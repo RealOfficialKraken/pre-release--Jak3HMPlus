@@ -265,6 +265,22 @@ level_tools::BspHeader extract_bsp_from_level(const ObjectFileDB& db,
  * Even though GAME.CGO isn't technically a level, the decompiler/loader treat it like one,
  * but the bsp stuff is just empty. It will contain only textures/art groups.
  */
+void extract_single_ag(const std::string& dgo_name,
+                       const std::string& ag_name,
+                       const ObjectFileDB& db,
+                       const TextureDB& tex_db,
+                       tfrag3::Level& lvl) {
+  auto dgo = db.obj_files_by_dgo.at(dgo_name);
+  for (const auto& file : dgo) {
+    if (file.name == ag_name) {
+      const auto& ag_file = db.lookup_record(file);
+      MercSwapInfo swapped_info;
+      extract_merc(ag_file, tex_db, db.dts, extract_tex_remap(db, dgo_name), lvl, false,
+                   db.version(), swapped_info);
+    }
+  }
+}
+
 void extract_common(const ObjectFileDB& db,
                     const TextureDB& tex_db,
                     const std::string& dgo_name,
@@ -287,6 +303,48 @@ void extract_common(const ObjectFileDB& db,
   std::map<std::string, level_tools::ArtData> art_group_data;
   add_all_textures_from_level(tfrag_level, dgo_name, tex_db);
   extract_art_groups_from_level(db, tex_db, {}, dgo_name, tfrag_level, art_group_data);
+
+  extract_single_ag("DESRESC.DGO", "neo-satellite-ag", db, tex_db, tfrag_level);
+  extract_single_ag("PRECA.DGO", "dp-bipedal-ag", db, tex_db, tfrag_level);
+  extract_single_ag("ARENACST.DGO", "yellow-barrel-ag", db, tex_db, tfrag_level);
+  extract_single_ag("LKLEEVER.DGO", "kleever-highres-ag", db, tex_db, tfrag_level);
+  extract_single_ag("DESOASIS.DGO", "marauder-male-ag", db, tex_db, tfrag_level);
+  extract_single_ag("DESRACE1.DGO", "pre-artifact-a-ag", db, tex_db, tfrag_level);
+  extract_single_ag("DESRACE1.DGO", "pre-artifact-b-ag", db, tex_db, tfrag_level);
+  extract_single_ag("DESRACE1.DGO", "pre-artifact-c-ag", db, tex_db, tfrag_level);
+  extract_single_ag("DESRACE1.DGO", "pre-artifact-d-ag", db, tex_db, tfrag_level);
+  extract_single_ag("DESRACE1.DGO", "gauntlets-ag", db, tex_db, tfrag_level);
+  extract_single_ag("DESRACE1.DGO", "was-artifact-ag", db, tex_db, tfrag_level);
+  extract_single_ag("WASDEFEN.DGO", "dm-robot-ag", db, tex_db, tfrag_level);
+  extract_single_ag("WASDEFEN.DGO", "dm-missle-ag", db, tex_db, tfrag_level);
+  extract_single_ag("WASDEFEN.DGO", "dm-debris-ag", db, tex_db, tfrag_level);
+  extract_single_ag("VIN.DGO", "warp-gate-ag", db, tex_db, tfrag_level);
+  extract_single_ag("FRSTA.DGO", "dm-ship-ag", db, tex_db, tfrag_level);
+  extract_single_ag("LPTRL.DGO", "dm-mine-spider-ag", db, tex_db, tfrag_level);
+  extract_single_ag("LPTRL.DGO", "dm-mine-spider-spawner-ag", db, tex_db, tfrag_level);
+  extract_single_ag("PRECA.DGO", "neo-wasp-ag", db, tex_db, tfrag_level);
+  extract_single_ag("TOWB.DGO", "neo-wasp-b-ag", db, tex_db, tfrag_level);
+  extract_single_ag("MIC.DGO", "manta-ag", db, tex_db, tfrag_level);
+  extract_single_ag("LJKDXVIN.DGO", "vin-effect-ag", db, tex_db, tfrag_level);
+  extract_single_ag("DESHOVER.DGO", "eco-crystal-dark-ag", db, tex_db, tfrag_level);
+  extract_single_ag("CWI.DGO", "ctycrate-ag", db, tex_db, tfrag_level);
+  extract_single_ag("TEMA.DGO", "urn-a-ag", db, tex_db, tfrag_level);
+  extract_single_ag("TITLE.DGO", "jakthreelogo-ag", db, tex_db, tfrag_level);
+  extract_single_ag("MUSEUM4.DGO", "flutflut-ag", db, tex_db, tfrag_level);
+  extract_single_ag("VOCA.DGO", "spiky-frog-ag", db, tex_db, tfrag_level);
+  extract_single_ag("WWD.DGO", "flut-saddle-ag", db, tex_db, tfrag_level);
+  extract_single_ag("WWD.DGO", "jak-flut+0-ag", db, tex_db, tfrag_level);
+  extract_single_ag("FACTORYA.DGO", "roboguard-ag", db, tex_db, tfrag_level);
+  extract_single_ag("MIB.DGO", "rat-ag", db, tex_db, tfrag_level);
+  extract_single_ag("COMBA.DGO", "precursor-ag", db, tex_db, tfrag_level);
+  extract_single_ag("MIC.DGO", "grunt-ag", db, tex_db, tfrag_level);
+  extract_single_ag("FACC.DGO", "spydroid-orig-ag", db, tex_db, tfrag_level);
+  extract_single_ag("VOCA.DGO", "mantis-ag", db, tex_db, tfrag_level);
+  extract_single_ag("SEN.DGO", "neo-grenadier-ag", db, tex_db, tfrag_level);
+  extract_single_ag("DESW.DGO", "dm-tentacle-ag", db, tex_db, tfrag_level);
+  extract_single_ag("COMBA.DGO", "kidmedallion-ag", db, tex_db, tfrag_level);
+  extract_single_ag("LCTYDEST.DGO", "mhcity-eco-dark-tower-ag", db, tex_db, tfrag_level);
+  extract_single_ag("LCTYDEST.DGO", "mhcity-de-tower-egg-ag", db, tex_db, tfrag_level);
 
   add_all_textures_from_level(tfrag_level, "ARTSPOOL", tex_db);
   extract_art_groups_from_level(db, tex_db, {}, "ARTSPOOL", tfrag_level, art_group_data);
