@@ -1,0 +1,319 @@
+(in-package goal)
+
+;;name: firefight.gc
+
+(define firefight-started? #f)
+(define *target-battle!* #f)
+(define fl-ctyinda-1 #f)
+(define fl-ctyindb-1 #f)
+(define fl-ctysluma-1 #f)
+(define fl-ctyslumb-1 #f)
+(define flr-ally 0)
+(define flr-enemy 0)
+(define flc-ally 0)
+(define flc-enemy 0)
+
+(deftype firefight-manager (task-manager)
+    ((ally-reinforcements                   int)
+    (enemy-reinforcements                   int)
+    (ally-tiberium                          int)
+    (enemy-tiberium                         int)
+    (ally-active-alive                      int)
+    (enemy-active-alive                     int)
+    (target-in-battle-area?                 symbol)
+    (desired-level                          symbol)
+    (general-i                              int)
+    (level-string                           string)
+    (ally-checkpoint                        (inline-array vector))
+    (enemy-checkpoint                       (inline-array vector))
+    )
+    (:state-methods
+    active
+    push-allies
+    push-enemy
+    start-battle
+    firefight-handler
+    spawn-reinforcements-ally
+    spawn-reinforcements-enemy
+    dormant
+    )
+)
+
+#|
+battles are fought on these levels
+- ctyinda
+- ctyindb
+- ctysluma
+- ctyslumb
+Each level has a subsection for where the battle is specifically taking place
+TO ADD A BATTLE:
+Add the symbol and level check 
+Set string for desired-level
+Add check for if the battle is active
+Add the symbol in both of the side's push states
+|#
+
+(define enemy-death? #f)
+(define ally-death? #f)
+
+(defun-extern quick-guard! vector none)
+(defun-extern quick-robo! vector none)
+
+
+(defun send-enemy-death ()
+    (set! enemy-death? #t)
+    (none)
+)
+
+(defun send-ally-death ()
+(set! ally-death? #t)
+    (none)
+)
+
+
+(defstate active (firefight-manager)
+    "firefight start params, or check to see if battle is already occuring since death/load resets the task. ALSO set the vectors for enemy and ally"
+    :virtual #t
+    :code (behavior ()
+    (suspend)
+    #|(when (or
+            (= flr-ally 0)
+            (= flr-enemy 0)
+          )
+        (set! flr-ally 150)
+        (set! flr-enemy 150)
+    )
+    (set! (-> self general-i) 0)
+    (cond ((not firefight-started?) ;start firefight for the first time
+            (set! flc-ally 1000)
+            (set! flc-enemy 1000)
+            (set! (-> self desired-level) 'ctyinda) ;ind next to port
+            (set! (-> self level-string) "ctyinda-1")
+            (set! fl-ctyinda-1 #t)
+            (set! firefight-started? #t)
+            (set! (-> self ally-checkpoint)
+                (new 'static
+                    'inline-array
+                    vector
+                    1
+                    (static-vectorm 956.81 8.00 1018.45)
+                    )
+                )
+            (set! (-> self enemy-checkpoint)
+                (new 'static
+                    'inline-array
+                    vector
+                    3
+                    (static-vectorm 954.87 8.00 965.66)
+                    )
+                )
+    )
+    (else ;if firefight is already started, make sure the task knows what battle it should be
+        (when (= fl-ctyinda-1 #t)
+            (set! (-> self desired-level) 'ctyinda)
+            (set! (-> self level-string) "ctyinda-1")
+            (set! (-> self ally-checkpoint)
+                (new 'static
+                    'inline-array
+                    vector
+                    3
+                    (static-vectorm 956.81 8.00 1018.45)
+                    )
+                )
+            (set! (-> self enemy-checkpoint)
+                (new 'static
+                    'inline-array
+                    vector
+                    3
+                    (static-vectorm 954.87 8.00 965.66)
+                    )
+                )
+        )
+        (when (= fl-ctyindb-1 #t)
+            (set! (-> self desired-level) 'ctyindb)
+            (set! (-> self level-string) "ctyindb-1")
+        )
+        (when (= fl-ctysluma-1 #t)
+            (set! (-> self desired-level) 'ctysluma)
+            (set! (-> self level-string) "ctysluma-1")
+        )
+        (when (= fl-ctyslumb-1 #t)
+            (set! (-> self desired-level) 'ctyslumb)
+            (set! (-> self level-string) "ctyslumb-1")
+        )
+    )
+    )
+    (loop ;check if target is in the same level as the battle
+        (when (= (-> (level-get-target-inside *level*) name) (-> self desired-level))
+            (set! *target-battle!* #t)
+            (go-virtual start-battle)
+        )
+        (when *debug-segment*
+            (format *stdcon* "firefight active at ~s, but player is outside of the level" (-> self level-string))
+        )
+        (suspend)
+    )|#
+    )
+)
+
+(defstate start-battle (firefight-manager)
+"start a new battle"
+    :virtual #t
+    :code (behavior ()
+    ;(send-event *traffic-manager* 'disable-spawning #t)
+    (set! (-> self enemy-reinforcements) flr-enemy) ;set reinforcement count to both sides
+    (set! (-> self ally-reinforcements) flr-ally)
+    (loop
+        (+! (-> self general-i) 1)
+        (when *debug-segment*
+            (format *stdcon* "Started Battle, waiting ~d/300~%ally=~d~%enemy=~d" (-> self general-i) (-> self ally-reinforcements) (-> self enemy-reinforcements))
+        )
+        (when (>= (-> self general-i) 25)
+            (set! (-> self general-i) 0)
+            (go-virtual firefight-handler)
+        )
+        (suspend)
+    )
+    )
+)
+
+(defstate firefight-handler (firefight-manager) ;spawn reinforcements on either side if needed, or push/retreat the firefight
+    "run checks on enemy death, reinforcement count, and currency"
+    :virtual #t
+    :code (behavior ()
+        (send-event *traffic-manager* 'disable-spawning #t)
+        (loop
+            (when (< flc-ally 7500)
+                (+! flc-ally 1)
+            )
+            (when (< flc-enemy 7500)
+                (+! flc-enemy 1)
+            )
+            (cond 
+                ((!= (-> self ally-reinforcements) flr-ally)
+                    (set! (-> self ally-reinforcements) flr-ally)
+                )
+                ((!= (-> self enemy-reinforcements) flr-enemy)
+                    (set! (-> self enemy-reinforcements) flr-enemy)
+                )
+                ((!= (-> (level-get-target-inside *level*) name) (-> self desired-level))
+                    (set! *target-battle!* #f)
+                    (send-event *traffic-manager* 'enable-spawning #t)
+                    (go-virtual active)
+                )
+                ((= enemy-death? #t)
+                    (-! (-> self enemy-active-alive) 1)
+                    (set! enemy-death? #f)
+                )
+                ((= ally-death? #t)
+                    (-! (-> self ally-active-alive) 1)
+                    (set! ally-death? #f)
+                )
+                ((<= (-> self enemy-reinforcements) 0)
+                    (go-virtual push-allies)
+                )
+                ((<= (-> self ally-reinforcements) 0)
+                    (go-virtual push-enemy)
+                )
+                ((< (-> self ally-active-alive) 6)
+                    (-! flc-ally 1250)
+                    (send-event *traffic-manager* 'enable-spawning #t)
+                    (go-virtual spawn-reinforcements-ally)
+                )
+                ( (< (-> self enemy-active-alive) 6)
+                    (-! flc-enemy 1250)
+                    (send-event *traffic-manager* 'enable-spawning #t)
+                    (go-virtual spawn-reinforcements-enemy)
+                )
+            )
+                (when *debug-segment*
+                    (format *stdcon* "idle~%ally=~d, alive=~d, currency=~d~%enemy=~d, alive=~d, currency=~d" (-> self ally-reinforcements) (-> self ally-active-alive) flc-ally (-> self enemy-reinforcements) (-> self enemy-active-alive) flc-enemy)
+                )
+            (suspend)
+        )
+    )
+)
+
+(defstate spawn-reinforcements-ally (firefight-manager) ;ally spent credits on spawner
+    :virtual #t
+    :code (behavior ()
+        (loop
+            (when (rand-vu-percent? 0.12)
+                (+! (-> self ally-active-alive) 1)
+                ;(quick-guard! (-> self ally-checkpoint 0))
+            )
+            (when (>= (-> self ally-active-alive) 20)
+                (go-virtual firefight-handler)
+            )
+            (when *debug-segment*
+                (format *stdcon* "spawning ally reinforcements ~d" (-> self ally-active-alive))
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate spawn-reinforcements-enemy (firefight-manager) ;enemy spent credits on spawner
+    :virtual #t
+    :code (behavior ()
+        (loop
+            (when (rand-vu-percent? 0.12)
+                (+! (-> self enemy-active-alive) 1)
+                ;(quick-robo! (-> self enemy-checkpoint 0))
+            )
+            (when (>= (-> self enemy-active-alive) 20)
+                (go-virtual firefight-handler)
+            )
+            (when *debug-segment*
+                (format *stdcon* "spawning enemy reinforcements ~d" (-> self enemy-active-alive))
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate push-allies (firefight-manager) ;when allies win battle
+    :virtual #t
+    :code (behavior ()
+        (cond
+            (fl-ctyinda-1
+                (set! fl-ctyindb-1 #t)
+                (set! fl-ctyinda-1 #f)
+            )
+            (fl-ctyindb-1
+                (set! fl-ctysluma-1 #t)
+                (set! fl-ctyindb-1 #f)
+            )
+            (fl-ctysluma-1
+                (set! fl-ctyslumb-1 #t)
+                (set! fl-ctysluma-1 #f)
+            )
+            (fl-ctyslumb-1
+                (set! fl-ctyinda-1 #t)
+                (set! fl-ctyslumb-1 #f)
+            )
+        )
+        (go-virtual active)
+    )
+)
+
+(defstate push-enemy (firefight-manager) ;when enemy wins battle
+    :virtual #t
+    :code (behavior ()
+        (cond
+            (fl-ctyslumb-1
+                (set! fl-ctysluma-1 #t)
+                (set! fl-ctyslumb-1 #f)
+            )
+            (fl-ctysluma-1
+                (set! fl-ctyindb-1 #t)
+                (set! fl-ctysluma-1 #f)
+            )
+            (fl-ctyindb-1
+                (set! fl-ctyinda-1 #t)
+                (set! fl-ctyindb-1 #f)
+            )
+        )
+        (go-virtual active)
+    )
+)

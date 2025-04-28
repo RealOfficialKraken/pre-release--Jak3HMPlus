@@ -1,0 +1,104 @@
+(in-package goal)
+
+;my own shot in keeping track of the soundtrack and looping/alternating them
+
+(define-extern mainmenu-camera symbol)
+
+(deftype kraken-volume (process)
+((volume               int)
+(tick                  int)
+(max-tick              int)
+(track-location     string)
+)
+(:state-methods 
+dead
+playing
+hold-music
+im-loopin-it!
+)
+)
+
+(defstate dead (kraken-volume)
+ :virtual #t
+ :code 
+    (behavior ()
+        (format *stdcon* "Dying")
+        (stop-main-music)
+        (process-deactivate)
+    )
+)
+
+(defstate hold-music (kraken-volume) 
+    :virtual #t
+    :code 
+    (behavior ()
+        (pause-main-music)
+        (loop
+            (when (= (paused?) #f)
+                (resume-main-music)
+                (go-virtual playing)
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate playing (kraken-volume)
+ :virtual #t
+ :code
+    (behavior ()
+        (loop
+            (when (< (-> self tick) 2)
+                (+! (-> self tick) 1) ;disabled counting for this mod
+            )
+            (set! (-> *setting-control* user-default music-volume) 0.0) ;terrible hack to give the main menu and dark world music.
+            (when (= (paused?) #t)
+                (go-virtual hold-music)
+            )
+            (when (= (-> self tick) 1)
+                (play-main-music (-> self track-location) (-> self volume))
+            )
+            (when (and
+                    (= in-main-menu? #f)
+                    (= in-pre-tutorial? #f)
+                    ) ;a hack I made strictly for dark world, and the main menu (since it takes place in dark world)
+                (go-virtual dead)
+            )
+            (when (>= (-> self tick) (-> self max-tick))
+                (go-virtual im-loopin-it!)
+            )
+            (format *stdcon* "Playing track~%Tick: ~d/~d" (-> self tick) (-> self max-tick))
+            (suspend)
+        )
+    )
+)
+
+(defstate im-loopin-it! (kraken-volume)
+ :virtual #t
+ :code 
+    (behavior ()
+        (set! (-> self tick) 0)
+        (go-virtual playing)
+    )
+)
+
+(defbehavior kraken-volume-init-by-other kraken-volume ((location string) (vol int))
+    (set! (-> self tick) 0)
+    (set! (-> self track-location) location)
+    (set! (-> self volume) vol)
+    (set! (-> self max-tick) 7000)
+    (go (method-of-object self playing))
+    (none)
+)
+
+(defun start-menu-music! ()
+    (cond
+        ((= in-main-menu? #t)
+            (play-main-music "snd/music/main-menu.wav" 175)
+        )
+        (else
+            (play-main-music "snd/music/dark-world-theme.wav" 100)
+        )
+    )
+    (none)
+)

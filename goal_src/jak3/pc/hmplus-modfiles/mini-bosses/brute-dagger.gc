@@ -1,0 +1,64 @@
+(in-package goal)
+
+;name: brute-dagger.gc
+
+(deftype brute-boss (marauder-c)
+    ((spawn-pos                   vector)
+     (boss-hp                     float)
+    )
+)
+
+(defbehavior brute-boss-init-by-other brute-boss ((vec vector))
+    (init-enemy-collision! self)
+    (logior! (-> self mask) (process-mask actor-pause))
+    (vector-copy! (-> self root trans) vec)
+    (quaternion-identity! (-> self root quat))
+    (vector-identity! (-> self root scale))
+    (init-enemy! self)
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (let ((nav (find-nearest-nav-mesh vec 0.0)) ;; try to find a nav mesh in the vicinity
+            ;; verts for the path
+            (cverts (new 'static 'inline-array vector 3
+                    (static-vectorm 1 0 0)
+                    (static-vectorm 0 1 0)
+                    (static-vectorm 0 0 1)
+                    )
+            )
+            )
+        ;; if a nav mesh is close by, use that, otherwise use default
+        (if nav
+        (change-to nav self)
+        (change-to *default-nav-mesh* self)
+        )
+        ;; allocate path
+        (set! (-> self path) (new 'process 'path-control self 'path 0.0 (the entity #f) #f))
+        (set! (-> self path curve cverts) cverts)
+        (set! (-> self path curve num-cverts) 3)
+        )
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (set! (-> *launch-matrix* trans quad) (-> self root trans quad))
+    (part-tracker-spawn part-tracker :to *entity-pool* :group (-> *part-group-id-table* 426))
+    (set! (-> self hit-points) 1400.0)
+    (set! (-> self enemy-info default-hit-points) 1400.0)
+    (set-vector! (-> self draw color-mult) 1.0 0.0 0.0 1.0)
+    (go-idle self)
+)
+
+(defun boss-brute! ((vec vector))
+    (let ((veccy (new 'static 'vector))
+          (boss (the enemy
+                (ppointer->process
+            (process-spawn brute-boss 
+            vec 
+            :name "goredrinker"
+            *default-pool*))
+                )
+            )
+         )
+        (set! (-> veccy x) 4.0)
+        (set! (-> veccy y) 4.0)
+        (set! (-> veccy z) 4.0)
+        (send-event boss 'scale veccy)
+    )
+    (none)
+)

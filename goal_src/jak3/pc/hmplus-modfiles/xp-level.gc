@@ -1,0 +1,2148 @@
+;Lisp
+(in-package goal)
+
+;name: xp-level.gc
+
+#|
+(when 
+        (and
+            (= (/ (mod (-> *game-info* auto-save-count) 100000) 10000) 3)
+            
+        )
+
+    )
+    |#
+
+    (define draw-levelup-int 0)
+    (define xp-bar-spawned? #f)
+
+    (define levelup-color #f)
+    (define lui 0)
+    (define levelup-string "")
+
+(defun levelup-reset-color ()
+    (set! (-> *part-id-table* 1701 init-specs 4 initial-valuef) 160.0) ;r 1
+    (set! (-> *part-id-table* 1701 init-specs 5 initial-valuef) 0.0) ;g 1
+    (set! (-> *part-id-table* 1701 init-specs 6 initial-valuef) 255.0) ;b 1
+;    (set! (-> *part-id-table* 1701 init-specs 8 initial-valuef) 64.0) ;a
+;
+    (set! (-> *part-id-table* 1702 init-specs 5 initial-valuef) 160.0) ;r 2
+    (set! (-> *part-id-table* 1702 init-specs 6 initial-valuef) 30.0) ;g 2
+    (set! (-> *part-id-table* 1702 init-specs 7 initial-valuef) 255.0) ;b 2
+    (set! (-> *part-id-table* 1702 init-specs 8 initial-valuef) 128.0) ;a
+;
+    (set! (-> *part-id-table* 1703 init-specs 5 initial-valuef) 20.0) ;r 3
+    (set! (-> *part-id-table* 1703 init-specs 6 initial-valuef) 40.0) ;g 3
+    (set! (-> *part-id-table* 1703 init-specs 7 initial-valuef) 128.0) ;b 3
+;    (set! (-> *part-id-table* 1703 init-specs 8 initial-valuef) 128.0) ;a
+;
+    (set! (-> *part-id-table* 1704 init-specs 5 initial-valuef) 160.0) ;r 4
+    (set! (-> *part-id-table* 1704 init-specs 6 initial-valuef) 30.0) ;g 4 
+    (set! (-> *part-id-table* 1704 init-specs 7 initial-valuef) 128.0) ;b 4
+;    (set! (-> *part-id-table* 1704 init-specs 8 initial-valuef) 128.0) ;a
+;
+    (set! (-> *part-id-table* 1705 init-specs 8 initial-valuef) 128.0) ;r 5
+    (set! (-> *part-id-table* 1705 init-specs 9 initial-valuef) 128.0) ;g 5
+    (set! (-> *part-id-table* 1705 init-specs 10 initial-valuef) 128.0) ;b 5
+;    (set! (-> *part-id-table* 1705 init-specs 11 initial-valuef) 128.0) ;a
+;
+    (set! (-> *part-id-table* 1706 init-specs 7 initial-valuef) 128.0) ;r 6
+    (set! (-> *part-id-table* 1706 init-specs 8 initial-valuef) 32.0) ;g 6
+    (set! (-> *part-id-table* 1706 init-specs 9 initial-valuef) 255.0) ;b 6
+;    (set! (-> *part-id-table* 1706 init-specs 10 initial-valuef) 120.0) ;a
+;
+    (set! (-> *part-id-table* 1707 init-specs 6 initial-valuef) 255.0) ;r 7
+    (set! (-> *part-id-table* 1707 init-specs 7 initial-valuef) 255.0) ;g 7
+    (set! (-> *part-id-table* 1707 init-specs 8 initial-valuef) 255.0) ;b 7
+;    (set! (-> *part-id-table* 1707 init-specs 9 initial-valuef) 255.0) ;a
+;
+    (none)
+)
+
+(defpartgroup group-level-explode-1
+  :id 1777
+  :flags (sp0 sp4)
+  :bounds (static-bspherem 0 0 0 20)
+  :parts ((sp-item 1701 :flags (sp3) :period (seconds 30) :length (seconds 0.017))
+    (sp-item 1702 :flags (sp3) :period (seconds 30) :length (seconds 0.017))
+    (sp-item 1703 :flags (sp3) :period (seconds 30) :length (seconds 0.017))
+    (sp-item 1704 :period (seconds 30) :length (seconds 0.167))
+    ;(sp-item 1705 :period (seconds 30) :length (seconds 0.335))
+    (sp-item 1706 :period (seconds 30) :length (seconds 0.667) :offset 300)
+    (sp-item 1707 :period (seconds 30) :length (seconds 0.117))
+    )
+  )
+
+(defun levelup-glow-yellow ()
+    (set! levelup-string "noto")
+    (set! lui 0)
+    (set! levelup-color #t)
+    (none)
+)
+
+(defun levelup-glow-red ()
+    (set! levelup-string "guns")
+    (set! lui 0)
+    (set! levelup-color #t)
+    (none)
+)
+
+;set params for the effect
+
+(defun levelup-glow-dark ()
+    (levelup-reset-color)
+    (none)
+)
+
+
+(deftype reputation-text (process)
+  ((trans         vector    :inline)
+   (trans-2d      vector4w  :inline)
+   (on-screen?    symbol)
+   (damage        int32)
+   (parent-mask   process-mask)
+   (font          font-context)
+   (y-ofs         float)
+   (xp-string     string)
+   (xp-gain       float)
+   (rep-string    string)
+   )
+  (:state-methods
+    active
+    )
+  (:methods
+    (initialize-font (_type_) font-context))
+  )
+
+
+(defstate active (reputation-text)
+  :virtual #t
+
+  :trans (behavior ()
+    
+    (when (not (logtest? (-> *kernel-context* prevent-from-run) (-> self parent-mask)))
+      ;; make font float upwards
+      (when 
+        (and 
+            (> (-> self y-ofs) 32.0) 
+            (< (-> self y-ofs) 33.0)
+            (<= notoriety-level (- enemy-noto 7))
+        )
+        (set! (-> self rep-string) "(+ High Level Bonus)~%~S: +~D Reputation")
+        (set! (-> self xp-gain) (+ (-> self xp-gain) (* (-> self xp-gain) 1.93)))
+      )
+      (+! (-> self y-ofs) (* 0.6 (-> self clock time-adjust-ratio)))
+      )
+
+    ;; convert 3D -> 2D screen now (result in trans-2d)
+    (set! (-> self on-screen?) (transform-point-qword! (-> self trans-2d) (-> self trans)))
+
+    ;; position font
+    (set-origin! (-> self font) (+ (/ (-> self trans-2d x) 16) -1792)
+                                (+ (/ (-> self trans-2d y) 16) -1855))
+    (set-depth! (-> self font) (/ (-> self trans-2d z) 16))
+    ;; now center (we could do this earlier but it's fine)
+    (-! (-> self font origin x) (/ (-> self font width) 2))
+    ;; now move it up
+    (-! (-> self font origin y) (-> self y-ofs)))
+
+  :code (behavior ()
+    (let ((state-time (current-time)))
+        ;; move up for a bit
+        (until (>= (- (current-time) state-time) (seconds 2.5))
+          (suspend))
+        ;; now fade out
+        (set! state-time (current-time))
+        (until (>= (- (current-time) state-time) (seconds 0.5))
+          (set! (-> self font alpha) (lerp-scale 1.0 0.0 (the float (- (current-time) state-time)) 0.0 (fsec 0.5)))
+          (suspend))
+        )
+    )
+
+  :post (behavior ()
+    (when (-> self on-screen?)
+      (print-game-text (string-format (-> self rep-string) (-> self xp-string) (the int (-> self xp-gain))) (-> self font) #f 44 (bucket-id debug-no-zbuf1)))
+    )
+  )
+
+(defmethod relocate ((this reputation-text) (diff int))
+  (if (nonzero? (-> this font))
+      (&+! (-> this font) diff)
+      )
+  (call-parent-method this diff)
+  )
+
+(defmethod initialize-font ((self reputation-text))
+  "create the font that will be used used."
+
+  (if (zero? (-> self font))
+      (set! (-> self font) (new 'process 'font-context *font-default-matrix* 0 0 0.0 (font-color default) (font-flags shadow kerning))))
+  (set! (-> self xp-string) xp-string)
+  (set! (-> self xp-gain) *xp-gain*)
+  (set! (-> self rep-string) "~S: +~D Reputation")
+  (set-scale! (-> self font) 0.2)
+  (set-flags! (-> self font) (font-flags shadow kerning large middle))
+  (set-width! (-> self font) 350)
+  (set-height! (-> self font) 350)
+  )
+
+
+(defbehavior reputation-text-init-by-other reputation-text ((pos vector) (parent-mask process-mask))
+  "initialize reputation-text"
+
+  ;; copy params
+  (set! (-> self damage) 0)
+  (set! (-> self parent-mask) parent-mask)
+  (vector-copy! (-> self trans) pos)
+
+  ;; init font
+  (initialize-font self)
+
+  ;; process settings to still render while paused
+  (process-mask-clear! (-> self mask) pause)
+
+  (go-virtual active)
+  )
+
+(defun spawn-rep-text ()
+    (when (task-node-closed? (game-task-node arena-fight-1-introduction))
+        (set! xp-draw #t)
+        (set! xp-draw-override #t)
+    )
+    (none)
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;level-up skill
+
+(defun level-up! ((arg0 int))
+    (+! (-> *game-info* total-trys) arg0)
+    (set! (-> *game-info* karma) extra-offthetop)
+    (set! draw-levelup-noto #t)
+    (set! noto-string "<COLOR_ORANGE>Notoriety<COLOR_YELLOW>")
+    (set! draw-levelup-int (-> *game-info* total-trys))
+    (cond
+        ((>= notoriety-level 10)
+            (when (!= (-> *target* fact health-max) (+ (-> *FACT-bank* health-max-default) (/ (-> *game-info* total-trys) 3)))
+                (set! (-> *target* fact health-max) (+ (-> *FACT-bank* health-max-default) (/ (-> *game-info* total-trys) 3)))
+            )
+        )
+        (else
+            (set! (-> *target* fact health-max) (-> *FACT-bank* health-max-default))
+        )
+    )
+    (set! (-> *target* fact health) (-> *target* fact health-max))
+    (when
+        (or
+            (= notoriety-level 9)
+            (= notoriety-level 24)
+            (= notoriety-level 39)
+            (= notoriety-level 59)
+        )
+        (r3-hint)
+    )
+    (auto-save-user)
+    ;(levelup-glow-yellow)
+    (none)
+)
+
+(defun level-up-guns! ((arg0 int))
+    (+! (-> *game-info* auto-save-count) arg0)
+    (+! (-> *game-info* karma) (/ extra-offthetop 2))
+    (set! (-> *game-info* buzzer-total) extra-offthetop)
+    (set! draw-levelup-noto #t)
+    (set! noto-string "<COLOR_RED>Guns<COLOR_YELLOW>")
+    (set! draw-levelup-int (-> *game-info* auto-save-count))
+    (when
+        (or
+            (= guns-level 3)
+            (= guns-level 8)
+            (= guns-level 15)
+            (= guns-level 24)
+        )
+        (r3-hint)
+    )
+    (auto-save-user)
+    ;(levelup-glow-red)
+    (none)
+)
+
+(defun level-up-cars! ((arg0 int))
+    (+! (-> *game-info* total-deaths) arg0)
+    (when (!= (-> *game-info* total-deaths) 1)
+        (set! (-> *game-info* fuel) extra-offthetop)
+        (+! (-> *game-info* karma) (/ extra-offthetop 2))
+    )
+    (set! draw-levelup-noto #t)
+    (set! noto-string "<COLOR_PINK>Vehicle<COLOR_YELLOW>")
+    (set! draw-levelup-int (-> *game-info* total-deaths))
+    (when
+        (or
+            (= cars-level 1)
+            (= cars-level 5)
+            (= cars-level 13)
+            (= cars-level 19)
+        )
+        (r3-hint)
+    )
+    (auto-save-user)
+    ;(levelup-glow-dark)
+    (none)
+)
+
+;XP dist
+
+(defun mission-complete? ((amount int)) ;default amount is 130
+    (set! in-desert-game-task? #f)
+    (set! (-> *game-info* side-enemies-killed?) 0)
+    (+! (-> *game-info* karma) (/ (* amount notoriety-level) 10))
+    (set! *xp-gain* (the float (/ (* amount notoriety-level) 10)))
+    (set! xp-string "Mission Complete")
+    (when (task-node-closed? (game-task-node arena-fight-1-introduction))
+        (set! xp-draw #t)
+    )
+    (auto-save-delayed)
+    (set! xpi 0)
+    (none)
+)
+
+(defun vehicle-killed? ((xp-gain float))
+    (+! (-> *game-info* fuel) (/ (* xp-gain enemy-noto) 2))
+    (+! (-> *game-info* karma) (/ (* xp-gain enemy-noto) 4))
+    (set! xp-string "Marauder Killed")
+    (set! *xp-gain* (/ (* xp-gain enemy-noto) 2))
+    (spawn-rep-text)
+    (auto-save-delayed)
+    (set! xpi 0)
+    (none)
+)
+
+(defun mod-killed? ((xp-gain float))
+    ;(+! (-> *game-info* karma) (* xp-gain guns-level))
+    (level-up-guns! 1)
+    (set! xp-string "<COLOR_RED>Duplicate Gun Mod found~%<COLOR_YELLOW>Level up to increase chances of higher tier weapons!")
+    (set! *xp-gain* (* xp-gain enemy-noto))
+    (set! xp-draw #t)
+    (auto-save-delayed)
+    (set! xp-i 0)
+    (none)
+)
+
+(defun enemy-killed? ((xp-gain float))
+    (when (= in-arena-fight? #t)
+        (set! xp-gain (/ xp-gain 1.6))
+    )
+    (let ((xp-gain2 (/ (* xp-gain enemy-noto) 1.5))
+          (xp-gain3 (/ (* xp-gain enemy-noto) 4)))
+
+        (when (> xp-gain2 2500.0)
+            (set! xp-gain2 2500.0)
+        )
+        (set! *xp-gain* (/ (* xp-gain enemy-noto) 1.5))
+        (cond 
+          ((<= notoriety-level (- enemy-noto 7))
+            (set! xp-gain2 (+ xp-gain2 (* xp-gain2 1.93)))
+            (+! (-> *game-info* karma) xp-gain2)
+          )
+          (else
+            (+! (-> *game-info* karma) xp-gain2)
+            (set! *xp-gain* xp-gain2)
+          )
+        )
+        (when (focus-test? *target* pilot)
+            (when (> xp-gain3 2500.0)
+                (set! xp-gain3 2500.0)
+            )
+            (+! (-> *game-info* fuel) xp-gain3)
+        )
+        (set! xp-string "Enemy Killed")
+        (spawn-rep-text)
+        (auto-save-delayed)
+        (set! xpi 0)
+    )
+    (none)
+)
+
+(defun boss-killed? ((xp-gain float))
+    (let ((xp-gain2 (/ (* xp-gain enemy-noto) 1.5))
+          (xp-gain3 (/ (* xp-gain enemy-noto) 4)))
+    (+! (-> *game-info* karma) xp-gain2)
+    (set! xp-string "Boss Killed")
+    (set! *xp-gain* xp-gain2)
+    (auto-save-delayed)
+    (when (task-node-closed? (game-task-node arena-fight-1-introduction))
+        (set! xp-draw #t)
+    )
+    (set! xpi 0)
+    )
+    (none)
+)
+
+(defun side-enemy-killed? ()
+    (+! (-> *game-info* side-enemies-killed?) 1)
+    (set! xp-string "Current Quest")
+    (set! *xp-gain* 1.0)
+    (auto-save-delayed)
+    (when (task-node-closed? (game-task-node arena-fight-1-introduction))
+        (set! xp-draw #t)
+    )
+    (none)
+)
+
+(defun collect-orb-xp! ((xp-gain float))
+    (+! (-> *game-info* karma) (/ (* xp-gain notoriety-level) 3.5))
+    (set! xp-string "Orb Collected")
+    (set! *xp-gain* (/ (* xp-gain notoriety-level) 3.5))
+    (when (task-node-closed? (game-task-node arena-fight-1-introduction))
+        (set! xp-draw #t)
+    )
+    (set! xpi 0)
+    (none)
+)
+
+(defun delayed-heal ()
+     (set! (-> *target* fact health-max) (+ 8.0 (/ notoriety-level 3)))
+     ;(set! delayed-heal-full #t)
+     ;(set! del-i 0)
+    (none)
+)
+
+(defun draw-targbar-hp ()
+    (let 
+            (
+                (x 7)
+                (y 358)
+                (progress 0.0)
+                (arg3 (new 'static 'rgba 
+                    :r 0
+                    :g 255
+                    :b 0
+                    :a #x40
+                    )
+                    )
+            )
+            (let (
+                    (level-cap (-> *target* fact health-max))
+                    (arg1 (-> *target* fact health))
+                    )
+                        (when (!= progress (/ arg1 level-cap))
+                            (set! progress (/ arg1 level-cap))
+                        )
+                    )
+                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                    (bucket-id particles)
+                                    )
+            (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)
+            )
+            )
+    (none)
+)
+(defun draw-targbar-dark ()
+    (let 
+            (
+                (x 7)
+                (y 342)
+                (progress 0.0)
+                (arg3 (new 'static 'rgba 
+                    :r 155
+                    :g 0
+                    :b 255
+                    :a #x40
+                    )
+                    )
+            )
+            (let (
+                    (level-cap (-> *FACT-bank* eco-pill-dark-max-default))
+                    (arg1 (-> *game-info* eco-pill-dark))
+                    )
+                        (when (!= progress (/ arg1 level-cap))
+                            (set! progress (/ arg1 level-cap))
+                        )
+                    )
+                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                    (bucket-id particles)
+                                    )
+            (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)
+            )
+            )
+    (none)
+)
+(defun draw-targbar-light ()
+    (let 
+            (
+                (x 7)
+                (y 326)
+                (progress 0.0)
+                (arg3 (new 'static 'rgba 
+                    :r 200
+                    :g 200
+                    :b 200
+                    :a #x40
+                    )
+                    )
+            )
+            (let (
+                    (level-cap (-> *FACT-bank* eco-pill-light-max-default))
+                    (arg1 (-> *game-info* eco-pill-light))
+                    )
+                        (when (!= progress (/ arg1 level-cap))
+                            (set! progress (/ arg1 level-cap))
+                        )
+                    )
+                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                    (bucket-id particles)
+                                    )
+            (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)
+            )
+            )
+    (none)
+)
+
+(defun draw-XP-bar ()
+(when 
+    (and
+        *target*
+        (not *scene-player*)
+        (= (paused?) #f)
+    )
+    
+    )
+    ;;;;;;;;;;;;;;;;;;;;;;;;;Notoriety;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (when 
+        (or 
+            (= in-menu? #f)
+            (and
+                (= in-skill? #t)
+                (= menu-slot 0)
+            )
+        )
+        (let 
+            (
+                (x noto-draw-x)
+                (y noto-draw-y)
+                (progress level-percent)
+                (arg3 (new 'static 'rgba 
+                    :r 255
+                    :g 255
+                    :b 0
+                    :a #x40
+                    )
+                    )
+            )
+                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                    (bucket-id particles)
+                                    )
+            (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff)
+            )
+
+            (let (
+                    (level-cap (the float (* (+ (* notoriety-level 60) (* notoriety-level 100)) notoriety-level)))
+                    (arg1 (-> *game-info* karma))
+                    )
+                        (when (!= level-percent (/ arg1 level-cap))
+                            (set! level-percent (/ arg1 level-cap))
+                        )
+                    )
+            )
+    )
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Guns;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when 
+        (or 
+            (= in-menu? #f)
+            (and
+                (= in-skill? #t)
+                (= menu-slot 1)
+            )
+        )
+        (when (task-node-closed? (game-task-node arena-fight-1-introduction))
+            (let 
+            (
+                (x guns-draw-x)
+                (y guns-draw-y)
+                (progress guns-percent)
+                (arg3 (new 'static 'rgba 
+                    :r 255
+                    :g 1
+                    :b 0
+                    :a #x40
+                    )
+                    )
+            )
+                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                    (bucket-id particles)
+                                    )
+            (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff)
+            )
+
+            (let (
+                    (level-cap (the float (* (+ (* guns-level 120) (* guns-level 200)) guns-level)))
+                    (arg1 (the float (-> *game-info* buzzer-total)))
+                    )
+                        (when (!= guns-percent (/ arg1 level-cap))
+                            (set! guns-percent (/ arg1 level-cap))
+                        )
+                    )
+            )
+        )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Vehicles;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when 
+        (or 
+            (= in-menu? #f)
+            (and
+                (= in-skill? #t)
+                (= menu-slot 2)
+            )
+        )
+        (when (!= (-> *game-info* total-deaths) 0)
+            (let 
+            (
+                (x car-draw-x)
+                (y car-draw-y)
+                (progress vehicle-percent)
+                (arg3 (new 'static 'rgba 
+                    :r 255
+                    :g 0
+                    :b 255
+                    :a #x40
+                    )
+                    )
+            )
+                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                    (bucket-id particles)
+                                    )
+            (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff)
+            )
+
+            (let (
+                    (level-cap (the float (* (+ (* cars-level 30) (* cars-level 175)) cars-level)))
+                    (arg1 (-> *game-info* fuel))
+                    )
+                        (when (!= vehicle-percent (/ arg1 level-cap))
+                            (set! vehicle-percent (/ arg1 level-cap))
+                        )
+                    )
+            )
+        )
+)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+  (none)
+  )
+
+(defun update-xp! ()
+
+    (when ;the level-up recolored particle setup, since it crashes when done all at once, I want to make sure the game takes it's time on setting up these big particles
+        (and 
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= levelup-color #t)
+        )
+        (+! lui 1)
+        (when (= lui 1)
+            (cond
+                ((string= levelup-string "reset")
+                    (set! (-> *part-id-table* 1701 init-specs 4 initial-valuef) 160.0) ;r 1
+                    (set! (-> *part-id-table* 1701 init-specs 5 initial-valuef) 0.0) ;g 1
+                    (set! (-> *part-id-table* 1701 init-specs 6 initial-valuef) 255.0) ;b 1
+                )
+                ((string= levelup-string "noto")
+                    (set! (-> *part-id-table* 1701 init-specs 5 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1701 init-specs 6 initial-valuef) 255.0) ;g
+                    (set! (-> *part-id-table* 1701 init-specs 7 initial-valuef) 0.0) ;b
+                )
+                ((string= levelup-string "guns")
+                    (set! (-> *part-id-table* 1701 init-specs 5 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1701 init-specs 6 initial-valuef) 0.0) ;g
+                    (set! (-> *part-id-table* 1701 init-specs 7 initial-valuef) 0.0) ;b
+                )
+            )
+        )
+        (when (= lui 3)
+            (cond
+                ((string= levelup-string "reset")
+                    (set! (-> *part-id-table* 1702 init-specs 5 initial-valuef) 160.0) ;r 2
+                    (set! (-> *part-id-table* 1702 init-specs 6 initial-valuef) 30.0) ;g 2
+                    (set! (-> *part-id-table* 1702 init-specs 7 initial-valuef) 255.0) ;b 2
+                    (set! (-> *part-id-table* 1702 init-specs 8 initial-valuef) 128.0) ;a
+                )
+                ((string= levelup-string "noto")
+                    (set! (-> *part-id-table* 1702 init-specs 5 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1702 init-specs 6 initial-valuef) 255.0) ;g
+                    (set! (-> *part-id-table* 1702 init-specs 7 initial-valuef) 0.0) ;b
+                    (set! (-> *part-id-table* 1702 init-specs 8 initial-valuef) (the float (+ notoriety-level 1))) ;a ;(the float (+ notoriety-level 1))
+                )
+                ((string= levelup-string "guns")
+                    (set! (-> *part-id-table* 1702 init-specs 5 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1702 init-specs 6 initial-valuef) 0.0) ;g
+                    (set! (-> *part-id-table* 1702 init-specs 7 initial-valuef) 0.0) ;b
+                )
+            )
+        )
+        (when (= lui 5)
+            (cond
+                ((string= levelup-string "reset")
+                    (set! (-> *part-id-table* 1703 init-specs 5 initial-valuef) 20.0) ;r 3
+                    (set! (-> *part-id-table* 1703 init-specs 6 initial-valuef) 40.0) ;g 3
+                    (set! (-> *part-id-table* 1703 init-specs 7 initial-valuef) 128.0) ;b 3
+                )
+                ((string= levelup-string "noto")
+                    (set! (-> *part-id-table* 1703 init-specs 5 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1703 init-specs 6 initial-valuef) 255.0) ;g
+                    (set! (-> *part-id-table* 1703 init-specs 7 initial-valuef) 0.0) ;b
+                )
+                ((string= levelup-string "guns")
+                    (set! (-> *part-id-table* 1703 init-specs 5 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1703 init-specs 6 initial-valuef) 0.0) ;g
+                    (set! (-> *part-id-table* 1703 init-specs 7 initial-valuef) 0.0) ;b
+                )
+            )
+        )
+        (when (= lui 7)
+            (cond
+                ((string= levelup-string "reset")
+                    (set! (-> *part-id-table* 1704 init-specs 5 initial-valuef) 160.0) ;r 4
+                    (set! (-> *part-id-table* 1704 init-specs 6 initial-valuef) 30.0) ;g 4 
+                    (set! (-> *part-id-table* 1704 init-specs 7 initial-valuef) 128.0) ;b 4
+                )
+                ((string= levelup-string "noto")
+                    (set! (-> *part-id-table* 1704 init-specs 5 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1704 init-specs 6 initial-valuef) 255.0) ;g
+                    (set! (-> *part-id-table* 1704 init-specs 7 initial-valuef) 0.0) ;b
+                )
+                ((string= levelup-string "guns")
+                    (set! (-> *part-id-table* 1704 init-specs 5 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1704 init-specs 6 initial-valuef) 0.0) ;g
+                    (set! (-> *part-id-table* 1704 init-specs 7 initial-valuef) 0.0) ;b
+                )
+            )
+        )
+        (when (= lui 9)
+            (cond
+                ((string= levelup-string "reset")
+                    (set! (-> *part-id-table* 1705 init-specs 8 initial-valuef) 128.0) ;r 5
+                    (set! (-> *part-id-table* 1705 init-specs 9 initial-valuef) 128.0) ;g 5
+                    (set! (-> *part-id-table* 1705 init-specs 10 initial-valuef) 128.0) ;b 5
+                )
+                ((string= levelup-string "noto")
+                    (set! (-> *part-id-table* 1705 init-specs 8 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1705 init-specs 9 initial-valuef) 255.0) ;g
+                    (set! (-> *part-id-table* 1705 init-specs 10 initial-valuef) 0.0) ;b
+                )
+                ((string= levelup-string "guns")
+                    (set! (-> *part-id-table* 1705 init-specs 8 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1705 init-specs 9 initial-valuef) 0.0) ;g
+                    (set! (-> *part-id-table* 1705 init-specs 10 initial-valuef) 0.0) ;b
+                )
+            )
+        )
+        (when (= lui 11)
+            (cond
+                ((string= levelup-string "reset")
+                    (set! (-> *part-id-table* 1706 init-specs 7 initial-valuef) 128.0) ;r 6
+                    (set! (-> *part-id-table* 1706 init-specs 8 initial-valuef) 32.0) ;g 6
+                    (set! (-> *part-id-table* 1706 init-specs 9 initial-valuef) 255.0) ;b 6
+                )
+                ((string= levelup-string "noto")
+                    (set! (-> *part-id-table* 1706 init-specs 7 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1706 init-specs 8 initial-valuef) 255.0) ;g
+                    (set! (-> *part-id-table* 1706 init-specs 9 initial-valuef) 0.0) ;b
+                )
+                ((string= levelup-string "guns")
+                    (set! (-> *part-id-table* 1706 init-specs 7 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1706 init-specs 8 initial-valuef) 0.0) ;g
+                    (set! (-> *part-id-table* 1706 init-specs 9 initial-valuef) 0.0) ;b
+                )
+            )
+        )
+        (when (= lui 13)
+            (cond
+                ((string= levelup-string "reset")
+                    (set! (-> *part-id-table* 1707 init-specs 6 initial-valuef) 255.0) ;r 7
+                    (set! (-> *part-id-table* 1707 init-specs 7 initial-valuef) 255.0) ;g 7
+                    (set! (-> *part-id-table* 1707 init-specs 8 initial-valuef) 255.0) ;b 7 
+                )
+                ((string= levelup-string "noto")
+                    (set! (-> *part-id-table* 1707 init-specs 6 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1707 init-specs 7 initial-valuef) 255.0) ;g
+                    (set! (-> *part-id-table* 1707 init-specs 8 initial-valuef) 0.0) ;b
+                )
+                ((string= levelup-string "guns")
+                    (set! (-> *part-id-table* 1707 init-specs 6 initial-valuef) 255.0) ;r
+                    (set! (-> *part-id-table* 1707 init-specs 7 initial-valuef) 0.0) ;g
+                    (set! (-> *part-id-table* 1707 init-specs 8 initial-valuef) 0.0) ;b    
+                )
+            )
+        )
+        (when (= lui 15)
+            (cond
+                ((logtest? (-> *part-group-id-table* 1777 flags) (sp-group-flag sp13))
+                    (set! (-> *launch-matrix* trans quad) (-> (target-pos 0) quad))
+                    (part-tracker-spawn part-tracker-subsampler :to *active-pool* :group (-> *part-group-id-table* 1777))
+                    )
+                (else
+                    (set! (-> *launch-matrix* trans quad) (-> (target-pos 0) quad))
+                    (part-tracker-spawn part-tracker :to *active-pool* :group (-> *part-group-id-table* 1777))
+                    )
+                )
+                (set! kill-eco-delay #t)
+                (set! killeci 0)
+        )
+    )
+
+    (when (= kill-eco-delay #t)
+        (+! killeci 1)
+        (when (= killeci 777)
+            (levelup-reset-color)
+            (set! killeci 0)
+            (set! kill-eco-delay #f)
+        )
+    )
+
+    (when 
+        (!= notoriety-level (-> *game-info* total-trys))
+            (set! notoriety-level (-> *game-info* total-trys))
+    )
+    (when ;bind total-trys and notoriety-level together as a game-save stat
+        (!= guns-level (-> *game-info* auto-save-count))
+            (set! guns-level (-> *game-info* auto-save-count))
+        )
+    (when (and
+            (!= cars-level (-> *game-info* total-deaths))
+            (!= (-> *game-info* total-deaths) 0)
+        )
+            (set! cars-level (-> *game-info* total-deaths))
+    )
+    (when ;level up parameters NOTO
+        (and
+            (>= (-> *game-info* karma) (* (+ (* notoriety-level 60) (* notoriety-level 100)) notoriety-level))
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (!= (-> *game-info* karma) 0.0)
+            (!= notoriety-level 0)
+        )
+            (set! extra-offthetop (- (-> *game-info* karma) (* (+ (* notoriety-level 60) (* notoriety-level 100)) notoriety-level)))
+            (level-up! 1)
+        )
+
+        (when ;level up parameters GUNS
+        (and
+            (>= (-> *game-info* buzzer-total) (* (+ (* guns-level 120) (* guns-level 200)) guns-level))
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (!= (-> *game-info* buzzer-total) 0.0)
+            (!= guns-level 0)
+        )
+            (set! extra-offthetop (- (-> *game-info* buzzer-total) (* (+ (* guns-level 120) (* guns-level 200)) guns-level)))
+            (level-up-guns! 1)
+        )
+
+        (when ;level up parameters CARS
+        (and
+            (>= (-> *game-info* fuel) (* (+ (* cars-level 30) (* cars-level 175)) cars-level))
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (!= (-> *game-info* fuel) 0.0)
+            (!= guns-level 0)
+        )
+            (set! extra-offthetop (- (-> *game-info* fuel) (* (+ (* cars-level 30) (* cars-level 175)) cars-level)))
+            (level-up-cars! 1)
+        )
+
+        (when 
+            (and
+                *target*
+                (not *scene-player*)
+                (= (paused?) #f)
+                (task-node-closed? (game-task-node arena-training-1-introduction))
+                (not (task-node-closed? (game-task-node arena-training-1-collect)))
+                (= (-> *game-info* karma) (the int 65))
+            )
+                (set! (-> *game-info* karma) 0.0)
+            )
+
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HPBAR;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+        (when (= enemy-hp #t)
+            (+! hpi 1)
+                (let (
+                    (color-string "<COLOR_WHITE>Lv. ") ;color tags for levels
+                    )
+                    (when (and  
+                                (<= enemy-noto (+ notoriety-level 3))
+                                (> enemy-noto (- notoriety-level 3))
+                                (not (string= color-string "<COLOR_YELLOW>Lv. "))
+                            )
+                                (set! color-string "<COLOR_YELLOW>Lv. ")
+                            )
+                            (when (and  
+                                (>= enemy-noto (+ notoriety-level 3))
+                                (not (string= color-string "<COLOR_RED>Lv. "))
+                            )
+                                (set! color-string "<COLOR_RED>Lv. ")
+                            )
+                            (when (and  
+                                (<= enemy-noto (- notoriety-level 3))
+                                (> enemy-noto (- notoriety-level 7))
+                                (not (string= color-string "<COLOR_GREEN>Lv. "))
+                            )
+                                (set! color-string "<COLOR_GREEN>Lv. ")
+                            )
+                            (when (and  
+                                (< enemy-noto (- notoriety-level 7))
+                                (not (string= color-string "<COLOR_TRANSPARENT>Lv. "))
+                            )
+                                (set! color-string "<COLOR_TRANSPARENT>Lv. ")
+                            )
+                (when 
+                (and
+                    *target*
+                    (not *scene-player*)
+                    (= (paused?) #f)
+                    (= in-menu? #f)
+                )
+                (let ((health-pos 0))
+                    (when (= hud-timer-on? #f)
+                        (set! health-pos 10)
+                    )
+                    (when (or (= hud-timer-on? #t) (= r3-noto #t))
+                        (set! health-pos 80)
+                    )
+                    (when
+                        (and 
+                            (= weather-dark-mode #f)
+                            (= onfoot-battle? #f)
+                        )
+                        (clear matt-str)
+                        (clear *pc-encoded-matt-str*)
+                        (format matt-str "~s~%~%<COLOR_WHITE>~s~d"
+                        enemy-string
+                        color-string
+                        draw-enemy-noto
+                        )
+                        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                        (set! (-> font-ctx scale) 0.325)
+                        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+                    )
+                    (when (or
+                            (= weather-dark-mode #t)
+                            (= onfoot-battle? #t)
+                          )
+                        (clear matt-str)
+                        (clear *pc-encoded-matt-str*)
+                        (format matt-str "~s~%~%<COLOR_WHITE>~s<COLOR_RED>??"
+                        enemy-string
+                        color-string
+                        )
+                        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                        (set! (-> font-ctx scale) 0.325)
+                        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+                    )
+                )
+                (let (
+                            (level-cap hpbar-max-hit-points)
+                            (arg1 hpbar-hit-points)
+                            )
+                                (when (!= enemy-hp-percent (/ arg1 level-cap))
+                                    (set! enemy-hp-percent (/ arg1 level-cap))
+                                )
+                                (when (< level-cap arg1)
+                                    (set! arg1 0.0)
+                                )
+                            )
+                (let 
+                    (
+                        (x 100)
+                        (y 21)
+                        (progress enemy-hp-percent) ;enemy-hp-percent
+                        (arg3 (new 'static 'rgba 
+                            :r 255
+                            :g 0
+                            :b 0
+                            :a #x40
+                            )
+                            )
+                    )
+                        (when (or (= hud-timer-on? #t) (= r3-noto #t))
+                            (set! y 90)
+                        )
+                        (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                            (bucket-id particles)
+                                            )
+                    (draw-sprite2d-xy s2-0 x y 310 8 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+                    (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 310.0 progress)) 6 arg3 #x3fffff)
+                    )
+
+                    )
+            )
+                (when (= hpi 400)
+                    (set! hpi 0)
+                    (set! enemy-hp #f)
+                )
+            )
+        )
+
+        ;TARGBAR
+        (when 
+            (and
+                (not *scene-player*)
+                *target*
+                (not (focus-test? *target* pilot))
+                (= in-pre-tutorial? #f)
+                (= (paused?) #f)
+                (= in-vin-shop? #f)
+                (not mainmenu-camera)
+            )
+                (draw-targbar-hp)
+                (draw-targbar-dark)
+                (when (logtest? (-> *game-info* features) (game-feature lightjak))
+                    (draw-targbar-light)
+                )
+                (when (>= notoriety-level 10)
+                    (when (!= (-> *target* fact health-max) (+ (-> *FACT-bank* health-max-default) (/ (-> *game-info* total-trys) 3)))
+                        (set! (-> *target* fact health-max) (+ (-> *FACT-bank* health-max-default) (/ (-> *game-info* total-trys) 3)))
+                    )
+                )
+            )
+
+        (when
+            (and
+                (not *scene-player*)
+                (= (paused?) #f)
+                (= (pause-allowed?) #t)
+                *target*
+                (= delayed-heal-full #t)
+            )
+                (+! del-i 1)
+                (when 
+                    (and
+                        (!= (-> *target* fact health) (+ (-> *FACT-bank* health-max-default) (/ (-> *game-info* total-trys) 3)))
+                        (>= del-i 0)
+                        (< del-i 260)
+                    )
+                    (set! (-> *target* fact health) (+ (-> *FACT-bank* health-max-default) (/ (-> *game-info* total-trys) 3)))
+                    (set! del-i 0)
+                    (set! delayed-heal-full #f)
+                )
+                (when (>= del-i 260)
+                    (set! (-> *target* fact health) (+ (-> *FACT-bank* health-max-default) (/ (-> *game-info* total-trys) 3)))
+                    (set! del-i 0)
+                    (set! delayed-heal-full #f)
+                )
+            )
+
+
+        ;level based enemy-levels in HERO MODE
+
+        (when (and
+                (not level-override)
+                (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+              )
+            (when
+            (and 
+                (task-node-closed? (game-task-node arena-training-1-introduction))
+                (= weather-dark-mode #t)
+            )
+            (when ;DARK-WORLD
+                (and
+                    (!= enemy-noto (+ notoriety-level 156))
+                )
+                (set! enemy-noto (+ notoriety-level 156))
+            )
+        )
+
+        (when 
+            (and 
+                (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                (= weather-dark-mode #f)
+            )
+            (when ;WASDOORS
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                    (!= enemy-noto 81)
+                )
+                (set! enemy-noto 81)
+            )
+            (when ;WASCITYA
+                (and
+                    (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
+                    (= (-> (level-get-target-inside *level*) name) 'wascitya)
+                    (!= enemy-noto 81)
+                )
+                (set! enemy-noto 81)
+            )
+            (when ;WASCITYB
+                (and
+                    (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
+                    (= (-> (level-get-target-inside *level*) name) 'wascityb)
+                    (not (task-node-open? (game-task-node wascity-pre-game-battle)))
+                    (!= enemy-noto 91)
+                )
+                (set! enemy-noto 91)
+            )
+            (cond
+                ;ARENA FIGHT 1
+                ((and
+                    (task-node-open? (game-task-node arena-fight-1-fight))
+                    (!= enemy-noto 1)
+                )
+                (set! enemy-noto 72)
+            )
+            ;ARENA FIGHT 2
+            ((and
+                    (task-node-open? (game-task-node arena-fight-2-fight))
+                    (!= enemy-noto notoriety-level)
+                )
+                (set! enemy-noto (+ notoriety-level 72))
+            )
+            ;ARENA FIGHT 3
+            ((and
+                (task-node-open? (game-task-node arena-fight-3-fight))
+                (!= enemy-noto (+ notoriety-level 10))
+                )
+                (set! enemy-noto (+ notoriety-level 120))
+            )
+            )
+            (when ;DESERT
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'desert)
+                    (= in-satbattle? #f)
+                    (!= enemy-noto notoriety-level)
+                    (= start-was-uprising #f)
+                )
+                (when (>= notoriety-level 3)
+                    (set! enemy-noto (+ notoriety-level 5))
+                    (set! start-was-uprising #t)
+                    (set! wasi 0)
+                )
+                (when (< notoriety-level 3)
+                    (set! enemy-noto notoriety-level)
+                )
+                ;(set! cdr-satbattle #t)
+                ;(set! cdr-i (rand-vu-int-range 2400 14000))
+            )
+            (when ;NESTA-B
+                (and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'nsta)
+                        (= (-> (level-get-target-inside *level*) name) 'nstb)
+                    )
+                    (!= enemy-noto 145)
+                )
+                (set! enemy-noto 145)
+            )
+            (when
+                (and
+                    (task-node-closed? (game-task-node desert-oasis-defense-meeting))
+                    (not (task-node-closed? (game-task-node desert-oasis-defense-resolution)))
+                    (= (-> (level-get-target-inside *level*) name) 'desert)
+                    (!= enemy-noto 140)
+                )
+                    (set! enemy-noto 140)
+                    )
+            (when ;VOLCANO MISSION
+                (and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                        (= (-> (level-get-target-inside *level*) name) 'volcanob)
+                        (= (-> (level-get-target-inside *level*) name) 'volcanox)
+                    )
+                    (not (task-node-closed? (game-task-node volcano-darkeco-resolution)))
+                    (!= enemy-noto 164)
+                )
+                (set! enemy-noto 164)
+            )
+            (when ;VOLCANO BACKTRACK LEVEL
+                (and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                        (= (-> (level-get-target-inside *level*) name) 'volcanob)
+                        (= (-> (level-get-target-inside *level*) name) 'volcanox)
+                    )
+                    (task-node-closed? (game-task-node volcano-darkeco-resolution))
+                    (or 
+                        (< enemy-noto 252)
+                        (> enemy-noto 252)
+                    )
+                )
+                (set! enemy-noto (rand-vu-int-range 14 20))
+            )
+            (when ;TEMPLEA
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'templea)
+                    (!= enemy-noto 171)
+                )
+                (set! enemy-noto 171)
+            )
+            (when ;TEMPLEB
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'templeb)
+                    (!= enemy-noto 210)
+                )
+                (set! enemy-noto 210)
+            )
+            (when ;TEMPLED
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'templeb)
+                    (!= enemy-noto 300)
+                )
+                (set! enemy-noto 300)
+            )
+            (when ;COMBABX
+                (and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'comba)
+                        (= (-> (level-get-target-inside *level*) name) 'combb)
+                        (= (-> (level-get-target-inside *level*) name) 'combx)
+                    )
+                    (and
+                        (!= enemy-noto 15)
+                        (!= enemy-noto 16)
+                        (!= enemy-noto 17)
+                        (!= enemy-noto 18)
+                    )
+                )
+                (set! enemy-noto (rand-vu-int-range 15 18))
+            )
+            (when ;MINE
+                (and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'minea)
+                        (= (-> (level-get-target-inside *level*) name) 'mineb)
+                        (= (-> (level-get-target-inside *level*) name) 'minec)
+                    )
+                )
+                (when
+                    (and
+                        (!= enemy-noto 151)
+                        (!= enemy-noto 152)
+                        (!= enemy-noto 153)
+                        (!= enemy-noto 154)
+                        (not (task-node-closed? (game-task-node mine-boss-resolution)))
+                    )
+                    (set! enemy-noto (rand-vu-int-range 151 154))
+                )
+                (when
+                    (and
+                        (!= enemy-noto 240)
+                        (!= enemy-noto 241)
+                        (!= enemy-noto 242)
+                        (!= enemy-noto 243)
+                        (!= enemy-noto 244)
+                        (!= enemy-noto 245)
+                        (!= enemy-noto 246)
+                        (task-node-closed? (game-task-node mine-boss-resolution))
+                    )
+                    (set! enemy-noto (rand-vu-int-range 240 246))
+                )
+            )
+            (when ;CTYGENB
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'ctygenb)
+                    (!= enemy-noto 159)
+                )
+                (set! enemy-noto 159)
+            )
+            (when ;SEW1
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'sewa)
+                    (!= enemy-noto 161)
+                    (!= enemy-noto 162)
+                )
+                (set! enemy-noto (rand-vu-int-range 161 162))
+            )
+            (when ;SEW2
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'sewb)
+                    (= (-> (level-get-target-inside *level*) name) 'sewc)
+                    (= (-> (level-get-target-inside *level*) name) 'sewd)
+                    (!= enemy-noto 210)
+                )
+                (set! enemy-noto 210)
+            )
+            (cond ;ctyport
+                ((and
+                    (not (task-node-open? (game-task-node city-port-assault-resolution)))
+                    (= (-> (level-get-target-inside *level*) name) 'ctyport)
+                    (!= enemy-noto 204)
+                    (!= enemy-noto 205)
+                )
+                (set! enemy-noto (rand-vu-int-range 204 205))
+            )
+            ((task-node-open? (game-task-node city-port-assault-resolution))
+                (set! enemy-noto 210)
+            )
+            )
+            (when ;ctyinda
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'ctyinda)
+                    (!= enemy-noto 211)
+                    (!= enemy-noto 212)
+                    (!= enemy-noto 213)
+                    (!= enemy-noto 214)
+                )
+                (set! enemy-noto (rand-vu-int-range 211 214))
+            )
+            (when ;ctyindb
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'ctyindb)
+                    (!= enemy-noto 216)
+                    (!= enemy-noto 217)
+                    (!= enemy-noto 218)
+                    (!= enemy-noto 219)
+                    (!= enemy-noto 220)
+                    (!= enemy-noto 221)
+                    (!= enemy-noto 222)
+                )
+                (set! enemy-noto (rand-vu-int-range 216 222))
+            )
+            (when ;ctysluma
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'ctysluma)
+                        (= (-> (level-get-target-inside *level*) name) 'ctyslumb)
+                        (= (-> (level-get-target-inside *level*) name) 'ctyslumc)
+                    )
+                    (!= enemy-noto 223)
+                    (!= enemy-noto 224)
+                    (!= enemy-noto 225)
+                    (!= enemy-noto 226)
+                    (!= enemy-noto 227)
+                    (!= enemy-noto 228)
+                )
+                (set! enemy-noto (rand-vu-int-range 223 228))
+            )
+            (when ;mhcitya+mhcityb
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'mhcitya)
+                        (= (-> (level-get-target-inside *level*) name) 'mhcityb)
+                    )
+                    (!= enemy-noto 289)
+                    (!= enemy-noto 290)
+                    (!= enemy-noto 291)
+                    (!= enemy-noto 292)
+                    (!= enemy-noto 293)
+                    (!= enemy-noto 294)
+                    (!= enemy-noto 295)
+                    (!= enemy-noto 296)
+                    (!= enemy-noto 297)
+                    (!= enemy-noto 298)
+                )
+                (set! enemy-noto (rand-vu-int-range 289 298))
+            )
+            (when ;ltowera+ltowerb
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'ltowera)
+                        (= (-> (level-get-target-inside *level*) name) 'ltowerb)
+                    )
+                    (!= enemy-noto 289)
+                    (!= enemy-noto 290)
+                    (!= enemy-noto 291)
+                    (!= enemy-noto 292)
+                    (!= enemy-noto 293)
+                    (!= enemy-noto 294)
+                    (!= enemy-noto 295)
+                    (!= enemy-noto 296)
+                    (!= enemy-noto 297)
+                    (!= enemy-noto 298)
+                )
+                (set! enemy-noto (rand-vu-int-range 289 298))
+            )
+
+            (when ;factory
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'factorya)
+                        (= (-> (level-get-target-inside *level*) name) 'factoryb)
+                        (= (-> (level-get-target-inside *level*) name) 'factoryc)
+                        (= (-> (level-get-target-inside *level*) name) 'lfacrm1)
+                    )
+                    (!= enemy-noto 311)
+                    (!= enemy-noto 312)
+                    (!= enemy-noto 313)
+                    (!= enemy-noto 314)
+                    (!= enemy-noto 315)
+                    (!= enemy-noto 316)
+                    (!= enemy-noto 317)
+                    (!= enemy-noto 318)
+                    (!= enemy-noto 319)
+                    (!= enemy-noto 320)
+                )
+                (set! enemy-noto (rand-vu-int-range 311 320))
+            )
+
+            (when 
+            (and 
+                (= start-was-uprising #t)
+                (= (-> (level-get-target-inside *level*) name) 'desert)
+                *target*
+                (not *scene-player*)
+                (= (paused?) #f)
+                (= (pause-allowed?) #t)
+            )
+                (+! wasi 1)
+                (when (= wasi 3000)
+                    (+! enemy-noto 1)
+                    (set! wasi 0)
+                )
+            )
+
+            (when 
+                (and
+                    (!= (-> (level-get-target-inside *level*) name) 'desert)
+                    (not (task-node-open? (game-task-node arena-replay-1-fight)))
+                    (= start-was-uprising #t)
+                )
+                    (set! wasi 0)
+                    (set! start-was-uprising #f)
+                )
+            )
+        )
+
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;level based enemy-levels in NORMALS
+
+        (when (and
+                (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+                (not level-override)
+              )
+            (when
+            (and 
+                (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+                (task-node-closed? (game-task-node arena-training-1-introduction))
+                (= weather-dark-mode #t)
+            )
+            (when ;DARK-WORLD
+                (and
+                    (!= enemy-noto (+ notoriety-level 26))
+                )
+                (set! enemy-noto 154)
+            )
+        )
+
+        (when 
+            (and 
+                (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+                (= weather-dark-mode #f)
+            )
+            (when ;WASDOORS
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                    (!= enemy-noto 1)
+                )
+                (set! enemy-noto 1)
+            )
+            (when
+                (not in-arena-fight?)
+                    (when (not (task-node-closed? (game-task-node wascity-pre-game-introduction)))
+                    (when ;WASCITYA
+                        (and
+                            (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
+                            (= (-> (level-get-target-inside *level*) name) 'wascitya)
+                            (!= enemy-noto 1)
+                        )
+                        (set! enemy-noto 1)
+                    )
+                    (when ;WASCITYB
+                        (and
+                            (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
+                            (= (-> (level-get-target-inside *level*) name) 'wascityb)
+                            (not (task-node-open? (game-task-node wascity-pre-game-battle)))
+                            (!= enemy-noto 2)
+                        )
+                        (set! enemy-noto 2)
+                    )
+                )
+                (when (task-node-closed? (game-task-node wascity-pre-game-introduction))
+                    (when ;WASCITYA
+                        (and
+                            (= (-> (level-get-target-inside *level*) name) 'wascitya)
+                            (or
+                                (< enemy-noto 1)
+                                (> enemy-noto 11)
+                            )
+                        )
+                        (set! enemy-noto (rand-vu-int-range 1 11))
+                    )
+                    (when ;WASCITYB
+                        (and
+                            (= (-> (level-get-target-inside *level*) name) 'wascityb)
+                            (not (task-node-open? (game-task-node wascity-pre-game-battle)))
+                            (or
+                                (< enemy-noto 7)
+                                (> enemy-noto 17)
+                            )
+                        )
+                        (set! enemy-noto (rand-vu-int-range 7 17))
+                    )
+                )
+            )
+            (when ;ARENA FIGHT 1
+                (and
+                    (task-node-open? (game-task-node arena-fight-1-fight))
+                    (!= enemy-noto 1)
+                )
+                (set! enemy-noto 1)
+            )
+            (when ;ARENA FIGHT 2
+                (and
+                    (task-node-open? (game-task-node arena-fight-2-fight))
+                    (!= enemy-noto notoriety-level)
+                )
+                (set! enemy-noto (+ notoriety-level 3))
+            )
+            (when ;ARENA FIGHT 3
+                (and
+                    (task-node-open? (game-task-node arena-fight-3-fight))
+                    (!= enemy-noto (+ notoriety-level 10))
+                )
+                (set! enemy-noto (+ notoriety-level 10))
+            )
+            (when ;DESERT
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'desert)
+                    (= in-satbattle? #f)
+                    (!= enemy-noto notoriety-level)
+                    (= start-was-uprising #f)
+                )
+                (when (>= notoriety-level 3)
+                    (set! enemy-noto (- notoriety-level 2))
+                    (set! start-was-uprising #t)
+                    (set! wasi 0)
+                )
+                (when (< notoriety-level 3)
+                    (set! enemy-noto notoriety-level)
+                )
+                ;(set! cdr-satbattle #t)
+                ;(set! cdr-i (rand-vu-int-range 2400 14000))
+            )
+            (when ;NESTA-B
+                (and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'nsta)
+                        (= (-> (level-get-target-inside *level*) name) 'nstb)
+                    )
+                    (!= enemy-noto 13)
+                )
+                (set! enemy-noto 13)
+            )
+            (when
+                (and
+                    (task-node-closed? (game-task-node desert-oasis-defense-meeting))
+                    (not (task-node-closed? (game-task-node desert-oasis-defense-resolution)))
+                    (= (-> (level-get-target-inside *level*) name) 'desert)
+                    (!= enemy-noto 20)
+                )
+                    (set! enemy-noto 20)
+                    )
+            (when ;VOLCANO MISSION
+                (and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                        (= (-> (level-get-target-inside *level*) name) 'volcanob)
+                        (= (-> (level-get-target-inside *level*) name) 'volcanox)
+                    )
+                    (not (task-node-closed? (game-task-node volcano-darkeco-resolution)))
+                    (!= enemy-noto 11)
+                )
+                (set! enemy-noto 11)
+            )
+            (when ;VOLCANO BACKTRACK LEVEL
+                (and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                        (= (-> (level-get-target-inside *level*) name) 'volcanob)
+                        (= (-> (level-get-target-inside *level*) name) 'volcanox)
+                    )
+                    (task-node-closed? (game-task-node volcano-darkeco-resolution))
+                    (or 
+                        (< enemy-noto 14)
+                        (> enemy-noto 20)
+                    )
+                )
+                (set! enemy-noto (rand-vu-int-range 14 20))
+            )
+            (when ;TEMPLEA
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'templea)
+                    (!= enemy-noto 11)
+                )
+                (set! enemy-noto (+ notoriety-level 3))
+            )
+            (when ;TEMPLEB
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'templeb)
+                    (!= enemy-noto 14)
+                )
+                (set! enemy-noto (+ notoriety-level 3))
+            )
+            (when ;TEMPLED
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'templeb)
+                    (!= enemy-noto 84)
+                )
+                (set! enemy-noto 84)
+            )
+            (when ;COMBABX
+                (and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'comba)
+                        (= (-> (level-get-target-inside *level*) name) 'combb)
+                        (= (-> (level-get-target-inside *level*) name) 'combx)
+                    )
+                    (and
+                        (!= enemy-noto 15)
+                        (!= enemy-noto 16)
+                        (!= enemy-noto 17)
+                        (!= enemy-noto 18)
+                    )
+                )
+                (set! enemy-noto (rand-vu-int-range 15 18))
+            )
+            (when ;MINE
+                (and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'minea)
+                        (= (-> (level-get-target-inside *level*) name) 'mineb)
+                        (= (-> (level-get-target-inside *level*) name) 'minec)
+                    )
+                )
+                (when
+                    (and
+                        (!= enemy-noto 15)
+                        (!= enemy-noto 16)
+                        (!= enemy-noto 17)
+                        (!= enemy-noto 18)
+                        (not (task-node-closed? (game-task-node mine-boss-resolution)))
+                    )
+                    (set! enemy-noto (rand-vu-int-range 15 18))
+                )
+                (when
+                    (and
+                        (!= enemy-noto 32)
+                        (!= enemy-noto 33)
+                        (!= enemy-noto 34)
+                        (!= enemy-noto 35)
+                        (!= enemy-noto 36)
+                        (!= enemy-noto 37)
+                        (!= enemy-noto 38)
+                        (task-node-closed? (game-task-node mine-boss-resolution))
+                    )
+                    (set! enemy-noto (rand-vu-int-range 32 38))
+                )
+            )
+            (when ;CTYGENB
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'ctygenb)
+                    (task-node-open? (game-task-node mine-boss-resolution))
+                    (!= enemy-noto 20)
+                )
+                (set! enemy-noto 20)
+            )
+            (when ;CTYGENB
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'ctygenb)
+                    (!= enemy-noto 17)
+                )
+                (set! enemy-noto 17)
+            )
+            (when ;SEW1
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'sewa)
+                    (!= enemy-noto 18)
+                    (!= enemy-noto 19)
+                )
+                (set! enemy-noto (rand-vu-int-range 18 19))
+            )
+            (when ;SEW2
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'sewb)
+                    (= (-> (level-get-target-inside *level*) name) 'sewc)
+                    (= (-> (level-get-target-inside *level*) name) 'sewd)
+                    (!= enemy-noto 60)
+                )
+                (set! enemy-noto 60)
+            )
+            (cond ;ctyport
+                ((and
+                    (not (task-node-open? (game-task-node city-port-assault-resolution)))
+                    (= (-> (level-get-target-inside *level*) name) 'ctyport)
+                    (!= enemy-noto 19)
+                    (!= enemy-noto 20)
+                )
+                (set! enemy-noto (rand-vu-int-range 19 20))
+            )
+            ((task-node-open? (game-task-node city-port-assault-resolution))
+                (set! enemy-noto 64)
+            )
+            )
+            (when ;ctyinda
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'ctyinda)
+                    (!= enemy-noto 38)
+                    (!= enemy-noto 39)
+                    (!= enemy-noto 40)
+                    (!= enemy-noto 41)
+                )
+                (set! enemy-noto (rand-vu-int-range 38 41))
+            )
+            (when ;ctyindb
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'ctyindb)
+                    (!= enemy-noto 39)
+                    (!= enemy-noto 40)
+                    (!= enemy-noto 41)
+                    (!= enemy-noto 42)
+                    (!= enemy-noto 43)
+                    (!= enemy-noto 44)
+                    (!= enemy-noto 45)
+                )
+                (set! enemy-noto (rand-vu-int-range 39 45))
+            )
+            (when ;ctysluma
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'ctysluma)
+                        (= (-> (level-get-target-inside *level*) name) 'ctyslumb)
+                        (= (-> (level-get-target-inside *level*) name) 'ctyslumc)
+                    )
+                    (!= enemy-noto 29)
+                    (!= enemy-noto 30)
+                    (!= enemy-noto 31)
+                    (!= enemy-noto 32)
+                    (!= enemy-noto 33)
+                    (!= enemy-noto 34)
+                )
+                (set! enemy-noto (rand-vu-int-range 29 34))
+            )
+            (when ;mhcitya+mhcityb
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'mhcitya)
+                        (= (-> (level-get-target-inside *level*) name) 'mhcityb)
+                    )
+                    (!= enemy-noto 63)
+                    (!= enemy-noto 64)
+                    (!= enemy-noto 65)
+                    (!= enemy-noto 66)
+                    (!= enemy-noto 67)
+                    (!= enemy-noto 68)
+                    (!= enemy-noto 69)
+                    (!= enemy-noto 70)
+                    (!= enemy-noto 71)
+                    (!= enemy-noto 72)
+                )
+                (set! enemy-noto (rand-vu-int-range 63 72))
+            )
+            (when ;ltowera+ltowerb
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'ltowera)
+                        (= (-> (level-get-target-inside *level*) name) 'ltowerb)
+                    )
+                    (!= enemy-noto 76)
+                    (!= enemy-noto 77)
+                    (!= enemy-noto 78)
+                    (!= enemy-noto 79)
+                    (!= enemy-noto 80)
+                    (!= enemy-noto 81)
+                    (!= enemy-noto 82)
+                    (!= enemy-noto 83)
+                    (!= enemy-noto 84)
+                    (!= enemy-noto 85)
+                )
+                (set! enemy-noto (rand-vu-int-range 289 298))
+            )
+            (when ;STADIUMA+B
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'stadiuma)
+                        (= (-> (level-get-target-inside *level*) name) 'stadiumb)
+                    )
+                    (or
+                        (< enemy-noto 81)
+                        (> enemy-noto 84)
+                    )
+                )
+                (set! enemy-noto (rand-vu-int-range 81 84))
+            )
+            (when ;DARK SHIP
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'precura)
+                        (= (-> (level-get-target-inside *level*) name) 'precurb)
+                        (= (-> (level-get-target-inside *level*) name) 'precurc)
+                        (= (-> (level-get-target-inside *level*) name) 'precurd)
+                    )
+                    (task-node-closed? (game-task-node precursor-tour-resolution))
+                    (!= enemy-noto (+ notoriety-level 5))
+                )
+                (set! enemy-noto (+ notoriety-level 5))
+            )
+            (when ;FORESTA
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'foresta)
+                    (or
+                        (< enemy-noto 47)
+                        (> enemy-noto 56)
+                    )
+                )
+                (set! enemy-noto (rand-vu-int-range 47 56))
+            )
+            (when ;factory
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'factorya)
+                        (= (-> (level-get-target-inside *level*) name) 'factoryb)
+                        (= (-> (level-get-target-inside *level*) name) 'factoryc)
+                        (= (-> (level-get-target-inside *level*) name) 'lfacrm1)
+                    )
+                    (!= enemy-noto 72)
+                    (!= enemy-noto 73)
+                    (!= enemy-noto 74)
+                    (!= enemy-noto 75)
+                    (!= enemy-noto 76)
+                    (!= enemy-noto 77)
+                    (!= enemy-noto 78)
+                    (!= enemy-noto 79)
+                    (!= enemy-noto 80)
+                    (!= enemy-noto 81)
+                )
+                (set! enemy-noto (rand-vu-int-range 72 81))
+            )
+
+            (when 
+            (and 
+                (= start-was-uprising #t)
+                (= (-> (level-get-target-inside *level*) name) 'desert)
+                *target*
+                (not *scene-player*)
+                (= (paused?) #f)
+                (= (pause-allowed?) #t)
+            )
+                (+! wasi 1)
+                (when (= wasi 3000)
+                    (+! enemy-noto 1)
+                    (set! wasi 0)
+                )
+            )
+
+            (when 
+                (and
+                    (!= (-> (level-get-target-inside *level*) name) 'desert)
+                    (not (task-node-open? (game-task-node arena-replay-1-fight)))
+                    (= start-was-uprising #t)
+                )
+                    (set! wasi 0)
+                    (set! start-was-uprising #f)
+                )
+            )
+        )
+
+
+    (when 
+        (and 
+            (= xp-draw #t)
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (not mainmenu-camera)
+            (task-node-closed? (game-task-node arena-fight-1-introduction))
+        ) ;gain XP
+        (+! xpi 1)
+        (let ((max-time 300))
+            (when (and (= xpi 3)(= xp-draw-override #t))
+                (process-spawn reputation-text global-root-trans global-parent-mask)
+            )
+            (when (= xp-draw-override #f)
+                (let ((y 50))
+                (when (= hud-timer-on? #f)
+                            (set! y 50)
+                        )
+                        (when (or (= hud-timer-on? #t) (= r3-noto #t))
+                            (set! y 120)
+                        )
+                (when (string= xp-string "<COLOR_RED>Duplicate Gun Mod found~%<COLOR_YELLOW>Level up to increase chances of higher tier weapons!")
+                    (set! max-time 900)
+                    (set! y 310)
+                )
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "~s~%<COLOR_CYAN>+~d Reputation"
+                xp-string
+                (the int *xp-gain*)
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 y 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                (set! (-> font-ctx scale) 0.325)
+                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            )
+            )
+            (when (= xpi max-time)
+                (set! xpi 0)
+                (set! xp-draw #f)
+                (set! xp-draw-override #f)
+            )
+        )
+    )
+
+    (when ;hack to disable xp-draw when it show +0
+    (and
+        (not (task-node-closed? (game-task-node arena-fight-1-introduction)))
+        (= xp-draw #t)
+    )
+        (set! xp-draw #f)
+    )
+
+    (when 
+        (and 
+            (= xp-draw-gun #t)
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (not mainmenu-camera)
+            (= completed-tutorial? #t)
+        ) ;gain XP
+        (+! xp-i 1)
+        (when (= xp-i 800)
+            (set! xp-i 0)
+            (set! xp-draw-gun #f)
+        )
+        (let ((y 50))
+            (when (= hud-timer-on? #f)
+                        (set! y 50)
+                    )
+                    (when (or (= hud-timer-on? #t) (= r3-noto #t))
+                        (set! y 120)
+                    )
+                    (when (= in-vin-shop? #t)
+                        (set! y 280)
+                    )
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "~s~%<COLOR_CYAN>+~d"
+            xp-string
+            (the int *xp-gain*)
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 y 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
+    )
+
+    (when (= draw-levelup-noto #t) ;Level Up
+        (+! lvli 1)
+        (when (= lvli 600)
+            (set! lvli 0)
+            (set! draw-levelup-noto #f)
+        )
+        (when 
+            (and
+                *target*
+                (not *scene-player*)
+                (= (paused?) #f)
+                (= in-menu? #f)
+            )
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_GREEN>LEVEL UP!~%~%~s Level ~d"
+            noto-string
+            draw-levelup-int
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 250 150 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
+    )
+    (when
+        (and
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            (cpad-pressed? 0 l3)
+            (not mainmenu-camera)
+            (= r3-noto #f)
+        )
+        (set! r3-noto #t)
+        (set! anim-noto -20)
+        (set! notoi 0)
+    )
+
+    (when
+        (and
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            (cpad-pressed? 0 l3)
+            (= r3-noto #t)
+            (> notoi 22)
+        )
+        (set! notoi 22)
+        (set! anim-noto 1)
+    )
+
+    (when
+        (and
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= r3-noto #t)
+        )
+            (+! notoi 1)
+            (when (and (>= notoi 1)(<= notoi 21))
+                (+! anim-noto 1)
+            )
+            (when (and (> notoi 21) (< notoi 353))
+                (draw-XP-bar)
+                (set! noto-draw-x 190)
+                (set! noto-draw-y 11)
+                (set! guns-draw-x 30)
+                (set! guns-draw-y 11)
+                (set! car-draw-x 350)
+                (set! car-draw-y 11)
+            )
+            (when (>= notoi 370)
+                (-! anim-noto 1)
+            )
+            (when (or (= notoi 390)(= in-menu? #t))
+                (set! notoi 0)
+                (set! anim-noto -30)
+                (set! r3-noto #f)
+                (set! xp-bar-spawned? #f)
+            )
+        )
+
+    (when ;draw the notoriety level onscreen
+    (and
+        *target*
+        (not *scene-player*)
+        (= (paused?) #f)
+        (= r3-noto #t)
+        (= in-menu? #f)
+    )
+        (clear matt-str)
+        (clear *pc-encoded-matt-str*)
+        (format matt-str "<COLOR_ORANGE>Notoriety: ~d~%~%<COLOR_YELLOW>~d/~d"
+        notoriety-level
+        (the int (-> *game-info* karma))
+        (the int (* (+ (* notoriety-level 60) (* notoriety-level 100)) notoriety-level))
+        )
+        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 anim-noto 0.0 (font-color default) (font-flags middle shadow kerning large))))
+        (set! (-> font-ctx scale) 0.325)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+    )
+    (when ;draw the guns level onscreen
+    (and
+        *target*
+        (not *scene-player*)
+        (= (paused?) #f)
+        (= r3-noto #t)
+        (= in-menu? #f)
+        (task-node-closed? (game-task-node arena-fight-1-introduction))
+    )
+        (clear matt-str)
+        (clear *pc-encoded-matt-str*)
+        (format matt-str "<COLOR_RED>Guns: ~d~%~%<COLOR_RED>~d/~d"
+        guns-level
+        (the int (-> *game-info* buzzer-total))
+        (the int (* (+ (* guns-level 120) (* guns-level 200)) guns-level))
+        )
+        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 90 anim-noto 0.0 (font-color default) (font-flags middle shadow kerning large))))
+        (set! (-> font-ctx scale) 0.325)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+    )
+    (when ;draw the cars level onscreen
+    (and
+        *target*
+        (not *scene-player*)
+        (= (paused?) #f)
+        (= r3-noto #t)
+        (= in-menu? #f)
+        (!= (-> *game-info* total-deaths) 0)
+    )
+        (clear matt-str)
+        (clear *pc-encoded-matt-str*)
+        (format matt-str "<COLOR_PINK>Vehicles: ~d~%~%<COLOR_PINK>~d/~d"
+        cars-level
+        (the int (-> *game-info* fuel))
+        (the int (* (+ (* cars-level 30) (* cars-level 175)) cars-level))
+        )
+        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 410 anim-noto 0.0 (font-color default) (font-flags middle shadow kerning large))))
+        (set! (-> font-ctx scale) 0.325)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+    )
+
+    (when (and 
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (focus-test? *target* pilot)
+            ) ;for the turbo meter, also referenced in wvehicle.gc and wvehicle-util.gc
+            (let 
+            (
+                (x 7)
+                (y 348)
+                (progress turbo-amount-hud) ;turbo-amount-hud
+                (arg3 (new 'static 'rgba 
+                    :r 0
+                    :g 255
+                    :b 255
+                    :a #x40
+                    )
+                    )
+            )
+                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                    (bucket-id particles)
+                                    )
+            (draw-sprite2d-xy s2-0 x y 60 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 58.5 progress)) 12 arg3 #x3fffff)
+            )
+        )
+        
+    )
+
+    (none)
+)

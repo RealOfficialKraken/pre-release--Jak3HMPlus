@@ -1,0 +1,205 @@
+(in-package goal)
+
+;name: "mod-title-obs.gc"
+
+;code
+
+
+;spawn the jak3 sign as a manipy
+(defun spawn-jak3logo ((vec vector) (arg0 float) (arg1 float) (arg2 float) (arg3 int))
+    (let ((logo (the manipy 
+                (ppointer->process
+                    (process-spawn manipy
+                    :init
+                    manipy-init
+                    vec
+                    #f
+                    (art-group-get-by-name *level* "skel-jakthreelogo" (the (pointer level) #f))
+                    #f
+                    0
+                    #f
+                    :name "jak3logo"))
+                    )
+                )
+            (color (new 'static 'vector))
+            )
+            (set! (-> color x) arg0)
+            (set! (-> color y) arg1)
+            (set! (-> color z) arg2)
+            (set-vector! (-> logo draw color-mult) (-> color x) (-> color y) (-> color z) 1.0)
+            (quaternion-rotate-y! (-> logo root quat) (-> logo root quat) (degrees arg3))
+            (quaternion-rotate-x! (-> logo root quat) (-> logo root quat) (degrees -15))
+            (quaternion-rotate-z! (-> logo root quat) (-> logo root quat) (degrees 20))
+      )
+        (set! spawned-logo? #t)
+    (none)
+  )
+
+
+  (deftype jak3logo (process)
+  ((wait-timer        int)
+   (wait-max          int)
+   (flicker-count     int)
+   (flicker-max       int)
+   (flicker-part      vector :inline)
+   (flicker-part2     vector :inline)
+   )
+   (:state-methods
+    active
+    check-for-flicker
+    turn-on
+    cdr
+    dead
+    )
+    (:methods
+    (jak3-turn-on (_type_) none)
+    (jak3logo-handler (_type_ process int symbol event-message-block) none)
+    )
+  )
+
+  (defbehavior jak3logo-event-handler jak3logo ((arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (jak3logo-handler self arg0 arg1 arg2 arg3)
+  (none)
+  )
+
+(defmethod jak3logo-handler ((this jak3logo) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+(case arg2
+    (('diepls)
+        (process-deactivate)
+        (set! globalrandi 1)
+        (set! in-main-menu? #f)
+        (set! mainmenu-camera #f)
+        (kill-by-name "jak3logo-flicker" *active-pool*)
+    )
+)
+(none)
+)
+
+  (defstate active (jak3logo) ;looped from CDR, or virtual startup.
+    :virtual #t
+    :code (behavior ()
+      (when (not (task-node-closed? (game-task-node arena-training-1-introduction)))
+      ;(spawn-dust-storm) ;<------ this is fucking why it keeps crashing D:<
+      (task-node-close! (game-task-node desert-interceptors-attack) #t)
+      (set! (-> self wait-timer) 0)
+      (set! (-> self flicker-count) 0)
+      (set! (-> self flicker-max) (rand-vu-int-range 3 10))
+      (kill-by-name "jak3logo" *active-pool*)
+      (go-virtual check-for-flicker)
+      )
+    )
+  )
+
+  (defstate check-for-flicker (jak3logo) ;run turn-on a couple times, then run cdr
+    :virtual #t
+    :code (behavior ()
+      (+! (-> self flicker-count) 1)
+      (set! (-> self wait-max) (rand-vu-int-range 12 60))
+      (set! (-> self wait-timer) 0)
+      (let ((vec (new 'static 'vector :x (meters 2767.4487) :y (meters 27.7348) :z (meters 485.2892) :w 1.0)))
+        (spawn-jak3logo vec 1.0 1.0 1.0 -180)
+      )
+      (loop
+        (+! (-> self wait-timer) 1)
+        (when (= mainmenu-camera #f)
+          (go-virtual dead)
+        )
+        (when (>= (-> self wait-timer) (-> self wait-max))
+          (kill-by-name "jak3logo" *active-pool*)
+          (go-virtual turn-on)
+        )
+        (when (>= (-> self flicker-count) (-> self flicker-max))
+          (go-virtual cdr)
+        )
+        ;(format *stdcon* "task-state: check-for-flicker ~%timer:~D~%max: ~D~%" (-> self wait-timer)(-> self wait-max))
+        (suspend)
+      )
+    )
+  )
+
+  (defstate turn-on (jak3logo) ;turn the sign on
+    :virtual #t
+    :code (behavior ()
+      (let ((vec (new 'static 'vector :x (meters 2767.4487) :y (meters 27.7348) :z (meters 485.2892) :w 1.0))
+        (vec2 (new 'static 'vector :x (meters 2781.5920) :y (meters 27.6575) :z (meters 484.6689) :w 1.0))
+        (vec3 (new 'static 'vector :x (meters 2767.9753) :y (meters 38.9075) :z (meters 487.2303) :w 1.0))
+        (vec4 (new 'static 'vector :x (meters 2778.5371) :y (meters 27.0325) :z (meters 484.1096) :w 1.0))
+      )
+      (spawn-jak3logo vec 2.3 2.3 2.3 -180)
+      (when (= torch-flicker #f)
+        (set! torch-flicker #t)
+      )
+      (when (rand-vu-percent? 0.1)
+        (launch-particles (-> *part-id-table* 9166) vec2)
+      )
+      (when (rand-vu-percent? 0.23)
+        (launch-particles (-> *part-id-table* 9166) vec3)
+      )
+      (when (rand-vu-percent? 0.012)
+        (launch-particles (-> *part-id-table* 9166) vec4)
+      )
+      (set! (-> self wait-timer) 0)
+      (set! (-> self wait-max) (rand-vu-int-range 4 18))
+      )
+      (loop
+        (+! (-> self wait-timer) 1)
+        (when (>= (-> self wait-timer) (-> self wait-max))
+          (kill-by-name "jak3logo" *active-pool*)
+          (go-virtual check-for-flicker)
+        )
+        ;(format *stdcon* "task-state: turn-on")
+        (suspend)
+      )
+    )
+  )
+
+  (defstate cdr (jak3logo) ;cool down for flicker
+    :virtual #t
+    :code (behavior ()
+      (set! (-> self wait-timer) 0)
+      (set! (-> self wait-max) (rand-vu-int-range 60 400))
+      (loop
+        (+! (-> self wait-timer) 1)
+        (when (= (-> self wait-timer) (- (-> self wait-max) 4))
+          (kill-by-name "jak3logo" *active-pool*)
+        )
+        (when (= (-> self wait-timer) (- (-> self wait-max) 3))
+          (let ((vec (new 'static 'vector :x (meters 2767.4487) :y (meters 27.7348) :z (meters 485.2892) :w 1.0)))
+            (spawn-jak3logo vec 2.3 2.3 2.3 -180)
+          )
+        )
+        (when (>= (-> self wait-timer) (-> self wait-max))
+          (go-virtual active)
+        )
+        ;(format *stdcon* "task-state: cdr")
+        (suspend)
+      )
+    )
+  )
+
+  (defstate dead (jak3logo) ;make process dead, clean up
+    :virtual #t
+    :code (behavior ()
+      (kill-by-name "jak3logo-flicker" *active-pool*)
+      (kill-by-name "jak3logo" *active-pool*)
+      (process-deactivate)
+      ;(format *stdcon* "task-state: <COLOR_RED>DEAD<COLOR_WHITE>")
+      (suspend)
+    )
+  )
+
+
+  (defbehavior jak3logo-init-by-other jak3logo ()
+    (set! (-> self wait-timer) 0)
+    (set! (-> self wait-max) 0)
+    (set! (-> self flicker-count) 0)
+    (set! (-> self flicker-max) 0)
+    (go (method-of-object self active))
+  )
+
+  (defun spawn-jak3flicker ()
+    (process-spawn jak3logo :name "jak3logo-flicker" *active-pool*)
+    (none)
+  )
+
+  

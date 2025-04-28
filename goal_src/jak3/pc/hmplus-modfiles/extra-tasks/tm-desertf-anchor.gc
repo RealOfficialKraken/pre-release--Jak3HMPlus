@@ -1,0 +1,792 @@
+(in-package goal)
+
+;name: tm-desertf-anchor.gc
+
+(defun-extern spawn-fireball vector vector float none)
+
+#|
+ANCHORS
+Each anchor is toggled on by its own game-task-node.
+All the anchor needs to be spawned is something to close the introduction task.
+The parameters for spawning it should only have to be set in the "active" state
+Finally, the tasks get opened again after dying, or the process goes dead
+|#
+
+(defpart 9163
+  :init-specs ((:texture (pal-lightning level-default-sprite))
+    (:birth-func 'birth-func-set-quat)
+    (:num 1.0)
+    (:scale-x (meters 1))
+    (:scale-y (meters 700))
+    (:r 128.0 64.0)
+    (:g 128.0 64.0)
+    (:b 128.0 64.0)
+    (:a 128.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 sp-cpuinfo-flag-14 left-multiply-quat))
+    )
+  )
+
+  (defpart 9164
+  :init-specs ((:texture (pal-lightning-red level-default-sprite))
+    (:birth-func 'birth-func-set-quat)
+    (:num 1.0)
+    (:scale-x (meters 3) (meters 1))
+    (:scale-y (meters 1))
+    (:r 128.0 64.0)
+    (:g 128.0 64.0)
+    (:b 128.0 64.0)
+    (:a 80.0 128.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 left-multiply-quat))
+    )
+  )
+
+(defpart 9165
+  :init-specs ((:texture (radial-gradient-yellow level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 15))
+    (:rot-x (degrees 22.5))
+    (:scale-y :copy scale-x)
+    (:r 128.0 64.0)
+    (:g 80.0 20.0)
+    (:b 128.0 64.0)
+    (:a 128.0)
+    (:omega (degrees 9011.25))
+    (:rotvel-z (degrees 0.3))
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 glow))
+    (:userdata 4096.0)
+    )
+  )
+
+(defpart 9166
+  :init-specs ((:texture (starflash level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 3) (meters 1))
+    (:rot-z (degrees 0) (degrees 3600))
+    (:scale-y :copy scale-x)
+    (:r 255.0)
+    (:g 180.0)
+    (:b 100.0)
+    (:a 200.0 55.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+    )
+  )
+
+(deftype tm-desertf-anchor (task-manager)
+  ((wave                           int) ;current wave
+   (wave-max                       int) ;max wave
+   (max-count                      int) ;max number of enemies per wave
+   (ship-inside?                symbol) ;check for ship spawn
+   (boss-spawned?               symbol) ;check for boss spawn
+   (blast-i                        int) ;time-frame for lightning spawn
+   (fling-i                        int) ;time-frame for fireball spawns
+   (fling-max                      int) ;max time for fireball spawn for a random set
+   (general-i                      int) ;used as a general time-frame
+   (general-f                    float) ;used as a general time-frame to fit float values
+   (fog-i                        float) ;used as a time-frame for fog's float value
+   (laser-bank   (inline-array vector)) ;inline array for locations of laser explosion
+   (lightning-pos               vector) ;ground pos for beam
+   (default-lightning-pos       vector) ;default ground pos for beam if target is far
+   (fireball-pos                vector) ;gets set back toward target after the fling-fireball state
+   (spawn-pos                   vector) ;dark ship pos
+   (reward-box                  vector) ;loot reward pos
+   (getoff-bounds               vector) ;vehicle getoff pos
+   (spawn-count                    int) ;keeps track of spawn amounts
+   (waiting?                    symbol) ;check if waiting in between enemy spawns
+   (wait-i                         int) ;time-frame in between enemy spawns
+   (wave-sp      (inline-array vector)) ;enemy spawn point vectors
+   (interceptors?               symbol) ;set interceptors back if disabled before
+  )
+ (:state-methods
+ active ;set all the prerequisites
+ idle ;target not in range, but in level
+ dormant ;target not in range, not in level
+ start-battle ;target in range, and in level
+ general-handler ;loop checks all of the different things it does
+ flash-out-battle ;target has gone out of range, is dead, or won the battle
+ fling-fireball ;cast a firebolt spell from the ship
+ lightning-blast ;send down a laser and explode at its base
+ spawn-wave ;spawns all the enemies
+ dead ;ship is dormant, and the time-window for battle is passed
+ dead-win ;ship is active, and player beats the challenge
+ )
+)
+  
+
+(defstate active (tm-desertf-anchor)
+    :virtual #t
+    :code 
+    (behavior ()
+        (let ((vec (new 'static 'vector 
+                :x (meters 1983.4888) 
+                :y (meters 314.2753) 
+                :z (meters 2685.8525) 
+                :w 1.0
+              ))
+              (vec2 (new 'static 'vector 
+                :x (meters 1980.4888) 
+                :y (meters 26.2753) 
+                :z (meters 2844.3520) 
+                :w 1.0
+              ))
+              (vec3 (new 'static 'vector 
+                :x (meters 1960.3009) 
+                :y (meters 27.3126) 
+                :z (meters 2778.7351) 
+                :w 1.0
+              ))
+              (vec4 (new 'static 'vector 
+                :x (meters 1922.9963) 
+                :y (meters 23.4870) 
+                :z (meters 2717.9418) 
+                :w 1.0
+              ))
+              )
+            (set! (-> self spawn-pos) vec)
+            (set! (-> self getoff-bounds) vec2)
+            (set! (-> self reward-box) vec3)
+            (set! (-> self lightning-pos) vec4)
+            (set! (-> self ship-inside?) #f)
+            (set! (-> self general-i) 0)
+            (set! (-> self wave-max) 11)
+            (set! (-> self max-count) 0)
+            (set! (-> self waiting?) #f)
+            (set! (-> self laser-bank)
+                (new 'static
+                    'inline-array
+                    vector
+                    5
+                    (static-vectorm 2006.1486 30.5638 2706.9541)
+                    (static-vectorm 2026.7478 29.0740 2817.4016)
+                    (static-vectorm 1908.2493 22.2660 2766.2316)
+                    (static-vectorm 2108.2353 39.1147 2737.9838)
+                    (static-vectorm 2005.8693 30.2832 2732.6713)
+                )
+            )
+            (set! (-> self wave-sp)
+                (new 'static
+                    'inline-array
+                    vector
+                    12
+                    (static-vectorm 1916.65 23.62 2701.48)
+                    (static-vectorm 1883.65 21.42 2750.90)
+                    (static-vectorm 1891.54 22.07 2740.75)
+                    (static-vectorm 1921.78 23.43 2765.01)
+                    (static-vectorm 2000.65 29.69 2806.30)
+                    (static-vectorm 2008.37 29.86 2821.89)
+                    (static-vectorm 1993.06 29.99 2814.21)
+                    (static-vectorm 2009.65 30.36 2740.88)
+                    (static-vectorm 2034.21 31.88 2734.43)
+                    (static-vectorm 2076.38 34.71 2740.96)
+                    (static-vectorm 2067.31 32.89 2765.49)
+                    (static-vectorm 2016.61 29.53 2823.34)
+                    ;(static-vectorm 2011.11 29.83 2855.87)
+                    )
+                )
+            (when (>= (-> *time-of-day-context* time) 13.0)
+                (go-virtual flash-out-battle)
+            )
+            (when (or
+                    (= in-debug? #t)
+                    (= anchor-target-dead? #t)
+                  )
+                (set! (-> self general-i) 1179)
+            )
+            (loop
+                (+! (-> self general-i) 1)
+                (cond 
+                    ((or 
+                            (= (-> (level-get-target-inside *level*) name) 'desert)
+                            (= (-> (level-get-target-inside *level*) name) 'desertg)
+                            (= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                        )
+                        (let ((i-i (-> self general-i)))
+                            (when (= i-i 1200)
+                                (set! in-desertf-anchor? #t)
+                                (set! enemy-noto (rand-vu-int-range 42 61))
+                            )
+                            (when (= i-i 1190)
+                                (when (= white-mode #f)
+                                    (toggle-white-mode)
+                                )
+                            )
+                            (when (= i-i 1199)
+                                (when (= white-mode #t)
+                                    (toggle-white-mode)
+                                )
+                            )
+                            (when (>= i-i 1201)
+                                (print "~%~%dm-ship SPAWNED~%~%")
+                                (go-virtual idle)
+                            )
+                            (cond 
+                                ((and 
+                                    (<= (vector-vector-distance (-> self spawn-pos) (target-pos 0)) 4000000.0)
+                                    (< (-> self fog-i) 1.0)
+                                )
+                                    (+! (-> self fog-i) 0.003)
+                                    (set! (-> *mood-control* overide-weather-flag) #t)
+                                )
+                                (else
+                                    (set! (-> self fog-i) 1.0)
+                                )
+                            )
+                            (format *stdebug* "~%~%active: general-i = ~D~%fog-i: ~F~%~%" (-> self general-i) (-> self fog-i))
+                        )
+                    )
+                    (
+                     *scene-player*
+                        (go-virtual dormant)
+                    )
+                    (else 
+                        (go-virtual dormant)
+                        (print "~%~%WENT DORMANT, WILL SPAWN ONCE INSIDE LEVEL~%~%")
+                    )
+                )
+                (suspend)
+            )
+        )
+    )
+)
+
+(defstate dormant (tm-desertf-anchor) ;jak is not in desert, but the battle occurs
+    :virtual #t
+    :code
+    (behavior ()
+        (kill-by-name "dm-ship" *default-pool*)
+        (loop 
+            (cond 
+                ((and
+                    (or 
+                        (= (-> (level-get-target-inside *level*) name) 'desert)
+                        (= (-> (level-get-target-inside *level*) name) 'desertg)
+                        (= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                    )
+                    (= in-desert-game-task? #f)
+                    (not *waste-ship-anchor*)
+                    (not *scene-player*)
+                )
+                    (print "~%~%dm-ship SPAWNED~%~%")
+                    (set! in-desertf-anchor? #t)
+                    (go-virtual idle)
+                )
+                (else
+                    (when (= in-desertf-anchor? #t)
+                        (set! *waste-ship-anchor* #f)
+                        (kill-by-name "dm-ship" *default-pool*)
+                    )
+                )
+            )
+            (when 
+                (>= (-> *time-of-day-context* time) 13.0)
+                (go-virtual dead)
+            )
+            (format *stdebug* "~%tm-desertf-anchor is dormant~%~%")
+            (suspend)
+        )
+    )
+)
+
+(defstate idle (tm-desertf-anchor) ;jak is inside of desert, but far away from battle
+    :virtual #t
+    :code
+    (behavior ()
+        (dm-dark-ship (-> self spawn-pos))
+        (loop 
+            (format *stdebug* "~%tm-desertf-anchor is idle~%~%")
+            (when (= in-desert-game-task? #t)
+                (go-virtual dormant)
+            )
+            (when (and
+                    (<= (vector-vector-distance (-> self spawn-pos) (target-pos 0)) 3600000.0)
+                    (= in-desert-game-task? #f)
+                  )
+                    (when (task-node-open? (game-task-node desert-interceptors-attack))
+                        (task-node-close! (game-task-node desert-interceptors-attack) #t)
+                        (set! (-> self interceptors?) #t)
+                    )
+                    (print "~%~%|||||||||||||BATTLE STARTED|||||||||||||~%~%")
+                    (set! onfoot-battle? #t)
+                    (set! anchor-float-time (-> *time-of-day-context* time))
+                    ;;;;;;;;;;;;;;;;;;;;Dark mode;;;;;;;;;;;;;;;;;;;;;
+                    (toggle-freeze)
+                    (send-event (ppointer->process *time-of-day*) 'change 'hour 19)
+                    (set! (-> *time-of-day-context* mode) (the-as time-of-day-palette-id 5))
+                    (send-event (ppointer->process *time-of-day*) 'change 'ratio 0.0)
+                    (set! (-> *time-of-day-context* overide-enable) #t)
+                    (set! (-> *mood-control* overide-weather-flag) #t)
+                    (set! (-> *overide-mood-fog-table*
+                                        data
+                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                        fog-color
+                                        x
+                                        )
+                                    255.0
+                                    )
+                    (set! (-> *overide-mood-fog-table*
+                                        data
+                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                        fog-color
+                                        y
+                                        )
+                                    0.0
+                                    )
+                    (set! (-> *overide-mood-fog-table*
+                                        data
+                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                        fog-color
+                                        z
+                                        )
+                                    255.0
+                                    )
+                    (set! (-> *overide-mood-color-table*
+                                        data
+                                        (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2))
+                                        lgt-color
+                                        y
+                                        )
+                                    1.0
+                                    )
+                    (set! (-> *overide-mood-color-table*
+                                        data
+                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                        lgt-color
+                                        y
+                                        )
+                                    0.0
+                                    )
+                    (set! (-> *overide-mood-color-table*
+                                        data
+                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                        lgt-color
+                                        z
+                                        )
+                                    1.0
+                                    )
+                    (set! (-> *overide-mood-color-table*
+                                        data
+                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                        lgt-color
+                                        w
+                                        )
+                                    1.0
+                                    )
+                                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    (set! enemy-noto 54)
+                    (format *stdebug* "~%tm-desertf-anchor battle started")
+                    (go-virtual start-battle)
+            )
+            (cond 
+                ((and
+                    (and 
+                        (!= (-> (level-get-target-inside *level*) name) 'desert)
+                        (!= (-> (level-get-target-inside *level*) name) 'desertg)
+                        (!= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                    )
+                )
+                    (go-virtual dormant)
+                )
+                (else
+                    (suspend)
+                )
+            )
+        )
+    )
+)
+
+(defstate start-battle (tm-desertf-anchor)
+    :virtual #t
+    :code
+    (behavior ()
+        (set! (-> self wave) 0)
+        (set! (-> self general-i) 0)
+        (set! (-> self blast-i) 0)
+        (set! (-> self fling-i) 0)
+        (set! (-> self fling-max) 15)
+        (set! (-> self fireball-pos) (target-pos 0))
+        (add-setting! 'music 'desres2 0.0 0)
+        (spawn-dust-storm)
+        (set-setting! 'dust-storm-sound-scalar #f 10.0 10)
+        (send-event (handle->process (-> *game-info* dust-storm)) 'set-intensity 1000)
+        #|(when (= mainmenu-camera #f)
+            (task-node-close! (game-task-node desert-interceptors-attack) #t)
+            (task-node-close! (game-task-node desert-logo-title1) #t)
+            (task-node-close! (game-task-node desert-logo-title2) #t)
+        )|#
+        (go-virtual general-handler)
+    )
+)
+
+(defstate general-handler (tm-desertf-anchor)
+    :virtual #t
+    :code
+    (behavior ()
+        (loop
+            (when (rand-vu-percent? 0.7)
+                (+! (-> self blast-i) 1)
+            )
+            (+! (-> self fling-i) 1)
+            (when (>= (-> self blast-i) 800)
+                (cond 
+                    ((<= (vector-vector-distance (-> self spawn-pos) (target-pos 0)) 4000000.0)
+                        (set! (-> self lightning-pos) (-> self laser-bank (rand-vu-int-range 0 4)))
+                    )
+                    (else
+                        (set! (-> self lightning-pos) (-> self default-lightning-pos))
+                    )
+                )
+                (go-virtual lightning-blast)
+            )
+            (when (>= (-> self fling-i) (-> self fling-max))
+                (go-virtual fling-fireball)
+            )
+            (cond
+                ((> (vector-vector-distance (-> self getoff-bounds) (target-pos 0)) 700000.0) ;force stop pilot at a certain range
+                    (set! *force-stop-pilot* #f)
+                )
+                (else
+                    (set! *force-stop-pilot* #t)
+                )
+            )
+            (when (> (vector-vector-distance (-> self spawn-pos) (target-pos 0)) 3800000.0) ;go dormant or idle when out of range
+                (set! (-> self general-i) 0)
+                (cond 
+                    ((and
+                            (!= (-> (level-get-target-inside *level*) name) 'desert)
+                            (!= (-> (level-get-target-inside *level*) name) 'desertg)
+                            (!= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                        )
+                        (go-virtual dormant)
+                    )
+                    (else
+                        (go-virtual flash-out-battle)
+                    )
+                )
+            )
+            (when (and ;spawn enemies below ship
+                    (< (vector-vector-distance (-> self getoff-bounds) (target-pos 0)) 900000.0)
+                    (not (search-process-tree *active-pool* (lambda ((p process)) (type? p dp-bipedal))))
+                    (not (search-process-tree *active-pool* (lambda ((p process)) (type? p marauder))))
+                    (not (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-wasp))))
+                  )
+                  (when (>= (-> self wave) (-> self wave-max))
+                    (go-virtual flash-out-battle)
+                  )
+                  (set! (-> self spawn-count) 0)
+                  (set! (-> self boss-spawned?) #f)
+                  (+! (-> self wave) 1)
+                  (format #t "~%~%NEW WAVE~%~%~D" (-> self wave))
+                  (go-virtual spawn-wave)
+            )
+            (when 
+                (and 
+                    (= weather-dark-mode #t)
+                    (not *scene-player*)
+                    (= (paused?) #f)
+                    (= (pause-allowed?) #t)
+                    (not (km-current-continue "wasdoors-city" (the-as debug-menu-msg #f)))
+                )
+                (set-continue! *game-info* "wasdoors-city" #t)
+            )
+            (format *stdebug* "~%general-handler: blast-i = ~D/800~%general-handler: fling-i = ~D/~D~%~%general-handler: wave = ~D/11~%" (-> self blast-i) (-> self fling-i) (-> self fling-max) (-> self wave))
+            (suspend)
+        )
+    )
+)
+
+
+
+(defstate lightning-blast (tm-desertf-anchor)
+    :virtual #t
+    :code
+    (behavior ()
+        (set! (-> self general-i) 0)
+        (loop
+            (let ((gp-0 (-> self spawn-pos)))
+            (let ((a2-2 (new 'stack-no-clear 'vector)))
+            (vector-! a2-2 (-> self lightning-pos) gp-0)
+            (set! (-> *part-id-table* 9164 init-specs 4 initial-valuef) (vector-length a2-2))
+            (draw-beam (-> *part-id-table* 9164) gp-0 a2-2 #f)
+            )
+            (launch-particles (-> *part-id-table* 9166) (-> self lightning-pos))
+            (let ((s5-1 (vector-normalize! (vector-! (new 'stack-no-clear 'vector) (-> self lightning-pos) gp-0) 1.0)))
+                (let ((s4-0 (new 'stack-no-clear 'vector)))
+                    (if *target*
+                        (vector-! s4-0 (get-trans *target* 3) gp-0)
+                    )
+                (vector+float*! s5-1 gp-0 s5-1 (vector-dot s5-1 s4-0))
+                )
+            )
+            )
+            (+! (-> self general-i) 1)
+            (when (>= (-> self general-i) 300)
+                (set! (-> self fireball-pos) (target-pos 0))
+                (set! (-> self blast-i) 0)
+                ;put explosion and damage-sphere here
+                (set! (-> *part-id-table* 2280 init-specs 8 initial-valuef) 255.0) ;a
+                (set! (-> *part-id-table* 2281 init-specs 8 initial-valuef) 64.0) ;a
+                (set! (-> *part-id-table* 2280 init-specs 1 initial-valuef) 1600.0) ;scalex
+                (set! (-> *part-id-table* 2280 init-specs 2 initial-valuef) (meters 98)) ;scalex
+                (let ((gp-0 (new 'stack-no-clear 'explosion-init-params)))
+                    (set! (-> gp-0 spawn-point quad) (-> self lightning-pos quad))
+                    (quaternion-identity! (-> gp-0 spawn-quat))
+                    (set! (-> gp-0 radius) 293200.0)
+                    ;(set! (-> gp-0 scale) 1.0)
+                    (set! (-> gp-0 group) (-> *part-group-id-table* 585))
+                    (set! (-> gp-0 collide-with)
+                            (collide-spec backgnd jak crate civilian obstacle vehicle-sphere hit-by-others-list player-list pusher)
+                            )
+                    (set! (-> gp-0 damage) 6.0)
+                    (set! (-> gp-0 damage-scale) 1.0)
+                    (set! (-> gp-0 vehicle-damage-factor) 1.0)
+                    (set! (-> gp-0 vehicle-impulse-factor) 1.0)
+                    (set! (-> gp-0 ignore-proc) (process->handle #f))
+                    (explosion-spawn gp-0 (the-as process-drawable *default-pool*))
+                    (activate! *camera-smush-control* 8192.0 15 150 1.0 0.8 (-> *display* camera-clock))
+                )
+                (go-virtual general-handler)
+            )
+            (format *stdebug* "~%lightning-blast: general-i = ~D/300~%~%" (-> self general-i))
+            (suspend)
+        )
+    )
+)
+
+(defstate fling-fireball (tm-desertf-anchor)
+    :virtual #t
+    :code
+    (behavior ()
+        (set! (-> self general-i) 0)
+        (loop
+            (+! (-> self general-i) 1)
+            (when (>= (-> self general-i) 30)
+                (let ((rnd (rand-vu-int-range 1 14))
+                      (rnd2 (rand-vu-float-range -30.0 30.0))
+                      (rnd3 (rand-vu-float-range -30.0 30.0))
+                      (vec (new-stack-vector0))
+                      (startpos (new-stack-vector0))
+                      (plusvec (new-stack-vector0)) 
+                      (off (new 'static 'vector :x (meters 0.0) :y (meters 0.0) :z (meters 0.0) :w 1.0))  
+                     )
+                    (set! off (new 'static 'vector :x (meters 0.0) :y (meters 0.0) :z (meters 0.0) :w 1.0))
+                    (set! plusvec (new 'static 'vector))
+                    (set! vec (new 'static 'vector))
+                    (set! startpos (-> self fireball-pos))
+                    (if (rand-vu-percent? 0.5)
+                        (+! (-> off x) (* (rand-vu-float-range 0.0 100.0) 4096.0))
+                        (-! (-> off x) (* (rand-vu-float-range 0.0 100.0) 4096.0))
+                    )
+                    (if (rand-vu-percent? 0.5)
+                        (+! (-> off z) (* (rand-vu-float-range 0.0 100.0) 4096.0))
+                        (-! (-> off z) (* (rand-vu-float-range 0.0 100.0) 4096.0))
+                    )
+                    (set! vec (-> self spawn-pos)) ;was (set! vec (-> self fireball-sp (rand-vu-int-range 1 27)))
+                    (vector-copy! plusvec (vector+! plusvec off vec))
+                    (set! startpos plusvec)
+                    (set! (-> startpos y) -200000.0)
+                    (spawn-fireball vec startpos (rand-vu-float-range 123000.0 255000.0))
+                )
+                (set! (-> self fling-i) 0)
+                (set! (-> self fling-max) (rand-vu-int-range 7 30))
+                (go-virtual general-handler)
+            )
+        )
+    )
+)
+
+(defstate spawn-wave (tm-desertf-anchor)
+    :virtual #t
+    :code
+    (behavior ()
+        (set! (-> self max-count) 7);(set! (-> self max-count) (rand-vu-int-range 4 12))
+        (loop
+            (when (= (-> self waiting?) #t)
+                    (+! (-> self wait-i) 1)
+                    (when (>= (-> self wait-i) 60)
+                        (set! (-> self waiting?) #f)
+                        (set! (-> self wait-i) 0)
+                    )
+                )
+            (when (= (-> self waiting?) #f)
+                (let ((vec (new-stack-vector0))
+                    )
+                    (set! vec (-> self wave-sp (rand-vu-int-range 0 11)))
+                    #|(when (<= (vector-vector-distance (target-pos 0) vec) 270000.0)
+                        (spawn-dark-maker vec "dp-bipedal-c")
+                        (+! (-> self spawn-count) 1)
+                    )|#
+                    (when
+                        (or
+                            (= (-> self wave) 3)
+                            (= (-> self wave) 8)
+                        )
+                        (spawn-dark-boss vec "Bipedal Boss")
+                        (+! (-> self spawn-count) (-> self max-count))
+                        (set! (-> self boss-spawned?) #t)
+                        (suspend)
+                    )
+                    (when (and 
+                            (< (-> self spawn-count) (-> self max-count))
+                            (!= (-> self wave) 3)
+                            (!= (-> self wave) 8)
+                          )
+                        (spawn-dark-maker vec "dp-bipedal-c")
+                        (+! (-> self spawn-count) 1)
+                    )
+                    (when (>= (-> self spawn-count) (-> self max-count))
+                        (go-virtual general-handler)
+                    )
+                    (when (and 
+                            (< (-> self spawn-count) (-> self max-count))
+                            (= (-> self wave) 11)
+                          )
+                        (spawn-dark-boss vec "Bipedal Boss")
+                        (+! (-> self spawn-count) (/ (-> self max-count) 2))
+                    )
+                    (set! (-> self waiting?) #t)
+                )
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate flash-out-battle (tm-desertf-anchor)
+    :virtual #t
+    :code
+    (behavior ()
+        (set! *force-stop-pilot* #f)
+        (when (= (-> self interceptors?) #t)
+            (task-node-open! (game-task-node desert-interceptors-attack) #t)
+        )
+        (kill-by-name "dp-bipedal-c" *default-pool*)
+        (kill-by-name "Bipedal Boss" *default-pool*)
+        (kill-by-name "v-catapult-shot" *active-pool*)
+        (set! (-> *part-id-table* 2280 init-specs 8 initial-valuef) 128.0) ;a
+        (set! (-> *part-id-table* 2283 init-specs 8 initial-valuef) 64.0) ;a
+        (set! (-> *part-id-table* 2280 init-specs 1 initial-valuef) 1.0) ;scalex
+        (set! (-> self general-f) 0.0)
+        (loop
+            (+! (-> self general-f) 0.1)
+            (when (< (-> self general-f) 72.0)
+                (send-event (ppointer->process *time-of-day*) 'change 'ratio (-> self general-f))
+            )
+            (when 
+                (and 
+                    (>= (-> *time-of-day-context* time) anchor-float-time)
+                    (< (-> *time-of-day-context* time) (+ anchor-float-time 0.3))
+                    (>= (-> self general-f) 72.0)
+                )
+                (set! onfoot-battle? #f)
+                (send-event (ppointer->process *time-of-day*) 'change 'ratio 1.0)
+                (if (or
+                        (>= (-> self wave) (-> self wave-max))
+                        (>= anchor-float-time 13.0)
+                    )
+                    (go-virtual dead-win)
+                    (go-virtual idle)
+                )
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate dead-win (tm-desertf-anchor)
+    :virtual #t
+    :code
+    (behavior ()
+        (set! (-> self general-i) 0)
+        (loop
+            (+! (-> self general-i) 1)
+            (when (= (-> self general-i) 1)
+                (toggle-white-mode)
+            )
+            (when (= (-> self general-i) 10)
+                (toggle-white-mode)
+                (kill-by-name "dm-ship" *default-pool*)
+                (set! in-desertf-anchor? #f)
+                (set! *force-stop-pilot* #f)
+                (task-node-open! (game-task-node desertf-anchor-introduction) #t)
+                (group-drop! (-> self reward-box) 0.34 0.12)
+                (set! anchor-cdr 0)
+                (set! anchor-cooldown #t)
+                (go-virtual dead)
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate dead (tm-desertf-anchor)
+    :virtual #t
+    :code
+    (behavior ()
+        (task-node-open! (game-task-node desertf-anchor-introduction) #t)
+        (set! *force-stop-pilot* #f)
+        (kill-by-name "dp-bipedal-c" *default-pool*)
+        (kill-by-name "v-catapult-shot" *active-pool*)
+        (kill-by-name "Bipedal Boss" *default-pool*)
+        (kill-by-name "dm-ship" *default-pool*)
+        (suspend)
+    )
+)
+
+
+#|(case rnd
+                    ((1)
+                    (spawn-dark-maker vec)
+                    )
+                    ((2)
+                    (spawn-dark-maker vec)
+                    )
+                    ((3)
+                    (spawn-dark-maker vec)
+                    ;(+! (-> vec y) 135000.0)
+                    ;(process-spawn neo-wasp vec :name "neo-wasp")
+                    )
+                )
+                
+                (set-vector! (-> *target* control trans) (meters 2011.1099) (meters 29.8269) (meters 2855.8701) 1.0)
+                
+                
+                ;;used to have this, when I did all of the fireball vectors manually
+
+                        (set! (-> self fireball-sp)
+          (new 'static
+               'inline-array
+               vector
+               27
+               (static-vectorm 1960.6270 26.78 2963.3300)
+               (static-vectorm 2047.1525 26.78 3026.7756)
+               (static-vectorm 1991.6225 26.78 2935.8791)
+               (static-vectorm 2058.5498 26.78 2760.7683)
+               (static-vectorm 2060.6682 26.78 2683.8244)
+               (static-vectorm 1969.8875 26.78 2645.7346)
+               (static-vectorm 1939.8687 26.78 2681.7270)
+               (static-vectorm 1903.5489 26.78 2646.2697)
+               (static-vectorm 1941.5935 26.78 2722.9638)
+               (static-vectorm 1947.8621 26.78 2779.0361)
+               (static-vectorm 2006.4748 26.78 2790.4409)
+               (static-vectorm 2026.6580 26.78 2721.3125)
+               (static-vectorm 1906.4324 26.78 2584.0651)
+               (static-vectorm 1862.9023 26.78 2599.0007)
+               (static-vectorm 1991.8981 26.78 2588.6503)
+               (static-vectorm 1870.5859 28.71 2646.9987)
+               (static-vectorm 1935.6380 28.71 2416.9560)
+               (static-vectorm 1944.0841 28.71 2491.1970)
+               (static-vectorm 1827.1391 28.71 2585.9370)
+               (static-vectorm 1828.8286 28.71 2698.2343)
+               (static-vectorm 1919.8422 28.71 2829.7145)
+               (static-vectorm 2037.8553 28.71 2921.2331)
+               (static-vectorm 1967.0367 28.71 3028.0673)
+               (static-vectorm 2063.0974 28.71 3079.4370)
+               (static-vectorm 2091.9807 28.71 3175.7692)
+               (static-vectorm 2000.0195 28.71 3167.6311)
+               (static-vectorm 1974.5571 28.71 3219.3796)
+            )
+        )
+                #

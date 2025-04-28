@@ -1,0 +1,53 @@
+(in-package goal)
+
+;; name: look-for-warpgate.gc
+
+
+(deftype look-for-warpgate (task-manager)
+    (
+    )
+  (:state-methods
+  active
+  win
+  dead
+  )
+  )
+
+  (defstate win (look-for-warpgate) ;makes task-manager dead
+  :virtual #t
+  :code (behavior ()
+      (suspend)
+    )
+  )
+
+  (defstate dead (look-for-warpgate) ;makes task-manager dead
+  :virtual #t
+  :code (behavior ()
+      (suspend)
+    )
+  )
+
+  (defstate active (look-for-warpgate) ;sets everything up
+    :virtual #t
+    :code (behavior ()
+        (loop
+            (let 
+                ((desert-storm 
+                    (search-process-tree *active-pool* 
+                        (lambda ((p process)) 
+                            (type? p dust-storm-randomizer)))
+                )
+                (chanced-scalar (rand-vu-float-range 0.0 1.0))
+                )
+            (when (rand-vu-percent? 0.00013)
+                (set-setting! 'dust-storm-sound-scalar #f chanced-scalar 0)
+            )
+            )
+            (when (= (-> *target* fact health) 0.0)
+                (go-virtual dead)
+            )
+            (suspend)
+        )
+    )
+    (none)
+  )

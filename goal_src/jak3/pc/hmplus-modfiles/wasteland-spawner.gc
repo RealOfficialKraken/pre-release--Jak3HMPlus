@@ -1,0 +1,1240 @@
+(in-package goal)
+
+;Lisp
+;name: wasteland-spawner.gc
+
+
+(declare-type marauder-c process-drawable)
+(declare-type was-artifact process-drawable)
+
+(defskelgroup skel-neo-sat neo-satellite neo-satellite-lod0-jg neo-satellite-idle-ja
+              ((neo-satellite-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 20)
+              :shadow neo-satellite-shadow-mg
+              :origin-joint-index 3
+              :global-effects 32
+              )
+
+(defun-extern spawn-roaming-satellite vector none)
+
+
+(defun spawn-manipy-sat ((vec vector) (stri string) (arrow? symbol))
+  (process-spawn manipy
+                 :init
+                 manipy-init
+                 vec
+                 #f
+                 (art-group-get-by-name *level* "skel-neo-sat" (the (pointer level) #f))
+                 #f
+                 0
+                 #f
+                 :name stri)
+    (when arrow?
+        (let (
+            (gp-3 (new 'stack-no-clear 'task-arrow-params))
+            (self1 (the-as process #f))
+            )
+            (set! (-> gp-3 pos quad) (-> vec quad))
+            (quaternion-identity! (-> gp-3 quat))
+            (set! (-> gp-3 flags) (task-arrow-flags taf3 taf8))
+            (set! (-> gp-3 map-icon) (the-as uint 12))
+            (process-spawn task-arrow gp-3 :name "task-arrow-satellite")
+        )
+    )
+  (none)
+)
+
+(defskelgroup skel-vin-effect vin-effect vin-effect-lod0-jg vin-effect-idle-ja
+              ((vin-effect-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 9999)
+              :origin-joint-index 3
+              )
+
+(defun spawn-vin-effect ((vec vector) (name string))
+    (let ((vin (the manipy 
+                (ppointer->process
+                    (process-spawn manipy
+                    :init
+                    manipy-init
+                    vec
+                    #f
+                    (art-group-get-by-name *level* "skel-vin-effect" (the (pointer level) #f))
+                    #f
+                    0
+                    #f
+                    :name name))
+                    )
+                )
+            (vscale (new 'static 'vector))
+            (qscale (new 'static 'quaternion))
+            )
+            (set! (-> vscale x) 175.0)
+            (set! (-> vscale y) 175.0)
+            (set! (-> vscale z) 175.0)
+            (send-event vin 'scale vscale)
+            (send-event vin 'rot-x (degrees 78))
+        )
+    (none)
+)
+
+(defun spawn-giant-vin-effect ((vec vector))
+    (let ((vin (the manipy 
+                (ppointer->process
+                    (process-spawn manipy
+                    :init
+                    manipy-init
+                    vec
+                    #f
+                    (art-group-get-by-name *level* "skel-vin-effect" (the (pointer level) #f))
+                    #f
+                    0
+                    #f
+                    :name "vin-effect-giant"))
+                    )
+                )
+            (vscale (new 'static 'vector))
+            (qscale (new 'static 'quaternion))
+            )
+            (set! (-> vscale x) 775.0)
+            (set! (-> vscale y) 775.0)
+            (set! (-> vscale z) 775.0)
+            (send-event vin 'scale vscale)
+            (send-event vin 'rot-x (degrees 78))
+        )
+    (none)
+)
+
+(define task-arrow-spawned? #f)
+
+(defun task-arrow-custom ((vec vector) (onin? symbol))
+    (let (
+        (gp-3 (new 'stack-no-clear 'task-arrow-params))
+        (self1 (the-as process #f))
+        )
+        (set! (-> gp-3 pos quad) (-> vec quad))
+        (quaternion-identity! (-> gp-3 quat))
+        (set! (-> gp-3 flags) (task-arrow-flags taf3 taf8))
+        (if onin?
+            (set! (-> gp-3 map-icon) (the-as uint 12))
+            (set! (-> gp-3 map-icon) (the-as uint 0))
+        )
+        (process-spawn task-arrow gp-3 :name "task-arrow-custom")
+        (set! task-arrow-spawned? #t)
+    )
+    (none)
+)
+
+(defun random-poi ((gem? float))
+    (-! (-> *game-info* gem) gem?)
+    (let (
+            (desertb1 (new 'static 'vector :x (meters 3154.2802) :y (meters 19.5781) :z (meters 541.2550) :w 1.0))
+            (desertb2 (new 'static 'vector :x (meters 3732.4335) :y (meters 22.4331) :z (meters 824.4011) :w 1.0))
+            (desertd1 (new 'static 'vector :x (meters 2292.9907) :y (meters 32.7233) :z (meters 1500.0242) :w 1.0))
+            (desertd2 (new 'static 'vector :x (meters 348.6051) :y (meters 29.4197) :z (meters 2832.0312) :w 1.0))
+            (deserta1 (new 'static 'vector :x (meters 1317.8349) :y (meters 36.3553) :z (meters 283.1715) :w 1.0))
+            (deserta2 (new 'static 'vector :x (meters 1657.2156) :y (meters 33.8630) :z (meters 386.2038) :w 1.0))
+            (desertc1 (new 'static 'vector :x (meters 280.2767) :y (meters 108.8450) :z (meters 1983.6145) :w 1.0))
+            (desertc2 (new 'static 'vector :x (meters 614.1239) :y (meters 42.8945) :z (meters 3780.4694) :w 1.0))
+            (rnd (rand-vu-int-range 1 8))
+            )
+                (when (= rnd 1)
+                    (task-arrow-custom deserta1 #t)
+                )
+                (when (= rnd 2)
+                    (task-arrow-custom deserta2 #t)
+                )
+                (when (= rnd 3)
+                    (task-arrow-custom desertb1 #t)
+                )
+                (when (= rnd 4)
+                    (task-arrow-custom desertb2 #t)
+                )
+                (when (= rnd 5)
+                    (task-arrow-custom desertc1 #t)
+                )
+                (when (= rnd 6)
+                    (task-arrow-custom desertc2 #t)
+                )
+                (when (= rnd 7)
+                    (task-arrow-custom desertd1 #t)
+                )
+                (when (= rnd 8)
+                    (task-arrow-custom desertd2 #t)
+                )
+            )
+)
+
+(defun-extern spawn-dark-maker vector string none)
+
+
+(defun bipedal-spawnsat ()
+    (let (
+            (off (new 'static 'vector :x (meters 16) :y (meters 0) :z (meters 16) :w 1.0))
+            (off2 (new 'static 'vector :x (meters -8) :y (meters 0) :z (meters -8) :w 1.0))
+            (off3 (new 'static 'vector :x (meters 4) :y (meters 0) :z (meters 8) :w 1.0))
+            (off4 (new 'static 'vector :x (meters 16) :y (meters 0) :z (meters -8) :w 1.0))
+            (off5 (new 'static 'vector :x (meters -8) :y (meters 0) :z (meters 16) :w 1.0))
+            (off6 (new 'static 'vector :x (meters 8) :y (meters 0) :z (meters -16) :w 1.0))
+            (off7 (new 'static 'vector :x (meters 18) :y (meters 0) :z (meters -14) :w 1.0))
+            (off8 (new 'static 'vector :x (meters -12) :y (meters 0) :z (meters 8) :w 1.0))
+            (off9 (new 'static 'vector :x (meters -8) :y (meters 0) :z (meters 16) :w 1.0))
+            (off10 (new 'static 'vector :x (meters -4) :y (meters 0) :z (meters 12) :w 1.0))
+            (off11 (new 'static 'vector :x (meters -4) :y (meters 0) :z (meters 8) :w 1.0))
+            (off12 (new 'static 'vector :x (meters -16) :y (meters 0) :z (meters 8) :w 1.0))
+            (vec (new-stack-vector0))
+            (desert-spawn (new-stack-vector0))
+            (desert-spawn2 (new-stack-vector0))
+            (desertb1 (new 'static 'vector :x (meters 3154.2802) :y (meters 19.5781) :z (meters 541.2550) :w 1.0))
+            (desertb2 (new 'static 'vector :x (meters 3732.4335) :y (meters 22.4331) :z (meters 824.4011) :w 1.0))
+            (desertd1 (new 'static 'vector :x (meters 2292.9907) :y (meters 32.7233) :z (meters 1500.0242) :w 1.0))
+            (desertd2 (new 'static 'vector :x (meters 348.6051) :y (meters 29.4197) :z (meters 2832.0312) :w 1.0))
+            (deserta1 (new 'static 'vector :x (meters 1317.8349) :y (meters 36.3553) :z (meters 283.1715) :w 1.0))
+            (deserta2 (new 'static 'vector :x (meters 1657.2156) :y (meters 33.8630) :z (meters 386.2038) :w 1.0))
+            (desertc1 (new 'static 'vector :x (meters 280.2767) :y (meters 108.8450) :z (meters 1983.6145) :w 1.0))
+            (desertc2 (new 'static 'vector :x (meters 614.1239) :y (meters 42.8945) :z (meters 3780.4694) :w 1.0))
+            )
+            ;;;;;;;;;;;;;;;;;;;;DESERTB1;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            (when (= spawned-deserta1-poi? #t)
+                (vector-copy! desert-spawn deserta1)
+                (vector-copy! desert-spawn2 deserta1)
+            )
+            (when (= spawned-deserta2-poi? #t)
+                (vector-copy! desert-spawn deserta2)
+                (vector-copy! desert-spawn2 deserta2)
+            )
+            (when (= spawned-desertb1-poi? #t)
+                (vector-copy! desert-spawn desertb1)
+                (vector-copy! desert-spawn2 desertb1)
+            )
+            (when (= spawned-desertb2-poi? #t)
+                (vector-copy! desert-spawn desertb2)
+                (vector-copy! desert-spawn2 desertb2)
+            )
+            (when (= spawned-desertc1-poi? #t)
+                (vector-copy! desert-spawn desertc1)
+                (vector-copy! desert-spawn2 desertc1)
+            )
+            (when (= spawned-desertc2-poi? #t)
+                (vector-copy! desert-spawn desertc2)
+                (vector-copy! desert-spawn2 desertc2)
+            )
+            (when (= spawned-desertd1-poi? #t)
+                (vector-copy! desert-spawn desertd1)
+                (vector-copy! desert-spawn2 desertd1)
+            )
+            (when (= spawned-desertd2-poi? #t)
+                (vector-copy! desert-spawn desertd2)
+                (vector-copy! desert-spawn2 desertd2)
+            )
+
+                (when (>= enemy-noto 10)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 13)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off2))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 18)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off3))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 23)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off4))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 26)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off5))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 30)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off6))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 30)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off7))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 40)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off8))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 40)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off9))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 50)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off10))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 50)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off11))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when (>= enemy-noto 50)
+                    (vector-copy! desert-spawn (vector+! vec desert-spawn off12))
+                    (spawn-dark-maker desert-spawn "dp-bipedal-c")
+                    (vector-copy! desert-spawn desert-spawn2)
+                )
+                (when
+                (and
+                    (= spawned-deserta1-poi? #f)
+                    (= spawned-deserta2-poi? #f)
+                    (= spawned-desertb1-poi? #f)
+                    (= spawned-desertb2-poi? #f)
+                    (= spawned-desertc1-poi? #f)
+                    (= spawned-desertc2-poi? #f)
+                    (= spawned-desertd1-poi? #f)
+                    (= spawned-desertd2-poi? #f)
+                )
+                    (kill-all-sat)
+                    (set! cdr-satbattle #t)
+                )
+        )
+        
+    (none)
+)
+
+(defun kill-all-sat ()
+    (kill-by-name "manipy-sat-dead" *default-pool*)
+    (kill-by-name "manipy-sat-deserta1" *default-pool*)
+    (kill-by-name "manipy-sat-deserta2" *default-pool*)
+    (kill-by-name "manipy-sat-desertb1" *default-pool*)
+    (kill-by-name "manipy-sat-desertb2" *default-pool*)
+    (kill-by-name "manipy-sat-desertc1" *default-pool*)
+    (kill-by-name "manipy-sat-desertc2" *default-pool*)
+    (kill-by-name "manipy-sat-desertd1" *default-pool*)
+    (kill-by-name "manipy-sat-desertd2" *default-pool*)
+    (kill-by-name "dp-bipedal-c" *default-pool*)
+    (kill-by-name "Bipedal Boss" *default-pool*)
+    (kill-by-name "task-arrow-satellite" *default-pool*)
+    (when (= (-> (level-get-target-inside *level*) name) 'desert)
+        (set! enemy-noto (+ notoriety-level 1))
+    )
+    (none)
+)
+
+(defun dm-dark-ship ((vec vector))
+    (let ((veccy (new 'stack-no-clear 'vector))
+          (ship 
+            (the manipy 
+            (ppointer->process 
+                (process-spawn manipy
+                :init
+                manipy-init
+                vec
+                #f
+                (art-group-get-by-name *level* "skel-dm-skyship" (the (pointer level) #f))
+                #f
+                0
+                #f
+                :name "dm-ship"
+                :from *default-dead-pool*
+                :stack-size #x18000
+                )
+            )
+          )
+      )
+    )
+    (send-event ship 'shadow #t)
+    (set! (-> veccy x) 55.0)
+    (set! (-> veccy y) 55.0)
+    (set! (-> veccy z) 55.0)
+    (send-event ship 'scale veccy)
+    (send-event ship 'max-vis-dist 9999999.0)
+    (set! *waste-ship-anchor* #t)
+    )
+    (none)
+)
+
+#|(defun quickanchor-town ()
+    (dm-dark-ship (new 'static 'vector
+        :x (meters 2009.4299) 
+        :y (meters 211.6466) 
+        :z (meters 2744.2368)
+        :w 1.0))
+    (set! in-desertf-anchor? #t)
+    (none)
+)|#
+
+(defun anchor-town ()
+    (when (= in-desert-game-task? #f)
+        (set! preanchor-town #t)
+    )
+    (none)
+)
+
+(defun spawn-kliever ((vec vector))
+    (let ((kleever (the manipy
+                    (ppointer->process (process-spawn manipy
+                                                      :init
+                                                      manipy-init
+                                                      vec
+                                                      #f
+                                                      (art-group-get-by-name *level* "skel-kleever-highres" (the (pointer level) #f))
+                                                      #f
+                                                      0
+                                                      #f
+                                                      :name "kleever-quest"
+                                                      :from
+                                                      *default-dead-pool*
+                                                      :stack-size #x18000)))))
+  (send-event kleever 'anim-mode 'loop)
+  (send-event kleever 'art-joint-anim "kleever-highres-idle-city-chase"))
+    (none)
+)
+
+(defun spawn-sat-dead ((vec vector))
+    (let ((sat-dead (the manipy
+                    (ppointer->process (process-spawn manipy
+                                                      :init
+                                                      manipy-init
+                                                      vec
+                                                      #f
+                                                      (art-group-get-by-name *level* "skel-was-pre-game" (the (pointer level) #f))
+                                                      #f
+                                                      0
+                                                      #f
+                                                      :name "manipy-sat-dead"))))))
+    (none)
+)
+
+(define *kleever-process* #f)
+(define kleever-shop #f)
+(define getin-kleever-shop #f)
+(define klevi 0)
+
+(defun wasteland-spawn! ()
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;KLIEVERQUEST;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#|
+(when
+  (and
+  *target*
+  (not *scene-player*)
+  (= (paused?) #f)
+  (= (pause-allowed?) #t)
+  (= in-desert-game-task? #f)
+  (= in-dialogue? #f)
+  (task-node-closed? (game-task-node desert-rescue-hold-doors))
+  )
+  (let (
+        (kleeverloc (new 'static 'vector :x (meters 2265.2575) :y (meters 30.7381) :z (meters 175.9652)))
+        )
+            (when (and 
+                    (<= (vector-vector-distance (target-pos 0) kleeverloc) 107000.0)
+                    (= *kleever-process* #f)
+                  )
+                (spawn-kliever kleeverloc)
+                (set! *kleever-process* #t)
+            )
+            (when (and 
+                    (> (vector-vector-distance (target-pos 0) kleeverloc) 117000.0)
+                    (= *kleever-process* #t)
+                  )
+                (kill-by-name "kleever-quest" *default-pool*)
+                (set! *kleever-process* #f)
+            )
+            (when (and 
+                    (<= (vector-vector-distance (target-pos 0) kleeverloc) 30000.0)
+                    (= *kleever-process* #t)
+                    (= kleever-shop #f)
+            )
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_RED>R3<COLOR_WHITE>: Talk to Kleiver"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            ;; reset bucket settings prior to drawing - font won't do self for us, and
+            ;; draw-raw-image can sometimes mess them up. (intro sequence)
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 10 300 0.0 (font-color default) (font-flags shadow kerning large))))
+                (set! (-> font-ctx scale) 0.325)
+                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+                (when (cpad-pressed? 0 r3)
+                (set! getin-kleever-shop #t)
+            )
+        )
+        )
+        (when (and 
+                (= kleever-shop #f)
+                (= getin-kleever-shop #t)
+            )
+            (+! klevi 1)
+            (when (= klevi 1)
+                (set-vector! (-> *target* control trans) (meters 2264.4641) (meters 30.6794) (meters 168.1648) 1.0)
+            )
+            (when (= klevi 2)
+                (set! in-dialogue? #t)
+                (set! log-sec 0)
+                (send-event *camera* 'teleport-to-vector-start-string (new 'static 'vector :x (meters 2264.6652) :y (meters 34.3564) :z (meters 166.1648)))
+                (camera-locked #f #f)
+                (set! di-s "So, you boys lookin' for some artifacts, aye?")
+                (set! di-s2 "") 
+                (set! di-s3 "")
+                (set! di-s4 "")
+                (set! log-id 1)
+            )
+            (when (= klevi 3)
+                (set! klevi 0)
+                (set! getin-kleever-shop #f)
+            )
+        )
+        (when (= kleever-shop #t)
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_RED>R3<COLOR_WHITE>: <COLOR_ORANGE>Locate an artifact in the wasteland <COLOR_RED>(50 gems)~%~%<COLOR_YELLOW>R2<COLOR_WHITE>: <COLOR_ORANGE>Exit"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            ;; reset bucket settings prior to drawing - font won't do self for us, and
+            ;; draw-raw-image can sometimes mess them up. (intro sequence)
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 10 300 0.0 (font-color default) (font-flags shadow kerning large))))
+                (set! (-> font-ctx scale) 0.325)
+                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        (when (cpad-pressed? 0 l2)
+            (camera-unlocked)
+            (set! kleever-shop #f)
+        )
+        (when 
+            (and 
+                (>= (-> *game-info* gem) 50.0)
+                (cpad-pressed? 0 r3)
+                )
+            (random-poi 50.0)
+            (camera-unlocked)
+            (set! kleever-shop #f)
+        )
+        )
+    )
+
+    (when 
+        (and 
+            (= in-desert-game-task? #t)
+            (= task-arrow-spawned? #t)
+        )
+        (kill-by-name "task-arrow-custom" *default-pool*)
+        (set! task-arrow-spawned? #f)
+    )
+
+    (when 
+        (and
+            (= in-dialogue? #t)
+            (cpad-pressed? 0 x)
+            (= log-id 1)
+        )
+        (+! log-sec 1)
+        (when (= log-sec 1)
+            (set! di-s "Damas says the best time to find artifacts are")
+            (set! di-s2 "when there's nothing actively happening in") 
+            (set! di-s3 "the desert already")
+            (set! di-s4 "")
+        )
+        (when (= log-sec 2)
+            (set! di-s "I'll always be right here when that happens,")
+            (set! di-s2 "scopin' out the wasteland with our") 
+            (set! di-s3 "desert scanner")
+            (set! di-s4 "")
+        )
+        (when (= log-sec 3)
+            (set! di-s "I can give ye boys a tip on some whereabouts,")
+            (set! di-s2 "for a price, of course") 
+            (set! di-s3 "")
+            (set! di-s4 "")
+        )
+        (when (= log-sec 3)
+            (set! di-s "But if you don't want me help,")
+            (set! di-s2 "you can always go out yerselves and look") 
+            (set! di-s3 "around the desert.")
+            (set! di-s4 "I'm sure you'll find something of value")
+        )
+        (when (= log-sec 4)
+            (set! di-s "")
+            (set! di-s2 "") 
+            (set! di-s3 "")
+            (set! di-s4 "")
+            (set! kleever-shop #t)
+            (set! log-id 0)
+            (set! log-sec 0)
+            (set! in-dialogue? #f)
+        )
+    )
+
+
+
+(when 
+(and 
+(= in-dialogue? #t)
+(not (cpad-hold? 0 x))
+)
+    (clear matt-str)
+    (clear *pc-encoded-matt-str*)
+    (format matt-str "<COLOR_WHITE>~S~%~S~%~S~%~S~%~%<COLOR_GREEN>Ok"
+    di-s
+    di-s2
+    di-s3
+    di-s4
+    )
+    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+      ;; reset bucket settings prior to drawing - font won't do self for us, and
+      ;; draw-raw-image can sometimes mess them up. (intro sequence)
+      (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+      (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 250 300 0.0 (font-color default) (font-flags middle shadow kerning large))))
+        (set! (-> font-ctx scale) 0.325)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+)
+
+(when 
+(and 
+(= in-dialogue? #t)
+(cpad-hold? 0 x)
+)
+    (clear matt-str)
+    (clear *pc-encoded-matt-str*)
+    (format matt-str "<COLOR_WHITE>~S~%~S~%~S~%~S~%~%<COLOR_YELLOW>Ok"
+    di-s
+    di-s2
+    di-s3
+    di-s4
+    )
+    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+      ;; reset bucket settings prior to drawing - font won't do self for us, and
+      ;; draw-raw-image can sometimes mess them up. (intro sequence)
+      (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+      (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 250 300 0.0 (font-color default) (font-flags middle shadow kerning large))))
+        (set! (-> font-ctx scale) 0.325)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+)
+
+(when 
+(and 
+(= in-dialogue? #t)
+(not (cpad-hold? 0 x))
+)
+    (clear matt-str)
+    (clear *pc-encoded-matt-str*)
+    (format matt-str "<COLOR_GREEN>-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------~%~%~%~%~%~%~%~%~%-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+    di-s
+    )
+    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+      ;; reset bucket settings prior to drawing - font won't do self for us, and
+      ;; draw-raw-image can sometimes mess them up. (intro sequence)
+      (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+      (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 250 285 0.0 (font-color default) (font-flags middle shadow kerning large))))
+        (set! (-> font-ctx scale) 0.325)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+)
+
+(when 
+(and 
+(= in-dialogue? #t)
+(cpad-hold? 0 x)
+)
+    (clear matt-str)
+    (clear *pc-encoded-matt-str*)
+    (format matt-str "<COLOR_YELLOW>-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------~%~%~%~%~%~%~%~%~%-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+    di-s
+    )
+    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+      ;; reset bucket settings prior to drawing - font won't do self for us, and
+      ;; draw-raw-image can sometimes mess them up. (intro sequence)
+      (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+      (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 250 285 0.0 (font-color default) (font-flags middle shadow kerning large))))
+        (set! (-> font-ctx scale) 0.325)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+)
+|#
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;SATBATTLE;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (when   ;cooldown for satbattle
+        (and
+            (= cdr-satbattle #t)
+            (= in-satbattle? #f)
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+        )
+            (+! cdr-i 1)
+            (when (= cdr-i 18000)
+                (set! cdr-i 0)
+                (set! cdr-satbattle #f)
+            )
+        )
+
+    (when   ;force jak out of a vehicle in sat-battle
+            (and 
+                (focus-test? *target* pilot)
+                (= in-satbattle? #t)
+                *target*
+                (not *scene-player*)
+                (= (paused?) #f)
+                (= (pause-allowed?) #t)
+            )
+                (send-event *target* 'end-mode 'pilot)
+        )
+    (when   ;force jak out of a vehicle in desert-spawn
+            (and 
+                (focus-test? *target* pilot)
+                (or
+                    (task-node-closed? (game-task-node desert-spawn-task-deserta-goto-artifact))
+                    (task-node-closed? (game-task-node desert-spawn-task-oasis-goto-artifact))
+                )
+                (or 
+                    (= desert-spawn-mission-oasis #t)
+                    (= desert-spawn-mission-deserta #t)
+                )
+                *target*
+                (not *scene-player*)
+                (= (paused?) #f)
+                (= (pause-allowed?) #t)
+            )
+                (send-event *target* 'end-mode 'pilot)
+        )
+
+    (when 
+        (and 
+        (= in-desert-game-task? #f)
+        (= desert-spawn-mission-brute #f)
+        (= cdr-satbattle #f)
+        (task-node-open? (game-task-node wascity-kleeverquest-bruteboss))
+        (task-node-closed? (game-task-node desert-brute-killed-introduction))
+            (or
+                (and
+                    (> (vector-vector-distance (target-pos 0) (new 'static 'vector
+                    :x (meters 825.8018)
+                    :y (meters 89.0678)
+                    :z (meters 3340.8896)
+                    :w 1.0
+                    )) 340000.0)
+                    (< (vector-vector-distance (target-pos 0) (new 'static 'vector
+                    :x (meters 825.8018)
+                    :y (meters 89.0678)
+                    :z (meters 3340.8896)
+                    :w 1.0
+                    )) 2440000.0)
+                )
+                (not (search-process-tree *active-pool* (lambda ((p process)) (type? p marauder-c))))
+            )
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+        )
+        (kill-by-name "goredrinker" *default-pool*)
+        (spawn-brute-artifact)
+        (set! in-satbattle? #f)
+        (set! cdr-satbattle #t)
+        (set! cdr-i (rand-vu-int-range 8000 16000))
+            )
+    #|(when 
+        (and 
+        (= in-desert-game-task? #f)
+            (or
+                (= desert-spawn-mission-brute #t)
+                (task-node-closed? (game-task-node desert-brute-killed-resolution))
+            )
+            (< (vector-vector-distance (target-pos 0) (new 'static 'vector
+                    :x (meters 825.8018)
+                    :y (meters 89.0678)
+                    :z (meters 3340.8896)
+                    :w 1.0
+                    )) 580000.0)
+            (focus-test? *target* pilot)
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+        )
+            (send-event *target* 'end-mode 'pilot)
+    )|#
+    (when ;look for spawn params while in desert
+        (and
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            (= in-satbattle? #f)
+            (= cdr-satbattle #f)
+            (= in-pre-tutorial? #f)
+            (= (-> (level-get-target-inside *level*) name) 'desert)
+        )
+        ;This is for spawning the manipy inside a big radius, waiting for jak to get close
+        (when (and
+                (= in-desert-game-task? #f)
+                (= weather-dark-mode #t)
+              )
+            (let ( 
+                (rng-percent (rand-vu-percent? 0.137)) ;actual is 0.00137
+                (bigsphere-rad 1837000.0)
+                (biggersphere-rad 2337000.0)
+                (noticesphere-rad 137000.0)
+                )
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    ;(set-vector! (-> *target* control trans) (meters 3154.2802) (meters 19.5781) (meters 541.2550) 1.0)
+                    ;;;;;;;;;;;;;;;;;;;;DESERTB1;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    (let ((desert-spawn (new 'static 'vector :x (meters 3154.2802) :y (meters 19.5781) :z (meters 541.2550) :w 1.0)))
+                        (when 
+                            (and
+                                (= spawned-desertb1-poi? #t)
+                                (= cdr-satbattle #f)
+                                (> (vector-vector-distance (target-pos 0) desert-spawn) biggersphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertb1" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (set! spawned-desertb1-poi? #f)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertb1-poi? #f)
+                                rng-percent
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
+                            )
+                                (spawn-manipy-sat desert-spawn "manipy-sat-desertb1" #t)
+                                (kill-by-name "task-arrow-custom" *default-pool*)
+                                (set! spawned-desertb1-poi? #t)
+                        )
+
+                        (when 
+                            (and
+                                (= spawned-desertb1-poi? #t)
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertb1" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (spawn-roaming-satellite desert-spawn)
+                                (set! in-satbattle? #t)
+                                (when (< enemy-noto 18)
+                                    (set! enemy-noto (rand-vu-int-range 10 18))
+                                )
+                                (set! cdr-satbattle #t)
+
+                        )
+                    )
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    ;(set-vector! (-> *target* control trans) (meters 3732.4335) (meters 22.4331) (meters 824.4011) 1.0)
+                    ;;;;;;;;;;;;;;;;;;;;DESERTB2;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    (let ((desert-spawn (new 'static 'vector :x (meters 3732.4335) :y (meters 22.4331) :z (meters 824.4011) :w 1.0)))
+                        (when 
+                            (and
+                                (= spawned-desertb2-poi? #t)
+                                (= cdr-satbattle #f)
+                                (> (vector-vector-distance (target-pos 0) desert-spawn) biggersphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertb2" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (set! spawned-desertb2-poi? #f)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertb2-poi? #f)
+                                rng-percent
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
+                            )
+                                (spawn-manipy-sat desert-spawn "manipy-sat-desertb2" #t)
+                                (kill-by-name "task-arrow-custom" *default-pool*)
+                                (set! spawned-desertb2-poi? #t)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertb2-poi? #t)
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertb2" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (spawn-roaming-satellite desert-spawn)
+                                (set! in-satbattle? #t)
+                                (when (< enemy-noto 18)
+                                    (set! enemy-noto (rand-vu-int-range 10 18))
+                                )
+                                (set! cdr-satbattle #t)
+
+                        )
+                    )
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    ;(set-vector! (-> *target* control trans) (meters 2292.9907) (meters 32.7233) (meters 1500.0242) 1.0)
+                    ;;;;;;;;;;;;;;;;;;;;DESERTD1;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    (let ((desert-spawn (new 'static 'vector :x (meters 2292.9907) :y (meters 32.7233) :z (meters 1500.0242) :w 1.0)))
+                        (when 
+                            (and
+                                (= spawned-desertd1-poi? #t)
+                                (= cdr-satbattle #f)
+                                (> (vector-vector-distance (target-pos 0) desert-spawn) biggersphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertd1" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (set! spawned-desertd1-poi? #f)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertd1-poi? #f)
+                                rng-percent
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
+                            )
+                                (spawn-manipy-sat desert-spawn "manipy-sat-desertd1" #t)
+                                (kill-by-name "task-arrow-custom" *default-pool*)
+                                (set! spawned-desertd1-poi? #t)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertd1-poi? #t)
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertd1" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (spawn-roaming-satellite desert-spawn)
+                                (set! in-satbattle? #t)
+                                (when (< enemy-noto 18)
+                                    (set! enemy-noto (rand-vu-int-range 10 18))
+                                )
+                                (set! cdr-satbattle #t)
+
+                        )
+                    )
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    ;(set-vector! (-> *target* control trans) (meters 3940.3449) (meters 52.2336) (meters 2400.6291) 1.0)
+                    ;;;;;;;;;;;;;;;;;;;;DESERTD2;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    (let ((desert-spawn (new 'static 'vector :x (meters 348.6051) :y (meters 29.4197) :z (meters 2832.0312) :w 1.0)))
+                        (when 
+                            (and
+                                (= spawned-desertd2-poi? #t)
+                                (= cdr-satbattle #f)
+                                (> (vector-vector-distance (target-pos 0) desert-spawn) biggersphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertd2" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (set! spawned-desertd2-poi? #f)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertd2-poi? #f)
+                                rng-percent
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
+                            )
+                                (spawn-manipy-sat desert-spawn "manipy-sat-desertd2" #t)
+                                (kill-by-name "task-arrow-custom" *default-pool*)
+                                (set! spawned-desertd2-poi? #t)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertd2-poi? #t)
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertd2" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (spawn-roaming-satellite desert-spawn)
+                                (set! in-satbattle? #t)
+                                (when (< enemy-noto 29)
+                                    (set! enemy-noto (rand-vu-int-range 19 29))
+                                )
+                                (set! cdr-satbattle #t)
+
+                        )
+                    )
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    ;(set-vector! (-> *target* control trans) (meters 1317.8349) (meters 36.3553) (meters 283.1715) 1.0)
+                    ;;;;;;;;;;;;;;;;;;;;DESERTA1;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    (let ((desert-spawn (new 'static 'vector :x (meters 1317.8349) :y (meters 36.3553) :z (meters 283.1715) :w 1.0)))
+                        (when 
+                            (and
+                                (= spawned-deserta1-poi? #t)
+                                (= cdr-satbattle #f)
+                                (> (vector-vector-distance (target-pos 0) desert-spawn) biggersphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-deserta1" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (set! spawned-deserta1-poi? #f)
+                        )
+                        (when 
+                            (and
+                                (= spawned-deserta1-poi? #f)
+                                rng-percent
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
+                            )
+                                (spawn-manipy-sat desert-spawn "manipy-sat-deserta1" #t)
+                                (kill-by-name "task-arrow-custom" *default-pool*)
+                                (set! spawned-deserta1-poi? #t)
+                        )
+                        (when 
+                            (and
+                                (= spawned-deserta1-poi? #t)
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-deserta1" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (spawn-roaming-satellite desert-spawn)
+                                (set! in-satbattle? #t)
+                                (when (< enemy-noto 18)
+                                    (set! enemy-noto (rand-vu-int-range 10 18))
+                                )
+                                (set! cdr-satbattle #t)
+
+                        )
+                    )
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    ;(set-vector! (-> *target* control trans) (meters 1654.1966) (meters 31.3163) (meters 279.9191) 1.0)
+                    ;;;;;;;;;;;;;;;;;;;;DESERTA2;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    (let ((desert-spawn (new 'static 'vector :x (meters 1657.2156) :y (meters 33.8630) :z (meters 386.2038) :w 1.0)))
+                        (when 
+                            (and
+                                (= spawned-deserta2-poi? #t)
+                                (= cdr-satbattle #f)
+                                (> (vector-vector-distance (target-pos 0) desert-spawn) biggersphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-deserta2" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (set! spawned-deserta2-poi? #f)
+                        )
+                        (when 
+                            (and
+                                (= spawned-deserta2-poi? #f)
+                                rng-percent
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
+                            )
+                                (spawn-manipy-sat desert-spawn "manipy-sat-deserta2" #t)
+                                (kill-by-name "task-arrow-custom" *default-pool*)
+                                (set! spawned-deserta2-poi? #t)
+                        )
+                        (when 
+                            (and
+                                (= spawned-deserta2-poi? #t)
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-deserta2" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (spawn-roaming-satellite desert-spawn)
+                                (set! in-satbattle? #t)
+                                (when (< enemy-noto 40)
+                                    (set! enemy-noto (rand-vu-int-range 40 73))
+                                )
+                                (set! cdr-satbattle #t)
+
+                        )
+                    )
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    ;(set-vector! (-> *target* control trans) (meters 280.2767) (meters 108.8450) (meters 1983.6145) 1.0)
+                    ;;;;;;;;;;;;;;;;;;;;DESERTC1;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    (let ((desert-spawn (new 'static 'vector :x (meters 280.2767) :y (meters 108.8450) :z (meters 1983.6145) :w 1.0)))
+                        (when 
+                            (and
+                                (= spawned-desertc1-poi? #t)
+                                (= cdr-satbattle #f)
+                                (> (vector-vector-distance (target-pos 0) desert-spawn) biggersphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertc1" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (set! spawned-desertc1-poi? #f)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertc1-poi? #f)
+                                rng-percent
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
+                            )
+                                (spawn-manipy-sat desert-spawn "manipy-sat-desertc1" #t)
+                                (kill-by-name "task-arrow-custom" *default-pool*)
+                                (set! spawned-desertc1-poi? #t)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertc1-poi? #t)
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertc1" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (spawn-roaming-satellite desert-spawn)
+                                (set! in-satbattle? #t)
+                                (when (< enemy-noto 32)
+                                    (set! enemy-noto (rand-vu-int-range 40 72))
+                                )
+                                (set! cdr-satbattle #t)
+
+                        )
+                    )
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    ;(set-vector! (-> *target* control trans) (meters 614.1239) (meters 42.8945) (meters 3780.4694) 1.0)
+                    ;;;;;;;;;;;;;;;;;;;;DESERTC2;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    (let ((desert-spawn (new 'static 'vector :x (meters 614.1239) :y (meters 42.8945) :z (meters 3780.4694) :w 1.0)))
+                        (when 
+                            (and
+                                (= spawned-desertc2-poi? #t)
+                                (= cdr-satbattle #f)
+                                (> (vector-vector-distance (target-pos 0) desert-spawn) biggersphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertc2" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (set! spawned-desertc2-poi? #f)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertc2-poi? #f)
+                                rng-percent
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
+                            )
+                                (spawn-manipy-sat desert-spawn "manipy-sat-desertc2" #t)
+                                (kill-by-name "task-arrow-custom" *default-pool*)
+                                (set! spawned-desertc2-poi? #t)
+                        )
+                        (when 
+                            (and
+                                (= spawned-desertc2-poi? #t)
+                                (= cdr-satbattle #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
+                            )
+                                (kill-by-name "manipy-sat-desertc2" *default-pool*)
+                                (kill-by-name "task-arrow-satellite" *default-pool*)
+                                (spawn-roaming-satellite desert-spawn)
+                                (set! in-satbattle? #t)
+                                (when (< enemy-noto 40)
+                                    (set! enemy-noto (rand-vu-int-range 23 40))
+                                )
+                                (set! cdr-satbattle #t)
+
+                        )
+                    )
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    ;;;;;;;;;;;;;;;;;;;;VOLCANO;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    (let ((desert-spawn 
+                        (new 'static 'vector 
+                        :x (meters -2.9549)
+                        :y (meters 2.7735)
+                        :z (meters -134.4601)
+                        :w 1.0))
+                        (s1 
+                        (new 'static 'vector 
+                        :x (meters 25.7504)
+                        :y (meters 2.2762)
+                        :z (meters -151.3469)
+                        :w 1.0))
+                        (s2 
+                        (new 'static 'vector 
+                        :x (meters -47.9361)
+                        :y (meters 2.2078)
+                        :z (meters -170.3293)
+                        :w 1.0)))
+                        (when (and 
+                                (= in-volcano-level? #t)
+                                (and
+                                    (!= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                                    (!= (-> (level-get-target-inside *level*) name) 'volcanob)
+                                    (!= (-> (level-get-target-inside *level*) name) 'volcanoc)
+                                    (!= (-> (level-get-target-inside *level*) name) 'volcanox)
+                                )
+                              )
+                              (set! in-volcano-level? #f)
+                        )
+                        (when (and 
+                                (= in-volcano-level? #f)
+                                (task-node-closed? (game-task-node volcano-darkeco-resolution))
+                                (or 
+                                    (= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                                    (= (-> (level-get-target-inside *level*) name) 'volcanob)
+                                    (= (-> (level-get-target-inside *level*) name) 'volcanoc)
+                                    (= (-> (level-get-target-inside *level*) name) 'volcanox)
+                                )
+                              )
+                                (set! in-volcano-level? #t)
+                                (spawn-volcano-mobs)
+                              )
+                        (when 
+                            (and
+                                (not (search-process-tree *active-pool* (lambda ((p process)) (type? p dm-mine-spider-spawner))))
+                                (= in-volcano-level? #t)
+                                (= in-satbattle? #f)
+                                (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
+                            )
+                                (kill-by-name "manipy-sat" *default-pool*)
+                                (spawn-roaming-satellite desert-spawn)
+                                (process-spawn dm-mine-spider-spawner s1 :name "dm-spawner")
+                                (process-spawn dm-mine-spider-spawner s2 :name "dm-spawner")
+                                (set! in-satbattle? #t)
+                                (when (< enemy-noto 30)
+                                    (set! enemy-noto (rand-vu-int-range 19 30))
+                                )
+
+                        )
+                    )
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            )
+        )
+    )
+    (when (and
+            (= in-desert-game-task? #f)
+            (= in-desertf-anchor? #t)
+          )
+        ;(< (vector-vector-distance (target-pos 0) v1-0) 8000000.0)
+        ;WATSE TOWN ANCHOR
+        (let (
+              (v1-0 (new 'static 'vector :x (meters 3016.7360) :y (meters 27.2753) :z (meters 2760.5092) :w 1.0))
+             )
+            #|(when (and 
+                    (not *waste-town-spawners*)
+                    (= (-> (level-get-target-inside *level*) name) 'desert)
+                  )  
+                    (let (
+                        (orig (vector-vector-distance (target-pos 0) v1-0))
+                        (v2-1 (new 'static 'vector :x (meters 2943.0642) :y (meters 23.8945) :z (meters 2740.1596) :w 1.0))
+                        (v2-2 (new 'static 'vector :x (meters 2974.6882) :y (meters 21.9412) :z (meters 2725.8251) :w 1.0))
+                        (v2-3 (new 'static 'vector :x (meters 2973.0068) :y (meters 22.0262) :z (meters 2755.4614) :w 1.0))
+                    )
+                        (when (< orig 700000.0)
+                            (set! *waste-town-spawners* #t)
+                            (set! enemy-noto 16)
+                            ;(process-spawn brute-boss v2-1 :name "Marauder Brute")
+                            (process-spawn marauder v2-2 :name "Marauder Ambusher")
+                            (process-spawn marauder v2-3 :name "Marauder Ambusher")
+                        )
+                        (when (>= orig 750000.0)
+                            (kill-by-name "Marauder Ambusher" *default-pool*)
+                            (set! *waste-town-spawners* #f)
+                        )
+                    )
+            )|#
+            (when 
+                (and
+                    (!= (-> (level-get-target-inside *level*) name) 'desert)
+                    (!= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                    (= *waste-ship-anchor* #t)
+                )
+                (kill-by-name "dm-ship" *default-pool*)
+                (set! *waste-ship-anchor* #f)
+            )
+        )
+    )
+    
+    (none)
+)

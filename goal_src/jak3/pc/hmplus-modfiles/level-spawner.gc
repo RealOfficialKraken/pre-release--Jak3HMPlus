@@ -1,0 +1,429 @@
+(in-package goal)
+;name: level-spawner.gc
+
+(define-extern roboguard type)
+
+(deftype level-spawner (process)
+((spawn-loc            vector :inline)
+(respawn-timer                    int)
+(spawn-type                      type)
+(general-i                        int)
+(stored-name                   string)
+(entity-count                     int))
+(:state-methods
+idle
+cooldown
+dead
+)
+(:methods
+(add-spawn-count (_type_) none)
+)
+)
+
+(defmethod add-spawn-count ((this level-spawner))
+    (let ((thename (new 'global 'string 2048 (the-as string #f))))
+        (cond
+            ((process-by-name (-> this stored-name) *active-pool*)
+                (+! (-> this entity-count) 1)
+                (format thename "~s-~d" (-> this name) (-> this entity-count))
+                (set! (-> this stored-name) thename)
+            )
+            (else
+                (format thename "~s-~d" (-> this name) (-> this entity-count))
+                (set! (-> this stored-name) thename)
+            )
+        )
+    )
+    (none)
+)
+
+(defbehavior level-spawner-init-by-other level-spawner ((vec vector) (arg0 type) (arg1 int))
+    (stack-size-set! (-> self main-thread) 1024)
+    (set! (-> self spawn-loc quad) (-> vec quad))
+    (set! (-> self respawn-timer) arg1)
+    (set! (-> self spawn-type) arg0)
+    (set! (-> self entity-count) 1)
+    (let ((thename (new 'global 'string 2048 (the-as string #f))))
+        (format thename "~s-~d" (-> self name) (-> self entity-count))
+        (set! (-> self stored-name) thename)
+        (format #t "~%~%Set level-spawner entity: ~s~%" (-> self stored-name))
+    )
+    (go (method-of-object self idle))
+    (none)
+)
+
+(defstate idle (level-spawner)
+    :virtual #t
+    :code
+    (behavior ()
+        (set! (-> self general-i) 0)
+        (loop
+            (when 
+                (and
+                    (>= (vector-vector-distance (target-pos 0) (-> self spawn-loc)) 2800000.0)
+                )
+                (format #t "||||||||RESPAWNER ~s DIED ON IDLE BEING TOO FAR AWAY||||||||" (-> self name))
+                (go-virtual dead)
+            )
+            (when (not (process-by-name (-> self stored-name) *active-pool*))
+                (go-virtual cooldown)
+            )
+            (when (= in-debug? #t)
+                (format *stdcon* "~%Process Going: level-spawner is idle~%type: ~s~%spawner-name: ~s~%entity-name: ~s" (-> self spawn-type) (-> self name) (-> self stored-name))
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate cooldown (level-spawner)
+    :virtual #t
+    :code
+    (behavior ()
+        (loop
+            (+! (-> self general-i) 1)
+            (when (= in-debug? #t)
+                (format *stdcon* "~%Process Going: level-spawner is on cooldown~%type: ~s~%spawner-name: ~s~%cdr: ~d/~d" (-> self spawn-type) (-> self name) (-> self general-i) (-> self respawn-timer))
+            )
+            (when (>= (vector-vector-distance (target-pos 0) (-> self spawn-loc)) 2800000.0)
+                (format #t "||||||||RESPAWNER ~s DIED ON COOLDOWN BEING TOO FAR AWAY||||||||" (-> self name))
+                (go-virtual dead)
+            )
+            (when (process-by-name (-> self stored-name) *active-pool*)
+                (add-spawn-count self)
+            )
+            (when (>= (-> self general-i) 50000)
+                (set! (-> self general-i) 0)
+            )
+            (when 
+                (and
+                    (>= (-> self general-i) (-> self respawn-timer))
+                    (not (process-by-name (-> self stored-name) *active-pool*))
+                    (< (vector-vector-distance (target-pos 0) (-> self spawn-loc)) 375000.0)
+                )
+                (cond
+                    ((string= (-> self name) "Bipedal Boss")
+                        (spawn-dark-boss (-> self spawn-loc) (-> self stored-name))
+                    )
+                    ((string= (-> self name) "dp-bipedal-c")
+                        (spawn-dark-maker (-> self spawn-loc) (-> self stored-name))
+                    )
+                    ((string= (-> self name) "Mantis Boss")
+                        (process-spawn mantis-boss (-> self spawn-loc) :name (-> self stored-name) *active-pool*)
+                    )
+                    ((string= (-> self name) "mantis-c")
+                        (spawn-mantis (-> self spawn-loc) (-> self stored-name))
+                    )
+                    ((string= (-> self name) "neo-grenadier")
+                        (process-spawn neo-grenadier (-> self spawn-loc) :name (-> self stored-name) *active-pool*)
+                    )
+                    ((string= (-> self name) "neo-grenadier-boss")
+                        (process-spawn neo-grenadier-boss (-> self spawn-loc) :name (-> self stored-name) *active-pool*)
+                    )
+                    ((string= (-> self name) "roboguard")
+                        (process-spawn roboguard (-> self spawn-loc) :name (-> self stored-name))
+                    )
+                    ((string= (-> self name) "roboguard-giant")
+                        (process-spawn roboguard-giant (-> self spawn-loc) :name (-> self stored-name))
+                    )
+                    ((string= (-> self name) "roboguard-giant")
+                        (process-spawn roboguard-giant (-> self spawn-loc) :name (-> self stored-name))
+                    )
+                    #|((string= (-> self name) "kg-guard")
+                        (process-spawn crimson-guard (-> self spawn-loc) :name (-> self stored-name))
+                    )|#
+                    (else
+                        (format #t "||||||||RESPAWNER ~s DIED ON COOLDOWN, UNABLE TO FIND ENTITY ON THE LIST!||||||||" (-> self name))
+                        (go-virtual dead)
+                    )
+                )
+                (go-virtual idle)
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate dead (level-spawner)
+    :virtual #t
+    :code
+    (behavior ()
+        (kill-by-name (-> self stored-name) *active-pool*)
+        (kill-by-name (-> self name) *active-pool*)
+    )
+)
+
+(defun init-respawner! ((vec vector) (arg0 type) (spawner-name string) (arg1 int))
+    (process-spawn level-spawner vec arg0 arg1 :name spawner-name *nk-dead-pool*)
+    (none)
+)
+
+(define temple-vbspawner (new 'static 'vector :x (meters 4124.4360) :y (meters 44.8466) :z (meters 4337.4125) :w 1.0))
+(define temple-bspawner #f)
+
+(define volcanoa-vbspawner (new 'static 'vector :x (meters 25.9791) :y (meters 10.2647) :z (meters -207.1895) :w 1.0))
+(define volcanoa-bspawner #f)
+
+(define minea-vbspawner-3 (new 'static 'vector :x (meters -69.3484) :y (meters 84.9264) :z (meters -108.0594) :w 1.0))
+(define minea-vbspawner-4 (new 'static 'vector :x (meters -98.0336) :y (meters 83.9966) :z (meters -81.5685) :w 1.0))
+(define minea-vbspawner-5 (new 'static 'vector :x (meters -88.3672) :y (meters 83.9966) :z (meters -115.4643) :w 1.0))
+(define minea-vbspawner-6 (new 'static 'vector :x (meters 75.4611) :y (meters 51.9216) :z (meters 15.3804) :w 1.0))
+(define minea-vbspawner-7 (new 'static 'vector :x (meters 71.8612) :y (meters 52.3163) :z (meters 2.7022) :w 1.0))
+(define minea-vbspawner-8 (new 'static 'vector :x (meters 74.4600) :y (meters 51.9492) :z (meters -7.5017) :w 1.0))
+(define minea-bspawner #f)
+
+(define darkworld-vbspawner-1 (new 'static 'vector :x (meters 242.7556) :y (meters 99.2942) :z (meters -81.5553) :w 1.0))
+(define darkworld-vbspawner-2 (new 'static 'vector :x (meters 241.7704) :y (meters 99.2169) :z (meters -110.7835) :w 1.0))
+(define darkworld-bspawner #f)
+
+(define mhcitya-vbspawner-1 (new 'static 'vector :x (meters -379.2566) :y (meters 10.3946) :z (meters 1176.0876) :w 1.0))
+(define mhcitya-bspawner #f)
+
+(define ctyinda-vbspawner-1 (new 'static 'vector :x (meters 970.73) :y (meters 7.9936) :z (meters 925.5459) :w 1.0))
+(define ctyinda-vbspawner-2 (new 'static 'vector :x (meters 946.7975) :y (meters 7.9936) :z (meters 928.8559) :w 1.0))
+(define ctyinda-vbspawner-3 (new 'static 'vector :x (meters 947.8950) :y (meters 7.9936) :z (meters 965.5139) :w 1.0))
+(define ctyinda-vbspawner-4 (new 'static 'vector :x (meters 958.0089) :y (meters 7.9936) :z (meters 961.6403) :w 1.0))
+(define ctyinda-vbspawner-5 (new 'static 'vector :x (meters 968.4634) :y (meters 7.9936) :z (meters 983.3506) :w 1.0))
+(define ctyinda-vbspawner-6 (new 'static 'vector :x (meters 936.1512) :y (meters 8.1321) :z (meters 975.7429) :w 1.0))
+(define ctyinda-vbspawner-7 (new 'static 'vector :x (meters 971.3947) :y (meters 7.9936) :z (meters 1001.3099) :w 1.0))
+(define ctyinda-vbspawner-8 (new 'static 'vector :x (meters 947.2451) :y (meters 7.9936) :z (meters 1008.2397) :w 1.0))
+
+
+(define ctyinda-kbspawner-2 (new 'static 'vector :x (meters 974.1008) :y (meters 7.9936) :z (meters 1072.7497) :w 1.0))
+(define ctyinda-kbspawner-3 (new 'static 'vector :x (meters 964.1898) :y (meters 7.9936) :z (meters 1082.1157) :w 1.0))
+(define ctyinda-kbspawner-4 (new 'static 'vector :x (meters 936.7274) :y (meters 8.0335) :z (meters 1064.9246) :w 1.0))
+(define ctyinda-kbspawner-5 (new 'static 'vector :x (meters 927.8038) :y (meters 7.9936) :z (meters 1053.6208) :w 1.0))
+(define ctyinda-kbspawner-6 (new 'static 'vector :x (meters 936.1512) :y (meters 8.1321) :z (meters 975.7429) :w 1.0))
+(define ctyinda-kbspawner-7 (new 'static 'vector :x (meters 947.5040) :y (meters 7.9936) :z (meters 1088.8927) :w 1.0))
+(define ctyinda-kbspawner-8 (new 'static 'vector :x (meters 948.7875) :y (meters 7.9936) :z (meters 1078.1287) :w 1.0))
+(define ctyinda-bspawner #f)
+
+(define ctyindb-vbspawner-1 (new 'static 'vector :x (meters 1104.3033) :y (meters 24.2729) :z (meters 583.8198) :w 1.0))
+(define ctyindb-vbspawner-2 (new 'static 'vector :x (meters 1108.8491) :y (meters 24.2729) :z (meters 612.8820) :w 1.0))
+(define ctyindb-vbspawner-3 (new 'static 'vector :x (meters 1077.5257) :y (meters 24.2729) :z (meters 629.2022) :w 1.0))
+(define ctyindb-vbspawner-4 (new 'static 'vector :x (meters 1101.8778) :y (meters 24.2729) :z (meters 630.7338) :w 1.0))
+(define ctyindb-bspawner #f)
+
+(define ctyport-vbspawner-1 (new 'static 'vector :x (meters 191.0988) :y (meters 3.8693) :z (meters 1239.0611) :w 1.0))
+(define ctyport-bspawner #f)
+
+(defun level-spawn-check ()
+    (let ((bspa (new-stack-vector0)))
+        (set-vector! bspa (meters 3468.1132) (meters 28.8032) (meters 966.2183) 1.0)
+        (cond
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TEMPLEA BIPEDAL BOSS;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ((and
+                (task-node-closed? (game-task-node temple-oracle-resolution))
+                (or
+                    (= (-> (level-get-target-inside *level*) name) 'templea)
+                    (= (-> (level-get-target-inside *level*) name) 'templec)
+                )
+                (<= (vector-vector-distance (target-pos 0) temple-vbspawner) 500000.0)
+                (= temple-bspawner #f)
+            )
+            (init-respawner! temple-vbspawner dp-bipedal "Bipedal Boss" 860)
+            (set! temple-bspawner #t)
+            )
+            ((and
+                (!= (-> (level-get-target-inside *level*) name) 'templea)
+                (!= (-> (level-get-target-inside *level*) name) 'templec)
+                (> (vector-vector-distance (target-pos 0) temple-vbspawner) 600000.0)
+                (= temple-bspawner #t)
+            )
+                (set! temple-bspawner #f)
+            )
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;VOLCANOA MANTIS BOSS;;;;;;;;;;;;;;;;;;;;
+            ((and
+                (task-node-closed? (game-task-node temple-oracle-resolution))
+                (or
+                    (= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                    (= (-> (level-get-target-inside *level*) name) 'volcanox)
+                )
+                (<= (vector-vector-distance (target-pos 0) volcanoa-vbspawner) 800000.0)
+                (= volcanoa-bspawner #f)
+            )
+            (init-respawner! volcanoa-vbspawner mantis-boss "Mantis Boss" 1460)
+            (set! volcanoa-bspawner #t)
+            )
+            ((and
+                (!= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                (!= (-> (level-get-target-inside *level*) name) 'volcanox)
+                (> (vector-vector-distance (target-pos 0) volcanoa-vbspawner) 1000000.0)
+                (= volcanoa-bspawner #t)
+            )
+                (set! volcanoa-bspawner #f)
+            )
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;MINEA MANTIS AREAS;;;;;;;;;;;;;;;;;;;;
+            ((and
+                (task-node-closed? (game-task-node mine-boss-resolution))
+                (or
+                    (= (-> (level-get-target-inside *level*) name) 'minea)
+                    (= (-> (level-get-target-inside *level*) name) 'minec)
+                )
+                (= minea-bspawner #f)
+            )
+            (init-respawner! minea-vbspawner-3 mantis "mantis-c" 600)
+            (init-respawner! minea-vbspawner-4 mantis "mantis-c" 600)
+            (init-respawner! minea-vbspawner-5 mantis "mantis-c" 600)
+            (init-respawner! minea-vbspawner-6 mantis "mantis-c" 600)
+            (init-respawner! minea-vbspawner-7 mantis "mantis-c" 600)
+            (init-respawner! minea-vbspawner-8 mantis "mantis-c" 600)
+            (set! minea-bspawner #t)
+            )
+            ((and
+                (!= (-> (level-get-target-inside *level*) name) 'minea)
+                (!= (-> (level-get-target-inside *level*) name) 'minec)
+                (> (vector-vector-distance (target-pos 0) minea-vbspawner-6) 2800000.0)
+                (= minea-bspawner #t)
+            )
+                (set! minea-bspawner #f)
+            )
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;MHCITYA AREAS;;;;;;;;;;;;;;;;;;;;
+            ((and
+                (task-node-closed? (game-task-node city-destroy-darkeco-resolution))
+                (or
+                    (= (-> (level-get-target-inside *level*) name) 'mhcitya)
+                    (= (-> (level-get-target-inside *level*) name) 'ctyport)
+                )
+                (= mhcitya-bspawner #f)
+            )
+            (init-respawner! mhcitya-vbspawner-1 neo-grenadier "neo-grenadier-boss" 600)
+            (set! mhcitya-bspawner #t)
+            )
+            ((and
+                (!= (-> (level-get-target-inside *level*) name) 'mhcitya)
+                (!= (-> (level-get-target-inside *level*) name) 'ctyport)
+                (> (vector-vector-distance (target-pos 0) mhcitya-vbspawner-1) 2800000.0)
+                (= mhcitya-bspawner #t)
+            )
+                (set! mhcitya-bspawner #f)
+            )
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CTYINDA AREAS;;;;;;;;;;;;;;;;;;;;
+            ((and
+                (task-node-closed? (game-task-node city-destroy-darkeco-resolution))
+                (or
+                    (= (-> (level-get-target-inside *level*) name) 'ctyinda)
+                    (= (-> (level-get-target-inside *level*) name) 'ctyindb)
+                )
+                (= ctyinda-bspawner #f)
+            )
+            (init-respawner! ctyinda-vbspawner-8 roboguard "roboguard" 600)
+            (init-respawner! ctyinda-kbspawner-2 roboguard "roboguard" 600)
+            (init-respawner! ctyinda-kbspawner-3 roboguard "roboguard" 600)
+            (init-respawner! ctyinda-kbspawner-4 roboguard "roboguard" 600)
+            (init-respawner! ctyinda-kbspawner-5 roboguard "roboguard" 600)
+            (init-respawner! ctyinda-kbspawner-6 roboguard "roboguard" 600)
+            (init-respawner! ctyinda-kbspawner-7 roboguard "roboguard" 600)
+            (init-respawner! ctyinda-kbspawner-8 roboguard "roboguard" 600)
+            (set! ctyinda-bspawner #t)
+            )
+            ((and
+                (!= (-> (level-get-target-inside *level*) name) 'ctyinda)
+                (!= (-> (level-get-target-inside *level*) name) 'ctyindb)
+                (> (vector-vector-distance (target-pos 0) ctyinda-vbspawner-1) 2800000.0)
+                (= ctyinda-bspawner #t)
+            )
+                (set! ctyinda-bspawner #f)
+            )
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CTYINDB AREAS;;;;;;;;;;;;;;;;;;;;
+            ((and
+                (task-node-closed? (game-task-node city-destroy-darkeco-resolution))
+                (or
+                    (= (-> (level-get-target-inside *level*) name) 'ctypesc)
+                    (= (-> (level-get-target-inside *level*) name) 'ctyindb)
+                )
+                (= ctyindb-bspawner #f)
+            )
+            (init-respawner! ctyindb-vbspawner-1 roboguard "roboguard" 600)
+            (init-respawner! ctyindb-vbspawner-2 roboguard "roboguard" 600)
+            (init-respawner! ctyindb-vbspawner-3 roboguard "roboguard" 600)
+            (init-respawner! ctyindb-vbspawner-4 roboguard-giant "roboguard-giant" 600)
+            (set! ctyindb-bspawner #t)
+            )
+            ((and
+                (!= (-> (level-get-target-inside *level*) name) 'ctypesc)
+                (!= (-> (level-get-target-inside *level*) name) 'ctyindb)
+                (> (vector-vector-distance (target-pos 0) ctyindb-vbspawner-1) 2800000.0)
+                (= ctyindb-bspawner #t)
+            )
+                (set! ctyindb-bspawner #f)
+            )
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CTYPORT AREA;;;;;;;;;;;;;;;;;;;;
+            ((and
+                (or
+                    (= (-> (level-get-target-inside *level*) name) 'ctyport)
+                )
+                (= ctyport-bspawner #f)
+            )
+            (init-respawner! ctyport-vbspawner-1 roboguard "roboguard" 600)
+            (set! ctyport-bspawner #t)
+            )
+            ((and
+                (!= (-> (level-get-target-inside *level*) name) 'ctyport)
+                (> (vector-vector-distance (target-pos 0) ctyport-vbspawner-1) 2800000.0)
+                (= ctyport-bspawner #t)
+            )
+                (set! ctyport-bspawner #f)
+            )
+            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;DARK-WORLD;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        ((and
+                (= weather-dark-mode #t)
+                (or
+                    (= (-> (level-get-target-inside *level*) name) 'desert)
+                )
+                (<= (vector-vector-distance (target-pos 0) bspa) 1200000.0)
+                (= darkworld-bspawner #f)
+            )
+            (let (
+                    (bspa (new-stack-vector0))
+                    (bspb (new-stack-vector0))
+                    (bspc (new-stack-vector0))
+                    (bspd (new-stack-vector0))
+                    (bspe (new-stack-vector0))
+                    (bspf (new-stack-vector0))
+                    (bspg (new-stack-vector0))
+                    (bsph (new-stack-vector0))
+                    (bspi (new-stack-vector0))
+                    (bspj (new-stack-vector0))
+                    (bspk (new-stack-vector0))
+                    )
+                    (when (and
+                            (= in-pre-tutorial? #f)
+                        )
+                    (set-vector! bspa (meters 3468.1132) (meters 28.8032) (meters 966.2183) 1.0)
+                    (init-respawner! bspa dp-bipedal "dp-bipedal-c" (rand-vu-int-range 400 1200))
+                    (set-vector! bspb (meters 3524.4287) (meters 24.6131) (meters 938.1008) 1.0)
+                    (init-respawner! bspb dp-bipedal "dp-bipedal-c" (rand-vu-int-range 400 1200))
+                    (set! darkworld-bspawner #t)
+                    )
+                )
+            )
+            ((and
+                (or
+                    (!= (-> (level-get-target-inside *level*) name) 'desert)
+                    (> (vector-vector-distance (target-pos 0) bspa) 2800000.0)
+                    (= weather-dark-mode #f)
+                )
+                (= darkworld-bspawner #t)
+            )
+                (set! darkworld-bspawner #f)
+            )
+        )
+    )
+    (none)
+)
+
+;(init-respawner! (target-pos 0) dp-bipedal "dp-bipedal-c" 600)
+;(init-respawner! (target-pos 0) bipedal-boss "Bipedal Boss" 800)
+;(init-respawner! (target-pos 0) mantis-boss "Mantis Boss" 800)
