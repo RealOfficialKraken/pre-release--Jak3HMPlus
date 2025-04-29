@@ -1324,7 +1324,9 @@
            )
          )
        )
-     (go (method-of-object this knocked))
+     (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+          (go (method-of-object this knocked))
+         )
      )
     (else
       ((method-of-type nav-enemy event-handler) this arg0 arg1 arg2 arg3)

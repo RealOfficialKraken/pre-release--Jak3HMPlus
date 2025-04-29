@@ -374,6 +374,14 @@
           )
   )
 
+  (deftype cty-attack-controller (mission-squad-control)
+  ((guard-angry-hatred-info-index  int8)
+   )
+  )
+
+
+(define-perm *cty-attack-controller* cty-attack-controller #f)
+
 ;; WARN: disable def twice: 182. This may happen when a cond (no else) is nested inside of another conditional, but it should be rare.
 (defmethod event-handler ((this crimson-guard) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
   "Commmon handler for events."
@@ -1706,8 +1714,9 @@
   (set! (-> this pursuit-start-time) 0)
   (set! (-> this last-choose-new-enemy-time) 0)
   (if (logtest? (-> this flags) (citizen-flag dark-guard))
-      (set! (-> this hit-points) (* 2.0 (-> this enemy-info default-hit-points)))
-      )
+      (set! (-> this hit-points) (+ (* 14.0 (-> this enemy-info default-hit-points)) (* (the float enemy-noto) 3)))
+      (set! (-> this hit-points) (+ (-> this enemy-info default-hit-points) (* (the float enemy-noto) 3)))
+    )
   (set! (-> this hit-face) (the-as uint -1))
   (if (not (logtest? (-> this flags) (citizen-flag in-mission)))
       (crimson-guard-method-267 this (the-as guard-type (ff-squad-control-method-54 (-> this squad) 6)) #f)

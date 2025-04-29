@@ -143,7 +143,7 @@
 (defun art-group-load-check ((arg0 string) (arg1 kheap) (arg2 int))
   ;; og:preserve-this
   ; (local-vars (sp-0 pointer))
-  (when *debug-segment*
+  ;(when *debug-segment*
     ; (the-as none sp-0)
     ; (if (< (the-as uint sp-0) (the-as uint *stack-top*))
     ;     (set! sp-0 (&+ *kernel-sp* -1024))
@@ -166,7 +166,7 @@
           )
         )
       )
-    )
+    ;)
   )
 
 (defmethod print ((this external-art-buffer))

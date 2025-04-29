@@ -2827,7 +2827,9 @@
      (freeze-hit-begin)
      (if (logtest? (-> this flags) (gekko-flag on-wall?))
          (go (method-of-object this knocked-wall))
-         (go (method-of-object this knocked))
+         (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+          (go (method-of-object this knocked))
+         )
          )
      #t
      )

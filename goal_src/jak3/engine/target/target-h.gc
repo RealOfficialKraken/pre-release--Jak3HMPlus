@@ -159,7 +159,7 @@
 (define-extern target-gun-can-fire-blue? (function pickup-type symbol :behavior target))
 (define-extern target-gun-fire-blue (function pickup-type (pointer process) :behavior target))
 (define-extern target-gun-can-fire-dark? (function pickup-type symbol :behavior target))
-(define-extern target-gun-fire-dark (function pickup-type (pointer process) :behavior target))
+(define-extern target-gun-fire-dark (function pickup-type object :behavior target))
 
 ;; powerups
 (define-extern target-darkjak-process (function none :behavior target))

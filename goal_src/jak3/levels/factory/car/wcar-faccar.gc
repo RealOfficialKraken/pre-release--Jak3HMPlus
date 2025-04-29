@@ -323,7 +323,6 @@
   )
 
 (defmethod vehicle-method-79 ((this v-faccar))
-  (set! (-> this turbo-supply) 3.0)
   (let ((s5-0 (new 'stack-no-clear 'inline-array 'quaternion 1)))
     (dotimes (s4-0 (-> this info physics-model wheel-count))
       (let ((v1-4 (-> this wheel s4-0)))

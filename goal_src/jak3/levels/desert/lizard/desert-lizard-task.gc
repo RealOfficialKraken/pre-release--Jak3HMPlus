@@ -189,6 +189,7 @@
 (defstate active (task-manager-desert-catch-lizards)
   :virtual #t
   :enter (behavior ()
+    (set! in-desert-game-task? #t)
     (let ((t9-0 (-> (method-of-type task-manager active) enter)))
       (if t9-0
           (t9-0)

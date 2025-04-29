@@ -60,6 +60,7 @@
   :virtual #t
   :enter (behavior ()
     (set-setting! 'extra-bank '((desert2 desbst1)) 0.0 0)
+    (set! in-desert-game-task? #t)
     (let ((t1-1 2))
       (set-setting! 'vehicles 'set (shr t1-1 32) t1-1)
       )

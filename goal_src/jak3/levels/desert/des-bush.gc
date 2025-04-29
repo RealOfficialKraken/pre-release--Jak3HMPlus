@@ -747,7 +747,7 @@
                 )
               (set-time! (-> self start-time))
               (set! (-> self time-limit)
-                    (the-as time-frame (the int (* 300.0 (-> *des-ring-times* (-> self info index) (-> self current-ring)))))
+                    (the-as time-frame (the int (/ (* 300.0 (-> *des-ring-times* (-> self info index) (-> self current-ring))) 1.55)))
                     )
               0
               )

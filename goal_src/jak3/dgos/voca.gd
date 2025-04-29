@@ -26,8 +26,6 @@
   "volcano-obs2.o"
   "volcano-mood.o"
   "volcano-texture.o"
-  "spiky-frog.o"
-  "mantis.o"
   "flut-wild.o"
   "flamer-lava.o"
   "tpage-1632.go"

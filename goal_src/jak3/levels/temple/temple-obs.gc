@@ -284,6 +284,13 @@
   (set! (-> this sound-close-stop) (static-sound-spec "door-close-hit" :group 0))
   (set! (-> this sound-post-close) (static-sound-spec "door-eye-close" :group 0))
   (set! (-> this sound-behind?) #t)
+  (when (string= (-> this name) "tpl-outer-airlock-door-2")
+    (set! (-> this level-name) 
+      '(when (or (and (task-closed? "volcano-darkeco-resolution")))
+        '(templea templex)
+      )
+      )    
+  )
   (go (method-of-object this close) #t)
   )
 

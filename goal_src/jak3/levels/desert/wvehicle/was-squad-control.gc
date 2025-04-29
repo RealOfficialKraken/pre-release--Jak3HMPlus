@@ -5,6 +5,13 @@
 ;; name in dgo: was-squad-control
 ;; dgos: LPATK, LFACCAR, WASALL
 
+(deftype cquery-with-5vec (structure)
+  "target-pilot-post"
+  ((cquery collide-query :inline)
+   (vec    vector 5 :inline)
+   )
+  )
+
 (deftype mystery-traffic-object-spawn-params0 (structure)
   "was-squad-control::spawn-unit"
   ((params traffic-object-spawn-params :inline)

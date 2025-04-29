@@ -927,7 +927,7 @@
     :notice-distance (meters 20)
     :notice-distance-delta (meters 10)
     :proximity-notice-distance (meters 20)
-    :default-hit-points 100.0
+    :default-hit-points 2500.0
     :gnd-collide-with (collide-spec backgnd obstacle hit-by-others-list)
     :movement-gravity (meters -100)
     :friction 0.8
@@ -1689,6 +1689,7 @@
      (if (not (and (-> this next-state) (= (-> this next-state name) 'explode)))
          (go (method-of-object this explode))
          )
+         (enemy-killed? (rand-vu-float-range 350.0 450.0))
      )
     (('blow-wall)
      (go (method-of-object this blow-wall))

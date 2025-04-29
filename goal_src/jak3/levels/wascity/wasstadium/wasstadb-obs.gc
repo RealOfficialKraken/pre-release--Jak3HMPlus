@@ -389,6 +389,15 @@
   :event (behavior ((proc process) (argc int) (message symbol) (block event-message-block))
     (case message
       (('touch 'attack)
+      (+! arena-token-count 1)
+      (when (= arena-token-count 1)
+        (set! tutorial-msg 0)
+        (set! in-tutorial? #t)
+      )
+       (when (= arena-token-count 18)
+        (set! tutorial-msg 1)
+        (set! in-tutorial? #t)
+       )
        (cond
          ((logtest? (-> *part-group-id-table* 500 flags) (sp-group-flag sp13))
           (vector-copy! (-> *launch-matrix* trans) (-> self root trans))
@@ -798,6 +807,7 @@
   :virtual #t
   :parent (task-manager-arena-training active)
   :enter (behavior ()
+    (activate-progress *dproc* 'icon-info)
     (dotimes (gp-0 (length (-> self actor-group 0)))
       (let ((v1-2 (-> self actor-group 0 data gp-0)))
         (when (logtest? (-> *arena-trainer-checkpoint-tokens* 0) (ash 1 gp-0))

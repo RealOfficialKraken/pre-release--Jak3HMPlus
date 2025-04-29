@@ -1034,7 +1034,7 @@
                  )
             )
        (cond
-         ((< (fabs (-> this torso-to-focus-angle)) 3640.889)
+         ((< (fabs (-> this torso-to-focus-angle)) 364000.889)
           (if (>= 24576.0 (vector-vector-xz-distance (-> this root trans) (-> this focus-pos)))
               4
               5
@@ -1890,7 +1890,9 @@
         (go (method-of-object this explode))
         )
        (else
-         (go (method-of-object this knocked))
+         (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+          (go (method-of-object this knocked))
+         )
          )
        )
      #t

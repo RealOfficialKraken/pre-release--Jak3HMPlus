@@ -52,6 +52,7 @@
   (stack-size-set! (-> self main-thread) 512)
   (set! (-> self skip-jump) (-> arg1 skip-jump))
   (set-multi-focus self (-> arg1 multi-focus))
+  (set! (-> self arena-dead?) #f)
   (enemy-init-by-other arg0 arg1)
   )
 

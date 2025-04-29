@@ -13,8 +13,8 @@
       :race-mesh-name "race-mesh-1"
       :path-group-name "desertb"
       :task-node (game-task-node desert-course-race-race)
-      :ai-min-speed-factor 0.65
-      :ai-max-speed-factor 0.815
+      :ai-min-speed-factor 0.8
+      :ai-max-speed-factor 1.0
       :ai-spread-factor 0.03
       :start-dir (new 'static 'vector :x 0.6112508 :z 0.791437 :w 1.0)
       :finish-dir (new 'static 'vector :z 1.0 :w 1.0)
@@ -51,8 +51,8 @@
       :race-mesh-name "race-mesh-1"
       :path-group-name "desertb"
       :task-node (game-task-node desert-bbush-time-trial-1-resolution)
-      :ai-min-speed-factor 0.5
-      :ai-max-speed-factor 1.0
+      :ai-min-speed-factor 1.0
+      :ai-max-speed-factor 1.1
       :ai-spread-factor 0.03
       :start-dir (new 'static 'vector :x 0.6112508 :z 0.791437 :w 1.0)
       :finish-dir (new 'static 'vector :z 1.0 :w 1.0)

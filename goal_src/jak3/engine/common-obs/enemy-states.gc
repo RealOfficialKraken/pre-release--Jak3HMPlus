@@ -906,7 +906,7 @@
      (+! (-> *game-info* enemies-killed) 1.0)
      )
     ((logtest? (process-mask guard civilian) (-> this mask))
-     (+! (-> *game-info* civilians-killed) 1.0)
+     (+! (-> *game-info* civilians-killed) 0.0)
      )
     )
   (logior! (-> this focus-status) (focus-status dead))

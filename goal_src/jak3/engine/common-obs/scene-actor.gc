@@ -1007,6 +1007,9 @@
 (defun intro-play ()
   (set! (-> *setting-control* user-default border-mode) #t)
   (set! (-> *level* play?) (-> *setting-control* user-default border-mode))
+  (stop-main-music)
+  (set! in-pre-tutorial? #f)
+  ;(task-node-close! (game-task-node desert-turtle-training-resolution) #t)
   (process-spawn
     scene-player
     :init scene-player-init

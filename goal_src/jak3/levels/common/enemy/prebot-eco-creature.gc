@@ -2413,7 +2413,9 @@
 (defmethod go-fallback-init ((this prebot-medium-eco-creature))
   "If there's no specific settings for initial state, go to this state after spawning."
   (set-vector! (-> this root scale) (-> this initial-scale) (-> this initial-scale) (-> this initial-scale) 1.0)
-  (go (method-of-object this knocked))
+  (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+          (go (method-of-object this knocked))
+         )
   )
 
 (defmethod init-enemy-collision! ((this prebot-medium-eco-creature))

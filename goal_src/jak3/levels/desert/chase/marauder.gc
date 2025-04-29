@@ -51,36 +51,7 @@
               :origin-joint-index 3
               )
 
-(deftype marauder (nav-enemy)
-  ((los                    los-control      :inline)
-   (target-pos             vector           :inline)
-   (jump-attack            symbol)
-   (jump-info              enemy-jump-info  :inline)
-   (save                   symbol)
-   (save-pos               vector           :inline)
-   (ambush?                symbol)
-   (knocked-back?          symbol)
-   (run-anim               int32)
-   (gun?                   symbol)
-   (target-last-attacker?  symbol)
-   (visible-last           time-frame)
-   (traj                   trajectory       :inline)
-   (skip-jump              symbol)
-   )
-  (:state-methods
-    attack-run
-    save
-    save-wait
-    lava-die
-    gun-shoot
-    jump-out
-    )
-  (:methods
-    (toggle-collide-spec (_type_ symbol int) none)
-    (fire-shot (_type_) none)
-    (set-multi-focus (_type_ symbol) none)
-    )
-  )
+
 
 
 (define *fact-info-marauder-defaults*
@@ -587,6 +558,16 @@
            (set! (-> this target-last-attacker?) #t)
            (set! (-> this target-last-attacker?) #f)
            )
+           (when 
+            (and 
+              (<= (-> this hit-points) 0.0)
+              (not (logtest? (-> this focus-status) (focus-status dead)))
+              (= (-> this arena-dead?) #f)
+            )
+            (+! global-marauder-count 1)
+            (set! (-> this arena-dead?) #t)
+            (logior! (-> this focus-status) (focus-status dead))
+           )
        )
      ((method-of-type nav-enemy event-handler) this arg0 arg1 arg2 arg3)
      )
@@ -595,7 +576,9 @@
        (when (< 4096.0 (-> (the-as rigid-body-impact v1-11) impulse))
          (logior! (-> this root penetrated-by) (penetrate vehicle))
          (set! (-> this hit-points) 0.0)
-         (go (method-of-object this knocked))
+         (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+          (go (method-of-object this knocked))
+         )
          #t
          )
        )
@@ -1661,6 +1644,14 @@
   :code (behavior ()
     (on-dying self)
     (sound-play "marauder-lava")
+    (when 
+    (and
+      (<= (-> self hit-points) 0.0)
+      (= (-> self arena-dead?) #f)
+    )
+      (+! global-marauder-count 1)
+      (set! (-> self arena-dead?) #t)
+    )
     (ja-channel-push! 1 (seconds 0.5))
     (ja-no-eval :group! marauder-male-drown-lava-ja :num! (seek!) :frame-num 0.0)
     (until (ja-done? 0)
@@ -1686,6 +1677,15 @@
         (set! (-> self knocked-back?) #f)
         )
     )
+    (when 
+            (and 
+              (<= (-> this hit-points) 0.0)
+              (= (-> this arena-dead?) #f)
+            )
+            (+! global-marauder-count 1)
+            (set! (-> this arena-dead?) #t)
+            (logior! (-> this focus-status) (focus-status dead))
+           )
   :post (behavior ()
     (let ((gp-0 (-> self root)))
       (cond
@@ -1843,20 +1843,6 @@
   (none)
   )
 
-(deftype marauder-init-by-other-params (enemy-init-by-other-params)
-  ((multi-focus  symbol)
-   (skip-jump    symbol)
-   )
-  )
-
-
-(defbehavior marauder-init-by-other marauder ((arg0 process-drawable) (arg1 marauder-init-by-other-params))
-  ;; og:preserve-this added
-  (stack-size-set! (-> self main-thread) 512)
-  (set! (-> self skip-jump) (-> arg1 skip-jump))
-  (set-multi-focus self (-> arg1 multi-focus))
-  (enemy-init-by-other arg0 arg1)
-  )
 
 ;; WARN: Return type mismatch symbol vs none.
 (defmethod init-enemy! ((this marauder))

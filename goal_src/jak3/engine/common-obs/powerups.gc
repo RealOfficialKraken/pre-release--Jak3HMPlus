@@ -20,7 +20,8 @@
   (let ((s1-1 (process->handle arg0))
         (s2-1 (process->handle arg1))
         )
-    (suspend-for (+ arg3 arg4)
+    (suspend-for
+      (+ arg3 arg4)
       (let ((v1-8 (or (not (handle->process s1-1)) (not (handle->process s2-1)))))
         (if v1-8
             (deactivate self)
@@ -46,7 +47,8 @@
        #f
        )
       (else
-        (suspend-for arg5
+        (suspend-for
+          arg5
           (let ((a0-21 (process-drawable-random-point! (the-as process-drawable (-> s2-1 process 0)) (new-stack-vector0))))
             (arg2 a0-21)
             )
@@ -802,6 +804,9 @@
 (defun target-update-segs ((arg0 process-drawable))
   (let ((f30-0 (-> *FACT-bank* health-max-default)))
     (let ((s5-0 (-> *game-info* features)))
+      (when (!= f30-0 (-> *target* fact health-max))
+        (set! f30-0 (-> *target* fact health-max))
+      )
       (when (!= (-> arg0 type) target)
         (if (-> *setting-control* user-current beard)
             (setup-masks (-> arg0 draw) 4 0)
@@ -811,7 +816,7 @@
         )
       (cond
         ((logtest? (game-feature armor0) s5-0)
-         (set! f30-0 (+ 2.0 f30-0))
+         ;(set! f30-0 (+ 2.0 f30-0))
          (setup-masks (-> arg0 draw) 2 0)
          )
         (else
@@ -820,7 +825,7 @@
         )
       (cond
         ((logtest? (game-feature armor1) s5-0)
-         (set! f30-0 (+ 2.0 f30-0))
+         ;(set! f30-0 (+ 2.0 f30-0))
          (setup-masks (-> arg0 draw) 16 0)
          )
         (else
@@ -829,7 +834,7 @@
         )
       (cond
         ((logtest? (game-feature armor2) s5-0)
-         (set! f30-0 (+ 2.0 f30-0))
+         ;(set! f30-0 (+ 2.0 f30-0))
          (setup-masks (-> arg0 draw) 128 0)
          )
         (else
@@ -838,7 +843,7 @@
         )
       (cond
         ((logtest? (game-feature armor3) s5-0)
-         (set! f30-0 (+ 2.0 f30-0))
+         ;(set! f30-0 (+ 2.0 f30-0))
          (setup-masks (-> arg0 draw) 512 256)
          )
         (else

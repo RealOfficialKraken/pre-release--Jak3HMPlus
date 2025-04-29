@@ -1999,7 +1999,7 @@
            0
            )
           (else
-            (set! (-> v1-25 target-count) 4)
+          (set! (-> v1-25 target-count) 60)
             )
           )
         )
@@ -2260,9 +2260,7 @@
         (send-event (handle->process (-> self current-transport)) 'note-last-passenger)
         )
     (let ((v1-24 *was-squad-control*))
-      (set! (-> v1-24 target-count)
-            (the int (the float (-> self passenger-pos (-> self current-passenger-index) num-marauders)))
-            )
+      (set! (-> v1-24 target-count) 60)
       )
     )
   :trans (behavior ()

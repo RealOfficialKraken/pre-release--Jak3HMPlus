@@ -4,7 +4,6 @@
   "jak-turret+0-ag.go"
   "wasgun-h.o"
   "skeet-part.o"
-  "maker-part.o"
   "dm-flyer.o"
   "wascity-turret-shot.o"
   "wascity-turret.o"

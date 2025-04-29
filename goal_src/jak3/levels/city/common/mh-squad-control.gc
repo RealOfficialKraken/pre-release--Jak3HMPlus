@@ -12,12 +12,12 @@
     (new 'static 'kg-squad-member-settings
       :object-type (traffic-type metalhead-grunt)
       :max-target-count #x7f
-      :target-count 4
+      :target-count 20
       )
     (new 'static 'kg-squad-member-settings
       :object-type (traffic-type metalhead-flitter)
       :max-target-count #x7f
-      :target-count 3
+      :target-count 20
       )
     (new 'static 'kg-squad-member-settings :object-type (traffic-type metalhead-predator) :max-target-count #x7f)
     )
@@ -27,17 +27,17 @@
                                          (new 'static 'kg-squad-member-settings
                                            :object-type (traffic-type metalhead-grunt)
                                            :max-target-count #x7f
-                                           :target-count 5
+                                           :target-count 20
                                            )
                                          (new 'static 'kg-squad-member-settings
                                            :object-type (traffic-type metalhead-flitter)
                                            :max-target-count #x7f
-                                           :target-count 5
+                                           :target-count 20
                                            )
                                          (new 'static 'kg-squad-member-settings
                                            :object-type (traffic-type metalhead-predator)
                                            :max-target-count #x7f
-                                           :target-count 2
+                                           :target-count 20
                                            )
                                          )
         )

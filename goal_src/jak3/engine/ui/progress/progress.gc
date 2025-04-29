@@ -8,6 +8,9 @@
 (define-extern memcard-unlocked-secrets? (function object symbol game-secrets))
 (define-extern *progress-list-level* progress-list-level)
 
+(defun-extern start-menu-music! (none))
+
+
 ;; DECOMP BEGINS
 
 (kmemopen global "progress-data")
@@ -228,7 +231,13 @@
 
 (defun progress-intro-start ()
   (set! (-> *game-info* mode) 'play)
-  (initialize! *game-info* 'game (the-as game-save #f) "intro-start" (the-as resetter-spec #f))
+  (set! in-pre-tutorial? #t)
+  (when (ppointer->process *jak3logo*)
+      (send-event (ppointer->process *jak3logo*) 'diepls #t)
+  )
+  (set! weather-dark-mode #t)
+  (set! tutorial-prologue #t)
+  (resume-main-music)
   (set-master-mode 'game)
   0
   )
@@ -326,10 +335,10 @@
   (set! (-> self joint-idx) arg0)
   (set! (-> self init-angle) arg1)
   (set! (-> self graphic-index) arg2)
-  (vector-copy! (-> self root trans) (-> self parent 0 root trans))
+  (set! (-> self root trans quad) (-> self parent 0 root trans quad))
   (quaternion-copy! (-> self root quat) (-> self parent 0 root quat))
   (quaternion-normalize! (-> self root quat))
-  (vector-copy! (-> self root scale) (-> self parent 0 root scale))
+  (set! (-> self root scale quad) (-> self parent 0 root scale quad))
   (let ((gp-1 (quaternion-vector-angle! (new 'stack-no-clear 'quaternion) *z-vector* (-> self init-angle))))
     (quaternion-normalize! gp-1)
     (quaternion*! (-> self root quat) (-> self root quat) gp-1)
@@ -739,9 +748,12 @@
          (set! (-> *progress-work* hero-mode-save) #f)
          )
         (('creating)
+         (reset-gunmod-vars! #f)
          (auto-save-command 'create-file 0 0 this #f)
          )
         (('loading)
+         (reset-gunmod-vars! #f)
+         ;(set! load-delay-1 #t)
          (set! (-> v1-7 last-slot-saved) a2-1)
          (auto-save-command 'restore 0 a2-1 this #f)
          (set! (-> (the-as menu-missions-option (-> *missions-options* options 0)) current-index) 0.0)
@@ -1324,7 +1336,7 @@
                   )
               )
         )
-    (vector-copy! s5-0 (the-as vector gp-1))
+    (set! (-> s5-0 quad) (-> (the-as vector gp-1) quad))
     (with-dma-buffer-add-bucket ((v1-12 (-> *display* frames (-> *display* on-screen) global-buf))
                                  (bucket-id hud-draw-hud-alpha)
                                  )
@@ -1782,6 +1794,10 @@
       )
     )
   :enter (behavior ()
+    (set! mainmenu-camera #f)
+    (send-event (ppointer->process *time-of-day*) 'change 'ratio 1.0)
+    (set! (-> *time-of-day-context* overide-enable) #f)
+    (set! (-> *mood-control* overide-weather-flag) #f)
     (set! (-> self menu-transition) 1.0)
     )
   :trans progress-trans
@@ -2204,6 +2220,9 @@
            ((= (-> arg0 current) 'select-load)
             (when (= (-> *progress-save-info* file (-> arg0 option-index) present) 1)
               (set! s5-0 #t)
+              (stop-main-music)
+              (set! in-main-menu? #f)
+              (set! globalrandi 1)
               (set-next-state arg0 'loading 0)
               )
             )
@@ -2827,14 +2846,14 @@
                  (cond
                    ((pair? s3-1)
                     (start 'play (get-continue-by-name *game-info* s4-2))
-                    (process-spawn
+                    #|(process-spawn
                       scene-player
                       :init scene-player-init
                       (-> (the-as pair (-> (the-as pair s3-1) cdr)) car)
                       #t
                       s4-2
                       :name "scene-player"
-                      )
+                      )|#
                     )
                    (else
                      (send-event (handle->process (-> *game-info* controller 0)) 'control-spec (get-play-list-idx s5-1))
@@ -2993,7 +3012,7 @@
 (defmethod respond-progress ((this menu-missions-option) (arg0 progress) (arg1 symbol))
   (let ((v1-0 #f))
     (let ((f0-1 (the float (+ (-> arg0 total-num-tasks) -1))))
-      (cond
+      #|(cond
         ((or (cpad-pressed? 0 up l-analog-up)
              (and (cpad-hold? 0 up l-analog-up) (= (-> this current-index) (-> this target-index)))
              )
@@ -3034,11 +3053,12 @@
          (set! (-> this scroll-speed) 1000.0)
          (set! (-> this target-index) (fmin (+ 5.0 (-> this target-index)) f0-1))
          )
-        )
+        )|#
       )
     (if v1-0
         (sound-play "mission-scroll")
         )
+    ;(activate-progress *dproc* 'error-disc-removed)
     )
   0
   )

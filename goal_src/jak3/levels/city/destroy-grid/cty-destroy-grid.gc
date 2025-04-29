@@ -1350,7 +1350,7 @@
                                                       (new 'static 'kg-squad-member-settings
                                                         :object-type (traffic-type roboguard)
                                                         :max-target-count #x7f
-                                                        :target-count 3
+                                                        :target-count 20
                                                         :enemy-type (traffic-type guard-a)
                                                         )
                                                       (new 'static 'kg-squad-member-settings
@@ -1361,13 +1361,13 @@
                                                       (new 'static 'kg-squad-member-settings
                                                         :object-type (traffic-type flying-turret)
                                                         :max-target-count #x7f
-                                                        :target-count 2
+                                                        :target-count 20
                                                         :enemy-type (traffic-type metalhead-grunt)
                                                         )
                                                       (new 'static 'kg-squad-member-settings
                                                         :object-type (traffic-type spydroid)
                                                         :max-target-count #x7f
-                                                        :target-count 3
+                                                        :target-count 20
                                                         :enemy-type (traffic-type metalhead-flitter)
                                                         )
                                                       )
@@ -1377,17 +1377,17 @@
                                                       (new 'static 'mh-squad-member-settings
                                                         :object-type (traffic-type metalhead-grunt)
                                                         :max-target-count #x7f
-                                                        :target-count 5
+                                                        :target-count 20
                                                         )
                                                       (new 'static 'mh-squad-member-settings
                                                         :object-type (traffic-type metalhead-flitter)
                                                         :max-target-count #x7f
-                                                        :target-count 6
+                                                        :target-count 20
                                                         )
                                                       (new 'static 'mh-squad-member-settings
                                                         :object-type (traffic-type metalhead-predator)
                                                         :max-target-count #x7f
-                                                        :target-count 2
+                                                        :target-count 20
                                                         )
                                                       )
         )

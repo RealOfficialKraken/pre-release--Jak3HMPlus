@@ -1159,7 +1159,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-056b)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1171,7 +1171,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-056c)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1183,7 +1183,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-056d)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1195,7 +1195,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-0579)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1207,7 +1207,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-057a)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1219,7 +1219,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-0576)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1231,7 +1231,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-057b)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1243,7 +1243,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-0577)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1255,7 +1255,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-057c)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1267,7 +1267,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-057d)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1279,7 +1279,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-0578)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1291,7 +1291,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-057e)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1303,7 +1303,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-057f)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1315,7 +1315,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-0580)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )
@@ -1327,7 +1327,7 @@ and neg-state is greater than or equal to neg.
                             :text-duration (seconds 5)
                             :delay (seconds 1)
                             :neg #x1
-                            :text-message (text-id text-0581)
+                            :text-message (text-id you-can-now-afford-to-purchase-new-secrets)
                             :on-close #f
                             :camera #f
                             )

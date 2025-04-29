@@ -1206,7 +1206,7 @@
                     (set! sv-368 print-game-text)
                     (set! sv-384 format)
                     (let ((a0-48 (clear *temp-string*))
-                          (a1-18 "~S")
+                          (a1-18 "Missions Hidden, this tab would otherwise crash the game")
                           )
                       (sv-384 a0-48 a1-18 s0-3)
                       )
@@ -3509,11 +3509,11 @@
   (set! (-> this sprites 0 pos z) #xffffff)
   (set! (-> this sprites 0 pos w) 0)
   (set-hud-piece-position! (-> this sprites 0) 240 160)
-  (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+  #|(with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
                                (bucket-id hud-draw-hud-alpha)
                                )
     ((method-of-type hud-sprite draw) (-> this sprites 0) s2-0 (-> *level* level-default) #t)
-    )
+    )|#
   (let ((a0-16 arg1))
     (set! (-> a0-16 flags) (font-flags kerning middle middle-vert large))
     )
@@ -3521,32 +3521,78 @@
   (set! (-> arg1 origin y) 80.0)
   (set-width! arg1 330)
   (set-height! arg1 85)
-  (print-game-text
+  #|(print-game-text
     (lookup-text! *common-text* (text-id progress-autosave-notice) #f)
     arg1
     #f
     44
     (bucket-id hud-draw-hud-alpha)
+    )|#
+  (clear matt-str)
+  (clear *pc-encoded-matt-str*)
+  (format matt-str "<COLOR_YELLOW>BIG SHOUTOUT"
+  )
+  (+! meme-count 1)
+  (cond ((< meme-count 0) ;og is 40
+    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id hud-draw-hud-alpha))
+    (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+    (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 90 0.0 (font-color default) (font-flags middle shadow kerning large))))
+    (set! (-> font-ctx scale) 0.525)
+    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+    (clear matt-str)
+    (clear *pc-encoded-matt-str*)
+    (format matt-str "<COLOR_YELLOW>To <COLOR_ORANGE>Mantis, <COLOR_CYAN>Smack Chin<COLOR_YELLOW>, <COLOR_PINK>Blarg<COLOR_YELLOW>, <COLOR_RED>MagicMask<COLOR_YELLOW>, <COLOR_RED>Zed<COLOR_YELLOW>, and <COLOR_ORANGE>Guitar(ofc)<COLOR_YELLOW>.~%This mod would be possible with all of you~%~%Frick you~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_WHITE>Continue"
+  )
+  )
+  (else
+    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id hud-draw-hud-alpha))
+    (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+    (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 90 0.0 (font-color default) (font-flags middle shadow kerning large))))
+    (set! (-> font-ctx scale) 0.525)
+    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+    (clear matt-str)
+    (clear *pc-encoded-matt-str*)
+    (format matt-str "<COLOR_YELLOW>To <COLOR_ORANGE>Mortis, <COLOR_CYAN>Hat Kid<COLOR_YELLOW>, <COLOR_PINK>Barg<COLOR_YELLOW>, <COLOR_RED>Majora<COLOR_YELLOW>, <COLOR_RED>Zed<COLOR_YELLOW>, and <COLOR_ORANGE>Kuitar<COLOR_YELLOW>.~%This mod would not be possible without you.~%~%Thank you~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_WHITE>Continue"
     )
+  )
+  )
+  (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+  (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id hud-draw-hud-alpha))
+  (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+  (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 150 0.0 (font-color default) (font-flags middle shadow kerning large))))
+  (set! (-> font-ctx scale) 0.325)
+  (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+  (clear matt-str)
+  (clear *pc-encoded-matt-str*)
+  (format matt-str "<COLOR_ORANGE>..:::::..~%.:-----------:.~%.-----.~%.---.~%.        ---        .~%-       :===:       -~%--.   .--: :--.   .--~%.======.    .======.~%.-=====-. .-=====-~%.-===========-.~%.-===-.~%."
+  )
+  (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+  (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+  (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+  (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 100 0.0 (font-color default) (font-flags middle shadow kerning large))))
+  (set! (-> font-ctx scale) 0.525)
+  (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
   (+! (-> arg1 origin y) 115.0)
   (set-height! arg1 95)
-  (let ((s4-2 print-game-text))
+  #|(let ((s4-2 print-game-text))
     (format (clear *temp-string*) (lookup-text! *common-text* (text-id progress-autosave-remove-warn) #f) 1)
     (s4-2 *temp-string* arg1 #f 44 (bucket-id hud-draw-hud-alpha))
-    )
+    )|#
   (+! (-> arg1 origin y) 90.0)
   (set-height! arg1 50)
   (let ((a0-27 arg1))
     (set! (-> a0-27 color) (font-color font-color-33))
     )
   (progress-method-40 arg0 arg1 (the int (+ 12.0 (-> arg1 origin y))) 24 (-> arg1 alpha))
-  (print-game-text
+  #|(print-game-text
     (lookup-text! *common-text* (text-id progress-continue) #f)
     arg1
     #f
     44
     (bucket-id hud-draw-hud-alpha)
-    )
+    )|#
   0
   (none)
   )

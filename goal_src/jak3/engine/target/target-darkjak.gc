@@ -2228,7 +2228,7 @@
              'attack
              #f
              (static-attack-info :mask (vehicle-impulse-factor) ((id (the-as uint arg2))
-                                                                 (damage 15.0)
+                                                                 (damage (+ 15.0 (/ notoriety-level 6)))
                                                                  (vehicle-damage-factor 1.0)
                                                                  (vehicle-impulse-factor 1.0)
                                                                  (mode 'ice)

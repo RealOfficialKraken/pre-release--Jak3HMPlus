@@ -249,7 +249,7 @@
          )
         ((= v1-2 1)
          (cond
-           ((time-elapsed? (-> self sub-state-time) (seconds 4))
+           ((time-elapsed? (-> self sub-state-time) (seconds 1))
             (cond
               ((logtest? (-> *part-group-id-table* 575 flags) (sp-group-flag sp13))
                (vector-copy! (-> *launch-matrix* trans) (-> self root trans))

@@ -34,6 +34,7 @@
 (defstate active (task-manager-city-vehicle-training-hover-zone-1)
   :virtual #t
   :code (behavior ()
+  (set! in-desert-game-task? #t)
     (until #f
       (if (and *target* (focus-test? *target* pilot))
           (goto cfg-7)
@@ -122,6 +123,7 @@
 (defstate active (task-manager-city-vehicle-training-hover-zone-2)
   :virtual #t
   :code (behavior ()
+  (set! in-desert-game-task? #t)
     (set-time! (-> self state-time))
     (until #f
       (cond
@@ -181,6 +183,7 @@
 (defstate active (cty-hijack-intro)
   :virtual #t
   :trans (behavior ()
+  (set! in-desert-game-task? #t)
     ((-> (method-of-object self wait) trans))
     )
   :code (behavior ()
@@ -216,6 +219,7 @@
 (defstate active (task-manager-force-load-borrows)
   :virtual #t
   :exit (behavior ()
+  (set! in-desert-game-task? #t)
     (send-event (ppointer->process *time-of-day*) 'change 'ratio 1.0)
     )
   :trans (behavior ()
@@ -251,6 +255,7 @@
 (defstate active (task-manager-blackout)
   :virtual #t
   :code (behavior ()
+  (set! in-desert-game-task? #t)
     (persist-with-delay *setting-control* 'task-manager-blackout (seconds 10) 'music 'portattk 0.0 0)
     (persist-with-delay
       *setting-control*

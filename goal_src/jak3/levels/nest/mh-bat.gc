@@ -1745,7 +1745,9 @@
      (process-contact-action arg0)
      (send-event arg0 'get-attack-count 1)
      (freeze-hit-begin)
-     (go (method-of-object this knocked))
+     (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+          (go (method-of-object this knocked))
+         )
      )
     (('event-flap)
      (sound-play-by-name

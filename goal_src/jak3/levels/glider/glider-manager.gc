@@ -77,6 +77,7 @@
 (defstate active (task-manager-desert-glide)
   :virtual #t
   :code (behavior ()
+    (set! in-desert-game-task? #t)
     (local-vars (v1-1 object))
     (suspend)
     (until v1-1

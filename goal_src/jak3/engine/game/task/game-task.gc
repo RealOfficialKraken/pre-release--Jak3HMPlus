@@ -102,9 +102,9 @@
             :name "wascity-pre-game"
             :text-name (text-id progress-missions-wascityb-game)
             :pre-play-node (game-task-node wascity-pre-game-introduction)
-            :kiosk-play-node (game-task-node wascity-pre-game-wait)
+            :kiosk-play-node (game-task-node wascity-pre-game-battle)
             :pre-play-continue "wascityb-seem"
-            :play-node (game-task-node wascity-pre-game-resolution)
+            :play-node (game-task-node wascity-pre-game-battle)
             :play-continue "wascityb-game"
             :kiosk-play-continue #f
             )
@@ -191,7 +191,7 @@
           (new 'static 'game-task-info
             :name "wascity-gungame"
             :text-name (text-id progress-missions-wascity-gungame)
-            :pre-play-node (game-task-node wascity-gungame-introduction)
+            :pre-play-node (game-task-node desert-vin-quest-introduction)
             :kiosk-play-node (game-task-node wascity-gungame-resolution)
             :pre-play-continue "wascityb-gungame"
             :play-node (game-task-node wascity-gungame-resolution)
@@ -594,7 +594,7 @@
             :kiosk-play-node (game-task-node wascity-defend-get-to)
             :pre-play-continue "wascityb-defend"
             :play-node (game-task-node wascity-defend-get-to)
-            :play-continue "wascityb-defend-reset"
+            :play-continue "wascityb-defend"
             :kiosk-play-continue #f
             )
           (new 'static 'game-task-info
@@ -1281,6 +1281,51 @@
             :play-continue "desert-bbush-desb-4"
             :kiosk-play-continue #f
             )
+            (new 'static 'game-task-info
+            :name "desert-spawn-task-oasis"
+            :pre-play-node (game-task-node desert-spawn-task-oasis-goto-artifact)
+            :kiosk-play-node (game-task-node none)
+            :pre-play-continue "desert-ashelin"
+            :play-node (game-task-node desert-spawn-task-oasis-battle)
+            :play-continue "desert-ashelin"
+            :kiosk-play-continue #f
+            )
+            (new 'static 'game-task-info
+            :name "desert-spawn-task-deserta"
+            :pre-play-node (game-task-node desert-spawn-task-deserta-goto-artifact)
+            :kiosk-play-node (game-task-node none)
+            :pre-play-continue "desert-hf-start"
+            :play-node (game-task-node desert-spawn-task-deserta-battle)
+            :play-continue "desert-hf-start"
+            :kiosk-play-continue #f
+            )
+            (new 'static 'game-task-info
+            :name "desert-brute-killed"
+            :pre-play-node (game-task-node desert-brute-killed-introduction)
+            :kiosk-play-node (game-task-node none)
+            :pre-play-continue "desert-ashelin"
+            :play-node (game-task-node desert-brute-killed-resolution)
+            :play-continue "desert-ashelin"
+            :kiosk-play-continue #f
+            )
+            (new 'static 'game-task-info
+            :name "desert-ship-lod"
+            :pre-play-node (game-task-node desert-ship-lod-introduction)
+            :kiosk-play-node (game-task-node none)
+            :pre-play-continue "wasdoors-city"
+            :play-node (game-task-node desert-ship-lod-introduction)
+            :play-continue "wasdoors-city"
+            :kiosk-play-continue #f
+            )
+            (new 'static 'game-task-info
+            :name "arena-challenges"
+            :pre-play-node (game-task-node arena-challenge-1)
+            :kiosk-play-node (game-task-node none)
+            :pre-play-continue "wasstada-start"
+            :play-node (game-task-node arena-challenge-1)
+            :play-continue "wasstada-start"
+            :kiosk-play-continue #f
+            )
           )
         )
   (set! (-> game-info sub-task-list)
@@ -1329,6 +1374,7 @@
               (desert-game alias desert copy desinter special)
               (deserte 0 #f #f)
               (foresta 0 #f #f)
+              (foresta 1 #f #f)
               (outrocst 0 #f #f)
               (factorya 0 lfactory special)
               (factorya 1 lfacrm1 copy)
@@ -1430,7 +1476,7 @@
             :task (game-task desert-interceptors)
             :name "desert-interceptors-attack"
             :when-open #f
-            :flags (game-task-node-flag close-task no-percent)
+            :flags (game-task-node-flag no-percent)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node city-start-resolution)
               (game-task-node none)
@@ -1449,6 +1495,958 @@
               :on-complete #f
               :on-fail #f
               )
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "desert-logo-title1"
+            :when-open #f
+            :flags (game-task-node-flag no-percent act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+          (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "desert-logo-title2"
+            :when-open #f
+            :flags (game-task-node-flag no-percent act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-logo-title1)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f #|(new 'static 'task-manager-info
+              :level #f
+              :type-to-spawn 'jak3logo
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node desert-logo-title2)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )|#
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "desert-interceptors-attack-exclude"
+            :when-open #f
+            :flags (game-task-node-flag exclusive no-percent bbush act1 set-task-mask)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-interceptors-attack)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :level 'desert
+              :type-to-spawn 'look-for-warpgate
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node desert-interceptors-attack-exclude)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '((desert-game alias desert copy desboss1 special) (waswide 0 lbiped display))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "tp-fb-ground"
+            :when-open #f
+            :flags (game-task-node-flag no-percent exclusive bbush)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-interceptors-attack-exclude)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :mask (task-manager-mask resolution-scene)
+              :level 'deswalk
+              :type-to-spawn 'task-manager-deswalk
+              :intro-scene #f
+              :resolution-scene '("desert-final-boss-res" "desert-final-boss-res-b" "arena-outro")
+              :resolution-scene-continue "desert-final-boss-res-movie-a"
+              :final-node (game-task-node tp-fb-ground)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '((desert-game alias desert copy deswalk display desboss2 copy))
+            :open? (lambda ()
+              (dotimes (gp-0 (-> *level* length))
+                (let ((v1-3 (-> *level* level gp-0)))
+                  (if (and (!= (-> v1-3 status) 'inactive)
+                           (= (-> v1-3 info memory-mode) (level-memory-mode tiny-edge))
+                           (not (member (-> v1-3 name) '(desertb deswalk desboss2)))
+                           )
+                      (return #f)
+                      )
+                  )
+                )
+              #t
+              )
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4b
+            :description (text-id progress-missions-desert-final-boss)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "tp-fb-fight"
+            :when-open #f
+            :flags (game-task-node-flag close-task no-percent bbush)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node tp-fb-ground)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((desert-game alias desert copy deswalk display desboss2 copy))
+            :open? (lambda ()
+              (dotimes (gp-0 (-> *level* length))
+                (let ((v1-3 (-> *level* level gp-0)))
+                  (if (and (!= (-> v1-3 status) 'inactive)
+                           (= (-> v1-3 info memory-mode) (level-memory-mode tiny-edge))
+                           (not (member (-> v1-3 name) '(desertb deswalk desboss2)))
+                           )
+                      (return #f)
+                      )
+                  )
+                )
+              #t
+              )
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4b
+            :description (text-id progress-missions-desert-final-boss)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "arena-replay-1-introduction"
+            :when-open (new 'static 'boxed-array :type game-task-event
+              (new 'static 'game-task-event
+                :actor (game-task-actor minimap)
+                :action (game-task-action show)
+                :tex (game-task-icon gaticon-115)
+                :scene #f
+                )
+              )
+            :flags (game-task-node-flag save-on-life act1 no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node nest-eggs-gas)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x5
+            :command-count #x2
+            :description (text-id progress-missions-arena-fight-1)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "arena-replay-1-fight"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-replay-1-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :mask (task-manager-mask resolution-scene)
+              :level 'wasstadc
+              :type-to-spawn 'task-manager-arena-fight
+              :intro-scene #f
+              :resolution-scene "arena-fight-1-res"
+              :resolution-scene-continue #f
+              :final-node (game-task-node arena-replay-1-fight)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '((wasstada 0 wasstadc display) (wasseem 0 waspgame special))
+            :open? #f
+            :on-close #f
+            :reset (new 'static 'task-reset-info
+              :restart-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'try :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              :quit-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              :fail-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              :death-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio no-slow-down)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              )
+            :suck-death-count #xa5
+            :command-index #x5
+            :command-count #x2
+            :description (text-id progress-missions-arena-fight-1)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "arena-replay-2-introduction"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life act1 no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node nest-eggs-gas)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x5
+            :command-count #x2
+            :description (text-id progress-missions-arena-fight-1)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "arena-replay-2-fight"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-replay-2-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :mask (task-manager-mask resolution-scene)
+              :level 'wasstadc
+              :type-to-spawn 'task-manager-arena-fight-2
+              :intro-scene #f
+              :resolution-scene "arena-fight-2-res"
+              :resolution-scene-continue #f
+              :final-node (game-task-node arena-replay-2-fight)
+              :vehicle-type #x1b
+              :on-complete '(kiosk-complete)
+              :on-fail #f
+              )
+            :borrow '((wasstada 0 wasstadc display))
+            :open? #f
+            :on-close #f
+            :reset (new 'static 'task-reset-info
+              :restart-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'try :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              :quit-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              :fail-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              :death-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio no-slow-down)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              )
+            :suck-death-count #xa5
+            :command-index #x13
+            :description (text-id progress-missions-arena-fight-2)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "arena-replay-3-introduction"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life act1 no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node nest-eggs-gas)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x5
+            :command-count #x2
+            :description (text-id progress-missions-arena-fight-1)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "arena-replay-3-fight"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-replay-3-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :mask (task-manager-mask resolution-scene)
+              :level 'wasstadc
+              :type-to-spawn 'task-manager-arena-fight-3
+              :intro-scene #f
+              :resolution-scene '("arena-fight-3-res" "nest-eggs-intro")
+              :resolution-scene-continue "wasstada-fight-2"
+              :final-node (game-task-node arena-replay-3-fight)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '((wasstada 0 wasstadc display))
+            :open? #f
+            :on-close #f
+            :reset (new 'static 'task-reset-info
+              :restart-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'try :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              :quit-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              :fail-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              :death-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio no-slow-down)
+                :fail (new 'static 'resetter-spec :continue "wasstada-wascity-chase" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              )
+            :suck-death-count #xa5
+            :command-index #x1a
+            :description (text-id progress-missions-arena-fight-3)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "desertf-anchor-introduction"
+            :when-open #f
+            :flags (game-task-node-flag no-percent act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "desertf-anchor-resolution"
+            :when-open #f
+            :flags (game-task-node-flag act1 no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desertf-anchor-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :level #f
+              :type-to-spawn 'tm-desertf-anchor
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node desertf-anchor-resolution)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "desertc-anchor-introduction"
+            :when-open #f
+            :flags (game-task-node-flag no-percent act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "desertc-anchor-resolution"
+            :when-open #f
+            :flags (game-task-node-flag act1 no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desertc-anchor-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :level #f
+              :type-to-spawn 'tm-desertc-anchor
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node desertc-anchor-resolution)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "desertg-anchor-introduction"
+            :when-open #f
+            :flags (game-task-node-flag no-percent act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "desertg-anchor-resolution"
+            :when-open #f
+            :flags (game-task-node-flag act1 no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desertg-anchor-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :level #f
+              :type-to-spawn 'tm-desertg-anchor
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node desertg-anchor-resolution)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "ctyinda-anchor-introduction"
+            :when-open #f
+            :flags (game-task-node-flag no-percent act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "ctyinda-anchor-resolution"
+            :when-open #f
+            :flags (game-task-node-flag act1 no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node ctyinda-anchor-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :level #f
+              :type-to-spawn 'tm-ctyinda-anchor
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node ctyinda-anchor-resolution)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+          (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "cty-firefight-introduction"
+            :when-open #f
+            :flags (game-task-node-flag no-percent act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+          (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "cty-firefight-resolution"
+            :when-open #f
+            :flags (game-task-node-flag act1 no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node cty-firefight-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :level #f
+              :type-to-spawn 'firefight-manager
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node cty-firefight-resolution)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '((ctywide 4 lctyhijk display)
+              (ctywide-kg alias ctywide copy dummy auto ctypesc auto ctypesa auto)
+              (ctywide-ff-kg alias ctywide copy dummy auto ctypesc auto ctypesa auto)
+              (ctywide-ff alias ctywide copy dummy auto ctypesc auto ctypesa auto)
+              ;(ctywide-ff-mh alias ctywide copy ctypesa auto ctypesb auto dummy auto)
+              ;(ctywide-mh alias ctywide copy ctypesb special dummy auto dummy auto ctypepb special)
+              )
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+          (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "mody-fireball"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "mody-nukeonly"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "mody-freeze"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "modr-bigshot"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "modr-shield"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "modr-missles"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "modb-ammo"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "modb-disperser"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "modb-airstrike"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "modd-morpher"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "modd-random"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'city
+            :task (game-task desert-interceptors)
+            :name "modd-reaper"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task utility-node)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
             :borrow '()
             :open? #f
             :on-close #f
@@ -2147,11 +3145,33 @@
             :level 'wascity
             :task (game-task wascity-pre-game)
             :name "wascity-pre-game-resolution"
+            :when-open #f
+            :on-open '(task-node-close! (game-task-node wascity-pre-game-resolution))
+            :manager #f
+            :borrow '((deserte 0 waspgame copy))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #xa
+            :command-count #x1
+            :description (text-id progress-missions-wascityb-game)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-pre-game)
+            :name "wascity-pre-game-battle"
             :when-open (new 'static 'boxed-array :type game-task-event
+                (new 'static 'game-task-event
+                :actor (game-task-actor was-pre-game-wascityb)
+                :tex (game-task-icon gaticon-06)
+                :scene #f
+                )
               (new 'static 'game-task-event
                 :actor (game-task-actor was-pre-game-wascityb)
-                :action (game-task-action play)
-                :tex (game-task-icon gaticon-06)
+                :action (game-task-action idle)
+                :tex (game-task-icon gaticon-01)
                 :scene #f
                 )
               (new 'static 'game-task-event
@@ -2161,7 +3181,7 @@
                 :scene #f
                 )
               )
-            :flags (game-task-node-flag close-task save-on-try exclusive act1)
+            :flags (game-task-node-flag close-task exclusive act1)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node wascity-pre-game-wait)
               (game-task-node none)
@@ -2172,18 +3192,18 @@
             :manager (new 'static 'task-manager-info
               :mask (task-manager-mask resolution-scene)
               :level 'waspgame
-              :type-to-spawn 'task-manager
+              :type-to-spawn 'task-manager-wasseem-attack
               :intro-scene #f
               :resolution-scene "wascity-pre-game-res"
               :resolution-scene-continue #f
-              :final-node (game-task-node wascity-pre-game-resolution)
+              :final-node (game-task-node wascity-pre-game-post-game)
               :vehicle-type #x1b
               :on-complete '(when (kiosk?)
                  (task-open! "wascity-gungame-introduction")
                  )
               :on-fail #f
               )
-            :borrow '((wasseem 0 waspgame display))
+            :borrow '((wasseem 0 waspgame display) (waswide 0 lbiped display))
             :open? #f
             :on-close #f
             :reset (new 'static 'task-reset-info
@@ -2193,7 +3213,7 @@
                 :fail (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
                 :retry (new 'static 'resetter-spec
                   :continue "wascityb-game"
-                  :node (game-task-node wascity-pre-game-resolution)
+                  :node (game-task-node wascity-pre-game-battle)
                   :reset-mode 'try
                   :execute #f
                   )
@@ -2205,7 +3225,7 @@
                 :fail (new 'static 'resetter-spec :continue #f :reset-mode 'life :execute #f)
                 :retry (new 'static 'resetter-spec
                   :continue "wascityb-game"
-                  :node (game-task-node wascity-pre-game-resolution)
+                  :node (game-task-node wascity-pre-game-battle)
                   :reset-mode 'try
                   :execute #f
                   )
@@ -2217,7 +3237,7 @@
                 :fail (new 'static 'resetter-spec :continue "wascityb-game" :reset-mode 'life :execute #f)
                 :retry (new 'static 'resetter-spec
                   :continue "wascityb-game"
-                  :node (game-task-node wascity-pre-game-resolution)
+                  :node (game-task-node wascity-pre-game-battle)
                   :reset-mode 'try
                   :execute #f
                   )
@@ -2229,7 +3249,7 @@
                 :fail (new 'static 'resetter-spec :continue "wascityb-game" :reset-mode 'life :execute #f)
                 :retry (new 'static 'resetter-spec
                   :continue "wascityb-game"
-                  :node (game-task-node wascity-pre-game-resolution)
+                  :node (game-task-node wascity-pre-game-battle)
                   :reset-mode 'try
                   :execute #f
                   )
@@ -2262,7 +3282,7 @@
               )
             :flags (game-task-node-flag no-restart act1)
             :parent-node (new 'static 'array game-task-node 4
-              (game-task-node wascity-pre-game-resolution)
+              (game-task-node wascity-pre-game-introduction)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)
@@ -2446,7 +3466,7 @@
               )
             :flags (game-task-node-flag act1)
             :parent-node (new 'static 'array game-task-node 4
-              (game-task-node desert-turtle-training-restrict-to-turtle)
+              (game-task-node wascity-pre-game-resolution)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)
@@ -2503,7 +3523,7 @@
             :when-open #f
             :flags (game-task-node-flag close-task act1)
             :parent-node (new 'static 'array game-task-node 4
-              (game-task-node desert-turtle-training-in-desert)
+              (game-task-node wascity-pre-game-resolution)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)
@@ -2537,9 +3557,9 @@
                 :scene #f
                 )
               )
-            :flags (game-task-node-flag auto-close save-on-life act1)
+            :flags (game-task-node-flag save-on-life act1)
             :parent-node (new 'static 'array game-task-node 4
-              (game-task-node desert-turtle-training-resolution)
+              (game-task-node wascity-pre-game-resolution)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)
@@ -3017,7 +4037,7 @@
                 :scene #f
                 )
               )
-            :flags (game-task-node-flag set-task-mask save-on-life exclusive act1)
+            :flags (game-task-node-flag set-task-mask save-on-life act1)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node desert-artifact-race-1-resolution)
               (game-task-node none)
@@ -4053,11 +5073,90 @@
           (new 'static 'game-task-node-info
             :level 'wascity
             :task (game-task wascity-gungame)
+            :name "desert-vin-quest-introduction"
+            :when-open #f
+            :flags (game-task-node-flag bbush act1 exclusive set-task-mask)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-course-race-resolution)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :level #f
+              :type-to-spawn 'tm-vin-intro
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node desert-vin-quest-introduction)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
+            :name "desert-vin-quest-resolution"
+            :when-open #f
+            :flags (game-task-node-flag close-task)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-vin-quest-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+          (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
+            :name "lock-wascity-gungame"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              ;(game-task-node desert-vin-quest-resolution)
+              ;(game-task-node volcano-darkeco-resolution)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x18
+            :description (text-id talk-to-kleiver)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
             :name "wascity-gungame-introduction"
             :when-open (new 'static 'boxed-array :type game-task-event
               (new 'static 'game-task-event
                 :actor (game-task-actor kleever-wascityb)
-                :action (game-task-action say)
+                :action (game-task-action idle)
                 :tex (game-task-icon gaticon-02)
                 :scene "wascity-gun-intro"
                 )
@@ -4070,7 +5169,297 @@
               )
             :flags (game-task-node-flag save-on-life act1)
             :parent-node (new 'static 'array game-task-node 4
-              (game-task-node desert-rescue-hold-doors)
+              ;(game-task-node desert-vin-quest-resolution)
+              ;(game-task-node volcano-darkeco-resolution)
+              (game-task-node lock-wascity-gungame)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((waswide 0 lkleever special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x18
+            :description (text-id talk-to-kleiver)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
+            :name "wascity-kleeverquest-lavatoad"
+            :when-open (new 'static 'boxed-array :type game-task-event
+              (new 'static 'game-task-event
+                :actor (game-task-actor kleever-wascityb)
+                :action (game-task-action idle)
+                :tex (game-task-icon gaticon-02)
+                :scene "wascity-gun-intro"
+                )
+              (new 'static 'game-task-event
+                :actor (game-task-actor minimap)
+                :action (game-task-action show)
+                :tex (game-task-icon gaticon-116)
+                :scene #f
+                )
+              )
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node wascity-gungame-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((waswide 0 lkleever special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x18
+            :description (text-id talk-to-kleiver)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
+            :name "wascity-kleeverquest-lavatoad-res"
+            :when-open (new 'static 'boxed-array :type game-task-event
+              (new 'static 'game-task-event
+                :actor (game-task-actor kleever-wascityb)
+                :action (game-task-action idle)
+                :tex (game-task-icon gaticon-02)
+                :scene "wascity-gun-intro"
+                )
+              (new 'static 'game-task-event
+                :actor (game-task-actor minimap)
+                :action (game-task-action show)
+                :tex (game-task-icon gaticon-116)
+                :scene #f
+                )
+              )
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node wascity-kleeverquest-lavatoad)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((waswide 0 lkleever special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x18
+            :description (text-id talk-to-kleiver)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
+            :name "wascity-kleeverquest-mantaray"
+            :when-open (new 'static 'boxed-array :type game-task-event
+              (new 'static 'game-task-event
+                :actor (game-task-actor kleever-wascityb)
+                :action (game-task-action idle)
+                :tex (game-task-icon gaticon-02)
+                :scene "wascity-gun-intro"
+                )
+              (new 'static 'game-task-event
+                :actor (game-task-actor minimap)
+                :action (game-task-action show)
+                :tex (game-task-icon gaticon-116)
+                :scene #f
+                )
+              )
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node wascity-kleeverquest-lavatoad-res)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((waswide 0 lkleever special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x18
+            :description (text-id talk-to-kleiver)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
+            :name "wascity-kleeverquest-mantaray-res"
+            :when-open (new 'static 'boxed-array :type game-task-event
+              (new 'static 'game-task-event
+                :actor (game-task-actor kleever-wascityb)
+                :action (game-task-action idle)
+                :tex (game-task-icon gaticon-02)
+                :scene "wascity-gun-intro"
+                )
+              (new 'static 'game-task-event
+                :actor (game-task-actor minimap)
+                :action (game-task-action show)
+                :tex (game-task-icon gaticon-116)
+                :scene #f
+                )
+              )
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node wascity-kleeverquest-mantaray)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((waswide 0 lkleever special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x18
+            :description (text-id talk-to-kleiver)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
+            :name "wascity-kleeverquest-marauders"
+            :when-open (new 'static 'boxed-array :type game-task-event
+              (new 'static 'game-task-event
+                :actor (game-task-actor kleever-wascityb)
+                :action (game-task-action idle)
+                :tex (game-task-icon gaticon-02)
+                :scene "wascity-gun-intro"
+                )
+              (new 'static 'game-task-event
+                :actor (game-task-actor minimap)
+                :action (game-task-action show)
+                :tex (game-task-icon gaticon-116)
+                :scene #f
+                )
+              )
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node wascity-kleeverquest-mantaray-res)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((waswide 0 lkleever special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x18
+            :description (text-id talk-to-kleiver)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
+            :name "wascity-kleeverquest-marauders-res"
+            :when-open (new 'static 'boxed-array :type game-task-event
+              (new 'static 'game-task-event
+                :actor (game-task-actor kleever-wascityb)
+                :action (game-task-action idle)
+                :tex (game-task-icon gaticon-02)
+                :scene "wascity-gun-intro"
+                )
+              (new 'static 'game-task-event
+                :actor (game-task-actor minimap)
+                :action (game-task-action show)
+                :tex (game-task-icon gaticon-116)
+                :scene #f
+                )
+              )
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node wascity-kleeverquest-marauders)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((waswide 0 lkleever special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x18
+            :description (text-id talk-to-kleiver)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
+            :name "wascity-kleeverquest-bruteboss"
+            :when-open (new 'static 'boxed-array :type game-task-event
+              (new 'static 'game-task-event
+                :actor (game-task-actor kleever-wascityb)
+                :action (game-task-action idle)
+                :tex (game-task-icon gaticon-02)
+                :scene "wascity-gun-intro"
+                )
+              (new 'static 'game-task-event
+                :actor (game-task-actor minimap)
+                :action (game-task-action show)
+                :tex (game-task-icon gaticon-116)
+                :scene #f
+                )
+              )
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node wascity-kleeverquest-marauders-res)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((waswide 0 lkleever special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x18
+            :description (text-id talk-to-kleiver)
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'wascity
+            :task (game-task wascity-gungame)
+            :name "wascity-kleeverquest-bruteboss-res"
+            :when-open (new 'static 'boxed-array :type game-task-event
+              (new 'static 'game-task-event
+                :actor (game-task-actor kleever-wascityb)
+                :action (game-task-action idle)
+                :tex (game-task-icon gaticon-02)
+                :scene "wascity-gun-intro"
+                )
+              (new 'static 'game-task-event
+                :actor (game-task-actor minimap)
+                :action (game-task-action show)
+                :tex (game-task-icon gaticon-116)
+                :scene #f
+                )
+              )
+            :flags (game-task-node-flag save-on-life act1)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node wascity-kleeverquest-bruteboss)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)
@@ -4106,7 +5495,7 @@
               )
             :flags (game-task-node-flag close-task save-on-life act1)
             :parent-node (new 'static 'array game-task-node 4
-              (game-task-node wascity-gungame-introduction)
+              (game-task-node wascity-kleeverquest-bruteboss-res)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)
@@ -4316,7 +5705,7 @@
               )
             :flags (game-task-node-flag save-on-life act1)
             :parent-node (new 'static 'array game-task-node 4
-              (game-task-node wascity-gungame-resolution)
+              (game-task-node desert-rescue-hold-doors)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)
@@ -6022,8 +7411,8 @@
               :restart-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset text-message)
                 :fail (new 'static 'resetter-spec
-                  :continue "desert-ashelin"
-                  :node (game-task-node desert-oasis-defense-battle)
+                  :continue "desert-ef-start"
+                  :node (game-task-node desert-oasis-defense-meeting)
                   :reset-mode 'try
                   :execute #f
                   )
@@ -6033,8 +7422,8 @@
               :quit-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset)
                 :fail (new 'static 'resetter-spec
-                  :continue "desert-ashelin"
-                  :node (game-task-node desert-oasis-defense-battle)
+                  :continue "desert-ef-start"
+                  :node (game-task-node desert-oasis-defense-meeting)
                   :reset-mode 'life
                   :execute #f
                   )
@@ -6044,8 +7433,8 @@
               :fail-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset)
                 :fail (new 'static 'resetter-spec
-                  :continue "desert-ashelin"
-                  :node (game-task-node desert-oasis-defense-battle)
+                  :continue "desert-ef-start"
+                  :node (game-task-node desert-oasis-defense-meeting)
                   :reset-mode 'life
                   :execute #f
                   )
@@ -6057,8 +7446,8 @@
                 :flags (resetter-flag auto-reset text-message no-audio no-slow-down)
                 :fail (new 'static 'resetter-spec :continue #f :reset-mode 'life :execute #f)
                 :retry (new 'static 'resetter-spec
-                  :continue "desert-ashelin"
-                  :node (game-task-node desert-oasis-defense-battle)
+                  :continue "desert-ef-start"
+                  :node (game-task-node desert-oasis-defense-meeting)
                   :reset-mode 'try
                   :execute #f
                   )
@@ -7246,6 +8635,67 @@
             :description (text-id progress-missions-mine-boss)
             :faction-commands '()
             )
+            (new 'static 'game-task-node-info
+            :level 'mine
+            :task (game-task mine-boss)
+            :name "mine-boss-extra"
+            :when-open #f
+            :flags (game-task-node-flag no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node mine-boss-resolution)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :task-mask (task-mask done)
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x26
+            :command-count #x2
+            :description (text-id progress-missions-mine-boss)
+            :faction-commands '()
+            )
+          (new 'static 'game-task-node-info
+            :level 'mine
+            :task (game-task mine-boss)
+            :name "mine-boss-extra-resolution"
+            :when-open #f
+            :flags (game-task-node-flag set-task-mask no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node mine-boss-extra)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :task-mask (task-mask done)
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :mask (task-manager-mask resolution-scene)
+              :level 'mined
+              :type-to-spawn 'task-manager-prebot
+              :intro-scene #f
+              :resolution-scene "mine-boss-res"
+              :resolution-scene-continue #f
+              :final-node (game-task-node mine-boss-extra-resolution)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x26
+            :command-count #x2
+            :description (text-id progress-missions-mine-boss)
+            :faction-commands '()
+            )
           (new 'static 'game-task-node-info
             :level 'sewer
             :task (game-task sewer-met-hum)
@@ -8182,7 +9632,7 @@
             :flags (game-task-node-flag save-on-life act2)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node city-sniper-fight-resolution)
-              (game-task-node city-gun-course-1-resolution)
+              (game-task-node none)
               (game-task-node none)
               (game-task-node none)
               )
@@ -8503,7 +9953,7 @@
               :on-complete '(begin (want-continue "foresta-start") (auto-save 'auto-save))
               :on-fail #f
               )
-            :borrow '((foresta 0 lforplnt display))
+            :borrow '((foresta 0 lforplnt display)(foresta 1 lformach display))
             :open? #f
             :on-close #f
             :reset (new 'static 'task-reset-info
@@ -9383,7 +10833,7 @@
             :flags (game-task-node-flag save-on-life act2)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node city-hijack-vehicle-resolution)
-              (game-task-node city-gun-course-2-resolution)
+              (game-task-node none)
               (game-task-node none)
               (game-task-node none)
               )
@@ -9430,25 +10880,45 @@
             :reset (new 'static 'task-reset-info
               :restart-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset text-message no-draw-target)
-                :fail (new 'static 'resetter-spec :continue "ctyport-bombbot" :reset-mode 'try :execute #f)
+                :fail (new 'static 'resetter-spec
+                  :continue "ctyport-hiphog-no-hiphog"
+                  :node (game-task-node city-blow-barricade-introduction)
+                  :reset-mode 'life
+                  :execute #f
+                  )
                 :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
                 :reset-delay (seconds 6.5)
                 )
               :quit-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset no-draw-target)
-                :fail (new 'static 'resetter-spec :continue "ctyport-bombbot" :reset-mode 'life :execute #f)
+                :fail (new 'static 'resetter-spec
+                  :continue "ctyport-hiphog-no-hiphog"
+                  :node (game-task-node city-blow-barricade-introduction)
+                  :reset-mode 'life
+                  :execute #f
+                  )
                 :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
                 :reset-delay (seconds 6.5)
                 )
               :fail-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset no-draw-target)
-                :fail (new 'static 'resetter-spec :continue "ctyport-bombbot" :reset-mode 'life :execute #f)
+                :fail (new 'static 'resetter-spec
+                  :continue "ctyport-hiphog-no-hiphog"
+                  :node (game-task-node city-blow-barricade-introduction)
+                  :reset-mode 'life
+                  :execute #f
+                  )
                 :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
                 :reset-delay (seconds 6.5)
                 )
               :death-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset text-message no-audio no-slow-down no-draw-target)
-                :fail (new 'static 'resetter-spec :continue "ctyport-bombbot" :reset-mode 'life :execute #f)
+                :fail (new 'static 'resetter-spec
+                  :continue "ctyport-hiphog-no-hiphog"
+                  :node (game-task-node city-blow-barricade-introduction)
+                  :reset-mode 'life
+                  :execute #f
+                  )
                 :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
                 )
               )
@@ -13644,22 +15114,22 @@
             :reset (new 'static 'task-reset-info
               :restart-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset text-message no-audio no-slow-down)
-                :fail (new 'static 'resetter-spec :continue "wascityb-defend-reset" :reset-mode 'try :execute #f)
-                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                :fail (new 'static 'resetter-spec :continue "wascityb-start" :reset-mode 'try :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f :node (game-task-node wascity-defend-get-to))
                 )
               :quit-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset text-message no-audio no-slow-down)
-                :fail (new 'static 'resetter-spec :continue "wascityb-defend-reset" :reset-mode 'life :execute #f)
+                :fail (new 'static 'resetter-spec :continue "wascityb-start" :reset-mode 'life :execute #f :node (game-task-node wascity-defend-get-to))
                 :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
                 )
               :fail-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset text-message no-audio no-slow-down)
-                :fail (new 'static 'resetter-spec :continue "wascityb-defend-reset" :reset-mode 'life :execute #f)
+                :fail (new 'static 'resetter-spec :continue "wascityb-start" :reset-mode 'life :execute #f :node (game-task-node wascity-defend-get-to))
                 :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
                 )
               :death-info (new 'static 'resetter-params
                 :flags (resetter-flag auto-reset text-message no-audio no-slow-down)
-                :fail (new 'static 'resetter-spec :continue "wascityb-defend-reset" :reset-mode 'life :execute #f)
+                :fail (new 'static 'resetter-spec :continue "wascityb-start" :reset-mode 'life :execute #f :node (game-task-node wascity-defend-get-to))
                 :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
                 )
               )
@@ -23353,6 +24823,446 @@
             :command-index #x4b
             :faction-commands '()
             )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-spawn-task-oasis)
+            :name "desert-spawn-task-oasis-goto-artifact"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x44
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-spawn-task-oasis)
+            :name "desert-spawn-task-oasis-battle"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life close-task)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-spawn-task-oasis-goto-artifact)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :level 'desoasis
+              :type-to-spawn 'task-manager-desertspawn-defense
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node desert-spawn-task-oasis-resolution)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '((desert-game alias desert copy desoasis special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x1f
+            :command-count #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-spawn-task-oasis)
+            :name "desert-spawn-task-oasis-resolution"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life close-task)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-spawn-task-oasis-battle)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((desert-game alias desert copy desoasis special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x1f
+            :command-count #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-spawn-task-deserta)
+            :name "desert-spawn-task-deserta-goto-artifact"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x44
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-spawn-task-deserta)
+            :name "desert-spawn-task-deserta-battle"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life close-task)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-spawn-task-deserta-goto-artifact)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :level 'desoasis
+              :type-to-spawn 'task-manager-deserta-defense
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node desert-spawn-task-deserta-resolution)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '((desert-game alias desert copy desoasis special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x1f
+            :command-count #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-spawn-task-deserta)
+            :name "desert-spawn-task-deserta-resolution"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life close-task)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-spawn-task-deserta-battle)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '((desert-game alias desert copy desoasis special))
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x1f
+            :command-count #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level #f
+            :task (game-task desert-brute-killed)
+            :name "desert-brute-killed-introduction"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life close-task)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level #f
+            :task (game-task desert-brute-killed)
+            :name "desert-brute-killed-resolution"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life close-task)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-brute-killed-introduction)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task desert-interceptors)
+            :name "desert-ship-lod-introduction"
+            :when-open #f
+            :flags (game-task-node-flag bbush act1 save-on-life)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node desert-interceptors-attack)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'none
+            :task (game-task arena-challenges)
+            :name "arena-challenge-1"
+            :when-open #f
+            :flags (game-task-node-flag bbush close-task no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-fight-3-resolution)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'none
+            :task (game-task arena-challenges)
+            :name "arena-challenge-2"
+            :when-open #f
+            :flags (game-task-node-flag bbush close-task no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-challenge-1)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'none
+            :task (game-task arena-challenges)
+            :name "arena-challenge-3"
+            :when-open #f
+            :flags (game-task-node-flag bbush close-task no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-challenge-2)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'none
+            :task (game-task arena-challenges)
+            :name "arena-challenge-4"
+            :when-open #f
+            :flags (game-task-node-flag bbush close-task no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-challenge-3)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'none
+            :task (game-task arena-challenges)
+            :name "arena-challenge-5"
+            :when-open #f
+            :flags (game-task-node-flag bbush close-task no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-challenge-4)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'none
+            :task (game-task arena-challenges)
+            :name "arena-challenge-6"
+            :when-open #f
+            :flags (game-task-node-flag bbush close-task no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-challenge-5)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'none
+            :task (game-task arena-challenges)
+            :name "arena-challenge-7"
+            :when-open #f
+            :flags (game-task-node-flag bbush close-task no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-challenge-6)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'none
+            :task (game-task arena-challenges)
+            :name "arena-challenge-8"
+            :when-open #f
+            :flags (game-task-node-flag bbush close-task no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-challenge-7)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'none
+            :task (game-task arena-challenges)
+            :name "arena-challenge-9"
+            :when-open #f
+            :flags (game-task-node-flag bbush close-task no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-challenge-8)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'none
+            :task (game-task arena-challenges)
+            :name "arena-challenge-10"
+            :when-open #f
+            :flags (game-task-node-flag bbush close-task no-percent)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node arena-challenge-9)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
           )
         )
   (set! (-> game-info mission-list) (new 'global 'boxed-array game-task-node-info 410))
@@ -23451,3 +25361,6 @@
       )
     )
   )
+
+
+;(foresta 0 lforring display)

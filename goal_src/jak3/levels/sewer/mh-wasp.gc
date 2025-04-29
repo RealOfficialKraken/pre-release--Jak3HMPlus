@@ -500,7 +500,9 @@
      (freeze-hit-begin)
      (if (= (-> this hit-points) 0.0)
          (go (method-of-object this die-explode))
-         (go (method-of-object this knocked))
+         (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+          (go (method-of-object this knocked))
+         )
          )
      )
     (else

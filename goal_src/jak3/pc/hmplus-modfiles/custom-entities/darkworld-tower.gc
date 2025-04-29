@@ -1,5 +1,7 @@
 (in-package goal)
 
+;name: darkworld-tower.gc
+
 (defskelgroup skel-darkworldtower mhcity-eco-dark-tower mhcity-eco-dark-tower-lod0-jg mhcity-eco-dark-tower-idle-ja
               ((mhcity-eco-dark-tower-lod0-mg (meters 999999)))
               :bounds (static-spherem 0 10 0 9999999)
@@ -71,7 +73,7 @@
         )
       (sound-play "de-tower-zap" :id (-> self plasma-sound) :position (-> self root trans))
       (let ((s3-0 (new 'stack-no-clear 'vector)))
-        (set! (-> s3-0 quad) (-> self root trans quad))
+        (vector-copy! s3-0 (-> self root trans))
         (let ((s4-0 (new 'stack-no-clear 'collide-query))
               (s5-2 (new 'stack-no-clear 'vector))
               (gp-2 (new 'stack-no-clear 'vector))
@@ -82,10 +84,10 @@
                 )
             (set! (-> s3-0 y) (+ f0-6 (- f1-3 (* (the float (the int (/ f1-3 f2-3))) f2-3))))
             )
-          (set! (-> gp-2 quad) (-> s3-0 quad))
+          (vector-copy! gp-2 s3-0)
           (sound-play "tree-shocker" :id (-> self shock-sound) :position gp-2)
           (+! (-> s3-0 x) 28672.0)
-          (set! (-> s4-0 start-pos quad) (-> s3-0 quad))
+          (vector-copy! (-> s4-0 start-pos) s3-0)
           (vector-float*! (-> s4-0 move-dist) *x-vector* -40960.0)
           (let ((v1-39 s4-0))
             (set! (-> v1-39 radius) 6144.0)
@@ -101,7 +103,7 @@
                 (s3-1 (-> self discs))
                 )
             (when (>= f0-12 0.0)
-              (set! (-> s5-2 quad) (-> s4-0 best-other-tri intersect quad))
+              (vector-copy! s5-2 (-> s4-0 best-other-tri intersect))
               (let ((s4-1 *x-vector*)
                     (f30-0 9362.286)
                     (s2-0 (vector-y-quaternion! (new 'stack-no-clear 'vector) (-> s3-1 0 orient)))
@@ -110,7 +112,7 @@
                     (f26-0 (vector-vector-distance gp-2 s5-2))
                     )
                 (dotimes (s5-3 8)
-                  (vector-rotate-around-axis! s1-0 (the-as quaternion s4-1) f28-0 s2-0)
+                  (vector-rotate-around-axis! s1-0 s4-1 f28-0 s2-0)
                   (vector-float*! s1-0 s1-0 f26-0)
                   (vector+! (-> s3-1 0 pts s5-3) gp-2 s1-0)
                   (+! f28-0 f30-0)

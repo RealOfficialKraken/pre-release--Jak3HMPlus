@@ -163,8 +163,24 @@
   (none)
   )
 
-;; WARN: Return type mismatch object vs none.
-;; WARN: Function get-nav-control has a return type of none, but the expression builder found a return statement.
+(defun get-nav-control ((arg0 process-drawable) (arg1 nav-mesh))
+  (if (not arg1)
+      (set! arg1 (nav-mesh-from-res-tag (-> arg0 entity) 'nav-mesh-actor 0))
+      )
+  (if arg1
+    (add-process-drawable-to-nav-mesh arg1 arg0 #t)
+    (add-process-drawable-to-nav-mesh *default-nav-mesh* arg0 #t)
+    )
+  (when (not *default-nav-mesh*)
+    (if (-> arg0 entity)
+        (logior! (-> arg0 entity extra perm status) (entity-perm-status error))
+        )
+    (go process-drawable-art-error "no nav-mesh")
+    (return 0)
+    )
+  (none)
+  )
+#|
 (defun get-nav-control ((arg0 process-drawable) (arg1 nav-mesh))
   (if (not arg1)
       (set! arg1 (nav-mesh-from-res-tag (-> arg0 entity) 'nav-mesh-actor 0))
@@ -173,12 +189,17 @@
     (if (-> arg0 entity)
         (logior! (-> arg0 entity extra perm status) (entity-perm-status error))
         )
+  (if arg1
+    (add-process-drawable-to-nav-mesh arg1 arg0 #t)
+    (add-process-drawable-to-nav-mesh *default-nav-mesh* arg0 #t)
+    )
     (go process-drawable-art-error "no nav-mesh")
     (return 0)
     )
   (add-process-drawable-to-nav-mesh arg1 arg0 #t)
   (none)
-  )
+  )|#
+
 
 (defmethod find-nearest-poly-to-point ((this nav-control) (arg0 vector))
   (let ((gp-0 (new 'stack 'nav-find-poly-parms)))

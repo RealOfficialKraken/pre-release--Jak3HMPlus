@@ -239,9 +239,6 @@
               (set! (-> *was-squad-control* target-count) 0)
               0
               )
-            (if (and (< f30-0 819200.0) (-> *setting-control* user-current turbo))
-                (set-setting! 'turbo #f 0.0 0)
-                )
             (when (< f30-0 327680.0)
               (was-squad-manager-kill)
               (set-setting! 'stop-vehicle? #t 0.0 0)
@@ -272,6 +269,7 @@
       (set-setting! 'music 'oasisfi 0.0 0)
       (set-setting! 'fog-special-interp-rate #f 0.025 0)
       (set-setting! 'fog-special-interp-targ #f 0.9 0)
+      (set! enemy-noto (rand-vu-int-range 18 20))
       (dotimes (gp-1 (length *oasis-vehicle-start*))
         (spawn-v-marauder self -1 gp-1)
         )
@@ -778,7 +776,12 @@
 
 (defmethod init-from-entity! ((this desoasis-hellcat) (arg0 entity-actor))
   "Set up a newly created process from the entity that created it."
-  (let ((s4-0 (new 'process 'collide-shape this (collide-list-enum usually-hit-by-player))))
+  (when 
+    (and 
+      (task-node-closed? (game-task-node desert-oasis-defense-introduction))
+      (not (task-node-closed? (game-task-node desert-oasis-defense-resolution)))
+      )
+      (let ((s4-0 (new 'process 'collide-shape this (collide-list-enum usually-hit-by-player))))
     (let ((v1-2 (new 'process 'collide-shape-prim-mesh s4-0 (the-as uint 0) (the-as uint 0))))
       (set! (-> v1-2 prim-core collide-as) (collide-spec obstacle))
       (set! (-> v1-2 prim-core action) (collide-action solid))
@@ -803,4 +806,5 @@
     )
   (transform-post)
   (go (method-of-object this idle))
+  )
   )

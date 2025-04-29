@@ -21,7 +21,7 @@
 
 (define *alert-level-settings* (new 'static 'squad-alert-state-settings
                                  :ped-tazer (new 'static 'squad-unit-settings
-                                   :target-count 3
+                                   :target-count 20
                                    :shot-count 1
                                    :inaccuracy 0.5
                                    :acquire-delay (seconds 1)
@@ -29,7 +29,7 @@
                                    :burst-delay (seconds 2)
                                    )
                                  :ped-rifle (new 'static 'squad-unit-settings
-                                   :target-count 3
+                                   :target-count 20
                                    :shot-count 2
                                    :rand-shot-count 1
                                    :inaccuracy 0.5
@@ -38,7 +38,7 @@
                                    :burst-delay (seconds 2)
                                    )
                                  :ped-grenade (new 'static 'squad-unit-settings
-                                   :target-count 1
+                                   :target-count 20
                                    :shot-count 1
                                    :inaccuracy 0.5
                                    :acquire-delay (seconds 1)
@@ -66,7 +66,7 @@
 
 (define *ff-war-alert-state-settings* (new 'static 'squad-alert-state-settings
                                         :ped-tazer (new 'static 'squad-unit-settings
-                                          :target-count 4
+                                          :target-count 20
                                           :shot-count 1
                                           :inaccuracy 0.125
                                           :acquire-delay (seconds 0.5)
@@ -74,7 +74,7 @@
                                           :burst-delay (seconds 2)
                                           )
                                         :ped-rifle (new 'static 'squad-unit-settings
-                                          :target-count 7
+                                          :target-count 20
                                           :shot-count 2
                                           :rand-shot-count 2
                                           :inaccuracy 0.125
@@ -83,7 +83,7 @@
                                           :burst-delay (seconds 2)
                                           )
                                         :ped-grenade (new 'static 'squad-unit-settings
-                                          :target-count 3
+                                          :target-count 20
                                           :shot-count 1
                                           :inaccuracy 0.125
                                           :acquire-delay (seconds 1)
@@ -753,7 +753,7 @@
         (if (not (logtest? (-> this alert-state flags) (squad-alert-flag alarm-on)))
             (logior! (-> this alert-state flags) (squad-alert-flag alarm-on))
             )
-        (vector-copy! (new 'stack-no-clear 'vector) (target-pos 0))
+        (set! (-> (new 'stack-no-clear 'vector) quad) (-> (target-pos 0) quad))
         (if #t
             (ff-squad-control-method-47 this)
             )

@@ -334,7 +334,7 @@
   (cond
     ((< 0.0 (-> self health-hud-timer))
      (logclear! (-> self mask) (process-mask actor-pause))
-     (send-event (handle->process (-> self hud-health)) 'set-health (the int (+ 0.5 (* 10.0 (-> self health)))))
+     (send-event (handle->process (-> self hud-health)) 'set-health (the int (+ 0.5 (* 1.0 (-> self health)))))
      (let ((s5-0 (new 'stack-no-clear 'vector))
            (gp-0 (new 'stack-no-clear 'vector4w))
            )

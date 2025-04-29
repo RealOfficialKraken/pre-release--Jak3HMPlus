@@ -1097,13 +1097,13 @@
                                    :bullseye-joint 19
                                    :notice-distance (meters 30)
                                    :notice-distance-delta (meters 10)
-                                   :default-hit-points 1.0
+                                   :default-hit-points 1000.0
                                    :gnd-collide-with (collide-spec backgnd)
                                    :overlaps-others-collide-with-filter (collide-spec jak bot player-list)
                                    :movement-gravity (meters -100)
                                    :friction 0.8
-                                   :attack-shove-back (meters 3)
-                                   :attack-shove-up (meters 2)
+                                   :attack-shove-back (meters 9999999999)
+                                   :attack-shove-up (meters 46)
                                    :attack-mode 'generic
                                    :attack-damage 2
                                    :recover-gnd-collide-with (collide-spec backgnd crate obstacle hit-by-others-list pusher)
@@ -1114,34 +1114,34 @@
                                    :jump-height-min (meters 3)
                                    :jump-height-factor 0.5
                                    :knocked-seek-ry-clamp 2730.6667
-                                   :knocked-soft-vxz-lo (meters 17.6)
-                                   :knocked-soft-vxz-hi (meters 26.4)
-                                   :knocked-soft-vy-lo (meters 20)
-                                   :knocked-soft-vy-hi (meters 30)
-                                   :knocked-medium-vxz-lo (meters 36)
-                                   :knocked-medium-vxz-hi (meters 48)
-                                   :knocked-medium-vy-lo (meters 33)
-                                   :knocked-medium-vy-hi (meters 37)
-                                   :knocked-hard-vxz-lo (meters 19.2)
-                                   :knocked-hard-vxz-hi (meters 28.8)
-                                   :knocked-hard-vy-lo (meters 44.8)
-                                   :knocked-hard-vy-hi (meters 51.2)
-                                   :knocked-huge-vxz-lo (meters 40.2)
-                                   :knocked-huge-vxz-hi (meters 60.8)
-                                   :knocked-huge-vy-lo (meters 44.8)
-                                   :knocked-huge-vy-hi (meters 53.2)
-                                   :knocked-yellow-vxz-lo (meters 10)
-                                   :knocked-yellow-vxz-hi (meters 12)
-                                   :knocked-yellow-vy-lo (meters 14)
-                                   :knocked-yellow-vy-hi (meters 20)
-                                   :knocked-red-vxz-lo (meters 6)
-                                   :knocked-red-vxz-hi (meters 48)
-                                   :knocked-red-vy-lo (meters 23)
-                                   :knocked-red-vy-hi (meters 37)
-                                   :knocked-blue-vxz-lo (meters 10)
-                                   :knocked-blue-vxz-hi (meters 12)
-                                   :knocked-blue-vy-lo (meters 6)
-                                   :knocked-blue-vy-hi (meters 20)
+                                   :knocked-soft-vxz-lo 72089.6
+                                   :knocked-soft-vxz-hi 108134.4
+                                   :knocked-soft-vy-lo 81920.0
+                                   :knocked-soft-vy-hi 122880.0
+                                   :knocked-medium-vxz-lo 147456.0
+                                   :knocked-medium-vxz-hi 196608.0
+                                   :knocked-medium-vy-lo 135168.0
+                                   :knocked-medium-vy-hi 151552.0
+                                   :knocked-hard-vxz-lo 78643.2
+                                   :knocked-hard-vxz-hi 117964.8
+                                   :knocked-hard-vy-lo 183500.8
+                                   :knocked-hard-vy-hi 209715.2
+                                   :knocked-huge-vxz-lo 164659.2
+                                   :knocked-huge-vxz-hi 249036.8
+                                   :knocked-huge-vy-lo 183500.8
+                                   :knocked-huge-vy-hi 217907.2
+                                   :knocked-yellow-vxz-lo 40960.0
+                                   :knocked-yellow-vxz-hi 49152.0
+                                   :knocked-yellow-vy-lo 57344.0
+                                   :knocked-yellow-vy-hi 81920.0
+                                   :knocked-red-vxz-lo 24576.0
+                                   :knocked-red-vxz-hi 196608.0
+                                   :knocked-red-vy-lo 94208.0
+                                   :knocked-red-vy-hi 151552.0
+                                   :knocked-blue-vxz-lo 40960.0
+                                   :knocked-blue-vxz-hi 49152.0
+                                   :knocked-blue-vy-lo 24576.0
+                                   :knocked-blue-vy-hi 81920.0
                                    :ragdoll-info #f
                                    :shadow-size (meters 1)
                                    :shadow-max-y (meters 1)
@@ -1188,13 +1188,13 @@
                                  :bullseye-joint 24
                                  :notice-distance (meters 30)
                                  :notice-distance-delta (meters 10)
-                                 :default-hit-points 1.0
+                                 :default-hit-points 1000.0
                                  :gnd-collide-with (collide-spec backgnd)
                                  :overlaps-others-collide-with-filter (collide-spec jak bot player-list)
                                  :movement-gravity (meters -100)
                                  :friction 0.8
-                                 :attack-shove-back (meters 3)
-                                 :attack-shove-up (meters 2)
+                                 :attack-shove-back (meters 9999999999)
+                                 :attack-shove-up (meters 9999999999)
                                  :attack-mode 'generic
                                  :attack-damage 2
                                  :recover-gnd-collide-with (collide-spec backgnd crate obstacle hit-by-others-list pusher)
@@ -1205,34 +1205,34 @@
                                  :jump-height-min (meters 3)
                                  :jump-height-factor 0.5
                                  :knocked-seek-ry-clamp 2730.6667
-                                 :knocked-soft-vxz-lo (meters 17.6)
-                                 :knocked-soft-vxz-hi (meters 26.4)
-                                 :knocked-soft-vy-lo (meters 20)
-                                 :knocked-soft-vy-hi (meters 30)
-                                 :knocked-medium-vxz-lo (meters 36)
-                                 :knocked-medium-vxz-hi (meters 48)
-                                 :knocked-medium-vy-lo (meters 33)
-                                 :knocked-medium-vy-hi (meters 37)
-                                 :knocked-hard-vxz-lo (meters 19.2)
-                                 :knocked-hard-vxz-hi (meters 28.8)
-                                 :knocked-hard-vy-lo (meters 44.8)
-                                 :knocked-hard-vy-hi (meters 51.2)
-                                 :knocked-huge-vxz-lo (meters 40.2)
-                                 :knocked-huge-vxz-hi (meters 60.8)
-                                 :knocked-huge-vy-lo (meters 44.8)
-                                 :knocked-huge-vy-hi (meters 53.2)
-                                 :knocked-yellow-vxz-lo (meters 10)
-                                 :knocked-yellow-vxz-hi (meters 12)
-                                 :knocked-yellow-vy-lo (meters 14)
-                                 :knocked-yellow-vy-hi (meters 20)
-                                 :knocked-red-vxz-lo (meters 6)
-                                 :knocked-red-vxz-hi (meters 48)
-                                 :knocked-red-vy-lo (meters 23)
-                                 :knocked-red-vy-hi (meters 37)
-                                 :knocked-blue-vxz-lo (meters 10)
-                                 :knocked-blue-vxz-hi (meters 12)
-                                 :knocked-blue-vy-lo (meters 6)
-                                 :knocked-blue-vy-hi (meters 20)
+                                 :knocked-soft-vxz-lo 72089.6
+                                 :knocked-soft-vxz-hi 108134.4
+                                 :knocked-soft-vy-lo 81920.0
+                                 :knocked-soft-vy-hi 122880.0
+                                 :knocked-medium-vxz-lo 147456.0
+                                 :knocked-medium-vxz-hi 196608.0
+                                 :knocked-medium-vy-lo 135168.0
+                                 :knocked-medium-vy-hi 151552.0
+                                 :knocked-hard-vxz-lo 78643.2
+                                 :knocked-hard-vxz-hi 117964.8
+                                 :knocked-hard-vy-lo 183500.8
+                                 :knocked-hard-vy-hi 209715.2
+                                 :knocked-huge-vxz-lo 164659.2
+                                 :knocked-huge-vxz-hi 249036.8
+                                 :knocked-huge-vy-lo 183500.8
+                                 :knocked-huge-vy-hi 217907.2
+                                 :knocked-yellow-vxz-lo 40960.0
+                                 :knocked-yellow-vxz-hi 49152.0
+                                 :knocked-yellow-vy-lo 57344.0
+                                 :knocked-yellow-vy-hi 81920.0
+                                 :knocked-red-vxz-lo 24576.0
+                                 :knocked-red-vxz-hi 196608.0
+                                 :knocked-red-vy-lo 94208.0
+                                 :knocked-red-vy-hi 151552.0
+                                 :knocked-blue-vxz-lo 40960.0
+                                 :knocked-blue-vxz-hi 49152.0
+                                 :knocked-blue-vy-lo 24576.0
+                                 :knocked-blue-vy-hi 81920.0
                                  :ragdoll-info #f
                                  :shadow-size (meters 1)
                                  :shadow-max-y (meters 10)
@@ -1491,7 +1491,7 @@
         )
       )
     (when (nonzero? (-> self shoot-delay))
-      (when (time-elapsed? (-> self next-shoot) (-> self shoot-delay))
+      (when (time-elapsed? (-> self next-shoot) (seconds 0.3))
         (set-time! (-> self next-shoot))
         (if (< (vector-vector-distance (-> self root trans) (target-pos 0)) 614400.0)
             (des-beast-method-164 self)
@@ -1574,6 +1574,10 @@
     (des-beast-method-163 self)
     (set! (-> self main-speed-factor) 0.9)
     (set! (-> self main-speed-factor-dest) 0.9)
+    (when  (= weather-dark-mode #t)
+      (set! (-> self main-speed-factor) 1.2)
+      (set! (-> self main-speed-factor-dest) 1.2)
+    )
     (set! (-> self path-pos-speed) (- (-> self path-pos-speed)))
     (set! (-> self run-start-frame) 18.0)
     (go-virtual idle)
@@ -1757,6 +1761,16 @@
      (enemy-touched-handler this arg0 arg3)
      )
     (('attack)
+    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      (set! hpbar-max-hit-points (+ 2000.0 (/ (the float enemy-noto) 3)))
+      (set! hpbar-max-hit-points (+ 1000.0 (/ (the float enemy-noto) 3)))
+    )
+    (set! hpbar-hit-points (-> self hit-points))
+    (set! enemy-hp #t)
+    (set! enemy-string "Wasteland Metalhead Beast")
+    (when (<= (-> this hit-points) 0.0) 
+      (set! hpbar-hit-points 0.0)
+    )
      (let ((s5-0 (the-as attack-info (-> arg3 param 1))))
        (cond
          ((!= (-> s5-0 id) (-> this incoming-attack-id))
@@ -2412,12 +2426,12 @@
   (set! (-> this can-turn?) #f)
   (cond
     ((kiosk?)
-     (set! (-> this hit-points) 110.0)
-     (set! (-> this hit-points2) 35.0)
+     (set! (-> this hit-points) (-> this enemy-info default-hit-points))
+     (set! (-> this hit-points2) (-> this enemy-info default-hit-points))
      )
     (else
-      (set! (-> this hit-points) (- 225.0 (* 70.0 (you-suck-scale *game-info* #f 0))))
-      (set! (-> this hit-points2) 50.0)
+      (set! (-> this hit-points) (-> this enemy-info default-hit-points))
+      (set! (-> this hit-points2) (-> this enemy-info default-hit-points))
       )
     )
   (set! (-> this angry) 0.0)

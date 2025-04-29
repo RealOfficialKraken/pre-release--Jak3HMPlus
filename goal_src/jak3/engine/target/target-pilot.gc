@@ -5,12 +5,7 @@
 ;; name in dgo: target-pilot
 ;; dgos: HGA, LPATK, RAILA, LFACCAR, CWI, WASALL, LFACTORY, COMBA
 
-(deftype cquery-with-5vec (structure)
-  "target-pilot-post"
-  ((cquery collide-query :inline)
-   (vec    vector 5 :inline)
-   )
-  )
+
 
 (define-extern h-warf type)
 

@@ -8,7 +8,7 @@
 ;; DECOMP BEGINS
 
 ;; this file is debug only
-(declare-file (debug))
+;(declare-file (debug))
 
 (define *overide-mood-color-table*
   (new 'static 'mood-color-table :data (new 'static 'inline-array mood-color 8

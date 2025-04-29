@@ -5,8 +5,17 @@
 ;; name in dgo: main
 ;; dgos: GAME
 
+(define weather-dark-mode #f)
 (define-extern menu-respond-to-pause (function symbol))
 (define-extern anim-tester-add-object (function string none))
+(defun-extern runs-jak3-every-frame (none))
+(defun-extern stat-tracker! (none))
+(defun-extern update-xp! (none))
+(defun-extern wasteland-spawn! (none))
+(defun-extern run-warp-room (none))
+(define-extern title-progress (function symbol int))
+(defun-extern runs-shop! (none))
+(defun-extern level-spawn-check (none))
 
 ;; DECOMP BEGINS
 
@@ -341,9 +350,9 @@
       (.lvf vf1 (&-> this color-dest quad))
       (.lvf vf2 (&-> this color quad))
       (.sub.vf vf3 vf1 vf2)
-      (.add.x.vf.y vf4 vf4 vf4)
-      (.min.w.vf.y vf4 vf4 vf0)
-      (.max.y.vf.y vf4 vf4 vf0)
+      (.add.x.vf vf4 vf4 vf4 :mask #b10)
+      (.min.w.vf vf4 vf4 vf0 :mask #b10)
+      (.max.y.vf vf4 vf4 vf0 :mask #b10)
       (.mul.y.vf vf3 vf3 vf4)
       (.add.vf vf1 vf2 vf3)
       (.svf (&-> this extra quad) vf4)
@@ -392,9 +401,9 @@
                  )
   "Initialize the screen-filter with the given settings."
   (set! (-> this draw?) #t)
-  (vector-copy! (-> this color) arg0)
-  (vector-copy! (-> this color-src) arg0)
-  (vector-copy! (-> this color-dest) arg1)
+  (set! (-> this color quad) (-> arg0 quad))
+  (set! (-> this color-src quad) (-> arg0 quad))
+  (set! (-> this color-dest quad) (-> arg1 quad))
   (set! (-> this extra x) arg2)
   (set! (-> this extra y) 0.0)
   (set! (-> this bucket) arg3)
@@ -1437,6 +1446,20 @@
         (load-continue (-> *level* loading-level))
         )
 
+        (runs-jak3-every-frame)
+        (stat-tracker!)
+        (update-xp!)
+        (wasteland-spawn!)
+        (run-warp-room)
+        (level-spawn-check)
+        (when 
+          (and
+            (= weather-dark-mode #t)
+            (task-node-closed? (game-task-node desert-vin-quest-resolution))
+          )
+          (runs-shop!)
+        )
+
     ; ;; modify vertices for merc face animation. I believe this is somewhat racing DMA of merc data to VU1.
     (with-profiler 'merc *profile-merc-color*
       (blerc-execute)
@@ -1642,7 +1665,7 @@
 (defbehavior display-loop process ()
   "Main loop for running the game."
 
-  (stack-size-set! (-> self main-thread) 512)
+  (stack-size-set! (-> self main-thread) 1024)
 
   ;; start process to run math (joints) engine.
   (process-spawn-function

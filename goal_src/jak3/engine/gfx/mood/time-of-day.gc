@@ -383,7 +383,7 @@
   (set! (-> arg0 rim-light-group3 ambi extra x) 1.0)
   (set-vector! (-> arg0 filter-color) 1.0 1.0 1.0 1.0)
   (set! (-> arg0 overide-enable) #f)
-  (when *debug-segment*
+  ;(when *debug-segment*
     (mem-copy! (the-as pointer *overide-mood-color-table*) (the-as pointer *no-cloud-mood-color-table*) 256)
     (mem-copy! (the-as pointer *overide-mood-fog-table*) (the-as pointer *no-cloud-clear-mood-fog-table*) 384)
     (dotimes (v1-32 8)
@@ -399,7 +399,7 @@
       (set-vector! (-> *time-of-day-context* times v1-32) 1.0 1.0 1.0 1.0)
       )
     #f
-    )
+    ;)
   )
 
 (defun set-filter-color! ((arg0 float) (arg1 float) (arg2 float))

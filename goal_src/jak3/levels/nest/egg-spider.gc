@@ -685,7 +685,9 @@
          (logior! (-> this root penetrated-by) (penetrate vehicle))
          (set! (-> this vehicle-attack?) #t)
          (set! (-> this hit-points) 0.0)
-         (go (method-of-object this knocked))
+         (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+          (go (method-of-object this knocked))
+         )
          #t
          )
        )

@@ -10,12 +10,12 @@
 (define *default-kg-squad-member-settings* (new 'static 'inline-array kg-squad-member-settings 4
                                              (new 'static 'kg-squad-member-settings
                                                :object-type (traffic-type roboguard)
-                                               :max-target-count #x7f
+                                               :max-target-count 20
                                                :enemy-type (traffic-type guard-a)
                                                )
                                              (new 'static 'kg-squad-member-settings
                                                :object-type (traffic-type roboguard)
-                                               :max-target-count #x7f
+                                               :max-target-count 20
                                                :enemy-type (traffic-type guard-b)
                                                )
                                              (new 'static 'kg-squad-member-settings
@@ -36,13 +36,13 @@
 (define *alert-kg-squad-member-settings* (new 'static 'inline-array kg-squad-member-settings 4
                                            (new 'static 'kg-squad-member-settings
                                              :object-type (traffic-type roboguard)
-                                             :max-target-count #x7f
-                                             :target-count 3
+                                             :max-target-count 20
+                                             :target-count 20
                                              :enemy-type (traffic-type guard-a)
                                              )
                                            (new 'static 'kg-squad-member-settings
                                              :object-type (traffic-type roboguard)
-                                             :max-target-count #x7f
+                                             :max-target-count 20
                                              :enemy-type (traffic-type guard-b)
                                              )
                                            (new 'static 'kg-squad-member-settings
@@ -63,13 +63,13 @@
 (define *war-kg-squad-member-settings* (new 'static 'inline-array kg-squad-member-settings 4
                                          (new 'static 'kg-squad-member-settings
                                            :object-type (traffic-type roboguard)
-                                           :max-target-count #x7f
-                                           :target-count 5
+                                           :max-target-count 20
+                                           :target-count 20
                                            :enemy-type (traffic-type guard-a)
                                            )
                                          (new 'static 'kg-squad-member-settings
                                            :object-type (traffic-type roboguard)
-                                           :max-target-count #x7f
+                                           :max-target-count 20
                                            :enemy-type (traffic-type guard-b)
                                            )
                                          (new 'static 'kg-squad-member-settings

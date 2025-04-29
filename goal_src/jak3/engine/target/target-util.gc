@@ -2348,6 +2348,7 @@
 
 (defun target-reset-on-task-finish ()
   (when *target*
+    (delayed-heal)
     (set! (-> *target* fact health) (-> *target* fact health-max))
     (if (using-gun? *target*)
         (send-event *target* 'end-mode 'gun)

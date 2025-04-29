@@ -76,7 +76,7 @@
       :engine-intake-factor 1.0
       :brake-factor 5033165000.0
       :turbo-boost-factor 0.7
-      :turbo-boost-duration (seconds 3.5)
+      :turbo-boost-duration (seconds 0.0)
       :max-xz-speed (meters 30)
       :player-turn-anim-min -1.0
       :player-turn-anim-max 1.0
@@ -402,7 +402,7 @@
       :engine-intake-factor 1.0
       :brake-factor 3355443200.0
       :turbo-boost-factor 0.75
-      :turbo-boost-duration (seconds 2)
+      :turbo-boost-duration (seconds 0.0)
       :max-xz-speed (meters 30)
       :player-turn-anim-bias 0.5
       :player-turn-anim-max 1.0
@@ -731,7 +731,7 @@
       :engine-intake-factor 1.0
       :brake-factor 5033165000.0
       :turbo-boost-factor 0.5
-      :turbo-boost-duration (seconds 2)
+      :turbo-boost-duration (seconds 0)
       :max-xz-speed (meters 30)
       :player-turn-anim-bias 0.2
       :player-turn-anim-min -0.2
@@ -1120,7 +1120,7 @@
       :engine-intake-factor 1.0
       :brake-factor 3355443200.0
       :turbo-boost-factor 0.8
-      :turbo-boost-duration (seconds 2)
+      :turbo-boost-duration (seconds 0)
       :max-xz-speed (meters 30)
       :player-turn-anim-min -1.0
       :player-turn-anim-max 1.0
@@ -1437,7 +1437,7 @@
       :engine-intake-factor 1.0
       :brake-factor 3355443200.0
       :turbo-boost-factor 0.9
-      :turbo-boost-duration (seconds 2)
+      :turbo-boost-duration (seconds 0)
       :max-xz-speed (meters 30)
       :player-turn-anim-min -1.0
       :player-turn-anim-max 1.0
@@ -1764,7 +1764,7 @@
       :engine-intake-factor 1.0
       :brake-factor 5033165000.0
       :turbo-boost-factor 4.0
-      :turbo-boost-duration (seconds 0.25)
+      :turbo-boost-duration (seconds 0.0)
       :max-xz-speed (meters 30)
       :player-turn-anim-min -1.0
       :player-turn-anim-max 1.0
@@ -2152,7 +2152,7 @@
       :engine-intake-factor 1.0
       :brake-factor 3355443200.0
       :turbo-boost-factor 0.9
-      :turbo-boost-duration (seconds 2)
+      :turbo-boost-duration (seconds 0)
       :max-xz-speed (meters 30)
       :player-turn-anim-bias 0.5
       :player-turn-anim-max 1.0
@@ -2481,7 +2481,7 @@
       :engine-intake-factor 1.0
       :brake-factor 3355443200.0
       :turbo-boost-factor 0.9
-      :turbo-boost-duration (seconds 2)
+      :turbo-boost-duration (seconds 0)
       :max-xz-speed (meters 30)
       :player-turn-anim-min -1.0
       :player-turn-anim-max 1.0
@@ -2808,7 +2808,7 @@
       :engine-intake-factor 1.0
       :brake-factor 1677721600.0
       :turbo-boost-factor 0.9
-      :turbo-boost-duration (seconds 2)
+      :turbo-boost-duration (seconds 0)
       :max-xz-speed (meters 30)
       :player-turn-anim-bias 0.5
       :player-turn-anim-max 1.0
@@ -3136,7 +3136,7 @@
       :engine-intake-factor 1.0
       :brake-factor 5033165000.0
       :turbo-boost-factor 2.0
-      :turbo-boost-duration (seconds 0.25)
+      :turbo-boost-duration (seconds 0.0)
       :max-xz-speed (meters 30)
       :player-turn-anim-min -1.0
       :player-turn-anim-max 1.0
@@ -3460,7 +3460,7 @@
       :engine-intake-factor 1.0
       :brake-factor 1677721600.0
       :turbo-boost-factor 0.9
-      :turbo-boost-duration (seconds 2)
+      :turbo-boost-duration (seconds 0)
       :max-xz-speed (meters 30)
       :player-turn-anim-bias 0.5
       :player-turn-anim-max 1.0

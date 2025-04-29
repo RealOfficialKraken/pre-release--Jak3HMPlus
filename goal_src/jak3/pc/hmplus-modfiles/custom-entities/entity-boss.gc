@@ -4,7 +4,7 @@
 ;; name: entity-boss.gc
 ;; name in dgo: neo-satellite
 ;; dgos: DESRESC
-
+#|
 (define-extern *range-sat-explo-color* curve-color-fast)
 (define-extern *range-sat-explo-alpha* curve2d-fast)
 (define-extern *range-sat-explo-scale-x* curve2d-fast)
@@ -2608,7 +2608,7 @@
     f30-0
     )
   )
-  #|
+  
 
   (when 
            (and 
@@ -2628,7 +2628,7 @@
              (bipedal-spawnsat)
            )
 
-           |#
+           
 
 (defstate entity-boss-sit-and-spin (entity-boss)
   :virtual #t
@@ -2951,7 +2951,7 @@
     (set! (-> self desired-float-height) 16384.0)
     (set! (-> self start-thrust-pos quad) (-> self root trans quad))
     (set-time! (-> self state-time))
-    #|(when (not (task-node-open? (game-task-node desert-rescue-satellite-fight)))
+    (when (not (task-node-open? (game-task-node desert-rescue-satellite-fight)))
       (when 
            (and 
            (= (-> self current-stage) 1)
@@ -2969,7 +2969,7 @@
            )
              (bipedal-spawnsat)
            )
-    )|#
+    )
     )
   :trans (behavior ()
     (entity-boss-manipy-track self)
@@ -3383,7 +3383,7 @@
                             0
                             )
                         )
-                      )|#
+                      )
                 )
               )
             (set! f28-0 f30-0)
@@ -3555,7 +3555,7 @@
     )
     (when (and (= (-> self general-i) rstate-5) (rand-vu-percent? 0.5))
       (entity-boss-switch-hover self)
-    )|#
+    )
     (sound-play "sat-hover" :id (-> self snd-hover))
     (entity-boss-manipy-track self)
     (let ((s5-0 (new 'stack-no-clear 'vector)))
@@ -4404,15 +4404,4 @@
         )
     (the-as search-info-flag v0-0)
     )
-  )
-
-  (defun spawn-precursor ((vec vector))
-    (let (
-            (satp (new 'static 'entity-boss-init-params))
-        )
-            (set! (-> satp pos quad) (-> vec quad))
-            (quaternion-identity! (-> satp quat))
-            (process-spawn entity-boss satp :name "entity-boss" :stack-size #x14000)
-        )
-        (none)
-)
+  )|#

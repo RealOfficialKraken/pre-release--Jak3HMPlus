@@ -408,27 +408,43 @@
   )
 
 (defmethod vehicle-method-64 ((this wvehicle))
-  (when (and (not (logtest? (vehicle-flag turbo-boost) (-> this v-flags))) (>= (-> this turbo-supply) 1.0))
+  (when (and (not (logtest? (vehicle-flag turbo-boost) (-> this v-flags))) (>= (-> this turbo-supply) 0.01))
     (cond
-      ((< (-> this turbo-supply) 1.0)
+      ((< (-> this turbo-supply) 0.01)
        (if (not (logtest? (-> this controls prev-flags) (vehicle-controls-flag vcf2)))
            (sound-play "turbo-dud")
            )
        )
-      ((< (-> this turbo-ready) 1.0)
+      ((< (-> this turbo-ready) 0.01)
        (if (not (logtest? (-> this controls prev-flags) (vehicle-controls-flag vcf2)))
            (sound-play "turbo-out")
            )
        )
       (else
-        (set! (-> this turbo-ready) 0.0)
-        (+! (-> this turbo-supply) -1.0)
+        (set! (-> this turbo-ready) 1.0)
+        (set! turbo-held? #t)
         (set! (-> this turbo-boost-time) (the-as uint (current-time)))
         (set! (-> this turbo-boost-factor) (-> this info handling turbo-boost-factor))
         (set! (-> this turbo-boost-duration) (-> this info handling turbo-boost-duration))
         (logior! (-> this v-flags) (vehicle-flag turbo-boost))
         )
       )
+      (when 
+            (and 
+            (= turbo-held? #t)
+            (cpad-hold? 0 r2)
+                (-! (-> this turbo-supply) 0.01)
+            )
+        )
+
+        (when
+          (and
+            (cpad-hold? 0 r2)
+            (= refill-turbo #t)
+          )
+            (set! refi 0)
+            (set! refill-turbo #f)
+        )
     )
   0
   (none)

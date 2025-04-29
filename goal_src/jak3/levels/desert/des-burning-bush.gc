@@ -263,7 +263,7 @@
          (let ((s5-1
                  (new 'stack 'font-context *font-default-matrix* 32 300 0.0 (font-color default) (font-flags shadow kerning))
                  )
-               (gp-1 (-> gp-0 tex))
+               (gp-1 (+ (-> (get-current-task-event (-> self task)) tex) 32.0))
                )
            (set! (-> s5-1 flags) (font-flags shadow kerning large))
            (set-width! s5-1 340)
@@ -375,7 +375,7 @@
       (suspend)
       )
     (suspend)
-    (let ((gp-0 (-> (get-current-task-event (-> self task)) tex)))
+    (let ((gp-0 (+ (-> (get-current-task-event (-> self task)) tex) 32.0)))
       (format 0 "skull-cost: ~d~%" gp-0)
       (set! (-> *target* game gem) (- (-> *target* game gem) (the float gp-0)))
       (until (time-elapsed? (-> self state-time) (* 45 (the-as int gp-0)))
@@ -1211,6 +1211,7 @@
 (defstate active (task-manager-desert-bbush-get-to)
   :virtual #t
   :event (behavior ((proc process) (argc int) (message symbol) (block event-message-block))
+    (set! in-desert-game-task? #t)
     (case message
       (('notify)
        (case (-> block param 0)
@@ -1249,7 +1250,7 @@
       )
     (set-time! (-> self start-time))
     (set! (-> self time-limit)
-          (the-as time-frame (the int (+ 300.0 (-> *burning-bush-get-on-info* (-> self info index) time))))
+          (the-as time-frame (/ (the int (+ 300.0 (-> *burning-bush-get-on-info* (-> self info index) time))) 1.85))
           )
     (suspend)
     (send-event (handle->process (-> self skill)) 'get-notify self)

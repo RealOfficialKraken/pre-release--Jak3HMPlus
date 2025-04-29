@@ -33,6 +33,10 @@
                      (set-setting! 'dust-storm-sound-scalar #f 1.0 0)
                      (rand-vu-float-range 0.35 0.6)
                      )
+                     ((= weather-dark-mode #t)
+                        (set-setting! 'dust-storm-sound-scalar #f 1.0 0)
+                        (rand-vu-float-range 0.08 1.0)
+                     )
                     (else
                       (remove-setting! 'dust-storm-sound-scalar)
                       (rand-vu-float-range 0.08 0.2)
@@ -295,7 +299,7 @@
   (let ((s5-0 *was-squad-control*))
     (when (time-elapsed? (-> this target-set-time) (seconds 15))
       (set-time! (-> this target-set-time))
-      (set! (-> s5-0 target-count) (rand-vu-int-range 1 4))
+      (set! (-> s5-0 target-count) 60)
       (set! (-> s5-0 reserve-count) 4000)
       )
     (let ((a0-4 *target*))
@@ -317,7 +321,7 @@
     (suspend)
     (was-squad-manager-start self)
     (let ((gp-1 *was-squad-control*))
-      (set! (-> gp-1 target-count) (rand-vu-int-range 1 4))
+      (set! (-> gp-1 target-count) 60)
       (set! (-> gp-1 reserve-count) 4000)
       )
     (set-setting! 'music 'desattck 0.0 0)
@@ -350,6 +354,7 @@
 (defstate active (task-manager-vehicle-training-1)
   :virtual #t
   :code (behavior ()
+  (set! in-desert-game-task? #t)
     (while (or (not *target*) (not (logtest? (-> *target* focus-status) (focus-status pilot-riding))))
       (suspend)
       )
@@ -379,6 +384,7 @@
 (defstate active (task-manager-vehicle-training-2)
   :virtual #t
   :code (behavior ()
+  (set! in-desert-game-task? #t)
     (while (or (not *target*) (not (logtest? (-> *target* focus-status) (focus-status pilot-riding))))
       (suspend)
       )
@@ -490,6 +496,7 @@
 (defstate active (task-manager-highlight-vehicle-wait)
   :virtual #t
   :code (behavior ()
+  (set! in-desert-game-task? #t)
     (local-vars (v1-1 object))
     (until #f
       (let ((v1-0 *target*))
@@ -538,6 +545,7 @@
 (defstate active (task-manager-vehicle-wait)
   :virtual #t
   :code (behavior ()
+  (set! in-desert-game-task? #t)
     (while (not (and *target* (focus-test? *target* pilot-riding)))
       (suspend)
       )
@@ -547,6 +555,32 @@
     )
   )
 
+    (deftype desertspawn-defense-intro-manager (task-manager)
+  ()
+  )
+
+
+(defstate active (desertspawn-defense-intro-manager)
+  :virtual #t
+  :code (behavior ()
+    (suspend-for (seconds 1)
+      )
+    (open! (-> self node-info) 'event)
+    (talker-spawn-func (-> *talker-speech* 83) *entity-pool* (target-pos 0) (the-as region #f))
+    (sleep-code)
+    )
+  )
+
+;; WARN: Return type mismatch connection vs none.
+(defmethod set-time-limit ((this desertspawn-defense-intro-manager))
+  ((method-of-type task-manager set-time-limit) this)
+  (let ((t1-0 11))
+    (set-setting! 'vehicles 'set (shr t1-0 32) t1-0)
+    )
+  (none)
+  )
+
+
 (deftype task-manager-lock-wasdoors (task-manager)
   ()
   )
@@ -555,6 +589,7 @@
 (defstate active (task-manager-lock-wasdoors)
   :virtual #t
   :enter (behavior ()
+  (set! in-desert-game-task? #t)
     (call-parent-state-handler enter)
     (set-setting! 'airlock #f 0.0 0)
     )
@@ -834,4 +869,16 @@
     )
   0
   (none)
+  )
+
+(defun spawn-dust-storm ()
+    (cond
+      ((= (-> (level-get-target-inside *level*) name) 'desert)
+        (process-spawn dust-storm-randomizer :name "dust-storm-randomizer")
+      )
+      (else
+        (print "PREVENTED CRASH FROM SPAWN-DUST-STORM - TARGET IS NOT IN DESERT")
+      )
+    )
+    (none)
   )

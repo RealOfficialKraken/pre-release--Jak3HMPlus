@@ -295,6 +295,8 @@
   0
   )
 
+
+
 (defstate startup (title-control)
   :virtual #t
   :event (behavior ((proc process) (argc int) (message symbol) (block event-message-block))
@@ -319,6 +321,10 @@
       )
     )
   :code (behavior ()
+    (set! mainmenu-camera #f)
+    (send-event (ppointer->process *time-of-day*) 'change 'ratio 1.0)
+    (set! (-> *time-of-day-context* overide-enable) #f)
+    (set! (-> *mood-control* overide-weather-flag) #f)
     (when (zero? (-> *game-info* demo-state))
       (let ((a1-0 (new 'stack-no-clear 'array 'symbol 10)))
         (set! (-> a1-0 9) #f)
@@ -583,7 +589,7 @@
                      )
               (v0-3 (-> self root trans))
               )
-          (vector-copy! v0-3 v1-14)
+          (set! (-> v0-3 quad) (-> v1-14 quad))
           v0-3
           )
         )

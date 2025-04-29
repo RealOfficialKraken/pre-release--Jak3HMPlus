@@ -323,6 +323,9 @@
   :virtual #t
   :enter (behavior ()
     (local-vars (v1-12 symbol) (v1-15 vector) (f0-4 float))
+    (when (not (task-node-closed? (game-task-node arena-training-1-introduction)))
+      (go (method-of-object self die-fast))
+    )
     (let ((t9-0 (-> (method-of-type nav-enemy active) enter)))
       (if t9-0
           (t9-0)

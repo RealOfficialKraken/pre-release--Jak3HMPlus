@@ -328,6 +328,8 @@
    (pillar-hint-timer    time-frame)
    (minecar-hint-timer   time-frame)
    (ammo                 prebot-ammo-tracker  20 :inline)
+   (hit-points           float)
+   (incoming-attack-id   uint32)
    )
   (:state-methods
     beaten
@@ -489,7 +491,7 @@
       )
     (quaternion-set! (-> self root quat) 0.0 (-> s4-8 x) 0.0 (-> s4-8 y))
     )
-  (vector-copy! (-> self root trans) arg0)
+  (set! (-> self root trans quad) (-> arg0 quad))
   (set! (-> self start-y) (-> self root trans y))
   (set! (-> self end-y) (+ (-> arg0 y) (-> arg1 height)))
   (set! (-> self vulnerable) #f)
@@ -616,7 +618,7 @@
 
 (set! (-> *prebot-sword-color-array* zbuffer?) #t)
 
-(vector-copy! (-> *prebot-sword-color-array* lie-vector) *up-vector*)
+(set! (-> *prebot-sword-color-array* lie-vector quad) (-> *up-vector* quad))
 
 (set! (-> *prebot-sword-color-array* use-tape-mode?) #t)
 
@@ -649,8 +651,8 @@
     (set! (-> self root) s2-0)
     )
   (set! (-> self root pause-adjust-distance) 409600.0)
-  (vector-copy! (-> self root trans) arg1)
-  (vector-copy! (-> self prev-position) arg1)
+  (set! (-> self root trans quad) (-> arg1 quad))
+  (set! (-> self prev-position quad) (-> arg1 quad))
   (set! (-> self old-target-dist) 204800.0)
   (set! (-> self prefix) arg0)
   (initialize-skeleton
@@ -745,7 +747,7 @@
     (set! (-> self root) s4-0)
     )
   (set! (-> self root pause-adjust-distance) 409600.0)
-  (vector-copy! (-> self root trans) arg0)
+  (set! (-> self root trans quad) (-> arg0 quad))
   (quaternion-copy! (-> self root quat) arg1)
   (initialize-skeleton
     self
@@ -788,7 +790,7 @@
     (set! (-> self root) s4-0)
     )
   (set! (-> self root pause-adjust-distance) 409600.0)
-  (vector-copy! (-> self root trans) arg1)
+  (set! (-> self root trans quad) (-> arg1 quad))
   (set! (-> self prefix) arg0)
   (initialize-skeleton
     self
@@ -847,7 +849,7 @@
     (set! (-> self root) s3-0)
     )
   (set! (-> self root pause-adjust-distance) 409600.0)
-  (vector-copy! (-> self root trans) arg1)
+  (set! (-> self root trans quad) (-> arg1 quad))
   (set! (-> self prefix) arg0)
   (initialize-skeleton
     self
@@ -887,7 +889,6 @@
   )
 
 (defmethod init-from-entity! ((this prebot) (arg0 entity-actor))
-  "Set up a newly created process from the entity that created it."
   (let ((s4-0 (new 'process 'collide-shape-moving this (collide-list-enum usually-hit-by-player))))
     (set! (-> s4-0 dynam) (copy *standard-dynamics* 'process))
     (set! (-> s4-0 reaction) cshape-reaction-default)
@@ -1045,7 +1046,7 @@
     (the-as pair 0)
     )
   (logior! (-> this mask) (process-mask enemy))
-  (vector-copy! (-> this original-position) (-> this root trans))
+  (set! (-> this original-position quad) (-> this root trans quad))
   (init (-> this position) (-> this original-position) 0.004096 2048.0 0.125)
   (set! (-> this draw light-index) (the-as uint 10))
   (dotimes (v1-64 28)
@@ -1097,5 +1098,10 @@
     (set! (-> this ammo v1-104 handle) (the-as handle #f))
     (set! (-> this ammo v1-104 birth-next-time) #f)
     )
+  (set! (-> this hit-points) (+ 600.0 (* enemy-noto 10)))
+  (if (= in-mine-level? #f)
+    (set! enemy-noto 20)
+    (set! enemy-noto (rand-vu-int-range 25 35))
+  )
   (prebot-go-next-stage)
   )

@@ -5,33 +5,7 @@
 ;; name in dgo: cty-attack-controller
 ;; dgos: DESRESC, WWD, CWI
 
-;; +++city-target-type
-(defenum city-target-type
-  (unk1 1)
-  (unk2 2)
-  (guard-tazer 3)
-  (guard-rifle 4)
-  (guard-grenade 5)
-  (grunt 6)
-  (flitter 7)
-  (unknown 8)
-  (roboguard 9)
-  (turret 10)
-  (spydroid 11)
-  (roboguard-giant 12)
-  )
-;; ---city-target-type
 
-
-;; +++cty-faction
-(defenum cty-faction
-  :type uint8
-  (ff 0)
-  (kg 1)
-  (mh 2)
-  (invalid 128)
-  )
-;; ---cty-faction
 
 
 ;; DECOMP BEGINS
@@ -145,13 +119,7 @@
     )
   )
 
-(deftype cty-attack-controller (mission-squad-control)
-  ((guard-angry-hatred-info-index  int8)
-   )
-  )
 
-
-(define-perm *cty-attack-controller* cty-attack-controller #f)
 
 (defun initialize-cty-attack-controller ()
   (set! *cty-attack-controller* (new 'loading-level 'cty-attack-controller))

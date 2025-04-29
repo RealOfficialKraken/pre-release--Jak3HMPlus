@@ -2416,7 +2416,7 @@
                )
            (suspend)
            )
-         (activate-progress *dproc* 'icon-info)
+         ;(activate-progress *dproc* 'icon-info)
          (while *progress-process*
            (suspend)
            )
@@ -2428,7 +2428,7 @@
                (add-process *gui-control* self (gui-channel hud-auto-save) (gui-action play) (-> self name) 81920.0 0)
                )
              )
-       (+! (-> *game-info* auto-save-count) 1)
+       (+! (-> *game-info* auto-save-count) 0)
        )
       )
     (while (or (< (-> *display* base-clock frame-counter) (-> *game-info* blackout-time))

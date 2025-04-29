@@ -72,6 +72,8 @@
           )
         )
       (1860 (fadeout (frame-time-30 5)))
+      (10000 (task-close! "wascity-pre-game-resolution"))
+      (10000 (task-close! "wascity-pre-game-introduction"))
       (10000 (task-close! "wascity-pre-game-wait"))
       )
     :cut-list '(121

@@ -1923,11 +1923,11 @@
 (defbehavior power-game-player-post power-game-player ()
   (cond
     ((cpad-hold? 0 x)
-     (set! (-> self speed) 8.0)
+     (set! (-> self speed) 16.0)
      (set! (-> self slide-dist) 1)
      )
     (else
-      (set! (-> self speed) 4.0)
+      (set! (-> self speed) 8.0)
       (set! (-> self slide-dist) 2)
       )
     )
@@ -2460,7 +2460,7 @@
       )
     )
   :code (behavior ()
-    (set! (-> self speed) 3.0)
+    (set! (-> self speed) 32.0)
     (ja-channel-set! 1)
     (until #f
       (ja-no-eval :group! switcher-idle-ja :num! (seek!) :frame-num 0.0)
@@ -2788,7 +2788,7 @@
       )
     (set-vector! (-> self root scale) 2.5 2.5 2.5 1.0)
     (set! (-> self switch-duration) (the-as time-frame (the int (+ 300.0 (* 900.0 f30-0)))))
-    (cond
+    #|(cond
       ((= arg3 1)
        (set-vector! (-> self local) 1.0 0.0 10.0 1.0)
        (set! (-> self speed) 3.0)
@@ -2809,12 +2809,13 @@
          (set-vector! (-> self local) 0.0 0.0 10.0 1.0)
          (task-node-closed? (game-task-node city-power-game-resolution))
          )
-       (set! (-> self speed) 4.0)
+       (set! (-> self speed) 12.0)
        )
       (else
         (set! (-> self speed) (- 4.0 (* 2.0 f30-0)))
         )
-      )
+      )|#
+      (set! (-> self speed) 12.0)
     )
   (set! (-> self next-dir) (-> self dir))
   (set! (-> self slide-dir) -1)

@@ -705,7 +705,9 @@
              )
            )
          (setup-masks (-> this draw) 0 (the-as int (* (-> this debris-mask) 2)))
-         (go (method-of-object this knocked))
+         (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+          (go (method-of-object this knocked))
+         )
          )
        )
      #t

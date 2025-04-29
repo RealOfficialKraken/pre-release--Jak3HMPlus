@@ -1338,7 +1338,7 @@
       (suspend)
       )
     (suspend)
-    (let ((gp-0 (-> (get-current-task-event (-> self task)) tex)))
+    (let ((gp-0 (+ (-> (get-current-task-event (-> self task)) tex) 32.0)))
       (format 0 "skull-cost: ~d~%" gp-0)
       (set! (-> *target* game gem) (- (-> *target* game gem) (the float gp-0)))
       (until (time-elapsed? (-> self state-time) (* 45 (the-as int gp-0)))
@@ -1400,7 +1400,7 @@
          (let ((s4-2
                  (new 'stack 'font-context *font-default-matrix* 32 300 0.0 (font-color default) (font-flags shadow kerning))
                  )
-               (s5-1 (-> gp-0 tex))
+               (s5-1 (+ (-> gp-0 tex) 32.0))
                )
            (set! (-> s4-2 flags) (font-flags shadow kerning large))
            (set-width! s4-2 340)

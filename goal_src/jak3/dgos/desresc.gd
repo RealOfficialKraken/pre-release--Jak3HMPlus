@@ -35,7 +35,6 @@
   "rope-system.o"
   "rope-prim-system-h.o"
   "rope-prim-system.o"
-  "neo-satellite.o"
   "tpage-1599.go"
   "tpage-1625.go"
   "tpage-1731.go"

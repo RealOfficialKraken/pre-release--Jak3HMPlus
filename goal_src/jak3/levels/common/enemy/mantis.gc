@@ -2042,3 +2042,79 @@
   (set! (-> this draw light-index) (the-as uint 30))
   (none)
   )
+
+
+(defbehavior mantis-init-by-other mantis ((vec vector))
+  (init-enemy-collision! self)
+  (logior! (-> self mask) (process-mask actor-pause))
+  (vector-copy! (-> self root trans) vec)
+  (quaternion-identity! (-> self root quat))
+  (vector-identity! (-> self root scale))
+  (init-enemy! self)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      (let ((nav (find-nearest-nav-mesh vec 0.0)) ;; try to find a nav mesh in the vicinity
+        ;; verts for the path
+        (cverts (new 'static 'inline-array vector 3
+                (static-vectorm 1 0 0)
+                (static-vectorm 0 1 0)
+                (static-vectorm 0 0 1)
+                )
+          )
+        )
+    ;; if a nav mesh is close by, use that, otherwise use default
+    (if nav
+      (change-to nav self)
+      (change-to *default-nav-mesh* self)
+      )
+    ;; allocate path
+    (set! (-> self path) (new 'process 'path-control self 'path 0.0 (the entity #f) #f))
+    (set! (-> self path curve cverts) cverts)
+    (set! (-> self path curve num-cverts) 3)
+    )
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (go-ambush self)
+  )
+
+  (defun spawn-mantis ((vec vector) (arg0 string))
+    (process-spawn mantis vec :name arg0 *default-pool*)
+    (none)
+  )
+
+  (deftype mantis-boss (mantis)
+  ()
+  )
+
+  (defbehavior mantis-boss-init-by-other mantis-boss ((vec vector))
+  (init-enemy-collision! self)
+  (logior! (-> self mask) (process-mask actor-pause))
+  (vector-copy! (-> self root trans) vec)
+  (quaternion-identity! (-> self root quat))
+  (vector-identity! (-> self root scale))
+  (init-enemy! self)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      (let ((nav (find-nearest-nav-mesh vec 0.0)) ;; try to find a nav mesh in the vicinity
+        ;; verts for the path
+        (cverts (new 'static 'inline-array vector 3
+                (static-vectorm 1 0 0)
+                (static-vectorm 0 1 0)
+                (static-vectorm 0 0 1)
+                )
+          )
+        )
+    ;; if a nav mesh is close by, use that, otherwise use default
+    (if nav
+      (change-to nav self)
+      (change-to *default-nav-mesh* self)
+      )
+    ;; allocate path
+    (set! (-> self path) (new 'process 'path-control self 'path 0.0 (the entity #f) #f))
+    (set! (-> self path curve cverts) cverts)
+    (set! (-> self path curve num-cverts) 3)
+    )
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (set! (-> self root scale x) 2.0)
+    (set! (-> self root scale y) 2.0)
+    (set! (-> self root scale z) 2.0)
+    (set! (-> self hit-points) (+ (+ 1200.0 (* enemy-noto 10)) (/ (the float enemy-noto) 3)))
+  (go-ambush self)
+  )

@@ -86,7 +86,7 @@
     :vehicle-type (vehicle-type-u8 vt27)
     :transmission (new 'static 'vehicle-transmission-info :gear-count 1)
     :handling (new 'static 'vehicle-handling-info
-      :max-engine-thrust (meters 39)
+      :max-engine-thrust (meters 100)
       :inv-max-engine-thrust 0.000006260016
       :engine-response-rate 20.0
       :engine-intake-factor 1.0
@@ -103,8 +103,8 @@
       :cos-ground-effect-angle 0.42261827
       :spring-lift-factor 0.4
       :air-drag-factor 1.0
-      :steering-thruster-factor 3.0
-      :steering-thruster-max-gain 3.5
+      :steering-thruster-factor 5.0
+      :steering-thruster-max-gain 5.5
       :steering-thruster-half-gain-speed (meters 15)
       :tire-steering-speed-factor 61440.0
       :tire-friction-factor 0.6
@@ -471,7 +471,7 @@
     :vehicle-type (vehicle-type-u8 vt27)
     :transmission (new 'static 'vehicle-transmission-info :gear-count 1)
     :handling (new 'static 'vehicle-handling-info
-      :max-engine-thrust (meters 40)
+      :max-engine-thrust (meters 100)
       :inv-max-engine-thrust 0.0000061035157
       :engine-response-rate 10.0
       :engine-intake-factor 1.0
@@ -488,8 +488,8 @@
       :cos-ground-effect-angle 0.42261827
       :spring-lift-factor 0.4
       :air-drag-factor 1.0
-      :steering-thruster-factor 3.5
-      :steering-thruster-max-gain 3.8
+      :steering-thruster-factor 5.0
+      :steering-thruster-max-gain 5.0
       :steering-thruster-half-gain-speed (meters 15)
       :tire-steering-speed-factor 61440.0
       :tire-friction-factor 0.55
@@ -850,7 +850,7 @@
     :vehicle-type (vehicle-type-u8 vt27)
     :transmission (new 'static 'vehicle-transmission-info :gear-count 1)
     :handling (new 'static 'vehicle-handling-info
-      :max-engine-thrust (meters 35)
+      :max-engine-thrust (meters 100)
       :inv-max-engine-thrust 0.0000069754465
       :engine-response-rate 10.0
       :engine-intake-factor 1.0
@@ -867,8 +867,8 @@
       :cos-ground-effect-angle 0.42261827
       :spring-lift-factor 0.4
       :air-drag-factor 1.0
-      :steering-thruster-factor 3.0
-      :steering-thruster-max-gain 3.0
+      :steering-thruster-factor 5.0
+      :steering-thruster-max-gain 5.0
       :steering-thruster-half-gain-speed (meters 15)
       :tire-steering-speed-factor 61440.0
       :tire-friction-factor 0.75
@@ -1262,7 +1262,7 @@
     :vehicle-type (vehicle-type-u8 vt27)
     :transmission (new 'static 'vehicle-transmission-info :gear-count 1)
     :handling (new 'static 'vehicle-handling-info
-      :max-engine-thrust (meters 30)
+      :max-engine-thrust (meters 100)
       :inv-max-engine-thrust 0.000008138021
       :engine-response-rate 8.0
       :engine-intake-factor 1.0
@@ -1279,8 +1279,8 @@
       :cos-ground-effect-angle 0.42261827
       :spring-lift-factor 0.3
       :air-drag-factor 1.0
-      :steering-thruster-factor 3.0
-      :steering-thruster-max-gain 2.0
+      :steering-thruster-factor 5.0
+      :steering-thruster-max-gain 5.0
       :steering-thruster-half-gain-speed (meters 15)
       :tire-steering-speed-factor 61440.0
       :tire-friction-factor 0.5

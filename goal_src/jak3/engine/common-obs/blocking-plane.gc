@@ -119,8 +119,41 @@
            )
          )
        )
+       (('obliterate)
+      (print "OBLITERATED")
+       (when (-> self current-attack-mode)
+         (let ((v1-25 (vector-z-quaternion! (new 'stack-no-clear 'vector) (-> self root quat))))
+           (if (< (vector-dot
+                    (vector-! (new 'stack-no-clear 'vector) (-> (the-as process-drawable proc) root trans) (-> self root trans))
+                    v1-25
+                    )
+                  0.0
+                  )
+               (vector-float*! v1-25 v1-25 -1.0)
+               )
+           (send-event
+             proc
+             'attack
+             #f
+             (static-attack-info :mask (vehicle-impulse-factor) ((id (new-attack-id))
+                                                                 (damage 2.0)
+                                                                 (vehicle-damage-factor 999.0)
+                                                                 (vehicle-impulse-factor 999.0)
+                                                                 (mode (-> self current-attack-mode))
+                                                                 (vector v1-25)
+                                                                 (shove-up (meters 999999))
+                                                                 (shove-back (meters 999999))
+                                                                 )
+                                 )
+             )
+           )
+         )
+       )
       (('impact-impulse)
        (send-event (ppointer->process (-> self parent)) 'blocking-plane-hit (-> block param 0))
+        (when (string= (-> self name) "blocking-plane-course-1")
+        (send-event (ppointer->process (-> self parent)) 'obliterate (-> block param 0))
+       )
        )
       )
     )

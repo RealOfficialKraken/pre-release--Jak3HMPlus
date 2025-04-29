@@ -132,7 +132,7 @@
     :turn-anim -1
     :run-anim 6
     :taunt-anim -1
-    :run-travel-speed (meters 35)
+    :run-travel-speed (meters 45)
     :run-acceleration (meters 5.8333335)
     :run-turning-acceleration (meters 100)
     :walk-travel-speed (meters 5)

@@ -350,7 +350,7 @@
        (set! (-> this values arg0 current) (-> this values arg0 target))
        )
       ((> v1-3 0)
-       (sound-play "inc-pickup" :pitch 0.5)
+       ;(sound-play "inc-pickup" :pitch 0.5)
        )
       (else
         (sound-play "gem-spawn" :vol 80 :pitch 0.4)
@@ -411,6 +411,65 @@
   )
 
 (defmethod update-value-callback ((this hud-skill) (arg0 int) (arg1 int))
+  (if (> arg1 0)
+      ;(sound-play "inc-pickup" :pitch 0.5)
+      (print "no increment sound cuz I like Jak 2's way c:")
+      )
+  0
+  (none)
+  )
+
+(define *hud-crystal* (the-as (pointer hud-crystal) #f))
+
+(defmethod draw ((this hud-crystal))
+  (set-hud-piece-position!
+    (the-as hud-sprite (-> this icons 0 pos))
+    (the int (+ (* -100.0 (-> this offset)) (* 60.0 (-> *video-params* relative-x-scale))))
+    128
+    )
+  (set-as-offset-from! (the-as hud-sprite (-> this sprites)) (-> this icons 0 pos) -12 49)
+  (set! (-> this sprites 0 scale-x) 0.62)
+  (format (clear (-> this strings 0 text)) "~D" (-> this values 0 current))
+  (set-as-offset-from! (the-as hud-sprite (-> this strings 0 pos)) (-> this icons 0 pos) 0 7)
+  (when (not (paused?))
+    (let ((s5-1 (new 'stack-no-clear 'quaternion)))
+      (quaternion-axis-angle! s5-1 0.0 1.0 0.0 364.0889)
+      (quaternion*! (-> this icons 0 icon 0 root quat) s5-1 (-> this icons 0 icon 0 root quat))
+      )
+    )
+  ((method-of-type hud draw) this)
+  0
+  (none)
+  )
+
+(defmethod update-values! ((this hud-crystal))
+  (set! (-> this values 0 target) (the int (-> *game-info* civilians-killed)))
+  ((method-of-type hud update-values!) this)
+  0
+  (none)
+  )
+
+(defmethod init-callback ((this hud-crystal))
+  (set! (-> this gui-id)
+        (add-process *gui-control* this (gui-channel subtitle-pc) (gui-action hidden) (-> this name) 81920.0 0)
+        )
+  (hud-create-icon this 0 (the-as int (art-group-get-by-name *level* "skel-eco-crystal-dark-c" (the-as (pointer level) #f))))
+  (set! (-> this icons 0 scale-x) 0.036)
+  (set! (-> this icons 0 scale-y) -0.072)
+  (set! (-> this sprites 0 scale-x) 0.62)
+  (set! (-> this sprites 0 scale-y) 1.34)
+  (set! (-> this sprites 0 pos z) #xfff9ff)
+  (alloc-string-if-needed this 0)
+  (set! (-> this strings 0 flags) (font-flags kerning middle large))
+  (set! (-> this strings 0 scale) 0.5)
+  ;(logior! (-> this values 0 flags) 9)
+  (set! (-> this values 0 inc-time) (the-as uint 45))
+  (set! (-> this values 0 inc-unit) (the-as uint 1))
+  0
+  (none)
+  )
+
+(defmethod update-value-callback ((this hud-crystal) (arg0 int) (arg1 int))
   (if (> arg1 0)
       (sound-play "inc-pickup" :pitch 0.5)
       )
@@ -513,6 +572,7 @@
              (sound-play "timer-warn")
              (sound-play "timer-beep")
              )
+             (set! hud-timer-on? #t)
          )
         ((= (-> this values 3 target) 1)
          (sound-play "warn-beep1")
@@ -1417,7 +1477,7 @@
   )
 
 (defun activate-hud ((arg0 target))
-  (process-spawn hud-health :init hud-init-by-other :name "hud-health" :to arg0)
+  ;(process-spawn hud-health :init hud-init-by-other :name "hud-health" :to arg0)
   (process-spawn hud-map :init hud-init-by-other :name "hud-map" :to arg0)
   (set! *hud-skullgem* (process-spawn hud-skullgem :init hud-init-by-other :name "hud-skullgem" :to arg0))
   (process-spawn hud-skill :init hud-init-by-other :name "hud-skill" :to arg0)
@@ -1425,3 +1485,9 @@
   0
   (none)
   )
+
+(defun activate-crystalhud ((arg0 target))
+  (set! *hud-crystal* (process-spawn hud-crystal :init hud-init-by-other :name "hud-crystal" :to arg0))
+  0
+  (none)
+)

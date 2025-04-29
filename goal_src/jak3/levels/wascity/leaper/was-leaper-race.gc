@@ -388,7 +388,7 @@
             (set! (-> self minimap) (add-icon! *minimap* self (the-as uint 13) (the-as int #f) (the-as vector #t) 0))
             )
         (when s4-0
-          (vector-copy! gp-0 (-> s4-0 control trans))
+          (set! (-> gp-0 quad) (-> s4-0 control trans quad))
           (+! (-> gp-0 y) 8192.0)
           (vector-! gp-0 gp-0 (-> self root trans))
           (let ((s5-0 (-> self root quat)))
@@ -567,14 +567,13 @@
   )
 
 (defmethod init-from-entity! ((this wascity-race-ring) (arg0 entity-actor))
-  "Set up a newly created process from the entity that created it."
   (logclear! (-> this mask) (process-mask actor-pause))
   (set! (-> this root) (new 'process 'trsqv))
   (process-drawable-from-entity! this arg0)
   (set! (-> this active?) #f)
   (set! (-> this minimap) #f)
   (quaternion->matrix (-> this mat) (-> this root quat))
-  (vector-copy! (-> this mat trans) (-> this root trans))
+  (set! (-> this mat trans quad) (-> this root trans quad))
   (set! (-> this taskman) (the-as handle #f))
   (set! (-> this part) (create-launch-control (-> *part-group-id-table* 518) this))
   (set! (-> this player-part) (create-launch-control (-> *part-group-id-table* 519) this))
@@ -1020,6 +1019,11 @@
     (set-time! (-> self check-timer))
     (set-time! (-> self hint-timer))
     (set-time! (-> self state-time))
+    (set! *enemies-explode* #t)
+    (blank-hint! "<COLOR_RED>Careful!" "<COLOR_YELLOW>All enemies <COLOR_ORANGE>explode<COLOR_YELLOW> on death!" 340 300)
+    (when (!= enemy-noto 1)
+      (set! enemy-noto 1)
+    )
     )
   :code (behavior ()
     (local-vars (v1-38 symbol))
@@ -1167,6 +1171,9 @@
           )
         )
       )
+    (when *enemies-explode*
+      (set! *enemies-explode* #f)
+    )
     (send-event self 'complete)
     (if *target*
         (send-event *target* 'change-mode 'flut self)
