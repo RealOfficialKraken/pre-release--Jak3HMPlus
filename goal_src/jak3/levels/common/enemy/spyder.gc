@@ -1332,3 +1332,130 @@
   0
   (none)
   )
+
+  (deftype spyder-boss (spyder)
+    ()
+  )
+
+  (defmethod init-enemy! ((this spyder-boss))
+  "Typical place for shared init code. Runs from entity or process style init."
+  (initialize-skeleton
+    this
+    (the-as skeleton-group (art-group-get-by-name *level* "skel-spyder" (the-as (pointer level) #f)))
+    (the-as pair 0)
+    )
+  (setup-enemy! this *spyder-nav-enemy-info*)
+  (let ((v1-5 (-> this neck)))
+    (set! (-> v1-5 up) (the-as uint 1))
+    (set! (-> v1-5 nose) (the-as uint 2))
+    (set! (-> v1-5 ear) (the-as uint 0))
+    (set-vector! (-> v1-5 twist-max) 11832.889 11832.889 0.0 1.0)
+    (set! (-> v1-5 ignore-angle) 30947.555)
+    )
+  (let ((v1-7 (-> this nav)))
+    (set! (-> v1-7 speed-scale) 1.0)
+    )
+  0
+  (set-gravity-length (-> this root dynam) 573440.0)
+  (set-vector! (-> this root scale) 1.5 1.5 1.5 1.0)
+  (vector-copy! (-> this my-up-vector) *up-vector*)
+  (set! (-> this status-flags) (spyder-flag sf2))
+  (if (rand-vu-percent? 0.5)
+      (logior! (-> this status-flags) (spyder-flag sf4))
+      )
+  (vector-copy! (-> this start-pos) (-> this root trans))
+  (set! (-> this sound)
+        (new 'process 'ambient-sound (static-sound-spec "spyder-talk" :group 0 :fo-max 70) (-> this root trans) 0.0)
+        )
+  (init-los!
+    (-> this los)
+    this
+    (seconds 0.1)
+    (meters 60)
+    (collide-spec backgnd obstacle hit-by-others-list los-blocker)
+    )
+  (init (-> this joint) this (the-as uint 4) (joint-mod-base-flags attached quat))
+  (set! (-> this joint blend) 1.0)
+  (let ((f30-0 (-> this root trans y)))
+    (dotimes (s5-1 4)
+      (set! (-> this joint-ik s5-1)
+            (new
+              'process
+              'joint-mod-ik
+              this
+              (-> *spyder-ik-limb-setup* s5-1 elbow-index)
+              (-> *spyder-ik-limb-setup* s5-1 hand-dist)
+              )
+            )
+      (enable-set! (-> this joint-ik s5-1) #f)
+      (set! (-> this delta-y-ik 0) f30-0)
+      )
+    )
+  (cond
+    ((>= (res-lump-value (-> this entity) 'extra-id int :default (the-as uint128 -1) :time -1000000000.0) 0)
+     (setup-masks (-> this draw) 8 0)
+     (logior! (-> this draw status) (draw-control-status force-fade warp-cross-fade))
+     (set! (-> this draw force-fade) (the-as uint 0))
+     (set! (-> this fade) 0.0)
+     (set! (-> this dest-fade) 0.0)
+     (set! (-> this predator-effect?) #t)
+     )
+    (else
+      (setup-masks (-> this draw) 8 0)
+      (set! (-> this predator-effect?) #f)
+      )
+    )
+  (add-connection
+    *part-engine*
+    this
+    7
+    this
+    468
+    (new 'static 'vector :x 901.12 :y -983.04 :z 942.08 :w 163840.0)
+    )
+  (add-connection
+    *part-engine*
+    this
+    7
+    this
+    468
+    (new 'static 'vector :x -901.12 :y -983.04 :z 942.08 :w 163840.0)
+    )
+  0
+  (none)
+  )
+
+(defbehavior spyder-boss-init-by-other spyder-boss ((vec vector))
+  (init-enemy-collision! self)
+  (logior! (-> self mask) (process-mask actor-pause))
+  (vector-copy! (-> self root trans) vec)
+  (quaternion-identity! (-> self root quat))
+  (vector-identity! (-> self root scale))
+  (init-enemy! self)
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      (let ((nav (find-nearest-nav-mesh vec 0.0)) ;; try to find a nav mesh in the vicinity
+        ;; verts for the path
+        (cverts (new 'static 'inline-array vector 3
+                (static-vectorm 1 0 0)
+                (static-vectorm 0 1 0)
+                (static-vectorm 0 0 1)
+                )
+          )
+        )
+    ;; if a nav mesh is close by, use that, otherwise use default
+    (if nav
+      (change-to nav self)
+      (change-to *default-nav-mesh* self)
+      )
+    ;; allocate path
+    (set! (-> self path) (new 'process 'path-control self 'path 0.0 (the entity #f) #f))
+    (set! (-> self path curve cverts) cverts)
+    (set! (-> self path curve num-cverts) 3)
+    )
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    (set! (-> self root scale x) 20.0)
+    (set! (-> self root scale y) 20.0)
+    (set! (-> self root scale z) 20.0)
+    (set! (-> self hit-points) (+ (+ 1200.0 (* enemy-noto 10)) (/ (the float enemy-noto) 3)))
+  (go-ambush self)
+  )

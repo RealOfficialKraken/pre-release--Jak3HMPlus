@@ -8,6 +8,8 @@
 (define-extern wvehicle type)
 
 
+
+
 (deftype task-manager-desert-artifact-race (task-manager)
   ((count               int8)
    (max-count           int8)
@@ -372,6 +374,7 @@
        )
      )
     ((= arg0 (+ (-> this max-count) -1))
+     (set! (-> *was-squad-control* target-count) 40)
      (talker-spawn-func (-> *artifact-race-speech-list* 24) *entity-pool* (target-pos 0) (the-as region #f))
      )
     ((and (= arg0 (+ (-> this max-count) -2)) (< (rand-vu) 0.5))
@@ -481,9 +484,9 @@
     (format #t "artifact-race::initialize death-count ~d, suck-factor ~f~%" a2-4 (-> this suck-factor))
     )
   (set! (-> this extra-suck-time) (* 16.0 (-> this suck-factor)))
-  (vector-copy! (-> this begin-pos) (new 'static 'vector :x 9263923.0 :y 129024.0 :z 1077248.0 :w 1.0))
-  (vector-copy! (-> this end-pos) (new 'static 'vector :x 9277440.0 :y 127795.2 :z 890880.0 :w 1.0))
-  (vector-copy! (-> this door-plane) (new 'static 'vector :z 1.0 :w 1.0))
+  (set! (-> this begin-pos quad) (-> (new 'static 'vector :x 9263923.0 :y 129024.0 :z 1077248.0 :w 1.0) quad))
+  (set! (-> this end-pos quad) (-> (new 'static 'vector :x 9277440.0 :y 127795.2 :z 890880.0 :w 1.0) quad))
+  (set! (-> this door-plane quad) (-> (new 'static 'vector :z 1.0 :w 1.0) quad))
   (set! (-> this door-plane w)
         (- (vector-dot (-> this door-plane) (new 'static 'vector :x 9277440.0 :y 125747.2 :z 957235.2 :w 1.0)))
         )
@@ -614,7 +617,14 @@
             (b! (not a0-40) cfg-65 :delay (empty-form))
             (set! (-> self slave) (process->handle a0-40))
             )
-          (set! (-> self time-limit) (- (the-as time-frame (-> s5-1 time)) (seconds 17)))
+          (cond
+            ((task-node-open? (game-task-node desert-artifact-race-1-race))
+              (set! (-> self time-limit) (- (the-as time-frame (-> s5-1 time)) (seconds 18)))
+            )
+            ((task-node-open? (game-task-node desert-artifact-race-2-race))
+              (set! (-> self time-limit) (- (the-as time-frame (-> s5-1 time)) (seconds 18)))
+            )
+          )
           )
         (set-time! (-> self start-time))
         (+! (-> self count) 1)

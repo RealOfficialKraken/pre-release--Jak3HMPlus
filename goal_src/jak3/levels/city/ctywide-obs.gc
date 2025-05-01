@@ -2139,7 +2139,7 @@
       )
     (set-time! (-> self start-time))
     (set! (-> self time-limit)
-          (the-as time-frame (the int (+ 300.0 (-> *city-burning-bush-get-on-info* (-> self info index) time))))
+          (the-as time-frame (the int (/ (+ 300.0 (-> *city-burning-bush-get-on-info* (-> self info index) time)) 1.50)))
           )
     (suspend)
     (send-event (handle->process (-> self skill)) 'get-notify self)

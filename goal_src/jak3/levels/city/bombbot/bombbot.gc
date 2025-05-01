@@ -1695,6 +1695,13 @@
      (go (method-of-object this blow-wall))
      )
     (('touched 'touch 'attack)
+    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                (set! hpbar-max-hit-points 12500.0)
+                (set! hpbar-max-hit-points 4000.0)
+              )
+              (when (> hpbar-hit-points hpbar-max-hit-points)
+                (set! hpbar-hit-points hpbar-max-hit-points)
+              )
      (if (logtest? (process-mask vehicle) (-> arg0 mask))
          (send-event
            arg0
@@ -1954,7 +1961,7 @@
 
 ;; WARN: Return type mismatch (pointer bombbot-shot) vs (pointer projectile).
 (defmethod fire-shot ((this bombbot) (arg0 vector) (arg1 vector))
-  (the-as (pointer projectile) (spawn-bombbot-projectile this arg0 arg1 819200.0 (the-as vector #f) 2.0))
+  (the-as (pointer projectile) (spawn-bombbot-projectile this arg0 arg1 819200.0 (the-as vector #f) (+ (the float (/ notoriety-level 9)) (the float (/ guns-level 4)))))
   )
 
 (defmethod bombbot-method-197 ((this bombbot))
@@ -3243,7 +3250,14 @@
     (vector-copy! (-> this nav state heading) s5-3)
     )
   0
-  (set! (-> this max-hit-points) (-> this hit-points))
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (set! (-> this hit-points) 5000.0)
+    (set! (-> this hit-points) 2500.0)
+    )
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (set! (-> this max-hit-points) 5000.0)
+    (set! (-> this max-hit-points) 2500.0)
+  )
   0
   (none)
   )
@@ -3468,7 +3482,10 @@
   (set-time! (-> this stop-shoot))
   (set! (-> this shoot-duration) 1.0)
   (set! (-> this draw light-index) (the-as uint 10))
-  (set! (-> this hit-points) 35.0)
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (set! (-> this hit-points) 5000.0)
+    (set! (-> this hit-points) 2500.0)
+    )
   (let ((v1-19 (-> this nav state))
         (a0-13 (-> this root trans))
         )
@@ -3477,7 +3494,10 @@
     (vector-copy! (-> v1-19 target-pos) a0-13)
     )
   0
-  (set! (-> this max-hit-points) (-> this hit-points))
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (set! (-> this max-hit-points) 5000.0)
+    (set! (-> this max-hit-points) 2500.0)
+  )
   (go (method-of-object this hostile))
   )
 
@@ -3958,8 +3978,8 @@
   (set! (-> self shoot-duration) 1.0)
   (set! (-> self hold-fire) #f)
   (set! (-> self draw light-index) (the-as uint 10))
-  (set! (-> self max-hit-points) (the float (+ (* 50 (the int (you-suck-scale *game-info* #f 0))) 50)))
-  (set! (-> self hit-points) (-> self max-hit-points))
+  (set! (-> self max-hit-points) (the float (+ (* (+ 50 (* cars-level 7))) (+ 50 (* cars-level 4)))))
+    (set! (-> self hit-points) (-> self max-hit-points))
   (set! (-> self health-hud)
         (ppointer->handle (process-spawn bombbot-hud :init hud-init-by-other :name "bombbot-hud" :to self))
         )

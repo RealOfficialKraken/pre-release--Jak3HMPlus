@@ -252,4 +252,5 @@
       (spawn-projectile dp-bipedal-grenade-shot gp-0 arg0 *default-dead-pool*)
       )
     )
+    (none)
   )

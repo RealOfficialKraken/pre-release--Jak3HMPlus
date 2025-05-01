@@ -13,6 +13,8 @@
 (define-extern *curve-sat-explo-scale-x* curve2d-fast)
 (define-extern *curve-sat-explo-scale-y* curve2d-fast)
 
+(define-extern spawn-dp-bipedal-grenade (function process-focusable vector vector float (none)))
+
 ;; DECOMP BEGINS
 
 

@@ -227,21 +227,22 @@
 (defstate die-movie (dark-eco-orb)
   :virtual #t
   :code (behavior ()
-    (until (process-grab? *target* #f)
+    #|(until (process-grab? *target* #f)
       (suspend)
       )
+      ;vvv   disabled because it crashes   vvv
     (process-spawn scene-player :init scene-player-init "city-get-dark-punch" #t #f :name "scene-player")
     (let ((v1-6 (-> self root root-prim)))
       (set! (-> v1-6 prim-core collide-as) (collide-spec))
       (set! (-> v1-6 prim-core collide-with) (collide-spec))
       )
-    0
+    0|#
     (logior! (-> self draw status) (draw-control-status no-draw))
-    (suspend-for (seconds 1)
+    #|(suspend-for (seconds 1)
       )
     (while *scene-player*
       (suspend)
-      )
+      )|#
     (task-node-close! (game-task-node city-destroy-darkeco-dark-punch) 'event)
     (set-setting! 'airlock #f 0.0 0)
     (suspend)
