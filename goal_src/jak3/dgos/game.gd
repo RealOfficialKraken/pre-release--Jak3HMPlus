@@ -520,6 +520,7 @@
   "neo-wasp.o"
   "flamer-lava.o"
   "manta.o"
+  "spyder.o"
   "mantis.o"
   "neo-grenadier.o"
   "flut.o"

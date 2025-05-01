@@ -52,7 +52,7 @@
 
 (defskelgroup skel-spyder spyder spyder-lod0-jg -1
               ((spyder-lod0-mg (meters 20)) (spyder-lod1-mg (meters 999999)))
-              :bounds (static-spherem 0 0 0 5)
+              :bounds (static-spherem 0 0 0 9999)
               :shadow spyder-shadow-mg
               :origin-joint-index 28
               )
