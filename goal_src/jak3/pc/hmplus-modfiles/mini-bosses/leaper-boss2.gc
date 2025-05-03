@@ -552,7 +552,7 @@
      )
     (('hit 'hit-flinch 'hit-knocked)
      (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-                (set! hpbar-max-hit-points (+ (* 6.0 (-> self enemy-info default-hit-points)) (* (the float enemy-noto) 3)))
+                (set! hpbar-max-hit-points (+ (* 14.0 (-> self enemy-info default-hit-points)) (* (the float enemy-noto) 3)))
                 (set! hpbar-max-hit-points (+ (-> self enemy-info default-hit-points) (* (the float enemy-noto) 3)))
               )
               (when (> hpbar-hit-points hpbar-max-hit-points)

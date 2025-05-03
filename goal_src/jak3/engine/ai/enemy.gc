@@ -1646,7 +1646,7 @@
      )
     ((= msg 'touched)
     (when (<= (-> this hit-points) 0.0)
-       (when *enemies-explode*
+       (when (and *enemies-explode* (rand-vu-percent? 0.2))
           (let ((gp-0 (new 'stack-no-clear 'explosion-init-params)))
             (set! (-> gp-0 spawn-point quad) (-> this root trans quad))
             (quaternion-identity! (-> gp-0 spawn-quat))
@@ -1770,7 +1770,7 @@
                     )
                   )
               (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-                (set! hpbar-max-hit-points (+ (* 6.0 (-> self enemy-info default-hit-points)) (* (the float enemy-noto) 3)))
+                (set! hpbar-max-hit-points (+ (* 14.0 (-> self enemy-info default-hit-points)) (* (the float enemy-noto) 3)))
                 (set! hpbar-max-hit-points (+ (-> self enemy-info default-hit-points) (* (the float enemy-noto) 3)))
               )
               (when (> hpbar-hit-points hpbar-max-hit-points)
@@ -2129,7 +2129,7 @@
      (send-event proc 'get-attack-count 1)
      (freeze-hit-begin)
      (when (= (-> this hit-points) 0.0)
-      (when *enemies-explode*
+      (when (and *enemies-explode* (rand-vu-percent? 0.2))
           (let ((gp-0 (new 'stack-no-clear 'explosion-init-params)))
             (set! (-> gp-0 spawn-point quad) (-> this root trans quad))
             (quaternion-identity! (-> gp-0 spawn-quat))
@@ -2266,7 +2266,7 @@
      )
      (set! global-parent-mask (-> this mask))
      (set! global-root-trans (-> this root trans))
-     (when *enemies-explode*
+     (when (and *enemies-explode* (rand-vu-percent? 0.2))
       (let ((gp-0 (new 'stack-no-clear 'explosion-init-params)))
         (set! (-> gp-0 spawn-point quad) (-> this root trans quad))
         (quaternion-identity! (-> gp-0 spawn-quat))
