@@ -1764,10 +1764,7 @@
                     (not (string= (-> this name) "roboguard-giant"))
                     (not (string= (-> this name) "Skull Snapper"))
                     (not (string= (-> this name) "entity-boss"))
-                    (and
-                       (= (remap-enemy-type-name (-> this type)) 'bombbot)
-                       (task-node-closed? (game-task-node city-port-assault-resolution))
-                    )
+                    (!= (remap-enemy-type-name (-> this type)) 'bombbot)
                   )
               (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
                 (set! hpbar-max-hit-points (+ (* 14.0 (-> self enemy-info default-hit-points)) (* (the float enemy-noto) 3)))

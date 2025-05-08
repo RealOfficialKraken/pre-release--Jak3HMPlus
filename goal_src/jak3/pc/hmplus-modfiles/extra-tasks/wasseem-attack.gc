@@ -63,6 +63,9 @@
   :code (behavior ()
       (kill-all-sat)
       (task-node-open! (game-task-node wascity-pre-game-wait) #t)
+      (when (not *traffic-manager*)
+        (send-event *traffic-manager* 'spawn-all #f)
+      )
       (suspend)
     )
   )
@@ -72,6 +75,7 @@
     :virtual #t
     :code (behavior ()
               (loop
+                (send-event *traffic-manager* 'kill-all #f)
                 (let (
                   (vec1 (new 'static 'vector :x (meters 1459.8339) :y (meters 26.78) :z (meters -372.99) :w 1.0))
                   (vec2 (new 'static 'vector :x (meters 1466.5053) :y (meters 27.62) :z (meters -355.66) :w 1.0))
@@ -170,6 +174,9 @@
         (task-node-close! (game-task-node wascity-pre-game-resolution) #t)
         (suspend-for (seconds 0.5))
         (set-continue! *game-info* "wascityb-game" #t)
+        (when *traffic-manager*
+          (send-event *traffic-manager* 'kill-all #f)
+        )
         (auto-save-user)
         (go-virtual check-active)
     )
