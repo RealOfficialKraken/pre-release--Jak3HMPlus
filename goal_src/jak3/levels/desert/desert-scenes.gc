@@ -6004,6 +6004,206 @@
               )
             )
 
+(load-scene (new 'static 'scene
+              :name "desert-jak-gets-on-tpfb"
+              :extra #f
+              :info #f
+              :scene-flags (scene-flags scf1 scf2 scf3 scf4)
+              :mask-to-clear (process-mask movie projectile)
+              :entity "scene-stage-211"
+              :art-group "scenecamera"
+              :anim "desert-jak-gets-on-t-c"
+              :parts 8
+              :command-list '((0 (apply ,(lambda :behavior scene-player
+                             ()
+                             (when (not (-> self aborted?))
+                               (disable *screen-filter*)
+                               (setup
+                                 *screen-filter*
+                                 (new 'static 'vector :x 255.0 :y 255.0 :z 255.0 :w 128.0)
+                                 (new 'static 'vector :x 255.0 :y 255.0 :z 255.0)
+                                 (* 0.1 (seconds-per-frame))
+                                 (bucket-id tex-hud-pris2)
+                                 #x3fffff
+                                 #x33001
+                                 #t
+                                 )
+                               (set-setting! 'allow-blackout #f 0.0 0)
+                               )
+                             (none)
+                             )
+                          )
+                   )
+                (120
+                  (part-tracker
+                    "group-desert-buggy-dust"
+                    entity
+                    "particleman"
+                    joint
+                    "particleO"
+                    track
+                    #t
+                    duration
+                    (frame-range 120 300)
+                    )
+                  (part-tracker
+                    "group-desert-buggy-dust"
+                    entity
+                    "particleman"
+                    joint
+                    "particleP"
+                    track
+                    #t
+                    duration
+                    (frame-range 120 300)
+                    )
+                  (part-tracker
+                    "group-desert-buggy-dust"
+                    entity
+                    "particleman"
+                    joint
+                    "particleQ"
+                    track
+                    #t
+                    duration
+                    (frame-range 120 300)
+                    )
+                  (part-tracker
+                    "group-desert-buggy-dust"
+                    entity
+                    "particleman"
+                    joint
+                    "particleR"
+                    track
+                    #t
+                    duration
+                    (frame-range 120 300)
+                    )
+                  )
+                (1950 (apply ,(lambda :behavior scene-player
+                                ()
+                                (set-setting! 'fog-special-interp-targ #f 0.2 0)
+                                (set-setting! 'dust-storm-fog-scalar #f 0.5 0)
+                                (set-setting! 'fog-special-interp-rate #f 0.05 0)
+                                (none)
+                                )
+                             )
+                      )
+                (2567 (fadeout (frame-time-30 5)))
+                (10000
+                  (apply ,(lambda :behavior scene-player
+                            ()
+                            (when (-> self aborted?)
+                              (disable *screen-filter*)
+                              (set-blackout-frames (seconds 0.2))
+                              (remove-setting! 'allow-blackout)
+                              )
+                            (none)
+                            )
+                         )
+                  )
+                )
+              :cut-list '()
+              :wait-ground-time (seconds 1)
+              :actor (new 'static 'boxed-array :type scene-actor
+                (new 'static 'scene-actor
+                  :name "scenecamera"
+                  :level #f
+                  :art-group "skel-scenecamera"
+                  :prefix ""
+                  :draw-frames '((min max))
+                  :scissor-frames '()
+                  :shadow-frames '((min max))
+                  :cloth-reset-frames '()
+                  :cloth-commands '()
+                  :camera 4
+                  :shadow-flags -1
+                  :shadow-volume-joint #f
+                  )
+                (new 'static 'scene-actor
+                  :name "particleman"
+                  :level 'desboss2
+                  :art-group "skel-particleman"
+                  :prefix ""
+                  :draw-frames '((min max))
+                  :scissor-frames '()
+                  :shadow-frames '((min max))
+                  :cloth-reset-frames '()
+                  :cloth-commands '()
+                  :flags #x1
+                  :shadow-flags -1
+                  :shadow-volume-joint #f
+                  )
+                (new 'static 'scene-actor
+                  :name "jakc-highres"
+                  :level 'desboss2
+                  :art-group "skel-jakc-highres"
+                  :prefix ""
+                  :draw-frames '((min max))
+                  :scissor-frames '()
+                  :shadow-frames '((min max))
+                  :cloth-reset-frames '((min 2400))
+                  :cloth-commands '()
+                  :flags #x1
+                  :shadow-flags -1
+                  :shadow-volume-joint #f
+                  :no-draw-seg #x80
+                  )
+                (new 'static 'scene-actor
+                  :name "sidekick-highres"
+                  :level 'desboss2
+                  :art-group "skel-sidekick-highres"
+                  :prefix ""
+                  :draw-frames '((min max))
+                  :scissor-frames '()
+                  :shadow-frames '((min max))
+                  :cloth-reset-frames '()
+                  :cloth-commands '()
+                  :flags #x1
+                  :shadow-flags -1
+                  :shadow-volume-joint #f
+                  )
+                (new 'static 'scene-actor
+                  :name "des-final-snake"
+                  :level 'wasall
+                  :art-group "skel-des-final-snake"
+                  :prefix ""
+                  :draw-frames '((min max))
+                  :scissor-frames '()
+                  :shadow-frames '((min max))
+                  :cloth-reset-frames '()
+                  :cloth-commands '()
+                  :flags #x1
+                  :shadow-flags -1
+                  :shadow-volume-joint #f
+                  :no-draw-seg #x2
+                  )
+                (new 'static 'scene-actor
+                  :name "snake-wheel-fma"
+                  :level 'desboss2
+                  :art-group "skel-snake-wheel-fma"
+                  :prefix ""
+                  :draw-frames '((min max))
+                  :scissor-frames '()
+                  :shadow-frames '((min max))
+                  :cloth-reset-frames '()
+                  :cloth-commands '()
+                  :flags #x1
+                  :shadow-flags -1
+                  :shadow-volume-joint #f
+                  )
+                )
+              :load-point "desert-boss-res-b"
+              :end-point "desert-tpfb-checkpoint"
+              :borrow '((desert-game alias desert copy desboss2 special))
+              :sfx-volume -1.0
+              :ambient-volume -1.0
+              :music-delay 1500.0
+              :on-running #f
+              :on-complete #f
+              )
+            )
+
 (load-scene
   (new 'static 'scene
     :name "desert-final-boss-res-b"

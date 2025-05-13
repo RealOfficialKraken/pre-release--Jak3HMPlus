@@ -1,0 +1,163 @@
+(in-package goal)
+
+;name: tp-fb.gc
+
+
+(defun km-current-continue ((arg0 string) (arg1 debug-menu-msg))
+  (if (= arg1 (debug-menu-msg press))
+      (start 'play (get-continue-by-name *game-info* arg0))
+      )
+  (string= (-> (get-current-continue-forced *game-info*) name) arg0)
+  )
+
+(deftype teleport-final-boss (process)
+    ((slotted-save                                  int)
+     (general-i                                     int)
+     (enemy-spawn-points          (inline-array vector))
+     (event-phase                                   int)
+     (stored-checkpoint                          string)
+    )
+    (:state-methods
+    init-tp-fb!
+    active
+    lose
+    win
+    )
+    (:methods
+        (kill-my (_type_) none)
+        (check-for-attributes (_type_) none)
+    )
+)
+
+(defbehavior teleport-final-boss-init-by-other teleport-final-boss ()
+    (set! (-> self general-i) 0)
+    (set! (-> self event-phase) 1)
+    (set! (-> self slotted-save) (-> *game-info* auto-save-which))
+    (set! (-> self stored-checkpoint) (-> *game-info* current-continue name))
+    (set! (-> self enemy-spawn-points)
+                (new 'static
+                    'inline-array
+                    vector
+                    1
+                    ;;put-spawn-points-here
+                    (static-vectorm 0.0 0.0 0.0)
+                )
+            )
+    (go-virtual init-tp-fb!)
+)
+
+(defun tp-fb! ()
+    (process-spawn teleport-final-boss :name "tp-fb-process" *active-pool*)
+    (none)
+)
+
+(defun reset-tp-fb! ()
+    (task-node-close! (game-task-node tp-fb-fight) #t)
+    (none)
+)
+
+(defstate init-tp-fb! (teleport-final-boss)
+    :virtual #t
+    :code
+    (behavior ()
+        (set! (-> self general-i) 0)
+        ;(initialize! *game-info* 'game (the-as game-save #f) (the-as string #f) (the-as resetter-spec #f))
+        (task-node-close! (game-task-node tp-fb-ground) #t)
+        (process-spawn scene-player 
+                :init scene-player-init 
+                "desert-jak-gets-on-tpfb"
+                #t
+                "desert-tpfb-checkpoint"
+                :name "scene-player")
+        (loop
+            (cond 
+                (*scene-player*
+                    (+! (-> self general-i) 1)
+                    (when (>= (-> self general-i) 2)
+                        (lambda :behavior scene-player () (set! (-> self aborted?) #t))
+                    )
+                )
+                (else
+                    (go-virtual active)
+                )
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate active (teleport-final-boss)
+    :virtual #t
+    :code
+    (behavior ()
+        (loop
+            (when   
+                (and 
+                    (or 
+                        (> (-> *target* fact health) 1.0)
+                        (not (km-current-continue (-> self stored-checkpoint) (the-as debug-menu-msg #f)))
+                        (not pause-menu-blocked?)
+                    )
+                    (not *debug-segment*)
+                )
+                (check-for-attributes self)
+            )
+            (when (or 
+                    (<= (-> *target* fact health) 0.0)
+                    (>= 
+                        (vector-vector-distance 
+                            (target-pos 0) 
+                            (new 'static 'vector :x (meters 2466.3571) :y (meters 108.2831) :z (meters 571.0242) :w 1.0)
+                        ) 
+                        (meters 400)
+                    )
+                  )
+                (go-virtual lose)
+            )
+            (when *debug-segment*
+                (format *stdcon* "TP-FB Active~%SC=~S~%CC=~S~%~%" (-> self stored-checkpoint) (-> *game-info* current-continue name))
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate lose (teleport-final-boss)
+    :virtual #t
+    :code
+    (behavior ()
+        (set! (-> self general-i) 0)
+        (loop
+            (+! (-> self general-i) 1)
+            (when (>= (-> self general-i) 180)
+                (km-current-continue (-> self stored-checkpoint) (the-as debug-menu-msg #f))
+                (task-node-close! (game-task-node tp-fb-fight) #t)
+                (kill-my self)
+            )
+            (suspend)
+        )
+    )
+)
+
+(defmethod kill-my ((self teleport-final-boss))
+    (kill-by-name (-> self name) *active-pool*)
+    (deactivate self)
+    (none)
+)
+
+(defmethod check-for-attributes ((this teleport-final-boss))
+    (set! (-> *target* fact health) 1.0)
+    (set! pause-menu-blocked? #t)
+    (set-continue! *game-info* (-> this stored-checkpoint) #t)
+    (none)
+)
+
+#|
+(lambda :behavior scene-player () (when (cpad-pressed? 0 triangle)
+                                                  (set! (-> self aborted?) #t)
+                                                  (logclear! (-> *cpad-list* cpads 0 button0-abs 0) (pad-buttons triangle))
+                                                  (logclear! (-> *cpad-list* cpads 0 button0-rel 0) (pad-buttons triangle))
+                                                  #t
+                                                  )
+                                             )
+                                             |#
