@@ -9159,6 +9159,25 @@
                        :want-sound (new 'static 'array symbol 3 'wascity1 'wascity2 'wascity3)
                        )
                      (new 'static 'continue-point
+                       :name "wascity-doors"
+                       :level 'wascitya
+                       :trans (new 'static 'vector :x (meters 2261.8459) :y (meters 23.3860) :z (meters 95.5868) :w 1.0)
+                       :camera-trans (new 'static 'vector :x (meters 2260.2348) :y (meters 28.5345) :z (meters 83.1909) :w 1.0)
+                       :quat (new 'static 'vector4h :data (new 'static 'array int16 4 0 #x62af 0 #x5182))
+                       :camera-rot (new 'static 'array int16 9 -4846 0 -32403 #xf80 #x7f05 -593 #x7da0 -4010 -4810)
+                       :on-goto #f
+                       :vis-nick 'wascitya
+                       :vehicle-type #x1b
+                       :want-count 4
+                       :want (new 'static 'inline-array level-buffer-state-small 4
+                         (new 'static 'level-buffer-state-small :name 'wasall :display? 'special)
+                         (new 'static 'level-buffer-state-small :name 'waswide :display? 'display)
+                         (new 'static 'level-buffer-state-small :name 'wascitya :display? 'display)
+                         (new 'static 'level-buffer-state-small :name 'wasstada :display? #f)
+                         )
+                       :want-sound (new 'static 'array symbol 3 'wascity1 'wascity2 'wascity3)
+                       )
+                     (new 'static 'continue-point
                        :name "wascitya-top-of-stairs"
                        :level 'wascitya
                        :trans (new 'static 'vector :x 9532157.0 :y 206590.77 :z -1411176.0 :w 1.0)
