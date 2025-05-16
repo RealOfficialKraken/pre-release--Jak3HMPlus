@@ -4635,7 +4635,7 @@ BUGS:
             *target*
             (= in-desertf-anchor? #t)
             (= anchor-cooldown #f)
-            (task-node-closed? (game-task-node desert-vin-quest-resolution))
+            (task-node-closed? (game-task-node temple-climb-introduction))
             (= anchor-day? #t)
             (not (task-node-open? (game-task-node desertf-anchor-resolution)))
         )
@@ -4649,7 +4649,7 @@ BUGS:
             *target*
             (= in-desertc-anchor? #t)
             (= anchor-cooldown #f)
-            (task-node-closed? (game-task-node desert-vin-quest-resolution))
+            (task-node-closed? (game-task-node temple-climb-introduction))
             (= anchor-day? #t)
             (not (task-node-open? (game-task-node desertc-anchor-resolution)))
         )
@@ -4663,7 +4663,7 @@ BUGS:
             *target*
             (= in-ctyinda-anchor? #t)
             (= anchor-cooldown #f)
-            (task-node-closed? (game-task-node desert-vin-quest-resolution))
+            (task-node-closed? (game-task-node temple-climb-introduction))
             (= anchor-day? #t)
             (not (task-node-open? (game-task-node ctyinda-anchor-resolution)))
         )
@@ -4677,7 +4677,7 @@ BUGS:
             *target*
             (= in-desertg-anchor? #t)
             (= anchor-cooldown #f)
-            (task-node-closed? (game-task-node desert-vin-quest-resolution))
+            (task-node-closed? (game-task-node temple-climb-introduction))
             (= anchor-day? #t)
             (not (task-node-open? (game-task-node desertg-anchor-resolution)))
         )

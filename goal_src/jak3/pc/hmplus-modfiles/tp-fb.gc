@@ -3,19 +3,13 @@
 ;name: tp-fb.gc
 
 
-(defun km-current-continue ((arg0 string) (arg1 debug-menu-msg))
-  (if (= arg1 (debug-menu-msg press))
-      (start 'play (get-continue-by-name *game-info* arg0))
-      )
-  (string= (-> (get-current-continue-forced *game-info*) name) arg0)
-  )
-
 (deftype teleport-final-boss (process)
     ((slotted-save                                  int)
      (general-i                                     int)
      (enemy-spawn-points          (inline-array vector))
      (event-phase                                   int)
      (stored-checkpoint                          string)
+     (stored-continue                    continue-point)
     )
     (:state-methods
     init-tp-fb!
@@ -34,6 +28,7 @@
     (set! (-> self event-phase) 1)
     (set! (-> self slotted-save) (-> *game-info* auto-save-which))
     (set! (-> self stored-checkpoint) (-> *game-info* current-continue name))
+    (set! (-> self stored-continue) (get-current-continue-forced *game-info*))
     (set! (-> self enemy-spawn-points)
                 (new 'static
                     'inline-array
@@ -67,8 +62,11 @@
                 :init scene-player-init 
                 "desert-jak-gets-on-tpfb"
                 #t
-                "desert-tpfb-checkpoint"
+                "desert-tpfb-ground"
                 :name "scene-player")
+                (set-continue! *game-info* "desert-tpfb-ground" #t)
+                (start 'play (get-current-continue-forced *game-info*))
+        (toggle-dark-mode)
         (loop
             (cond 
                 (*scene-player*
@@ -92,15 +90,12 @@
     (behavior ()
         (loop
             (when   
-                (and 
-                    (or 
-                        (> (-> *target* fact health) 1.0)
-                        (not (km-current-continue (-> self stored-checkpoint) (the-as debug-menu-msg #f)))
-                        (not pause-menu-blocked?)
-                    )
-                    (not *debug-segment*)
+                (or 
+                    (> (-> *target* fact health) 1.0)
+                    (not (km-current-continue (-> self stored-checkpoint) (the-as debug-menu-msg #f)))
+                    (not pause-menu-blocked?)
                 )
-                (check-for-attributes self)
+            (check-for-attributes self)
             )
             (when (or 
                     (<= (-> *target* fact health) 0.0)
@@ -147,17 +142,18 @@
 
 (defmethod check-for-attributes ((this teleport-final-boss))
     (set! (-> *target* fact health) 1.0)
-    (set! pause-menu-blocked? #t)
+    (when (not *debug-segment*)
+        (set! pause-menu-blocked? #t)
+    )
     (set-continue! *game-info* (-> this stored-checkpoint) #t)
     (none)
 )
 
 #|
 (lambda :behavior scene-player () (when (cpad-pressed? 0 triangle)
-                                                  (set! (-> self aborted?) #t)
-                                                  (logclear! (-> *cpad-list* cpads 0 button0-abs 0) (pad-buttons triangle))
-                                                  (logclear! (-> *cpad-list* cpads 0 button0-rel 0) (pad-buttons triangle))
-                                                  #t
-                                                  )
-                                             )
-                                             |#
+    (set! (-> self aborted?) #t)
+    (logclear! (-> *cpad-list* cpads 0 button0-abs 0) (pad-buttons triangle))
+    (logclear! (-> *cpad-list* cpads 0 button0-rel 0) (pad-buttons triangle))
+    #t)
+)
+|#

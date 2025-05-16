@@ -6193,8 +6193,8 @@
                   :shadow-volume-joint #f
                   )
                 )
-              :load-point "desert-boss-res-b"
-              :end-point "desert-tpfb-checkpoint"
+              :load-point "desert-tpfb-ground"
+              :end-point "desert-tpfb-ground"
               :borrow '((desert-game alias desert copy desboss2 special))
               :sfx-volume -1.0
               :ambient-volume -1.0

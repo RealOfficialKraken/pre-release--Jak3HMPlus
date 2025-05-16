@@ -1614,7 +1614,7 @@
               :on-complete #f
               :on-fail #f
               )
-            :borrow '((desert-game alias desert copy deswalk display desboss2 copy))
+            :borrow '((desert-game alias desert copy desboss2 special))
             :open? (lambda ()
               (dotimes (gp-0 (-> *level* length))
                 (let ((v1-3 (-> *level* level gp-0)))
@@ -1640,7 +1640,7 @@
             :task (game-task desert-interceptors)
             :name "tp-fb-fight"
             :when-open #f
-            :flags (game-task-node-flag close-task no-percent bbush)
+            :flags (game-task-node-flag no-percent)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node tp-fb-ground)
               (game-task-node none)
@@ -1649,20 +1649,8 @@
               )
             :on-open #f
             :manager #f
-            :borrow '((desert-game alias desert copy deswalk display desboss2 copy))
-            :open? (lambda ()
-              (dotimes (gp-0 (-> *level* length))
-                (let ((v1-3 (-> *level* level gp-0)))
-                  (if (and (!= (-> v1-3 status) 'inactive)
-                           (= (-> v1-3 info memory-mode) (level-memory-mode tiny-edge))
-                           (not (member (-> v1-3 name) '(desertb deswalk desboss2)))
-                           )
-                      (return #f)
-                      )
-                  )
-                )
-              #t
-              )
+            :borrow '((desert-game alias desert copy desboss2 special))
+            :open? #f
             :on-close #f
             :reset #f
             :suck-death-count #xa5

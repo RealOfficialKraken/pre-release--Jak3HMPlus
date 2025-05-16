@@ -14571,6 +14571,26 @@
                         )
                       :want-sound (new 'static 'array symbol 3 'wasall1 'desert1 'desert2)
                       )
+                      (new 'static 'continue-point
+                      :name "desert-tpfb-ground"
+                      :level 'desertb
+                      :flags (continue-flags no-auto)
+                      :trans (new 'static 'vector :x (meters 2747.8432):y (meters 20.9517):z (meters 551.0838) :w 1.0)
+                      :camera-trans (new 'static 'vector :x (meters 2467.9824) :y (meters 114.4812) :z (meters 571.4113):w 1.0)
+                      :quat (new 'static 'vector4h :data (new 'static 'array int16 4 0 -9718 -3 #x7a39))
+                      :camera-rot (new 'static 'array int16 9 #x6105 0 #x5377 -2598 #x7f09 #xbcd -21210 -3984 #x604d)
+                      :on-goto #f
+                      :vis-nick 'desert
+                      :vehicle-type #x1b
+                      :want-count 4
+                      :want (new 'static 'inline-array level-buffer-state-small 4
+                        (new 'static 'level-buffer-state-small :name 'wasall :display? 'special)
+                        (new 'static 'level-buffer-state-small :name 'desert-game :display? 'display)
+                        (new 'static 'level-buffer-state-small :name 'deswalk :display? 'display)
+                        (new 'static 'level-buffer-state-small :name 'desertb :display? 'display)
+                        )
+                      :want-sound (new 'static 'array symbol 3 'wasall1 'desert1 'desert2)
+                      )
                     )
                   :callback-list '()
                   :borrow #f
