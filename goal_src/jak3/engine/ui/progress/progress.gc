@@ -2222,6 +2222,7 @@
               (set! s5-0 #t)
               (stop-main-music)
               (set! in-main-menu? #f)
+              (set! disable-targbar #f)
               (set! globalrandi 1)
               (set-next-state arg0 'loading 0)
               )

@@ -52,16 +52,9 @@ gunmod-reaper (chance to spawn a mini dark maker ship that fires dark-grenades e
 
 TODO:
 - (optional) add to title screen, like a dark ship or enemies in the background, or the rage ghost
-- (CRITICAL) Add vin-hints at the wascity-doors, also provide a shop and an extra hidden option for TP-FB, once you take out all of it's legs. Try to make it an actual process that summons a menu
-- Add TP-FB. Once you take out terraformer's legs in dark-world, get a dialogue from Vin to do a cloned final boss task, with extra events, without dying. Prize is a guaranteed weapon, sometimes a gun mod
-- (CRITICAL) Finish the warp gate level backtracks, with custom entities and minibosses
 - (CRITICAL) Add the sounds to the rage-ghost, and the anchor event
-- (CRITICAL) Finish making the missions hard
-- (CRITICAL) Add more gun mods, it's unknown what variable they'll be attached to
 - (CRITICAL) Add a NG+ to continue levelling with your current stats, higher level enemies, and extremely hard story missions
 - (CRITICAL) Make TP-FB with the terraformer in dark-world
-- (optional) Add a secret code from those who know, to unlock a gun mod
-- (optional) Rewrite group-drop!
 - (optional) Maybe port the nest worms over to desert and add a worm boss, too
 
 After all of these, the mod will be at a v1.0 state. Mod releasing is determined by Jak 3's open release
@@ -76,6 +69,12 @@ BUGS:
 - levelup explosion runs out of memory, or happens outside of goal code
 - terraformer in dark-world makes auto-saving fail, probably easy fix
 |#
+
+
+
+;;MOD VERSION
+(define mod-version "0.71")
+;;
 
 (defun-extern freeze-enemies-in-menu! (none))
 (defun-extern level-up! int none)
@@ -4219,6 +4218,17 @@ BUGS:
         (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 335 0.0 (font-color default) (font-flags middle shadow kerning large))))
         (set! (-> font-ctx scale) 0.825)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        (clear matt-str)
+        (clear *pc-encoded-matt-str*)
+        (format matt-str "<COLOR_GREEN>v~s"
+        mod-version
+        )
+        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 510 410 0.0 (font-color default) (font-flags right shadow kerning large))))
+        (set! (-> font-ctx scale) 0.225)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         (when 
             (or
                 (cpad-pressed? 0 x)
@@ -5949,6 +5959,73 @@ BUGS:
         )
     )
 
+    (when
+        (and
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= in-disclaimer? #t)
+            (= (pause-allowed?) #t)
+        )
+        (let ((vec1 (new-stack-vector0))
+              (vec2 (new-stack-vector0))
+             )
+            (set! (-> vec1 y) (meters -100))
+            (set! (-> vec1 x) (-> (target-pos 0) x))
+            (set! (-> vec1 z) (-> (target-pos 0) z))
+            (set! (-> vec1 w) 1.0)
+            (set! (-> vec2 y) (meters -50))
+            (set! (-> vec2 x) (-> (target-pos 0) x))
+            (set! (-> vec2 z) (-> (target-pos 0) z))
+            (set! (-> vec2 w) 1.0)
+            (disable-hudmap)
+            (turn-to-scene-camera vec2 vec1 #t)
+            (when (not launch-mmenu-delay)
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "<COLOR_ORANGE>Disclaimer"
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 50 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                (set! (-> font-ctx scale) 0.625)
+                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "<COLOR_WHITE>HeroMode+ is v~s,~%which means that the mod is <COLOR_YELLOW>unfinished<COLOR_WHITE>.~%~%Furthermore, the <COLOR_ORANGE>Open<COLOR_YELLOW>GOAL<COLOR_WHITE> version is that <COLOR_CYAN>below the beta release!~%<COLOR_WHITE>Expect bugs and slight changes to the Mod's gameplay elements~%~%That being said, the mod is still completely playable to 100%,~%and you can even play the game in Hero-Mode.~%~%If you need to submit any bugs/suggestions, please leave them in the<COLOR_CYAN> JakMods.dev<COLOR_PINK> Discord<COLOR_WHITE>,~%<COLOR_YELLOW>in the 'jak3-heromode-plus' section.~%<COLOR_ORANGE>I will try to respond to everyone, but no guarantees.~%<COLOR_WHITE>Thank you in advance, for playing!~%~% Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%~%~%X<COLOR_WHITE> Continue"
+                mod-version
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 80 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                (set! (-> font-ctx scale) 0.325)
+                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            )
+        )
+        (when (or (cpad-pressed? 0 x) (cpad-pressed? 0 confirm))
+            (set! launch-mmenu-delay #t)
+            (set! lmmi 0)
+        )
+    )
+
+    (when 
+        (and
+            (= launch-mmenu-delay #t)
+            *target*
+            (not *scene-player*)
+            (= (pause-allowed?) #t)
+        )
+            (+! lmmi 1)
+            (when (>= lmmi 120)
+                (set! launch-mmenu-delay #f)
+                (set! lmmi 0)
+                (set! in-disclaimer? #f)
+                (launch-mmenu)
+            )
+        )
+
 (none)
 )
 
@@ -7131,6 +7208,13 @@ BUGS:
         (set! globalrandi 0)
     )
     (set! mainmenu-camera #t)
+    (none)
+)
+
+(defun launch-disclaimer ()
+    (initialize! *game-info* 'game (the-as game-save #f) "desert-bd-start" (the-as resetter-spec #f))
+    (set! in-disclaimer? #t)
+    (set! disable-targbar #t)
     (none)
 )
 

@@ -1015,6 +1015,7 @@
                 (= (paused?) #f)
                 (= in-vin-shop? #f)
                 (not mainmenu-camera)
+                (not disable-targbar)
             )
                 (draw-targbar-hp)
                 (draw-targbar-dark)

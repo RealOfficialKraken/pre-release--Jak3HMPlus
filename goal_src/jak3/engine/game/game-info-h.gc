@@ -639,6 +639,14 @@
   (defun-extern spawn-dark-world-forest none)
   (defun-extern dark-weather-override none)
 
+  (defun-extern launch-disclaimer none)
+  (define in-disclaimer? #f)
+  (define-extern mod-version string)
+  (define launch-mmenu-delay #f)
+  (define lmmi 0)
+
+  (define disable-targbar #f)
+
 
 
 ;; +++game-items
