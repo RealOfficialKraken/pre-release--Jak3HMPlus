@@ -1648,14 +1648,15 @@
   (cond
     ((task-node-open? (game-task-node desert-rescue-satellite-fight))
       (set! enemy-string "Damaged Satellite")
-      (-! (-> this hit-points) 1400.0)
+      (-! (-> this hit-points) 1600.0)
     )
     (else
       (set! enemy-string "Satellite Probe")
     )
   )
+  (set! draw-enemy-noto enemy-noto)
   (set! hpbar-hit-points (-> this hit-points))
-  (set! hpbar-max-hit-points (-> this hit-points))
+  (set! hpbar-max-hit-points (-> this enemy-info default-hit-points))
   (set! enemy-hp #t)
   (go (method-of-object this sat-idle))
   (none)

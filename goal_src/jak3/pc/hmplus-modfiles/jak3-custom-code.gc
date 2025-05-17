@@ -4226,7 +4226,7 @@ BUGS:
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
         (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 510 410 0.0 (font-color default) (font-flags right shadow kerning large))))
+        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 509 409 0.0 (font-color default) (font-flags right shadow kerning large))))
         (set! (-> font-ctx scale) 0.225)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         (when 
@@ -5993,7 +5993,7 @@ BUGS:
                 (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
                 (clear matt-str)
                 (clear *pc-encoded-matt-str*)
-                (format matt-str "<COLOR_WHITE>HeroMode+ is v~s,~%which means that the mod is <COLOR_YELLOW>unfinished<COLOR_WHITE>.~%~%Furthermore, the <COLOR_ORANGE>Open<COLOR_YELLOW>GOAL<COLOR_WHITE> version is that <COLOR_CYAN>below the beta release!~%<COLOR_WHITE>Expect bugs and slight changes to the Mod's gameplay elements~%~%That being said, the mod is still completely playable to 100%,~%and you can even play the game in Hero-Mode.~%~%If you need to submit any bugs/suggestions, please leave them in the<COLOR_CYAN> JakMods.dev<COLOR_PINK> Discord<COLOR_WHITE>,~%<COLOR_YELLOW>in the 'jak3-heromode-plus' section.~%<COLOR_ORANGE>I will try to respond to everyone, but no guarantees.~%<COLOR_WHITE>Thank you in advance, for playing!~%~% Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%~%~%X<COLOR_WHITE> Continue"
+                (format matt-str "<COLOR_WHITE>HeroMode+ is v~s,~%which means that the mod is <COLOR_YELLOW>unfinished<COLOR_WHITE>.~%~%Furthermore, the <COLOR_ORANGE>Open<COLOR_YELLOW>GOAL<COLOR_WHITE> version is <COLOR_CYAN>below the beta release!~%<COLOR_WHITE>Expect bugs and slight changes to the Mod's gameplay elements~%~%That being said, the mod is still completely playable to 100%,~%and you can even play the game in Hero-Mode.~%~%If you need to submit any bugs/suggestions, please leave them in the<COLOR_CYAN> JakMods.dev<COLOR_PINK> Discord<COLOR_WHITE>,~%<COLOR_YELLOW>in the 'jak3-heromode-plus' section.~%<COLOR_ORANGE>I will try to respond to everyone, but no guarantees.~%<COLOR_WHITE>Thank you in advance, for playing!~%~% Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%~%~%X<COLOR_WHITE> Continue"
                 mod-version
                 )
                 (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
