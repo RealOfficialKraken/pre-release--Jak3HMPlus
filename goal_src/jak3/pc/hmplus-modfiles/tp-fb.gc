@@ -10,6 +10,7 @@
      (event-phase                                   int)
      (stored-checkpoint                          string)
      (stored-continue                    continue-point)
+     (active?                                    symbol)
     )
     (:state-methods
     init-tp-fb!
@@ -29,6 +30,7 @@
     (set! (-> self slotted-save) (-> *game-info* auto-save-which))
     (set! (-> self stored-checkpoint) (-> *game-info* current-continue name))
     (set! (-> self stored-continue) (get-current-continue-forced *game-info*))
+    (set! (-> self active?) #f)
     (set! (-> self enemy-spawn-points)
                 (new 'static
                     'inline-array
@@ -56,6 +58,7 @@
     :code
     (behavior ()
         (set! (-> self general-i) 0)
+        (set! (-> self active?) #t)
         ;(initialize! *game-info* 'game (the-as game-save #f) (the-as string #f) (the-as resetter-spec #f))
         (task-node-close! (game-task-node tp-fb-ground) #t)
         (process-spawn scene-player 
@@ -90,10 +93,13 @@
     (behavior ()
         (loop
             (when   
-                (or 
-                    (> (-> *target* fact health) 1.0)
-                    (not (km-current-continue (-> self stored-checkpoint) (the-as debug-menu-msg #f)))
-                    (not pause-menu-blocked?)
+                (and
+                    (or 
+                        (> (-> *target* fact health) 1.0)
+                        (not (km-current-continue (-> self stored-checkpoint) (the-as debug-menu-msg #f)))
+                        (not pause-menu-blocked?)
+                    )
+                    (-> self active?)
                 )
             (check-for-attributes self)
             )
