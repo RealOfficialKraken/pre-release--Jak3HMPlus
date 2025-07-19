@@ -6022,6 +6022,7 @@ BUGS:
                 (set! launch-mmenu-delay #f)
                 (set! lmmi 0)
                 (set! in-disclaimer? #f)
+                (set! disable-targbar #f)
                 (launch-mmenu)
             )
         )

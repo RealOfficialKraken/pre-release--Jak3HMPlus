@@ -1594,7 +1594,7 @@
             :task (game-task desert-interceptors)
             :name "tp-fb-ground"
             :when-open #f
-            :flags (game-task-node-flag no-percent exclusive bbush)
+            :flags (game-task-node-flag no-percent bbush)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node desert-interceptors-attack-exclude)
               (game-task-node none)
@@ -3831,7 +3831,7 @@
               )
             :flags (game-task-node-flag save-on-life act1)
             :parent-node (new 'static 'array game-task-node 4
-              (game-task-node desert-course-race-resolution)
+              (game-task-node desert-vin-quest-resolution)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)
