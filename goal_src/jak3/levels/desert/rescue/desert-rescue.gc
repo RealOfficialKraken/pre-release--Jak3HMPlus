@@ -1920,6 +1920,7 @@
     (set! (-> self current-passenger-index) 0)
     (set! (-> self current-transport) (the-as handle #f))
     (set! (-> self current-passenger) (the-as handle #f))
+    (set! in-desert-game-task? #t)
     (set! (-> self hud-timer)
           (ppointer->handle (process-spawn hud-timer :init hud-init-by-other :name "hud-timer" :to self))
           )

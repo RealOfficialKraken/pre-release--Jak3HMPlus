@@ -3,53 +3,7 @@
 
 ;; name: jak3-custom-code.gc
 
-#|IDEAS TO IMPLEMENT
-
-----------------------------------------
-GUN MOD - RANDOM OBJECT
-----------------------------------------
-All projectiles from Jak fire manipys on top, and each
-time Jak collects ammunition, it switches the manipy to something else
-----------------------------------------
-GUN MOD - Alpha Hit
-Jak can crit from his projectiles. When this happens, blast a
-non-white-screen nuke with a huge radius, but the damage isnt that big
-----------------------------------------
-----------------------------------------
-GUN MOD - CHAIN REACTION
-----------------------------------------
-Jak's gun shooting has a chance to pop out a gyro burst, but it's different projectiles.
-For example, one roll may have it shoot out grenades, or dark blasts, or fireballs. On
-the other hand, it could also fire out all nukes in an off chance
-----------------------------------------
-dark-world objectives
-----------------------------------------
-gives the player things to do in the dark world.
-Like encounter bosses, fight satellites, and to farm
-in wascity. Some quests go here, that entail to accessing
-areas like the palace or the arena with process-platforms spawned
-
-(GUN MODS TOTAL)
-Gun mods can be accessed in the mod-menu, and selected via dpad for the color.
-Then, you can choose the gun mods for that specific color, and each of them are different.
-Saving the gunmods to the save file might require different fanagling with tasks somehow
-|YELLOW|
-gunmod-fireball - (chance to spawn raining fireballs on hit location)
-gunmod-nukeonly - IMPLEMENTED
-gunmod-freeze IMPLEMENTED
-|RED|
-gunmod-bigshot - IMPLEMENTED
-gunmod-sheild - IMPLEMENTED
-gunmod-missles - IMPLEMENTED
-|BLUE|
-gunmod-ammo IMPLEMENTED
-gunmod-disperser (chance to spawn a BUNCH of blue shots from the target on hit)
-gunmod-minigun (turns blue shots into purple turret shots)
-|DARK|
-gunmod-morpher (rains peacemaker shots downward)
-gunmod-randomshot (spawns a random projectile)
-gunmod-reaper (chance to spawn a mini dark maker ship that fires dark-grenades everywhere)
-
+#|
 TODO:
 - (optional) add to title screen, like a dark ship or enemies in the background, or the rage ghost
 - (CRITICAL) Add the sounds to the rage-ghost, and the anchor event
@@ -64,10 +18,11 @@ BUGS:
 - Bipedal Boss' shield isnt strength 999
 - Crystal in hud has no texture
 - Blocking plane at course-race doesn't spawn
+- General Gouge doesn't have his attributes or hpbar name
 
 :CRASHES
-- levelup explosion runs out of memory, or happens outside of goal code
-- terraformer in dark-world makes auto-saving fail, probably easy fix
+- terraformer in dark-world makes auto-saving fail, and causes a memory leak.
+- Dark world can remain after using fast travel to go anywhere except for when you go back to the warp room.
 |#
 
 
