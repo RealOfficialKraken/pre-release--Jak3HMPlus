@@ -598,7 +598,7 @@
             (set! (-> this continue) #f)
             (when (and
                     (not (search-process-tree *active-pool* (lambda ((p process)) (type? p kleever-npc))))
-                    (task-node-closed? (game-task-node mine-boss-resolution))
+                    (task-node-closed? (game-task-node temple-tests-resolution))
                   )
               (set! (-> this continue) (get-continue-by-name *game-info* "minea-warp"))
             )

@@ -273,6 +273,7 @@
           )
         )
       (setup-scorpion)
+      (set! in-desert-game-task? #t)
       (task-node-close! (game-task-node nest-eggs-get-to-scorpion) 'event)
       (suspend-for (seconds 0.5)
         )

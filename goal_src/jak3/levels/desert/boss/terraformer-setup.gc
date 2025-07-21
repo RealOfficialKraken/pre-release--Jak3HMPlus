@@ -2217,8 +2217,6 @@
              (not (logtest? (-> self entity extra perm status) (entity-perm-status subtask-complete)))
              (and (not (handle->process (-> *game-info* auto-save-proc))) (time-elapsed? (-> self state-time) (seconds 3)))
              )
-             (= weather-dark-mode #t)
-             (not (task-node-open? (game-task-node desert-vin-quest-introduction)))
         )
         (go-virtual walk)
         (go-virtual frozen)

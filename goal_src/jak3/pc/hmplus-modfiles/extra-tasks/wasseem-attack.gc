@@ -54,6 +54,8 @@
       (send-event (handle->process gp-0) 'complete)
       (process-spawn scene-player :init scene-player-init "wascity-pre-game-res" #t "wascityb-seem" :name "scene-player")
       (task-node-close! (game-task-node wascity-pre-game-post-game) #t)
+      (task-node-close! (game-task-node wascity-pre-game-battle) #t)
+      (task-node-close! (game-task-node wascity-pre-game-resolution) #t)
       )
     )
   )

@@ -120,7 +120,10 @@
           (set! (-> s5-1 quad) (-> wgm-vec quad))
           (+! (-> s5-1 y) 9011.2)
           (set-continue! *game-info* "minea-start" #t)
-          (when (= in-mine-level? #f)
+          (when (and
+                  (= in-mine-level? #f)
+                  (task-node-closed? (game-task-node mine-boss-resolution))
+                )
             (mine-level)
           )
           (auto-save-user)

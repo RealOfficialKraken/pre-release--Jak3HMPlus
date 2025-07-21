@@ -2122,66 +2122,6 @@
           (new 'static 'game-task-node-info
             :level 'city
             :task (game-task desert-interceptors)
-            :name "cty-firefight-introduction"
-            :when-open #f
-            :flags (game-task-node-flag no-percent act1)
-            :parent-node (new 'static 'array game-task-node 4
-              (game-task-node none)
-              (game-task-node none)
-              (game-task-node none)
-              (game-task-node none)
-              )
-            :on-open #f
-            :manager #f
-            :borrow '()
-            :open? #f
-            :on-close #f
-            :reset #f
-            :suck-death-count #xa5
-            :command-index #x4
-            :faction-commands '()
-            )
-          (new 'static 'game-task-node-info
-            :level 'city
-            :task (game-task desert-interceptors)
-            :name "cty-firefight-resolution"
-            :when-open #f
-            :flags (game-task-node-flag act1 no-percent)
-            :parent-node (new 'static 'array game-task-node 4
-              (game-task-node cty-firefight-introduction)
-              (game-task-node none)
-              (game-task-node none)
-              (game-task-node none)
-              )
-            :on-open #f
-            :manager (new 'static 'task-manager-info
-              :level #f
-              :type-to-spawn 'firefight-manager
-              :intro-scene #f
-              :resolution-scene #f
-              :resolution-scene-continue #f
-              :final-node (game-task-node cty-firefight-resolution)
-              :vehicle-type #x1b
-              :on-complete #f
-              :on-fail #f
-              )
-            :borrow '((ctywide 4 lctyhijk display)
-              (ctywide-kg alias ctywide copy dummy auto ctypesc auto ctypesa auto)
-              (ctywide-ff-kg alias ctywide copy dummy auto ctypesc auto ctypesa auto)
-              (ctywide-ff alias ctywide copy dummy auto ctypesc auto ctypesa auto)
-              ;(ctywide-ff-mh alias ctywide copy ctypesa auto ctypesb auto dummy auto)
-              ;(ctywide-mh alias ctywide copy ctypesb special dummy auto dummy auto ctypepb special)
-              )
-            :open? #f
-            :on-close #f
-            :reset #f
-            :suck-death-count #xa5
-            :command-index #x4
-            :faction-commands '()
-            )
-          (new 'static 'game-task-node-info
-            :level 'city
-            :task (game-task desert-interceptors)
             :name "mody-fireball"
             :when-open #f
             :flags (game-task-node-flag no-percent close-task utility-node)
