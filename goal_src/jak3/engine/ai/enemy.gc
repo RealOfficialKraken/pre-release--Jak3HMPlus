@@ -2242,7 +2242,7 @@
          )
      )
     ((= msg 'death-start)
-    (when (<= (-> this hit-points) 0.0)
+    #|(when (<= (-> this hit-points) 0.0)
       (when *target-battle!*
           (let ((enemy-name (remap-enemy-type-name (-> this type))))
             ;(format #t "DEATH TO ALL SUCC-HEADS! via ~s" enemy-name)
@@ -2260,7 +2260,7 @@
             )
           )
         )
-     )
+     )|#
      (set! global-parent-mask (-> this mask))
      (set! global-root-trans (-> this root trans))
      (when (and *enemies-explode* (rand-vu-percent? 0.2))
