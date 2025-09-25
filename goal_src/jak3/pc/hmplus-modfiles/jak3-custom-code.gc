@@ -4101,7 +4101,16 @@ BUGS:
             )
                 (set! *rage-ghost* #f)
             )
-
+        (when 
+            (and
+                (search-process-tree *active-pool* (lambda ((p process)) (type? p wasteland-marauder)))
+                (= weather-dark-mode #t)
+                (task-node-closed? (game-task-node nest-eggs-gas))
+            )
+            (kill-by-type wasteland-marauder *active-pool*)
+            (set! (-> *was-squad-control* active-count) 0)
+            (set! (-> *was-squad-control* reserve-count) 0)
+            )
         (when
             (and
                 (= weather-dark-mode #f)

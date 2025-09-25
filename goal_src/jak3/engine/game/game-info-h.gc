@@ -647,6 +647,9 @@
 
   (define disable-targbar #f)
 
+  (declare-type wasteland-marauder marauder)
+  (defun-extern spawn-wasteland-marauder vector string none)
+  (define wastelander-dead? #f)
 
 
 ;; +++game-items

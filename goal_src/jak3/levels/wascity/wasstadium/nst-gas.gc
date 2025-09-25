@@ -230,6 +230,7 @@
       )
     (when (< (vector-vector-xz-distance *garage-center* (target-pos 0)) 81920.0)
       (send-event *target* 'end-mode 'pilot)
+      (blank-hint! "Wasteland Marauders can now spawn" "in the wasteland when off of vehicle!" 205 600)
       (send-event self 'complete)
       )
     )
