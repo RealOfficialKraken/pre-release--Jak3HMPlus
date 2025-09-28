@@ -1115,7 +1115,7 @@ BUGS:
         (when (and (>= tutorial-freeze 925) (< tutorial-freeze 2025))
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "<COLOR_ORANGE>Crates are dropped from <COLOR_YELLOW>enemies, civilians, and bosses~%<COLOR_ORANGE>There are three tiers, an urn, a crate, and black crates being highest~%<COLOR_YELLOW>They can also drop weapons and gun mods, but mainly collectables"
+            (format matt-str "<COLOR_ORANGE>Crates are dropped from <COLOR_YELLOW>enemies, civilians, and bosses~%<COLOR_ORANGE>There are three tiers, an urn, a crate, and black crates being highest~%<COLOR_YELLOW>They can also drop weapons and super gun mods, but mainly collectables"
             )
             (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
             (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -1522,7 +1522,7 @@ BUGS:
     (= menu-select 0)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -1535,7 +1535,7 @@ BUGS:
     (= menu-select 1)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Gun Mods <COLOR_GREEN>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_GREEN>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -1548,7 +1548,7 @@ BUGS:
     (= menu-select 2)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_GREEN>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_GREEN>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -1561,7 +1561,7 @@ BUGS:
     (= menu-select 3)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_GREEN>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_GREEN>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -2727,7 +2727,7 @@ BUGS:
 (when (and (= (-> *game-info* total-deaths) 0)(= menu-unlocked? #t)(= on-vehicle? #f)(not *scene-player*)(= in-menu? #t))
     (clear matt-str)
     (clear *pc-encoded-matt-str*)
-    (format matt-str "~%~%<COLOR_WHITE>Welcome to <COLOR_BLUE>Hero<COLOR_RED>Mode<COLOR_CYAN>+~%<COLOR_GREEN>Made by Kraken~%~%<COLOR_CYAN>RPG Elements have been added~%Information about your levels can be accessed in the <COLOR_ORANGE>Skills<COLOR_CYAN> tab~%~%The new way to get weapons is to find them in enemy-dropped~%crates, which can be found in any tier.~%<COLOR_PINK>Black crates<COLOR_CYAN> are unlocked after <COLOR_ORANGE>Notoriety Lv.<COLOR_YELLOW> 18~%~%<COLOR_CYAN>Gun Mods are new additions that mod the <COLOR_GREEN>type<COLOR_CYAN> of each colored gun.~%They only mod the specified colored weapon, and~%it becomes more powerful with each one~%attached~%~%They can be found very rarely in black crates only, or by~%completing certain challenges in the future.~%~%Enemies also have a level, so be careful treading into certain areas~%<COLOR_ORANGE>Main missions are now <COLOR_RED>very difficult<COLOR_ORANGE>, and certain outlier levels~%can be incredibly difficult, but Leveling can make~%a difference!~%~%<COLOR_GREEN>Have fun! - <COLOR_BLUE>Kraken"
+    (format matt-str "~%~%<COLOR_WHITE>Welcome to <COLOR_BLUE>Hero<COLOR_RED>Mode<COLOR_CYAN>+~%<COLOR_GREEN>Made by Kraken~%~%<COLOR_CYAN>RPG Elements have been added~%Information about your levels can be accessed in the <COLOR_ORANGE>Skills<COLOR_CYAN> tab~%~%The new way to get weapons is to find them in enemy-dropped~%crates, which can be found in any tier.~%<COLOR_PINK>Black crates<COLOR_CYAN> are unlocked after <COLOR_ORANGE>Notoriety Lv.<COLOR_YELLOW> 18~%~%<COLOR_CYAN>Super Gun Mods are new additions that mod the <COLOR_GREEN>type<COLOR_CYAN> of each colored gun.~%They only mod the specified colored weapon, and~%it becomes more powerful with each one~%attached~%~%They can be found very rarely in black crates only, or by~%completing certain challenges in the future.~%~%Enemies also have a level, so be careful treading into certain areas~%<COLOR_ORANGE>Main missions are now <COLOR_RED>very difficult<COLOR_ORANGE>, and certain outlier levels~%can be incredibly difficult, but Leveling can make~%a difference!~%~%<COLOR_GREEN>Have fun! - <COLOR_BLUE>Kraken"
     )
     (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
     (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -4829,7 +4829,7 @@ BUGS:
                     (set! aarena-str "Arena 1")
                 )
                 ((task-node-open? (game-task-node arena-challenge-3))
-                    (set! achallenge-str "Kill 95 Marauders in under 2 minutes!")
+                    (set! achallenge-str "Kill 85 Marauders in under 2 minutes!")
                     (set! areward-str "Level up in <COLOR_RED>Guns<COLOR_PINK>,<COLOR_YELLOW> Notoriety<COLOR_PINK>, and Vehicles.")
                     (set! aarena-str "Arena 2")
                 )
@@ -5997,6 +5997,14 @@ BUGS:
             )
         )
 
+    (when (and
+                (not (task-node-open? (game-task-node wascity-pre-game-battle)))
+                *wasseem-rift*
+            )
+        (kill-by-name "wasseem-rift" *active-pool*)
+        (set! *wasseem-rift* #f)
+    )
+
 (none)
 )
 
@@ -6817,8 +6825,30 @@ BUGS:
         (set! (-> fact options) (actor-option blocked))
         (cond
          ((= rnd 1)
-            (set! (-> fact pickup-type) (pickup-type eco-crystal-dark-c))
-            (set! (-> fact pickup-amount) (the float rnd-crystal))
+            (cond 
+                ((>= enemy-noto 18)
+                    (set! (-> fact pickup-type) (pickup-type eco-crystal-dark-c))
+                    (set! (-> fact pickup-amount) (the float rnd-crystal))
+                )
+                (else
+                    (cond 
+                        ((or
+                            (logtest? (-> *game-info* features) (game-feature gun-blue-1))
+                            (logtest? (-> *game-info* features) (game-feature gun-blue-2))
+                            (logtest? (-> *game-info* features) (game-feature gun-blue-3))
+                        )
+                            (set! (-> fact pickup-type) (pickup-type ammo-blue))
+                        )
+                        (else
+                            (if (rand-vu-percent? 0.5)
+                                (set! (-> fact pickup-type) (pickup-type ammo-yellow))
+                                (set! (-> fact pickup-type) (pickup-type ammo-red))
+                            )
+                        )
+                    )
+                    (set! (-> fact pickup-amount) 30.0)
+                )
+            )
          )
          ((= rnd 2)
             (set! (-> fact pickup-type) (pickup-type gem))

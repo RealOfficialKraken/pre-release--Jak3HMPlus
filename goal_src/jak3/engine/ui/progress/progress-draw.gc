@@ -3533,7 +3533,7 @@
   (format matt-str "<COLOR_YELLOW>BIG SHOUTOUT"
   )
   (+! meme-count 1)
-  (cond ((< meme-count 0) ;og is 40
+  (cond ((< meme-count 40) ;og is 40
     (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
     (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id hud-draw-hud-alpha))
     (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))

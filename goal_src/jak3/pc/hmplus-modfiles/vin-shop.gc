@@ -250,7 +250,7 @@
             (set! vinhs4 "")
         )
         ((= vin-hinti 4)
-            (set! vinhs1 "<COLOR_YELLOW>Certain gun mods can be obtained only by")
+            (set! vinhs1 "<COLOR_YELLOW>Certain super gun mods can be obtained only by")
             (set! vinhs2 "specific enemies as drops. Mainly through slaying")
             (set! vinhs3 "enemies")
             (set! vinhs4 "")

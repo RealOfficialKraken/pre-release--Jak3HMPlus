@@ -2,7 +2,346 @@
 
 ;name: wasseem-attack.gc
 
+(defpartgroup group-nestc-rift-ring
+  :id 1560
+  :duration (seconds 0.017)
+  :linger-duration (seconds 1.5)
+  :flags (sp0)
+  :bounds (static-bspherem 9999 9999 9999 9999)
+  :rotate ((degrees 90) (degrees 0) (degrees 0))
+  :parts ((sp-item 5359 :flags (is-3d sp5 sp6))
+    (sp-item 5360 :flags (sp6))
+    (sp-item 5361 :flags (sp5))
+    (sp-item 5362 :flags (sp5))
+    (sp-item 5363 :flags (sp6))
+    )
+  )
 
+(defpart 5363
+  :init-specs ((:texture (hotdot level-default-sprite))
+    (:num 1.0 1.0)
+    (:x (meters 30))
+    (:y (meters 10))
+    (:scale-x (meters 0.25) (meters 0.25))
+    (:rot-x 4)
+    (:scale-y :copy scale-x)
+    (:r 64.0)
+    (:g 0.0)
+    (:b 128.0)
+    (:a 64.0)
+    (:omega (degrees 0.0225) (degrees 0.0225))
+    (:vel-x (meters -0.36666667))
+    (:vel-y (meters -0.123333335))
+    (:fade-r 0.32)
+    (:fade-g 0.64)
+    (:fade-b 0.0)
+    (:fade-a 0.32)
+    (:friction 0.95)
+    (:timer (seconds 0.667))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+    (:func 'sparticle-motion-blur)
+    (:rotate-y (degrees 0) (degrees 3600))
+    )
+  )
+
+(defpart 5364
+  :init-specs ((:texture (glow-hotdot level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 24))
+    (:scale-y :copy scale-x)
+    (:r 16.0)
+    (:g 0.0)
+    (:b 32.0)
+    (:a 128.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-14))
+    (:rotate-y (degrees 0))
+    )
+  )
+
+(defpart 5361
+  :init-specs ((:texture (glow-soft level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 5))
+    (:rot-x (degrees 45))
+    (:scale-y :copy scale-x)
+    (:r 255.0)
+    (:g 255.0)
+    (:b 255.0)
+    (:a 48.0 32.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 glow))
+    (:userdata 819.2)
+    )
+  )
+
+(defpart 5362
+  :init-specs ((:texture (glow-soft level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 24))
+    (:rot-x (degrees 45))
+    (:scale-y :copy scale-x)
+    (:r 64.0)
+    (:g 0.0)
+    (:b 128.0)
+    (:a 48.0 4.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 glow))
+    (:userdata 65536.0)
+    )
+  )
+
+(defpart 5359
+  :init-specs ((:texture (bigpuff level-default-sprite))
+    (:num 0.0 0.1)
+    (:z (meters 0.2))
+    (:scale-x (meters 2) (meters 4))
+    (:scale-y :copy scale-x)
+    (:r 196.0)
+    (:g 255.0)
+    (:b 196.0)
+    (:a 0.0)
+    (:fade-a 0.4 0.4)
+    (:timer (seconds 1.067))
+    (:flags (sp-cpuinfo-flag-0 sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 sp-cpuinfo-flag-14 left-multiply-quat))
+    (:next-time (seconds 0.267))
+    (:next-launcher 5265)
+    (:rotate-y (degrees 0) (degrees 3600))
+    )
+  )
+
+(defpart 5365
+  :init-specs ((:fade-a 0.0) (:next-time (seconds 0.535)) (:next-launcher 5266))
+  )
+
+(defpart 5366
+  :init-specs ((:fade-a -0.8))
+  )
+
+(defpart 5360
+  :init-specs ((:texture (bigpuff level-default-sprite))
+    (:num 8.0)
+    (:x (meters 2))
+    (:scale-x (meters 1) (meters 1))
+    (:scale-y :copy scale-x)
+    (:r 0.0 196.0)
+    (:g 0.0)
+    (:b 128.0 128.0)
+    (:a 16.0 16.0)
+    (:omega (degrees 0.045) (degrees 0.045))
+    (:vel-x (meters -0.10666667))
+    (:fade-r -0.42666668 0.6533333)
+    (:fade-g 0.42666668)
+    (:fade-b 0.0 -0.21333334)
+    (:friction 0.96)
+    (:timer (seconds 1))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+    (:func 'sparticle-motion-blur)
+    (:rotate-y (degrees 0) (degrees 3600))
+    )
+  )
+
+
+(deftype wasseem-rift (process)
+  ((rift-height         float)
+   (pos                 vector :inline)
+   (init-height-count   float)
+   (should-raise?       symbol)
+   (should-die?         symbol)
+  )
+  (:state-methods
+    init-raise
+    raise
+    idle
+    death-anim
+    dead
+  )
+  (:methods
+    (rift-event-handler (_type_ process int symbol event-message-block) none)
+  )
+)
+
+(defun start-wasseem-rift-particle ((vec vector))
+  (cond
+    ((logtest? (-> *part-group-id-table* 1560 flags) (sp-group-flag sp13))
+        (set! (-> *launch-matrix* trans quad) (-> vec quad))
+        (part-tracker-spawn part-tracker-subsampler :to *active-pool* :group (-> *part-group-id-table* 1560))
+        )
+    (else
+        (set! (-> *launch-matrix* trans quad) (-> vec quad))
+        (part-tracker-spawn part-tracker :to *active-pool* :group (-> *part-group-id-table* 1560))
+        )
+    )
+  (none)
+)
+
+(defbehavior wasseem-rift-event-handler wasseem-rift ((arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (rift-event-handler self arg0 arg1 arg2 arg3)
+  (none)
+  )
+
+(defmethod relocate ((this wasseem-rift) (offset int))
+  (if *wasseem-rift* (&+! *wasseem-rift* offset))
+  (call-parent-method this offset)
+)
+
+(defmethod deactivate ((this wasseem-rift))
+  (set! *wasseem-rift* #f)
+  (call-parent-method this)
+  )
+
+(defbehavior wasseem-rift-init-by-other wasseem-rift ((vec vector))
+  (stack-size-set! (-> self main-thread) 128)
+  (set! (-> self should-die?) #f)
+  (set! *wasseem-rift* self)
+  (set! (-> self should-raise?) #f)
+  (set! (-> self pos quad) (-> vec quad))
+  (set! (-> self rift-height) (-> vec y))
+  (set! (-> self init-height-count) 0.0)
+  (go (method-of-object self init-raise))
+  (none)
+)
+
+(defstate init-raise (wasseem-rift)
+  :virtual #t
+  :event wasseem-rift-event-handler
+  :code (behavior ()
+    (loop
+      (cond
+        ((<= (-> self init-height-count) (meters 4)) ;so long as it's under X meters, keep raising
+          (+! (-> self pos y) 128.0) ;raise by X each frame
+          (+! (-> self init-height-count) 128.0) ;counts how much the rift height is being offset
+        )
+        (else
+          (go-virtual idle)
+        )
+      )
+      (start-wasseem-rift-particle (-> self pos))
+      ;(format *stdcon* "~%wasseem-rift: init-raise~%")
+      (suspend)
+    )
+  )
+)
+
+(defstate idle (wasseem-rift)
+  :virtual #t
+  :event wasseem-rift-event-handler
+  :enter (behavior ()
+    (set! (-> self init-height-count) 0.0)
+    (set! (-> self should-raise?) #f)
+  )
+  :code (behavior ()
+    (loop
+      (start-wasseem-rift-particle (-> self pos))
+      (when (-> self should-raise?)
+        (set! (-> self should-raise?) #f)
+        (go-virtual raise)
+      )
+      (when (-> self should-die?)
+        (go-virtual death-anim)
+      )
+      ;(format *stdcon* "~%wasseem-rift: idle~%")
+      (suspend)
+    )
+  )
+)
+
+(defstate raise (wasseem-rift)
+  :virtual #t
+  :event wasseem-rift-event-handler
+  :enter (behavior ()
+    (set! (-> self init-height-count) 0.0)
+    (process-spawn dark-lightning-orb (-> self pos) :name "wasseem-orb" *active-pool*)
+  )
+  :code (behavior ()
+    (loop
+      (cond
+        ((<= (-> self init-height-count) (meters 2)) ;so long as it's under X meters, keep raising
+          (+! (-> self pos y) 32.0) ;raise by X each frame
+          (+! (-> self init-height-count) 32.0) ;counts how much the rift height is being offset
+        )
+        (else
+          (go-virtual idle)
+        )
+      )
+      (start-wasseem-rift-particle (-> self pos))
+      (suspend)
+    )
+  )
+  :exit (behavior ()
+    (kill-by-name "wasseem-orb" *active-pool*)
+  )
+)
+
+  (defmethod rift-event-handler ((this wasseem-rift) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (case arg2
+      (('raise)
+        (set! (-> this should-raise?) #t)
+      )
+      (('die)
+        (set! (-> this should-die?) #t)
+      )
+  )
+  (none)
+)
+
+(defstate death-anim (wasseem-rift)
+  :virtual #t
+  :enter (behavior ()
+    (set! (-> self init-height-count) (meters 18))
+  )
+  :code (behavior ()
+    (loop
+      (cond
+        ((>= (-> self init-height-count) 0.0)
+          (-! (-> self pos y) 64.0)
+          (-! (-> self init-height-count) 64.0)
+          (when (rand-vu-percent? 0.05)
+            (cond
+            ((logtest? (-> *part-group-id-table* 422 flags) (sp-group-flag sp13))
+                (set! (-> *launch-matrix* trans quad) (-> self pos quad))
+                (part-tracker-spawn part-tracker-subsampler :to *active-pool* :group (-> *part-group-id-table* 422))
+                )
+            (else
+                (set! (-> *launch-matrix* trans quad) (-> self pos quad))
+                (part-tracker-spawn part-tracker :to *active-pool* :group (-> *part-group-id-table* 422))
+                )
+            )
+          )
+        )
+        (else
+          (cond
+            ((logtest? (-> *part-group-id-table* 426 flags) (sp-group-flag sp13))
+                (set! (-> *launch-matrix* trans quad) (-> self pos quad))
+                (part-tracker-spawn part-tracker-subsampler :to *active-pool* :group (-> *part-group-id-table* 426))
+                )
+            (else
+                (set! (-> *launch-matrix* trans quad) (-> self pos quad))
+                (part-tracker-spawn part-tracker :to *active-pool* :group (-> *part-group-id-table* 426))
+                )
+            )
+          (go-virtual dead)
+        )
+      )
+      (when (rand-vu-percent? 0.25)
+        (start-wasseem-rift-particle (-> self pos))
+      )
+      (suspend)
+    )
+  )
+)
+
+(defstate dead (wasseem-rift)
+  :virtual #t
+  :code (behavior ()
+      (let ((vec (new 'static 'vector :x (meters 1476.0166) :y (meters 28.3137) :z (meters -362.2517) :w 1.0))
+            )
+      (birth-pickup-at-point vec (pickup-type gun-mod-upgrade) 1.0 #t *entity-pool* (the-as fact-info #f))
+      (task-arrow-custom vec #t)      
+      )
+      (deactivate self)
+  )
+)
 
 (deftype task-manager-wasseem-attack (task-manager)
     ((maker-count      uint8)
@@ -23,11 +362,6 @@
   :code
   (behavior ()
     ;(process-spawn leaper-boss2 (target-pos 0) :name "Skull Snapper")
-    (let ((vec (new 'static 'vector :x (meters 1476.0166) :y (meters 26.9137) :z (meters -362.2517) :w 1.0))
-          )
-    (spawn-gun-upgrade vec 1.0)
-    (task-arrow-custom vec #t)      
-    )
     (loop 
       (when (= yellow-gun-picked-up? #t)
         (kill-by-name "task-arrow-custom" *default-pool*)
@@ -64,6 +398,7 @@
   :virtual #t
   :code (behavior ()
       (kill-all-sat)
+      (kill-by-name "wasseem-rift" *default-pool*)
       (task-node-open! (game-task-node wascity-pre-game-wait) #t)
       (when (not *traffic-manager*)
         (send-event *traffic-manager* 'spawn-all #f)
@@ -150,11 +485,13 @@
                   (when (= (-> self wave) 8)
                     (set! (-> self wave) 0)
                     (+! enemy-noto 4)
+                    (send-event *wasseem-rift* 'raise #t)
                   )
                   (when (or
                           (>= (-> self increment) 72)
                           (= in-debug? #t)
                         )
+                    (send-event *wasseem-rift* 'die #t)
                     (go-virtual wait-for-grab)
                   )
               )
@@ -168,6 +505,16 @@
   (defstate active (task-manager-wasseem-attack) ;sets everything up
     :virtual #t
     :code (behavior ()
+        (blank-hint! "<COLOR_RED>This mission drops a Super Gun Mod!" "<COLOR_YELLOW>This mission can also be skipped for later" 240 600)
+        (let ((vec 
+              (new 'static 'vector
+              :x (meters 1477.4195)
+              :y (meters 27.6057)
+              :z (meters -370.3547)
+              :w 1.0
+              )))
+          (process-spawn wasseem-rift vec :name "wasseem-rift" *active-pool*)
+        )
         (set-setting! 'music 'mineboss 0.0 0)
         (set! enemy-noto 1)
         (set! (-> self wave) 0)

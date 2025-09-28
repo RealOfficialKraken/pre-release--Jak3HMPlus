@@ -308,6 +308,9 @@
 
   (define meme-count 0)
 
+  (declare-type wasseem-rift process)
+  (define *wasseem-rift* (the wasseem-rift #f))
+
   (define warp-room-spawned? #f)
   (define warp-room-tutorial? #f)
 
@@ -509,7 +512,7 @@
 
   (declare-type jak3logo process)
   (define *jak3logo* (the (pointer jak3logo) #f))
-
+  (define wasseem-should-raise? #f)
   (define load-delay-1 #f)
   (define load-i 0)
   (define global-marauder-count 0)

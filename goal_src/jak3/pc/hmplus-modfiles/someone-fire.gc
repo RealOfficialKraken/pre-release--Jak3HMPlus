@@ -334,6 +334,40 @@ It's structured this way so changes can be made all in one place.
   (none)
 )
 
+(deftype commando-yellow-shot (gun-yellow-shot)
+  ()
+)
+
+(defun gun-yellow-shot-move ((arg0 commando-yellow-shot))
+  (projectile-move-fill-line-sphere arg0)
+  (let ((s5-0 (-> arg0 root)))
+    (let ((s4-0 (new 'stack-no-clear 'vector)))
+      (vector-! s4-0 (-> arg0 tail-pos) (-> s5-0 trans))
+      (let ((f0-0 (vector-length s4-0)))
+        (when (< 65536.0 f0-0)
+          (vector-normalize! s4-0 65536.0)
+          (vector+! (-> arg0 tail-pos) (-> s5-0 trans) s4-0)
+          )
+        )
+      )
+    (when (logtest? (-> s5-0 status) (collide-status touch-surface))
+      (if (logtest? (-> arg0 root status) (collide-status touch-actor))
+          (set! (-> arg0 hit-actor?) #t)
+          )
+      (let ((v1-14 (vector-normalize! (vector-! (new 'stack-no-clear 'vector) (-> arg0 tail-pos) (-> s5-0 trans)) 2048.0))
+            (a1-5 (-> arg0 hit-pos))
+            )
+        (set! (-> a1-5 quad) (-> s5-0 trans quad))
+        (vector+! a1-5 a1-5 v1-14)
+        (move-to-point! (-> arg0 root) a1-5)
+        )
+      (go (method-of-object arg0 impact))
+      )
+    )
+  0
+  (none)
+  )
+
 (defun someone-fire-yellow-1 ((arg0 vector) (arg1 vector))
   (let ((s5-0 (-> *target* gun))
         (gp-0 (new 'stack-no-clear 'projectile-init-by-other-params))
@@ -359,7 +393,7 @@ It's structured this way so changes can be made all in one place.
     (vector-float*! (-> gp-0 vel) arg1 819200.0)
     (the-as
       (pointer gun-yellow-shot)
-      (someone-fire-projectile gun-yellow-shot gp-0 (ppointer->process (-> s5-0 gun)))
+      (someone-fire-projectile commando-yellow-shot gp-0 (ppointer->process (-> s5-0 gun)))
       )
     )
   (none)
@@ -471,6 +505,8 @@ It's structured this way so changes can be made all in one place.
       (set! (-> s4-1 timeout) (seconds 4))
       (cond
         ((= gunmod-airstrike #t)
+          (someone-fire-jak-purple arg0 arg1)
+          (someone-fire-jak-purple arg0 arg1)
           (someone-fire-jak-purple arg0 arg1)
         )
         (else
@@ -727,6 +763,8 @@ It's structured this way so changes can be made all in one place.
     )
     (cond
         ((= gunmod-airstrike #t)
+          (someone-fire-jak-purple arg0 arg1)
+          (someone-fire-jak-purple arg0 arg1)
           (someone-fire-jak-purple arg0 arg1)
         )
         (else

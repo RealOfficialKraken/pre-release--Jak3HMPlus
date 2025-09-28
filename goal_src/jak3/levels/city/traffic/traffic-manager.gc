@@ -857,7 +857,6 @@
          )
        )
       (('kill-all)
-       (format #t "traffic-manager::kill-all~%")
        (deactivate-all (-> self traffic-engine))
        (kill-all self)
        )

@@ -88,7 +88,7 @@
       (task-node-open? (game-task-node arena-replay-2-fight))
       (<= (-> this hours) 0)
       (< (-> this minutes) 2)
-      (>= global-marauder-count 95)
+      (>= global-marauder-count 85)
     )
     (level-up! 1)
     (level-up-guns! 1)
