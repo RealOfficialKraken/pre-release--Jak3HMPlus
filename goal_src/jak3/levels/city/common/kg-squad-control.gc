@@ -98,7 +98,7 @@
   (copy-squad-settings-to-idx this *default-kg-squad-member-settings* 0)
   (copy-squad-settings-to-idx this *war-kg-squad-member-settings* 1)
   (copy-squad-settings-to-idx this *default-kg-squad-member-settings* 2)
-  (set! (-> this alert-level) 0)
+  (set! (-> this alert-level) 4)
   (call-parent-method this)
   (kg-squad-control-method-51 this)
   (none)

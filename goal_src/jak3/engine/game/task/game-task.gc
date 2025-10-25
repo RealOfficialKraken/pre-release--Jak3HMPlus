@@ -11675,11 +11675,68 @@
           (new 'static 'game-task-node-info
             :level 'nest
             :task (game-task nest-hunt)
+            :name "nest-hunt-carbreak"
+            :when-open #f
+            :flags (game-task-node-flag save-on-life act2)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node nest-hunt-sig)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager (new 'static 'task-manager-info
+              :level 'wasall
+              :type-to-spawn 'task-manager-nest-carbreak
+              :intro-scene #f
+              :resolution-scene #f
+              :resolution-scene-continue #f
+              :final-node (game-task-node nest-hunt-carbreak)
+              :vehicle-type #x1b
+              :on-complete #f
+              :on-fail #f
+              )
+            :borrow '((desert-game alias desert copy deshunt display) (wasall 0 lwassig #f))
+            :open? #f
+            :on-close #f
+            :reset (new 'static 'task-reset-info
+              :restart-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message)
+                :fail (new 'static 'resetter-spec :continue "nsta-start" :reset-mode 'try :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                :reset-delay (seconds 6.5)
+                )
+              :quit-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset)
+                :fail (new 'static 'resetter-spec :continue "nsta-start" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                :reset-delay (seconds 6.5)
+                )
+              :fail-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset)
+                :fail (new 'static 'resetter-spec :continue "nsta-start" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                :reset-delay (seconds 6.5)
+                )
+              :death-info (new 'static 'resetter-params
+                :flags (resetter-flag auto-reset text-message no-audio no-slow-down)
+                :fail (new 'static 'resetter-spec :continue "nsta-start" :reset-mode 'life :execute #f)
+                :retry (new 'static 'resetter-spec :continue #f :reset-mode 'try :execute #f)
+                )
+              )
+            :suck-death-count #xa5
+            :command-index #x39
+            :description (text-id progress-missions-nest-hunt)
+            :faction-commands '()
+            )
+          (new 'static 'game-task-node-info
+            :level 'nest
+            :task (game-task nest-hunt)
             :name "nest-hunt-fight"
             :when-open #f
             :flags (game-task-node-flag save-on-life exclusive act2)
             :parent-node (new 'static 'array game-task-node 4
-              (game-task-node nest-hunt-sig)
+              (game-task-node nest-hunt-carbreak)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)

@@ -109,6 +109,7 @@
   0
   (none)
   )
+
 (defmethod spawn-unit ((this was-squad-control) (arg0 vector) (arg1 quaternion))
   (cond
     ((task-node-closed? (game-task-node nest-eggs-gas))
@@ -246,8 +247,8 @@
             )
           )
         )
+      )
     )
-  )
   0
   (none)
   )
@@ -543,36 +544,6 @@
   :code sleep-code
   :post (behavior ()
     (was-squad-manager-method-15 self)
-    (when
-      (and
-        (not (search-process-tree *active-pool* (lambda ((p process)) (type? p wasteland-marauder))))
-        (not (focus-test? *target* pilot))
-        (task-node-closed? (game-task-node nest-eggs-gas))
-      )
-      (set! (-> *was-squad-control* active-count) 0)
-      (set! (-> *was-squad-control* reserve-count) 40)
-      (kill-by-type v-marauder *active-pool*)
-    )
-    (when 
-      (and
-        (search-process-tree *active-pool* (lambda ((p process)) (type? p wasteland-marauder)))
-        (focus-test? *target* pilot)
-        (task-node-closed? (game-task-node nest-eggs-gas))
-      )
-      (kill-by-type wasteland-marauder *active-pool*)
-      (set! (-> *was-squad-control* active-count) 0)
-      (set! (-> *was-squad-control* reserve-count) 40)
-    )
-    (when 
-      (and
-        (search-process-tree *active-pool* (lambda ((p process)) (type? p v-marauder)))
-        (not (focus-test? *target* pilot))
-        (task-node-closed? (game-task-node nest-eggs-gas))
-      )
-      (kill-by-type v-marauder *active-pool*)
-      (set! (-> *was-squad-control* active-count) 0)
-      (set! (-> *was-squad-control* reserve-count) 40)
-    )
     )
   )
 

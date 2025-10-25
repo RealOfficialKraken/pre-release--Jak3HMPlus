@@ -158,7 +158,7 @@
         (else
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "~S(Talk) <COLOR_WHITE>To Vin~%~%~S(x35) Receive Mass Inverter~%~%~S(x25) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x100) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+            (format matt-str "~S(Talk) <COLOR_WHITE>To Vin~%~%~S(x35) Receive Mass Inverter~%~%~S(x25) Receive Peacemaker~%~%~S(x40) Receive Random Weapon~%~%~S(x100) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
             vinw1
             vinw2
             vinw3

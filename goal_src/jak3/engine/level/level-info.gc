@@ -16845,8 +16845,8 @@
                    :name "nstb-hunt"
                    :level 'nstb
                    :flags (continue-flags no-auto race)
-                   :trans (new 'static 'vector :x 6744972.5 :y -392779.78 :z 2620850.2 :w 1.0)
-                   :camera-trans (new 'static 'vector :x 6772533.0 :y -371657.94 :z 2664031.0 :w 1.0)
+                   :trans (new 'static 'vector :x (meters 1688.7006) :y (meters -82.2273) :z (meters 728.6707) :w 1.0)
+                   :camera-trans (new 'static 'vector :x (meters 1688.7006) :y (meters -82.2273) :z (meters 728.6707) :w 1.0)
                    :quat (new 'static 'vector4h :data (new 'static 'array int16 4 0 #x7a77 0 -9518))
                    :camera-rot (new 'static 'array int16 9 -27619 0 #x44dc -2136 #x7f0c -3345 -17497 -3971 -27416)
                    :on-goto #f

@@ -72,6 +72,13 @@
               :origin-joint-index 3
               )
 
+(defskelgroup skel-roboguard-terry roboguard roboguard-lod0-jg roboguard-idle0-ja
+              ((roboguard-lod0-mg (meters 20)) (roboguard-lod1-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 99999)
+              :shadow roboguard-shadow-mg
+              :origin-joint-index 3
+              )
+
 (defskelgroup skel-roboguard-explode roboguard roboguard-explode-lod0-jg roboguard-explode-idle-ja
               ((roboguard-explode-lod0-mg (meters 999999)))
               :bounds (static-spherem 0 0 0 80)
@@ -1975,7 +1982,7 @@
 (defmethod init-enemy! ((this roboguard-giant))
   (initialize-skeleton
     this
-    (the-as skeleton-group (art-group-get-by-name *level* "skel-roboguard-giant" (the-as (pointer level) #f)))
+    (the-as skeleton-group (art-group-get-by-name *level* "skel-roboguard-terry" (the-as (pointer level) #f)))
     (the-as pair 0)
     )
   (logior! (-> this mask) (process-mask kg-robot))
@@ -2086,6 +2093,109 @@
         )
   (set! (-> this last-hit-points) (the int (-> this enemy-info default-hit-points)))
   (setup-masks (-> this draw) -1 0)
+  0
+  (none)
+  )
+
+  (defstate hostile (roboguard-giant)
+  :virtual #t
+  :exit (behavior ()
+    ;; og:preserve-this fix potential use-after-free bug
+    (if (-> self nav)
+      (let ((v1-0 (-> self nav)))
+        (logclear! (-> v1-0 shape nav-flags) (nav-flags has-extra-sphere))
+        )
+      )
+    0
+    )
+  :trans (behavior ()
+    (let ((t9-0 (-> (method-of-type nav-enemy hostile) trans)))
+      (if t9-0
+          (t9-0)
+          )
+      )
+    (when (time-elapsed? (-> self state-time) (-> self reaction-time))
+      (cond
+        ((< (vector-vector-xz-distance (-> self root trans) (-> self formation-position)) (meters 7))
+         (go-virtual shoot-attack)
+         )
+        ((and (< (fabs (-> self torso-to-focus-angle)) 3640.889)
+              (and (get-focus! self) (>= 24576.0 (vector-vector-xz-distance (-> self root trans) (-> self focus-pos))))
+              )
+         (go-virtual close-attack)
+         )
+        )
+      )
+    )
+  :post (behavior ()
+    (seek! (-> self torso-aim-blend) 0.0 (seconds-per-frame))
+    (seek! (-> self arm-rot-mult 0) 0.0 (* 10.0 (seconds-per-frame)))
+    (seek! (-> self arm-rot-mult 1) 0.0 (* 10.0 (seconds-per-frame)))
+    (roboguard-method-195 self)
+    (let ((a0-4 (-> self nav state))
+          (v1-8 (-> self formation-position))
+          )
+      (logclear! (-> a0-4 flags) (nav-state-flag directional-mode))
+      (logior! (-> a0-4 flags) (nav-state-flag target-poly-dirty))
+      (vector-copy! (-> a0-4 target-pos) v1-8)
+      )
+    0
+    (nav-enemy-method-187 self)
+    )
+  )
+
+  (defstate hostile-stand (roboguard-giant)
+  :virtual #t
+  :event enemy-event-handler
+  :enter (behavior ()
+    (set-time! (-> self state-time))
+    (set! (-> self stand-angle-threshold) (meters 12))
+    (nav-enemy-method-180 self (meters 12) (the-as float #f))
+    )
+  :exit (behavior ()
+    (nav-enemy-method-179 self)
+    )
+  :trans (behavior ()
+    (when (and (time-elapsed? (-> self state-time) (-> self reaction-time)) (ja-done? 0))
+      (if (or (and (< (meters 12) (vector-vector-xz-distance (-> self focus-pos) (-> self root trans)))
+                   (< (meters 12) (vector-vector-xz-distance (-> self root trans) (-> self formation-position)))
+                   )
+              (< (meters 12) (vector-vector-xz-distance (-> self root trans) (-> self formation-position)))
+              )
+          (go-virtual hostile)
+          )
+      (when (and (time-elapsed? (-> self state-time) (seconds 0.3))
+                 (and (< (fabs (-> self torso-to-focus-angle)) (meters 12)) (get-focus! self))
+                 )
+        (cond
+          ((>= (meters 0) (vector-vector-xz-distance (-> self root trans) (-> self focus-pos)))
+           (go-virtual close-attack)
+           )
+          ((should-check-los? (-> self los) (seconds 0.1))
+           (go-virtual shoot-attack)
+           )
+          )
+        )
+      )
+    )
+  :code roboguard-turret-code
+  :post (behavior ()
+    (seek! (-> self arm-rot-mult 0) 0.0 (* 10.0 (seconds-per-frame)))
+    (seek! (-> self arm-rot-mult 1) 0.0 (* 10.0 (seconds-per-frame)))
+    (roboguard-method-195 self)
+    (roboguard-turn-torso-post)
+    )
+  )
+
+  (defmethod roboguard-method-196 ((this roboguard-giant) (arg0 int))
+  (let* ((s5-0 (-> this node-list data arg0))
+         (v1-2 (vector<-cspace! (new 'stack-no-clear 'vector) s5-0))
+         (a3-1 (vector-float*! (new 'stack-no-clear 'vector) (-> s5-0 bone transform uvec) -1.0))
+         )
+      (spawn-fireball v1-2 (vector+! (new 'stack-no-clear 'vector) v1-2 a3-1) -319200.0)
+    )
+  (sound-play "robo-fire" :position (-> this root trans))
+  (+! (-> this fire-count) 1)
   0
   (none)
   )

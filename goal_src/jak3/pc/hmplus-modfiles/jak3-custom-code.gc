@@ -6005,6 +6005,14 @@ BUGS:
         (set! *wasseem-rift* #f)
     )
 
+    (when 
+        (and
+            (focus-test? *target* pilot)
+            (task-node-open? (game-task-node nest-hunt-fight))
+        )
+            (send-event *target* 'change-mode 'normal)
+        )
+
 (none)
 )
 

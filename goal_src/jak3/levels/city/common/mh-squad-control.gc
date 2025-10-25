@@ -65,7 +65,7 @@
     (the-as (inline-array mh-squad-member-settings) *default-mh-squad-member-settings*)
     2
     )
-  (set! (-> this alert-level) 0)
+  (set! (-> this alert-level) 4)
   (call-parent-method this)
   (mh-squad-control-method-48 this)
   (none)

@@ -789,6 +789,11 @@
       (remove-setting! 'music)
       )
     )
+  (let ((vec (new 'static 'vector :x (meters 1701) :y (meters -81.7682) :z (meters 714.0360) :w 1.0)))
+          (when (<= (vector-vector-distance (target-pos 0) vec) (meters 15))
+            (task-node-close! (game-task-node nest-hunt-sig) #t)
+          )
+        )
   (cond
     ((or (not *minimap*) (or (task-node-closed? (game-task-node nest-hunt-fight))
                              (not (task-node-closed? (game-task-node nest-hunt-sig)))
@@ -869,6 +874,79 @@
     )
   0
   (none)
+  )
+
+  (deftype task-manager-nest-carbreak (task-manager)
+    ((general-i         int)
+    )
+    (:state-methods
+      active
+      waiting
+      car-break
+      complete
+    )
+  )
+
+  (defstate active (task-manager-nest-carbreak)
+    :virtual #t
+    :code (behavior ()
+      (set! (-> self general-i) 0)
+      (format #t "TASK_MANAGER_NEST_CARBREAK ACTIVE")
+      (go-virtual waiting)
+    )
+  )
+
+  (defstate waiting (task-manager-nest-carbreak)
+    :virtual #t
+    :enter (behavior ()
+      (format #t "TASK_MANAGER_NEST_CARBREAK WAITING")
+    )
+    :code (behavior ()
+      (loop
+        (when (not (km-current-continue "nsta-start" (the-as debug-menu-msg #f)))
+          (set-continue! *game-info* "nsta-start" #t)
+        )
+        (let ((vec (new 'static 'vector :x (meters 1701) :y (meters -81.7682) :z (meters 714.0360) :w 1.0)))
+          (when (<= (vector-vector-distance (target-pos 0) vec) (meters 15))
+            (go-virtual car-break)
+          )
+        )
+        (when *debug-segment*
+          (format *stdcon* "car-break-waiting")
+        )
+        (suspend)
+      )
+    )
+  )
+
+  (defstate car-break (task-manager-nest-carbreak)
+    :virtual #t
+    :enter (behavior ()
+      (format #t "TASK_MANAGER_NEST_CARBREAK CAR_BREAK")
+      (play-sound-file "snd/car-jam.wav" 100)
+    )
+    :code (behavior ()
+      (loop
+        (set-setting! 'stop-vehicle? #t 0.0 0)
+        (+! (-> self general-i) 1)
+        (when (>= (-> self general-i) 1020)
+          (go-virtual complete)
+        )
+        (suspend)
+      )
+    )
+  )
+
+  (defstate complete (task-manager-nest-carbreak)
+    :virtual #t
+    :enter (behavior ()
+      (format #t "TASK_MANAGER_NEST_CARBREAK COMPLETE")
+    )
+    :code (behavior ()
+      (task-node-close! (game-task-node nest-hunt-carbreak) #t)
+      (suspend-for (seconds 2))
+      (send-event *target* 'change-mode 'normal)
+    )
   )
 
 (defun spawn-dust-storm ()

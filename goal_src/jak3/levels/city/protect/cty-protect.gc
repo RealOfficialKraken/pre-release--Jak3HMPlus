@@ -428,6 +428,16 @@
     (('gunship-spawn)
      (let ((a1-3 (-> arg3 param 0)))
        (gunship-spawn this (the-as protect-gunship-enemy-spawn-params a1-3))
+       (when (not (search-process-tree *active-pool* (lambda ((p process)) (type? p roboguard-giant))))
+          (let ((vec (new 'static 'vector
+                      :x (meters 592.1080)
+                      :y (meters 8.0209)
+                      :z (meters -558.3975)
+                      :w 1.0
+          )))
+            (process-spawn roboguard-giant vec :name "roboguard-giant")
+          )
+        )
        )
      )
     (else

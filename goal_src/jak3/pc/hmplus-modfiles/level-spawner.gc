@@ -309,6 +309,7 @@ dead
                     (= (-> (level-get-target-inside *level*) name) 'ctyinda)
                     (= (-> (level-get-target-inside *level*) name) 'ctyindb)
                 )
+                (not (task-node-open? (game-task-node city-blow-barricade-resolution)))
                 (= ctyinda-bspawner #f)
             )
             (init-respawner! ctyinda-vbspawner-8 roboguard "roboguard" 600)
@@ -333,6 +334,7 @@ dead
             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CTYINDB AREAS;;;;;;;;;;;;;;;;;;;;
             ((and
                 (task-node-closed? (game-task-node city-destroy-darkeco-resolution))
+                (not (task-node-open? (game-task-node city-blow-barricade-resolution)))
                 (or
                     (= (-> (level-get-target-inside *level*) name) 'ctypesc)
                     (= (-> (level-get-target-inside *level*) name) 'ctyindb)
@@ -359,6 +361,7 @@ dead
                 (or
                     (= (-> (level-get-target-inside *level*) name) 'ctyport)
                 )
+                (not (task-node-open? (game-task-node city-blow-barricade-resolution)))
                 (= ctyport-bspawner #f)
             )
             (init-respawner! ctyport-vbspawner-1 roboguard "roboguard" 600)

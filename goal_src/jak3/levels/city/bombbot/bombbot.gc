@@ -1961,7 +1961,7 @@
 
 ;; WARN: Return type mismatch (pointer bombbot-shot) vs (pointer projectile).
 (defmethod fire-shot ((this bombbot) (arg0 vector) (arg1 vector))
-  (the-as (pointer projectile) (spawn-bombbot-projectile this arg0 arg1 819200.0 (the-as vector #f) (+ (the float (/ notoriety-level 9)) (the float (/ guns-level 4)))))
+  (the-as (pointer projectile) (spawn-bombbot-projectile this arg0 arg1 819200.0 (the-as vector #f) 2.0))
   )
 
 (defmethod bombbot-method-197 ((this bombbot))
@@ -3978,7 +3978,7 @@
   (set! (-> self shoot-duration) 1.0)
   (set! (-> self hold-fire) #f)
   (set! (-> self draw light-index) (the-as uint 10))
-  (set! (-> self max-hit-points) (the float (+ (* (+ 50 (* cars-level 7))) (+ 50 (* cars-level 4)))))
+  (set! (-> self max-hit-points) (the float (+ (* (+ 50 (* cars-level 20))) (+ 50 (* cars-level 12)))))
     (set! (-> self hit-points) (-> self max-hit-points))
   (set! (-> self health-hud)
         (ppointer->handle (process-spawn bombbot-hud :init hud-init-by-other :name "bombbot-hud" :to self))
@@ -4100,25 +4100,25 @@
 (define *blow-barricade-kg-squad-member-settings* (new 'static 'inline-array kg-squad-member-settings 4
                                                     (new 'static 'kg-squad-member-settings
                                                       :object-type (traffic-type roboguard)
-                                                      :max-target-count #x7f
-                                                      :target-count 3
+                                                      :max-target-count 0
+                                                      :target-count 0
                                                       :enemy-type (traffic-type guard-a)
                                                       )
                                                     (new 'static 'kg-squad-member-settings
                                                       :object-type (traffic-type roboguard)
-                                                      :max-target-count #x7f
+                                                      :max-target-count 0
                                                       :enemy-type (traffic-type guard-b)
                                                       )
                                                     (new 'static 'kg-squad-member-settings
                                                       :object-type (traffic-type flying-turret)
-                                                      :max-target-count #x7f
-                                                      :target-count 3
+                                                      :max-target-count 0
+                                                      :target-count 0
                                                       :enemy-type (traffic-type metalhead-grunt)
                                                       )
                                                     (new 'static 'kg-squad-member-settings
                                                       :object-type (traffic-type spydroid)
-                                                      :max-target-count #x7f
-                                                      :target-count 3
+                                                      :max-target-count 0
+                                                      :target-count 0
                                                       :enemy-type (traffic-type metalhead-flitter)
                                                       )
                                                     )
