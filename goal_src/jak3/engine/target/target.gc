@@ -112,7 +112,10 @@
                )
       (target-invisible-start (seconds 30))
       (if (not (logtest? (-> self darkjak stage) (darkjak-stage force-on endless-dark)))
-          (send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-button-invis-inc)))
+          ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-button-invis-inc)))
+          (when *debug-segment*
+              (print "none")
+            )
           )
       )
     (when (and (cpad-hold? (-> self control cpad number) l1) (can-duck?))
@@ -183,7 +186,7 @@
     ((-> self state-hook))
     (if (and (using-gun? self)
              (and (-> self next-state) (= (-> self next-state name) 'target-walk))
-             (not (and (focus-test? self dark) (nonzero? (-> self darkjak))))
+             ;(not (and (focus-test? self dark) (nonzero? (-> self darkjak))))
              )
         (go target-gun-walk)
         )
@@ -230,6 +233,10 @@
       (target-invisible-start (seconds 30))
       (if (not (logtest? (-> self darkjak stage) (darkjak-stage force-on endless-dark)))
           (send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-button-invis-inc)))
+          
+          (when *debug-segment*
+              (print "none")
+            )
           )
       )
     (when (and (and (focus-test? self light) (nonzero? (-> self lightjak)))
@@ -2099,8 +2106,12 @@
                  (logtest? (-> self darkjak stage) (darkjak-stage force-on endless-dark))
                  )
              )
-        (send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-spin-inc)))
-        )
+        ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-spin-inc)))
+        
+          (when *debug-segment*
+              (print "none")
+            )
+          )
     (set! (-> self control mod-surface) *attack-mods*)
     (set! (-> self water drip-mult) 4.0)
     (set! (-> self neck flex-blend) 0.0)
@@ -2606,8 +2617,12 @@
                  (logtest? (-> self darkjak stage) (darkjak-stage force-on endless-dark))
                  )
              )
-        (send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-punch-inc)))
-        )
+        ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-punch-inc)))
+        
+          (when *debug-segment*
+              (print "none")
+            )
+          )
     (initialize (-> self control impact-ctrl) self 28 3276.8 (-> self control root-prim prim-core collide-with))
     (let ((f26-0 (the-as number 0.0))
           (f30-0 1.0)
@@ -2863,8 +2878,12 @@
                  (logtest? (-> self darkjak stage) (darkjak-stage force-on endless-dark))
                  )
              )
-        (send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-spin-inc)))
-        )
+        ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-spin-inc)))
+        
+          (when *debug-segment*
+              (print "none")
+            )
+          )
     (set! (-> self control mod-surface) *jump-attack-mods*)
     (set! (-> self neck flex-blend) 0.0)
     (let ((f0-4 (vector-dot (-> self control dynam gravity-normal) (-> self control transv))))
@@ -3058,8 +3077,12 @@
                  (logtest? (-> self darkjak stage) (darkjak-stage force-on endless-dark))
                  )
              )
-        (send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-uppercut-inc)))
-        )
+        ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-uppercut-inc)))
+        
+          (when *debug-segment*
+              (print "none")
+            )
+          )
     (set! (-> self control mod-surface) *uppercut-mods*)
     (set! (-> self neck flex-blend) 0.0)
     (set! (-> self gun surpress-time) (+ (current-time) (seconds 0.15)))
@@ -3526,7 +3549,10 @@
                    (logtest? (-> self darkjak stage) (darkjak-stage force-on endless-dark))
                    )
                )
-          (send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-flop-inc)))
+          ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-flop-inc)))
+          (when *debug-segment*
+              (print "none")
+            )
           )
       )
     )

@@ -355,7 +355,7 @@
                  (target-lightjak-end-mode #t)
                  )
                 ((using-gun? self)
-                 (target-gun-end-mode #t)
+                 ;(target-gun-end-mode #t)
                  )
                 )
               )

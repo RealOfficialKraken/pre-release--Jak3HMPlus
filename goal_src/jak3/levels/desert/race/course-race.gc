@@ -495,7 +495,7 @@
     (set! (-> gp-0 map-icon) (the-as uint 12))
     (set! (-> self arrow) (process->handle (task-arrow-spawn gp-0 self)))
     )
-  (set-setting! 'turbo #f 0.0 0)
+  ;(set-setting! 'turbo #f 0.0 0)
   (until #f
     (let ((v1-11 (as-type (handle->process (-> self player-vehicle)) process-focusable)))
       (when (and v1-11 (not (logtest? (-> (the-as process-focusable v1-11) focus-status) (focus-status dead))))

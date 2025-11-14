@@ -3074,7 +3074,7 @@
             :task (game-task wascity-pre-game)
             :name "wascity-pre-game-resolution"
             :when-open #f
-            :on-open '(task-node-close! (game-task-node wascity-pre-game-resolution))
+            :on-open #f
             :manager #f
             :borrow '((deserte 0 waspgame copy))
             :open? #f
