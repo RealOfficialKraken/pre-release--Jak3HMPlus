@@ -16,6 +16,7 @@
 (define-extern title-progress (function symbol int))
 (defun-extern runs-shop! (none))
 (defun-extern level-spawn-check (none))
+(defun-extern look-for-darkjak (none))
 
 ;; DECOMP BEGINS
 
@@ -1452,6 +1453,7 @@
         (wasteland-spawn!)
         (run-warp-room)
         (level-spawn-check)
+        (look-for-darkjak)
         (when 
           (and
             (= weather-dark-mode #t)

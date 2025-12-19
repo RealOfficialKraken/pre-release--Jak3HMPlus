@@ -573,4 +573,5 @@
   "destroy-dark-eco.o"
   "darkworld-tower.o"
   "tp-fb.o"
+  "darkjak-weapons.o"
  ))

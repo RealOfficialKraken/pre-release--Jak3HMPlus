@@ -1,0 +1,76 @@
+(in-package goal)
+
+;name : darkjak-weapons.gc
+
+;description : Additional weapon modifications for Dark Jak
+
+(define set-part-dark? #f)
+
+
+(defun look-for-darkjak ()
+    (let ((v1-0 *target*))
+        (when (and
+            (focus-test? v1-0 dark) ;set
+            (not set-part-dark?)
+            )
+            ;yellow-1
+            (set! (-> *part-id-table* 264 init-specs 5 initial-valuef) 0.0)
+            (set! (-> *part-id-table* 264 init-specs 6 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 264 init-specs 7 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 264 init-specs 8 initial-valuef) 128.0)
+
+            (set! (-> *part-id-table* 266 init-specs 5 initial-valuef) 0.0)
+            (set! (-> *part-id-table* 266 init-specs 6 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 266 init-specs 7 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 266 init-specs 8 initial-valuef) 128.0)
+
+            (set! (-> *part-id-table* 267 init-specs 5 initial-valuef) 128.0)
+            (set! (-> *part-id-table* 267 init-specs 6 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 267 init-specs 7 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 267 init-specs 8 initial-valuef) 255.0)
+            ;yellow-3
+            (set! (-> *part-id-table* 277 init-specs 5 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 277 init-specs 6 initial-valuef) 0.0)
+            (set! (-> *part-id-table* 277 init-specs 7 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 277 init-specs 8 initial-valuef) 128.0)
+
+            (set! (-> *part-id-table* 278 init-specs 5 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 278 init-specs 6 initial-valuef) 0.0)
+            (set! (-> *part-id-table* 278 init-specs 7 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 278 init-specs 8 initial-valuef) 128.0)
+            (set! set-part-dark? #t)
+        )
+        (when (and
+            (not (focus-test? v1-0 dark)) ;reset
+            set-part-dark?
+            )
+            ;yellow-1
+            (set! (-> *part-id-table* 264 init-specs 5 initial-valuef) 128.0)
+            (set! (-> *part-id-table* 264 init-specs 6 initial-valuef) 128.0)
+            (set! (-> *part-id-table* 264 init-specs 7 initial-valuef) 128.0)
+            (set! (-> *part-id-table* 264 init-specs 8 initial-valuef) 32.0)
+
+            (set! (-> *part-id-table* 266 init-specs 5 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 266 init-specs 6 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 266 init-specs 7 initial-valuef) 128.0)
+            (set! (-> *part-id-table* 266 init-specs 8 initial-valuef) 32.0)
+
+            (set! (-> *part-id-table* 267 init-specs 5 initial-valuef) 128.0)
+            (set! (-> *part-id-table* 267 init-specs 6 initial-valuef) 128.0)
+            (set! (-> *part-id-table* 267 init-specs 7 initial-valuef) 128.0)
+            (set! (-> *part-id-table* 267 init-specs 8 initial-valuef) 64.0)
+            ;yellow-3
+            (set! (-> *part-id-table* 277 init-specs 5 initial-valuef) 0.0)
+            (set! (-> *part-id-table* 277 init-specs 6 initial-valuef) 0.0)
+            (set! (-> *part-id-table* 277 init-specs 7 initial-valuef) 255.0)
+            (set! (-> *part-id-table* 277 init-specs 8 initial-valuef) 128.0)
+
+            (set! (-> *part-id-table* 278 init-specs 5 initial-valuef) 128.0)
+            (set! (-> *part-id-table* 278 init-specs 6 initial-valuef) 128.0)
+            (set! (-> *part-id-table* 278 init-specs 7 initial-valuef) 0.0)
+            (set! (-> *part-id-table* 278 init-specs 8 initial-valuef) 64.0)
+            (set! set-part-dark? #f)
+        )
+    )
+    (none)
+)

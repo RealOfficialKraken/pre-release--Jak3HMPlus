@@ -828,7 +828,7 @@
 ;; WARN: Return type mismatch connection vs none.
 (defbehavior target-board-init target ()
   (target-lightjak-end-mode #t)
-  ;(target-darkjak-end-mode #t)
+  (target-darkjak-end-mode #t)
   (target-gun-end-mode #f)
   (target-exit)
   (target-board-setup #t)
