@@ -1768,6 +1768,8 @@
   )
 
 (defmethod spawn-sat ((this task-manager-desert-rescue))
+  (send-event *target* 'get-pickup (pickup-type eco-pill-dark) 100.0)
+  (send-event *target* 'get-pickup (pickup-type eco-pill-light) 100.0)
   (set! (-> this current-enemy)
         (ppointer->handle (spawn-neo-sat
                             (-> this passenger-pos (-> this current-passenger-index) beacon-pos)

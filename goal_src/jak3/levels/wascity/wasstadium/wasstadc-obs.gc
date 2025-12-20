@@ -2660,6 +2660,7 @@
   :virtual #t
   :exit (behavior ()
     (set! (-> self play-hint) #t)
+    (blank-hint! "Your weapons do more" "damage in <COLOR_PINK>DarkJak!" 170 400)
     (set-time! (-> self hint-time))
     (set-setting! 'music 'arenafi 0.0 0)
     (case (-> self node-info task)

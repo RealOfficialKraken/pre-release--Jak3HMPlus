@@ -2121,6 +2121,7 @@
             (not *scene-player*)
             (= (paused?) #f)
             (focus-test? *target* pilot)
+            (not (task-node-open? (game-task-node desert-glide-templetop)))
             ) ;for the turbo meter, also referenced in wvehicle.gc and wvehicle-util.gc
             (let 
             (
