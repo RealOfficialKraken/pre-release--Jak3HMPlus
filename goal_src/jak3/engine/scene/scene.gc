@@ -1849,7 +1849,7 @@
             (set! (-> self targ-speed)
                   (fmax -10.0 (fmin 10.0 (+ (-> self targ-speed) (* (-> self speed-change-speed) (seconds-per-frame)))))
                   )
-            (if (and (= *cheat-mode* 'debug) (not (time-elapsed? (-> self speed-change-time) (seconds 3))))
+            #|(if (and (= *cheat-mode* 'debug) (not (time-elapsed? (-> self speed-change-time) (seconds 3))))
                 (format
                   *stdcon*
                   "id ~d speed ~f~%"
@@ -1859,7 +1859,7 @@
                       )
                   (-> self targ-speed)
                   )
-                )
+                )|#
             (cond
               ((!= (-> self targ-speed) 0.0)
                )
