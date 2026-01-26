@@ -593,6 +593,7 @@
   (define arena-token-count 0)
   (defun-extern spawn-gun-upgrade vector float none)
   (defun-extern task-arrow-custom vector symbol none)
+  (define task-arrow-spawned? #f)
 
   (defun-extern r3-hint (none))
   (define r3-hinti 0)

@@ -214,6 +214,8 @@ dead
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;TEMPLEA BIPEDAL BOSS;;;;;;;;;;;;;;;;;;;;;;;;;;;
             ((and
                 (task-node-closed? (game-task-node temple-oracle-resolution))
+                (not (task-node-open? (game-task-node temple-tests-introduction)))
+                (not (task-node-open? (game-task-node temple-tests-hover-training)))
                 (or
                     (= (-> (level-get-target-inside *level*) name) 'templea)
                     (= (-> (level-get-target-inside *level*) name) 'templec)

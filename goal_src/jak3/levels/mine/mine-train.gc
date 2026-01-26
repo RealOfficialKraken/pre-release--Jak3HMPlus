@@ -8,7 +8,7 @@
 ;; DECOMP BEGINS
 
 (define *min-bomb-train-times*
-  (new 'static 'boxed-array :type float 12.0 15.0 27.0 33.0 55.0 59.0 90.0 92.0 106.0 127.0 131.0 143.0 146.0)
+  (new 'static 'boxed-array :type float 8.0 9.5 15.5 18.5 29.5 31.5 47.0 48.0 55.0 65.5 67.0 73.5 75.0)
   )
 
 (deftype min-bomb-train (process-focusable)
@@ -332,9 +332,7 @@
       )
     (let ((v1-13 (-> *game-info* sub-task-list (game-task-node mine-blow-resolution))))
       (if (and v1-13 (< (the-as uint 2) (-> v1-13 death-count)))
-          (set! (-> self suck-level)
-                (- 1.0 (* 0.04 (the float (max 0 (min 5 (the-as int (+ (-> v1-13 death-count) -2)))))))
-                )
+          (set! (-> self suck-level) 0.0)
           )
       )
     (add-icon! *minimap* self (the-as uint 129) (the-as int #f) (the-as vector #t) 0)
@@ -344,7 +342,7 @@
     (if (not (task-node-open? (game-task-node mine-blow-resolution)))
         (go-virtual idle)
         )
-    (set! (-> self path-pos) (get-path-progress self (-> self path-pos) (* (-> self speed) (seconds-per-frame))))
+    (set! (-> self path-pos) (get-path-progress self (-> self path-pos) (* (* (-> self speed) (seconds-per-frame)) 2.0)))
     (spawn-from-cspace (-> self spark-part) (joint-node min-bomb-train-lod0-jg sparks))
     (spawn-from-cspace (-> self smoke-part) (joint-node min-bomb-train-lod0-jg sparks1))
     (spawn-from-cspace (-> self spark-part) (joint-node min-bomb-train-lod0-jg sparks2))

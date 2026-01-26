@@ -104,9 +104,7 @@
     (none)
 )
 
-(define task-arrow-spawned? #f)
-
-(defun task-arrow-custom ((vec vector) (onin? symbol))
+(defun task-arrow-custom ((vec vector) (micon? symbol))
     (let (
         (gp-3 (new 'stack-no-clear 'task-arrow-params))
         (self1 (the-as process #f))
@@ -114,11 +112,11 @@
         (set! (-> gp-3 pos quad) (-> vec quad))
         (quaternion-identity! (-> gp-3 quat))
         (set! (-> gp-3 flags) (task-arrow-flags taf3 taf8))
-        (if onin?
+        (if micon?
             (set! (-> gp-3 map-icon) (the-as uint 12))
             (set! (-> gp-3 map-icon) (the-as uint 0))
         )
-        (process-spawn task-arrow gp-3 :name "task-arrow-custom")
+        (process-spawn task-arrow-c gp-3 :name "task-arrow-custom")
         (set! task-arrow-spawned? #t)
     )
     (none)

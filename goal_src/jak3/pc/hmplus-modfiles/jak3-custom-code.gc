@@ -6013,6 +6013,62 @@ BUGS:
             (send-event *target* 'change-mode 'normal)
         )
 
+    (when
+        (and
+            (or
+                (task-node-open? (game-task-node mine-explore-introduction))
+                (task-node-open? (game-task-node mine-explore-elevator))
+                (task-node-open? (game-task-node mine-explore-armor))
+                (task-node-open? (game-task-node mine-explore-resolution))
+                (task-node-open? (game-task-node mine-blow-introduction))
+                (task-node-open? (game-task-node mine-blow-elevator))
+                (task-node-open? (game-task-node mine-blow-resolution))
+                (task-node-open? (game-task-node mine-boss-introduction))
+                (task-node-open? (game-task-node mine-boss-resolution))
+            )
+            (and
+                (!= (-> (level-get-target-inside *level*) name) 'minea)
+                (!= (-> (level-get-target-inside *level*) name) 'mineb)
+                (!= (-> (level-get-target-inside *level*) name) 'minec)
+            )
+            (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
+        )
+        (let ((level-mine (new 'static 'vector  :x (meters 2299.0676)  :y (meters 32.5507)  :z (meters 158.4272)  :w 1.0)))
+            (task-arrow-custom level-mine #t)
+            (when 
+                (or
+                    (task-node-open? (game-task-node mine-blow-introduction))
+                    (task-node-open? (game-task-node mine-blow-elevator))
+                )
+                (task-node-open! (game-task-node mine-explore-introduction) #t)
+            )
+        )
+    )
+
+    (when
+        (and
+            (or
+                (task-node-open? (game-task-node mine-explore-introduction))
+                (task-node-open? (game-task-node mine-explore-elevator))
+                (task-node-open? (game-task-node mine-explore-armor))
+                (task-node-open? (game-task-node mine-explore-resolution))
+                (task-node-open? (game-task-node mine-blow-introduction))
+                (task-node-open? (game-task-node mine-blow-elevator))
+                (task-node-open? (game-task-node mine-blow-resolution))
+                (task-node-open? (game-task-node mine-boss-introduction))
+                (task-node-open? (game-task-node mine-boss-resolution))
+            )
+            (or
+                (= (-> (level-get-target-inside *level*) name) 'minea)
+                (= (-> (level-get-target-inside *level*) name) 'mineb)
+                (= (-> (level-get-target-inside *level*) name) 'minec)
+            )
+            (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c)))
+        )
+        (kill-by-name "task-arrow-custom" *default-pool*)
+        (set! task-arrow-spawned? #f)
+    )
+
 (none)
 )
 
