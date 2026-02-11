@@ -2189,11 +2189,11 @@
 
 ;; WARN: disable def twice: 6. This may happen when a cond (no else) is nested inside of another conditional, but it should be rare.
 (defmethod get-current-enemy ((this roboguard-city))
-  (if #t
-      (handle->process (-> this attacker-info enemy))
-      (squad-control-city-method-35 (-> this squad) this (-> this target-status handle))
-      )
-  )
+  (let ((h (-> this attacker-info enemy)))
+    (if h
+        (handle->process h)
+        (squad-control-city-method-35 (-> this squad) this (-> this target-status handle))))
+)
 
 (defmethod roboguard-city-method-237 ((this roboguard-city))
   (when (not (handle->process (-> this target-status handle)))

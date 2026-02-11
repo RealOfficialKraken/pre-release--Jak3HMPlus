@@ -186,10 +186,12 @@
 
 ;; WARN: disable def twice: 6. This may happen when a cond (no else) is nested inside of another conditional, but it should be rare.
 (defmethod get-current-enemy ((this mh-squad-member))
-  (if #t
-      (handle->process (-> this attacker-info enemy))
-      (squad-control-city-method-35 (-> this squad) this (-> this current-enemy))
+  (let ((en (-> this attacker-info enemy)))
+    (if en
+      (handle->process en)
+      (squad-control-city-method-35 (-> this squad) this (-> this focus handle))
       )
+  )
   )
 
 ;; WARN: disable def twice: 120. This may happen when a cond (no else) is nested inside of another conditional, but it should be rare.
