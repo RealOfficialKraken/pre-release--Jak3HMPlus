@@ -14,6 +14,7 @@
                 (= (-> (level-get-target-inside *level*) name) 'desert)
             )
         )
+            (set! global-sfx-volume-refer (the int (* (-> *setting-control* user-current sfx-volume) 100)))
             (let ((dark-v (new 'static 'vector  :x (meters 2254.46)  :y (meters 30.70)  :z (meters 149.23)  :w 1.0)))
                 (spawn-warp-gate dark-v "warp-gate-dark" 90)
             )

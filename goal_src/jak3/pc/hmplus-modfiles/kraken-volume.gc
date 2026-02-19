@@ -6,16 +6,49 @@
 
 (deftype kraken-volume (process)
 ((volume               int)
-(tick                  int)
-(max-tick              int)
-(track-location     string)
+(paused??           symbol)
+(track              string)
 )
 (:state-methods 
 dead
 playing
-hold-music
-im-loopin-it!
 )
+(:methods
+(kv-handler (_type_ process int symbol event-message-block) none)
+)
+)
+
+(defbehavior kv-event-handler kraken-volume ((arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (kv-handler self arg0 arg1 arg2 arg3)
+  (none)
+  )
+
+(defmethod kv-handler ((this kraken-volume) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+(case arg2
+    (('change-music)
+        (case (-> arg3 param 0)
+            (('main)
+                (play-main-music "snd/music/main-menu.wav" (-> this volume))
+                (set! (-> this track) "main-menu")
+            )
+            (('in-game)
+                (play-main-music "snd/music/dark-world-theme.wav" (-> this volume))
+                (set! (-> this track) "dark-world-theme")
+            )
+            (('combat)
+                (play-main-music "snd/music/combat.wav" (-> this volume))
+                (set! (-> this track) "combat")
+            )
+        )
+    )
+    (('die)
+        (go (method-of-object this dead))
+    )
+    (('test)
+        (format #t "Got test from Kraken-Volume~%")
+    )
+)
+(none)
 )
 
 (defstate dead (kraken-volume)
@@ -28,77 +61,61 @@ im-loopin-it!
     )
 )
 
-(defstate hold-music (kraken-volume) 
-    :virtual #t
-    :code 
-    (behavior ()
-        (pause-main-music)
-        (loop
-            (when (= (paused?) #f)
-                (resume-main-music)
-                (go-virtual playing)
-            )
-            (suspend)
-        )
-    )
-)
-
 (defstate playing (kraken-volume)
  :virtual #t
+ :event kv-event-handler
+ :enter
+    (behavior ()
+        (cond
+            ((= in-main-menu? #t)
+                (play-main-music "snd/music/main-menu.wav" (-> self volume))
+                (set! (-> self track) "main-menu")
+            )
+            (else
+                (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))
+                (set! (-> self track) "dark-world-theme")
+            )
+        )
+    )
  :code
     (behavior ()
         (loop
-            (when (< (-> self tick) 2)
-                (+! (-> self tick) 1) ;disabled counting for this mod
-            )
-            (set! (-> *setting-control* user-default music-volume) 0.0) ;terrible hack to give the main menu and dark world music.
-            (when (= (paused?) #t)
-                (go-virtual hold-music)
-            )
-            (when (= (-> self tick) 1)
-                (play-main-music (-> self track-location) (-> self volume))
-            )
-            (when (and
-                    (= in-main-menu? #f)
-                    (= in-pre-tutorial? #f)
-                    ) ;a hack I made strictly for dark world, and the main menu (since it takes place in dark world)
-                (go-virtual dead)
-            )
-            (when (>= (-> self tick) (-> self max-tick))
-                (go-virtual im-loopin-it!)
-            )
-            (format *stdcon* "Playing track~%Tick: ~d/~d" (-> self tick) (-> self max-tick))
+            (when 
+                (and
+                    (or
+                        (search-process-tree *active-pool* (lambda ((p process)) (type? p dp-bipedal)))
+                        (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat)))
+                    )
+                    (not (string= (-> self track) "combat"))
+                )
+                    (play-main-music "snd/music/combat.wav" (-> self volume))
+                    (set! (-> self track) "combat")
+                )
+            (when 
+                (and
+                    (not (search-process-tree *active-pool* (lambda ((p process)) (type? p dp-bipedal))))
+                    (not (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat))))
+                    (string= (-> self track) "combat")
+                )
+                    (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))
+                    (set! (-> self track) "dark-world-theme")
+                )
+            (format *stdcon* "kraken-volume~%vol: ~d~%track: ~s~%~%" (-> self volume) (-> self track))
             (suspend)
         )
     )
 )
 
-(defstate im-loopin-it! (kraken-volume)
- :virtual #t
- :code 
-    (behavior ()
-        (set! (-> self tick) 0)
-        (go-virtual playing)
-    )
-)
-
-(defbehavior kraken-volume-init-by-other kraken-volume ((location string) (vol int))
-    (set! (-> self tick) 0)
-    (set! (-> self track-location) location)
+(defbehavior kraken-volume-init-by-other kraken-volume ((vol int))
+    (stack-size-set! (-> self main-thread) 256)
     (set! (-> self volume) vol)
-    (set! (-> self max-tick) 7000)
+    (set! (-> self paused??) #f)
+    (set! (-> self track) "none")
     (go (method-of-object self playing))
     (none)
 )
 
 (defun start-menu-music! ()
-    (cond
-        ((= in-main-menu? #t)
-            (play-main-music "snd/music/main-menu.wav" 175)
-        )
-        (else
-            (play-main-music "snd/music/dark-world-theme.wav" 100)
-        )
-    )
+    (set! *kv* (process-spawn kraken-volume global-sfx-volume-refer :name "kv-1000"))
     (none)
 )

@@ -7563,6 +7563,8 @@ BUGS:
     (kill-by-name "darkworld-tower" *active-pool*)
     (kill-by-name "jak3logo" *active-pool*)
     (kill-by-name "jak3logo-flicker" *active-pool*)
+    (kill-by-name "Entity-Boss" *active-pool*)
+    (kill-by-name "kv-1000" *active-pool*)
     (when (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
         (set! *enemies-explode* #f)
     )

@@ -519,6 +519,9 @@
   (defun-extern spawn-kraken-timer none)
   (declare-type kraken-timer process)
   (define *kraken-timer* (the (pointer kraken-timer) #f))
+  (declare-type kraken-volume process)
+  (define *kv* (the (pointer kraken-volume) #f))
+  (define-extern global-sfx-volume-refer int)
   (declare-type arena-event process)
   (define *arena-event* (the (pointer arena-event) #f))
   (defun-extern summon-arena-event (none))
@@ -654,6 +657,8 @@
   (declare-type wasteland-marauder marauder)
   (defun-extern spawn-wasteland-marauder vector string none)
   (define wastelander-dead? #f)
+
+  (defun-extern to-final-boss! (none))
 
 
 ;; +++game-items
