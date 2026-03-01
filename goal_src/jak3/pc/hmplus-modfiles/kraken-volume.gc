@@ -28,14 +28,17 @@ playing
     (('change-music)
         (case (-> arg3 param 0)
             (('main)
+                (stop-main-music)
                 (play-main-music "snd/music/main-menu.wav" (-> this volume))
                 (set! (-> this track) "main-menu")
             )
             (('in-game)
+                (stop-main-music)
                 (play-main-music "snd/music/dark-world-theme.wav" (-> this volume))
                 (set! (-> this track) "dark-world-theme")
             )
             (('combat)
+                (stop-main-music)
                 (play-main-music "snd/music/combat.wav" (-> this volume))
                 (set! (-> this track) "combat")
             )
@@ -80,6 +83,21 @@ playing
  :code
     (behavior ()
         (loop
+            (when (!= (the int (* (-> *setting-control* user-current sfx-volume) 100)) (-> self volume))
+                (set! (-> self volume) (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+                (stop-main-music)
+                (cond
+                    ((string= (-> self track) "combat")
+                        (play-main-music "snd/music/combat.wav" (-> self volume))
+                    )
+                    ((string= (-> self track) "dark-world-theme")
+                        (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))
+                    )
+                    ((string= (-> self track) "main-menu")
+                        (play-main-music "snd/music/main-menu.wav" (-> self volume))
+                    )
+                )
+            )
             (when 
                 (and
                     (or
@@ -88,6 +106,7 @@ playing
                     )
                     (not (string= (-> self track) "combat"))
                 )
+                    (stop-main-music)
                     (play-main-music "snd/music/combat.wav" (-> self volume))
                     (set! (-> self track) "combat")
                 )
@@ -97,6 +116,7 @@ playing
                     (not (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat))))
                     (string= (-> self track) "combat")
                 )
+                    (stop-main-music)
                     (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))
                     (set! (-> self track) "dark-world-theme")
                 )
@@ -116,6 +136,6 @@ playing
 )
 
 (defun start-menu-music! ()
-    (set! *kv* (process-spawn kraken-volume global-sfx-volume-refer :name "kv-1000"))
+    (set! *kv* (process-spawn kraken-volume (the int (* (-> *setting-control* user-current sfx-volume) 100)) :name "kv-1000"))
     (none)
 )
