@@ -443,6 +443,7 @@
   (defun-extern black-hole! vector none)
   (defun-extern random-shot! vector vector process-drawable none)
   (defun-extern peacemaker-burst! none)
+  (define global-neo-sat-diff-counter 0)
 
   (define pm-burst #f)
   (define pmi 0)
@@ -618,6 +619,8 @@
   (define choice-max 4)
 
   (defun-extern close-vin-shop! none)
+
+  (define weather-dark-mode #f)
 
   (define global-degree 0)
   (defun-extern spawn-warp-gate vector string int none)

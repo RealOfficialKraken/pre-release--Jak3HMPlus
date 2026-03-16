@@ -32,12 +32,7 @@
   (let ((t9-0 (method-of-type task-manager task-manager-method-26)))
     (t9-0 this)
     )
-  (let* ((s4-0 (handle->process (-> this player-vehicle)))
-         (s5-0 (if (type? s4-0 process-focusable)
-                   (the-as process-focusable s4-0)
-                   )
-               )
-         )
+  (let ((s5-0 (as-type (handle->process (-> this player-vehicle)) process-focusable)))
     (when s5-0
       (if (focus-test? s5-0 dead)
           (send-event this 'fail)

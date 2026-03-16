@@ -1843,6 +1843,20 @@
   (none)
   )
 
+(deftype marauder-init-by-other-params (enemy-init-by-other-params)
+  ((multi-focus  symbol)
+   (skip-jump    symbol)
+   )
+  )
+
+
+(defbehavior marauder-init-by-other marauder ((arg0 process-drawable) (arg1 marauder-init-by-other-params))
+  ;; og:preserve-this added
+  (stack-size-set! (-> self main-thread) 512)
+  (set! (-> self skip-jump) (-> arg1 skip-jump))
+  (set-multi-focus self (-> arg1 multi-focus))
+  (enemy-init-by-other arg0 arg1)
+  )
 
 ;; WARN: Return type mismatch symbol vs none.
 (defmethod init-enemy! ((this marauder))

@@ -1149,6 +1149,7 @@
    (snd-spool-explosion         sound-id)
    (antenna-explode-part        sparticle-launch-control)
    (next-lightning-time         time-frame)
+   (diff-counter                int)
    )
   (:state-methods
     sat-idle
@@ -1197,11 +1198,14 @@
     (spawn-shield (_type_) none)
     (neo-sat-method-232 (_type_ vector) symbol)
     (neo-sat-method-233 (_type_) quaternion)
+    (neo-sat-spawn-stage-bipedals (_type_) none)
+    (someone-fire-sat-purple (_type_ vector vector float) (pointer for-turret-shot))
     )
   (:states
     neo-sat-drill-halting
     )
   )
+
 
 
 (define *alive-neo-sats* (new 'static 'boxed-array :type handle :length 0 :allocated-length 12))
@@ -1247,7 +1251,7 @@
     :neck-joint -1
     :notice-distance (meters 30)
     :notice-distance-delta (meters 10)
-    :default-hit-points 1900.0
+    :default-hit-points 950.0
     :gnd-collide-with (collide-spec backgnd obstacle hit-by-others-list)
     :overlaps-others-collide-with-filter (collide-spec jak bot player-list)
     :movement-gravity (meters -100)
@@ -1349,6 +1353,30 @@
   )
 
 (define *neo-satellite-nav-mesh* (the-as actor-id #x11bae))
+
+(defmethod someone-fire-sat-purple ((arg0 neo-sat) (arg1 vector) (arg2 vector) (arg3 float))
+    (let ((gp-0 (new 'stack-no-clear 'projectile-init-by-other-params)))
+    (set! (-> gp-0 ent) (-> arg0 entity))
+    (set! (-> gp-0 charge) 1.0)
+    (set! (-> gp-0 options) (projectile-options))
+    (logclear! (-> gp-0 options) (projectile-options po14 po15 po16))
+    (set! (-> gp-0 notify-handle) (process->handle arg0))
+    (set! (-> gp-0 owner-handle) (the-as handle #f))
+    (set! (-> gp-0 target-handle) (the-as handle #f))
+    (set! (-> gp-0 target-pos quad) (the-as uint128 0))
+    (set! (-> gp-0 ignore-handle) (process->handle arg0))
+    (let* ((v1-11 *game-info*)
+           (a0-11 (+ (-> v1-11 attack-id) 1))
+           )
+      (set! (-> v1-11 attack-id) a0-11)
+      (set! (-> gp-0 attack-id) a0-11)
+      )
+    (set! (-> gp-0 timeout) (seconds 4))
+    (vector-copy! (-> gp-0 pos) arg1)
+    (vector-normalize-copy! (-> gp-0 vel) arg2 arg3)
+    (the-as (pointer for-turret-shot) (spawn-projectile for-turret-shot gp-0 arg0 *default-dead-pool*))
+    )
+  )
 
 ;; WARN: Return type mismatch none vs object.
 (defbehavior neo-sat-init-by-other neo-sat ((arg0 neo-sat-init-params))
@@ -1645,18 +1673,67 @@
   (ja-post)
   (set-setting! 'dust-storm-sound-scalar #f 0.75 0)
   (set-setting! 'minimap 'clear 0.0 (minimap-flag minimap))
+  (set! (-> this diff-counter) 0)
+  (when (task-node-closed? (game-task-node darkworld-a1-reso))
+    (+! (-> this diff-counter) 1)
+  )
+  (when (task-node-closed? (game-task-node darkworld-a2-reso))
+    (+! (-> this diff-counter) 1)
+  )
+  (when (task-node-closed? (game-task-node darkworld-b1-reso))
+    (+! (-> this diff-counter) 1)
+  )
+  (when (task-node-closed? (game-task-node darkworld-b2-reso))
+    (+! (-> this diff-counter) 1)
+  )
+  (when (task-node-closed? (game-task-node darkworld-c1-reso))
+    (+! (-> this diff-counter) 1)
+  )
+  (when (task-node-closed? (game-task-node darkworld-c2-reso))
+    (+! (-> this diff-counter) 1)
+  )
+  (when (task-node-closed? (game-task-node darkworld-d1-reso))
+    (+! (-> this diff-counter) 1)
+  )
+  (when (task-node-closed? (game-task-node darkworld-d2-reso))
+    (+! (-> this diff-counter) 1)
+  )
+  (format #t "neo-sat diff-counter at ~d" (-> this diff-counter))
+  (set! global-neo-sat-diff-counter (-> this diff-counter))
   (cond
     ((task-node-open? (game-task-node desert-rescue-satellite-fight))
       (set! enemy-string "Damaged Satellite")
-      (-! (-> this hit-points) 1600.0)
+      (-! (-> this hit-points) 600.0)
     )
     (else
-      (set! enemy-string "Satellite Probe")
+      (when (or (= (-> this diff-counter) 0) (= (-> this diff-counter) 1))
+        (set! enemy-string "Satellite Probe")
+      )
+      (when (= (-> this diff-counter) 2)
+        (set! enemy-string "Dark Satellite")
+      )
+      (when (or (= (-> this diff-counter) 3) (= (-> this diff-counter) 4))
+        (set! enemy-string "Ancient Satellite")
+      )
+      (when (or (= (-> this diff-counter) 5) (= (-> this diff-counter) 6))
+        (set! enemy-string "Unstable Satellite")
+      )
+      (when (= (-> this diff-counter) 7)
+        (set! enemy-string "Cataclysm")
+      )
     )
+  )
+  (when (!= (-> this diff-counter) 0)
+    (+! (-> this hit-points) (* 600.0 (the float (-> this diff-counter))))
   )
   (set! draw-enemy-noto enemy-noto)
   (set! hpbar-hit-points (-> this hit-points))
-  (set! hpbar-max-hit-points (-> this enemy-info default-hit-points))
+  (set! hpbar-max-hit-points 
+    (if (!= (-> this diff-counter) 0)
+      (+ (-> this enemy-info default-hit-points) (* 600.0 (the float (-> this diff-counter))))
+      (-> this enemy-info default-hit-points)
+    )
+  )
   (set! enemy-hp #t)
   (go (method-of-object this sat-idle))
   (none)
@@ -2523,7 +2600,7 @@
   "Given an attack message, apply damage."
   (let ((f30-0 (call-parent-method this arg0 arg1)))
     (let ((f28-0 (-> this hit-points))
-          (f26-0 (* 570.0 (- 3.0 (the float (+ (-> this current-stage) 1)))))
+          (f26-0 (* 285.0 (- 3.0 (the float (+ (-> this current-stage) 1)))))
           )
       (sound-play "sat-hit")
       (when (>= f26-0 f28-0)
@@ -2563,6 +2640,9 @@
       )
     )
   :enter (behavior ()
+    (when *target*
+      (neo-sat-spawn-stage-bipedals self)
+    )
     (set! (-> self active-laser-index) 0)
     (neo-sat-method-209 self)
     (set-time! (-> self state-time))
@@ -2693,7 +2773,7 @@
                      )
                 (vector+float*! s1-0 (-> this shockwave-origin) s0-0 f28-1)
                 (set! (-> s1-0 y) (neo-sat-method-218 this s1-0))
-                (set! (-> *part-id-table* 1679 init-specs 3 initial-valuef) (lerp 409.6 2457.6 (* 0.0000061035157 f28-1)))
+                (set! (-> *part-id-table* 1679 init-specs 3 initial-valuef) (lerp 409.6 2457.6 (/ f28-1 (meters 40))))
                 (let* ((f26-2 (-> *part-id-table* 1679 init-specs 3 initial-valuef))
                        (f24-1 1.0)
                        (v1-41 (/ (the-as int (rand-uint31-gen *random-generator*)) 256))
@@ -2790,13 +2870,13 @@
     (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 229 (seconds 0.5))
     (send-event (handle->process (-> self warp-handle)) 'turn-off)
     (cond
-      ((logtest? (-> *part-group-id-table* 418 flags) (sp-group-flag sp13))
+      ((logtest? (-> group-neo-sat-ground-impact flags) (sp-group-flag sp13))
        (vector-copy! (-> *launch-matrix* trans) (-> self root trans))
-       (part-tracker-spawn part-tracker-subsampler :to self :group (-> *part-group-id-table* 418))
+       (part-tracker-spawn part-tracker-subsampler :to self :group group-neo-sat-ground-impact)
        )
       (else
         (vector-copy! (-> *launch-matrix* trans) (-> self root trans))
-        (part-tracker-spawn part-tracker :to self :group (-> *part-group-id-table* 418))
+        (part-tracker-spawn part-tracker :to self :group group-neo-sat-ground-impact)
         )
       )
     (sound-play "sat-in-ground")
@@ -2969,28 +3049,51 @@
         )
     (seek! (-> self anim-speed) 3.0 (* 0.15 (seconds-per-frame)))
     (when (time-elapsed? (-> self wander-generate-time) (seconds 1.5))
-      (let ((s5-0 (new 'stack-no-clear 'vector)))
-        (vector-copy! s5-0 *x-vector*)
-        (let ((gp-0 (new 'stack-no-clear 'vector)))
-          (vector-normalize! s5-0 65536.0)
-          (vector-rotate-y! s5-0 s5-0 (-> self offset-angle))
-          (let* ((f30-0 -16384.0)
-                 (f28-0 32768.0)
-                 (v1-16 (/ (the-as int (rand-uint31-gen *random-generator*)) 256))
-                 (v1-17 (the-as number (logior #x3f800000 v1-16)))
-                 )
-            (set! (-> self offset-angle) (+ f30-0 (* f28-0 (+ -1.0 (the-as float v1-17))) (-> self offset-angle)))
-            )
-          (set! (-> self offset-angle) (the float (sar (shl (the int (-> self offset-angle)) 48) 48)))
-          (set-time! (-> self wander-generate-time))
-          (vector+! gp-0 (-> self focus-pos) s5-0)
-          (let ((v1-26 (-> self nav state)))
-            (logclear! (-> v1-26 flags) (nav-state-flag directional-mode))
-            (logior! (-> v1-26 flags) (nav-state-flag target-poly-dirty))
-            (vector-copy! (-> v1-26 target-pos) gp-0)
-            )
-          )
-        )
+      (let ((s5-0 (new 'stack-no-clear 'vector))
+      (gp-0 (new 'stack-no-clear 'vector))
+      (elapsed 0.0)
+      (phase 0.0)
+      (major-radius 0.0)
+      (minor-radius 0.0))
+
+  ;; advance orbit angle every frame so Neo-Sat continuously moves
+  ;; 4096.0 angle-units/sec = 1 full orbit every ~16 seconds
+  (+! (-> self offset-angle) (* 4096.0 (seconds-per-frame)))
+  (set! (-> self offset-angle) (the float (sar (shl (the int (-> self offset-angle)) 48) 48)))
+
+  ;; compute 0..1 phase over 30 seconds
+  (set! elapsed (the float (- (current-time) (-> self state-time))))
+  (set! phase (* 0.033333335 elapsed)) ;; / 30 seconds
+
+  (when (< phase 0.0)
+    (set! phase 0.0))
+  (when (> phase 1.0)
+    (set! phase 1.0))
+
+  ;; shrink orbit from 15m down to 4m over the hostile phase
+  (set! major-radius (lerp (meters 15.0) (meters 4.0) phase))
+  (set! minor-radius (* major-radius 0.65))
+
+  ;; build ellipse point around Jak
+  ;; start from +X axis, rotate by orbit angle, then squash Z for ellipse
+  (vector-copy! s5-0 *x-vector*)
+  (vector-normalize! s5-0 major-radius)
+  (vector-rotate-y! s5-0 s5-0 (-> self offset-angle))
+  (set! (-> s5-0 z) (* (-> s5-0 z) 0.65))
+
+  ;; target is always relative to Jak's current position
+  (vector+! gp-0 (-> self focus-pos) s5-0)
+
+  ;; feed the orbit target into nav
+  (let ((v1-34 (-> self nav state)))
+    (logclear! (-> v1-34 flags) (nav-state-flag directional-mode))
+    (logior! (-> v1-34 flags) (nav-state-flag target-poly-dirty))
+    (vector-copy! (-> v1-34 target-pos) gp-0))
+
+  ;; after 30 seconds, transition into laser
+  ;; by now the orbit radius has already shrunk to ~4m
+  (when (time-elapsed? (-> self state-time) (seconds 30.0))
+    (go-virtual neo-sat-laser-attack)))
       0
       )
     (neo-sat-method-203 self #f)
@@ -3070,6 +3173,9 @@
   :virtual #t
   :event enemy-event-handler
   :enter (behavior ()
+    (when *kv*
+      (send-event (ppointer->process *kv*) 'die #t)
+    )
     (logclear! (-> self draw status) (draw-control-status no-draw))
     (set! (-> self next-lightning-time) 0)
     (sound-play "sat-out-ground")
@@ -3081,13 +3187,13 @@
     (logclear! (-> self enemy-flags) (enemy-flag vulnerable))
     (logclear! (-> self focus-status) (focus-status dangerous))
     (cond
-      ((logtest? (-> *part-group-id-table* 420 flags) (sp-group-flag sp13))
+      ((logtest? (-> group-neo-sat-ground-dust flags) (sp-group-flag sp13))
        (vector-copy! (-> *launch-matrix* trans) (-> self root trans))
-       (part-tracker-spawn part-tracker-subsampler :to self :group (-> *part-group-id-table* 420))
+       (part-tracker-spawn part-tracker-subsampler :to self :group group-neo-sat-ground-dust)
        )
       (else
         (vector-copy! (-> *launch-matrix* trans) (-> self root trans))
-        (part-tracker-spawn part-tracker :to self :group (-> *part-group-id-table* 420))
+        (part-tracker-spawn part-tracker :to self :group group-neo-sat-ground-dust)
         )
       )
     (set-time! (-> self state-time))
@@ -3121,7 +3227,7 @@
         0
         40960.0
         )
-      (set! (-> self next-lightning-time) (+ (current-time) (seconds 0.05)))
+      (set! (-> self next-lightning-time) (+ (current-time) (seconds 0.00001)))
       )
     (if (not (time-elapsed? (-> self state-time) (seconds 1)))
         (spawn
@@ -3209,8 +3315,52 @@
               (set! tier2-chance 1.0)
               (set! tier3-chance 0.5)
             )
-            (set! vec (-> self root trans))
+            (vector-copy! vec (-> self root trans))
             (group-drop! vec tier2-chance tier3-chance)
+            (cond
+              ((task-node-open? (game-task-node darkworld-a1-reso))
+                (task-node-close! (game-task-node darkworld-a1-reso) #t)
+              )
+              ((task-node-open? (game-task-node darkworld-a2-reso))
+                (task-node-close! (game-task-node darkworld-a2-reso) #t)
+              )
+              ((task-node-open? (game-task-node darkworld-b1-reso))
+                (task-node-close! (game-task-node darkworld-b1-reso) #t)
+              )
+              ((task-node-open? (game-task-node darkworld-b2-reso))
+                (task-node-close! (game-task-node darkworld-b2-reso) #t)
+              )
+              ((task-node-open? (game-task-node darkworld-c1-reso))
+                (task-node-close! (game-task-node darkworld-c1-reso) #t)
+              )
+              ((task-node-open? (game-task-node darkworld-c2-reso))
+                (task-node-close! (game-task-node darkworld-c2-reso) #t)
+              )
+              ((task-node-open? (game-task-node darkworld-d1-reso))
+                (task-node-close! (game-task-node darkworld-d1-reso) #t)
+              )
+              ((task-node-open? (game-task-node darkworld-d2-reso))
+                (task-node-close! (game-task-node darkworld-d2-reso) #t)
+              )
+            )
+            (when (or (= (-> self diff-counter) 6) (= (-> self diff-counter) 5))
+              (let ((fact (new 'static 'fact-info)))
+                (vector-copy! vec (-> self root trans))
+                (+! (-> vec y) (meters 3))
+                (set! (-> fact pickup-type) (pickup-type gun-yellow-1))
+                (set! (-> fact pickup-amount) 1.0)
+                (birth-pickup-at-point vec (-> fact pickup-type) (-> fact pickup-amount) #t *entity-pool* (the-as fact-info #f))
+              )
+            )
+            (when (>= (-> self diff-counter) 7)
+              (let ((fact (new 'static 'fact-info)))
+                (vector-copy! vec (-> self root trans))
+                (+! (-> vec y) (meters 3))
+                (set! (-> fact pickup-type) (pickup-type gun-mod-upgrade))
+                (set! (-> fact pickup-amount) 1.0)
+                (birth-pickup-at-point vec (-> fact pickup-type) (-> fact pickup-amount) #t *entity-pool* (the-as fact-info #f))
+              )
+            )
         )
         (when (and (= weather-dark-mode #t) *kv*)
               (send-event (ppointer->process *kv*) 'change-music 'in-game)
@@ -3291,19 +3441,17 @@
     (sound-play "sat-out-ground")
     (send-event (handle->process (-> self warp-handle)) 'turn-on)
     (cond
-      ((logtest? (-> *part-group-id-table* 420 flags) (sp-group-flag sp13))
+      ((logtest? (-> group-neo-sat-ground-dust flags) (sp-group-flag sp13))
        (vector-copy! (-> *launch-matrix* trans) (-> self root trans))
-       (part-tracker-spawn part-tracker-subsampler :to self :group (-> *part-group-id-table* 420))
-       )
+       (part-tracker-spawn part-tracker-subsampler :to self :group group-neo-sat-ground-dust))
       (else
-        (vector-copy! (-> *launch-matrix* trans) (-> self root trans))
-        (part-tracker-spawn part-tracker :to self :group (-> *part-group-id-table* 420))
-        )
-      )
+       (vector-copy! (-> *launch-matrix* trans) (-> self root trans))
+       (part-tracker-spawn part-tracker :to self :group group-neo-sat-ground-dust)))
     (let ((v1-40 self))
-      (set! (-> v1-40 enemy-flags) (the-as enemy-flag (logclear (-> v1-40 enemy-flags) (enemy-flag ef37))))
-      (set! (-> v1-40 nav callback-info) *null-nav-callback-info*)
-      )
+      (set! (-> v1-40 enemy-flags)
+            (the-as enemy-flag
+                    (logclear (-> v1-40 enemy-flags) (enemy-flag ef37))))
+      (set! (-> v1-40 nav callback-info) *null-nav-callback-info*))
     0
     (logclear! (-> self enemy-flags) (enemy-flag vulnerable))
     (set! (-> self desired-float-height) 163840.0)
@@ -3311,153 +3459,696 @@
     (neo-sat-method-204 self)
     (set! (-> self ground-offset) 4096.0)
     (set-time! (-> self state-time))
+    (set! (-> self next-lightning-time) 0)
     (logclear! (-> self focus-status) (focus-status dangerous))
     (when (-> self was-spinning?)
       (set! (-> self was-spinning?) #f)
-      (sound-play "sat-whip-in")
-      )
-    (sound-play "sat-hover" :id (-> self snd-hover))
-    )
+      (sound-play "sat-whip-in"))
+    (sound-play "sat-hover" :id (-> self snd-hover)))
   :exit (behavior ()
     (dotimes (gp-0 (-> self ropes length))
-      (rope-system-method-21 (-> self ropes gp-0))
-      )
-    )
+      (rope-system-method-21 (-> self ropes gp-0))))
   :trans (behavior ()
     (neo-sat-method-201 self)
+
     (when (not (time-elapsed? (-> self state-time) (seconds 1)))
+      (when (< (-> self next-lightning-time) (current-time))
+        (process-drawable-shock-effect
+          self
+          (-> *lightning-spec-id-table* 22)
+          lightning-probe-callback
+          (-> *part-id-table* 160)
+          0
+          0
+          40960.0)
+        (process-drawable-shock-effect
+          self
+          (-> *lightning-spec-id-table* 22)
+          lightning-probe-callback
+          (-> *part-id-table* 160)
+          0
+          0
+          40960.0)
+        (set! (-> self next-lightning-time) (+ (current-time) (seconds 0.05))))
+
       (let* ((f1-2 (* 0.0033333334 (the float (- (current-time) (-> self state-time)))))
              (f1-5 (- 1.0 (* (- 1.0 f1-2) (- 1.0 f1-2))))
-             (f0-3 (- 1.0 (* (- 1.0 f1-5) (- 1.0 f1-5))))
-             )
-        (set! (-> *part-id-table* 1687 init-specs 2 initial-valuef) (fmax 0.0 (lerp 10.0 0.0 f0-3)))
-        )
-      (spawn (-> self burst-dust-part) (-> self root trans))
-      )
+             (f0-3 (- 1.0 (* (- 1.0 f1-5) (- 1.0 f1-5)))))
+        (set! (-> *part-id-table* 1687 init-specs 2 initial-valuef)
+              (fmax 0.0 (lerp 10.0 0.0 f0-3))))
+      (spawn (-> self burst-dust-part) (-> self root trans)))
+
     (seek! (-> self desired-float-height) 49152.0 (* 327680.0 (seconds-per-frame)))
     (neo-sat-method-228 self)
     (if (time-elapsed? (-> self state-time) (seconds 1.5))
-        (go-virtual hostile)
-        )
-    )
+        (go-virtual hostile)))
   :code sleep-code
   :post (behavior ()
-    (nav-enemy-method-187 self)
-    )
-  )
+    (nav-enemy-method-187 self)))
 
-(defstate hostile (neo-sat)
+    (defstate hostile (neo-sat)
   :virtual #t
   :event enemy-event-handler
   :enter (behavior ()
+    (set! (-> self next-lightning-time) 0)
     (sound-play "sat-arms" :id (-> self snd-arms-chatter))
     (set! (-> self laser-rotate-angle) 0.0)
     (sound-stop (-> self snd-laser-burn))
     (set! (-> self fly-speed-scalar) 1.0)
     (set! (-> self max-speed) 204800.0)
     (set! (-> self active-laser-index) -1)
+
     (let ((v1-5 self))
       (if (not (logtest? (enemy-flag ef37) (-> v1-5 enemy-flags)))
-          (set! (-> v1-5 enemy-flags) (the-as enemy-flag (logior (enemy-flag ef39) (-> v1-5 enemy-flags))))
-          )
-      (set! (-> v1-5 enemy-flags) (the-as enemy-flag (logior (enemy-flag ef37) (-> v1-5 enemy-flags))))
-      (set! (-> v1-5 nav callback-info) (-> v1-5 enemy-info callback-info))
-      )
+          (set! (-> v1-5 enemy-flags)
+                (the-as enemy-flag
+                        (logior (enemy-flag ef39) (-> v1-5 enemy-flags)))))
+      (set! (-> v1-5 enemy-flags)
+            (the-as enemy-flag
+                    (logior (enemy-flag ef37) (-> v1-5 enemy-flags))))
+      (set! (-> v1-5 nav callback-info)
+            (-> v1-5 enemy-info callback-info)))
     0
     (let ((v1-8 (-> self nav)))
-      (set! (-> v1-8 target-speed) 4096.0)
-      )
+      (set! (-> v1-8 target-speed) 4096.0))
     0
     (set-time! (-> self state-time))
     (set! (-> self hit-player?) #f)
     (logclear! (-> self enemy-flags) (enemy-flag vulnerable))
-    (set! (-> self wander-generate-time) 0)
+    (set-time! (-> self wander-generate-time))
+    (set-time! (-> self new-spin-time))
     (set! (-> self last-thrust-vec quad) (the-as uint128 0))
     (set! (-> self ground-offset) 40960.0)
     (set! (-> self desired-float-height) 49152.0)
     (set! (-> self bob-speed-scalar) 1.0)
+    (set! (-> self offset-angle)
+          (rand-vu-float-range 0.0 65536.0))
+
     (ja-channel-push! 1 (seconds 0.5))
     (ja-no-eval :group! neo-satellite-active-ja :num! (loop!) :frame-num 0.0)
     (set! (-> self anim-loop?) #t)
     (set! (-> self play-anim?) #t)
     (set! (-> self anim-speed) 0.6)
-    (neo-sat-method-204 self)
-    )
+
+    (neo-sat-method-204 self))
+
   :exit (behavior ()
-    '()
-    )
+    '())
+
   :trans (behavior ()
-    (let ((rnd (rand-vu-int-range 1 14))
-              (rnd2 (rand-vu-float-range -30.0 30.0))
-              (rnd3 (rand-vu-float-range -30.0 30.0))
-              (vec (new-stack-vector0))
-              (startpos (new-stack-vector0))
-              (plusvec (new-stack-vector0)) 
-              (off (new 'static 'vector :x (meters 0.0) :y (meters 0.0) :z (meters 0.0) :w 1.0))  
-              )
-            (set! off (new 'static 'vector :x (meters 0.0) :y (meters 0.0) :z (meters 0.0) :w 1.0))
-            (set! plusvec (new 'static 'vector :x (meters 0.0) :y (meters 0.0) :z (meters 0.0) :w 1.0))
-            (set! vec (new 'static 'vector :x (meters 0.0) :y (meters 0.0) :z (meters 0.0) :w 1.0))
-            (set! startpos (-> self root trans))
-            (if (rand-vu-percent? 0.5)
-                (+! (-> off x) (* (rand-vu-float-range 0.0 100.0) 4096.0))
-                (-! (-> off x) (* (rand-vu-float-range 0.0 100.0) 4096.0))
-            )
-            (if (rand-vu-percent? 0.5)
-                (+! (-> off z) (* (rand-vu-float-range 0.0 100.0) 4096.0))
-                (-! (-> off z) (* (rand-vu-float-range 0.0 100.0) 4096.0))
-            )
-            (set! vec (-> self root trans)) ;was (set! vec (-> self fireball-sp (rand-vu-int-range 1 27)))
-            (vector-copy! plusvec (vector+! plusvec off vec))
-            (set! startpos plusvec)
-            ;(set! (-> startpos y) -200000.0)
-            (when (rand-vu-percent? 0.02)
-              (spawn-dp-bipedal-grenade self vec startpos (rand-vu-float-range -255000.0 255000.0))
-            )
+
+    (let ((src (new-stack-vector0))
+          (center-target (new-stack-vector0))
+          (left-target (new-stack-vector0))
+          (right-target (new-stack-vector0))
+          (to-jak (new-stack-vector0))
+          (side (new-stack-vector0))
+          (rand-target (new-stack-vector0))
+          (turret-target (new-stack-vector0))
+          (turret-dir (new-stack-vector0))
+          (center-dist 0.0)
+          (left-dist 0.0)
+          (right_dist 0.0)
+          (rand-dist 0.0)
+          (center-power 0.0)
+          (left-power 0.0)
+          (right-power 0.0)
+          (rand-power 0.0)
+          (side-y-a 0.0)
+          (side-y-b 0.0)
+          (spread (meters 3.5))
+          (t 0.0)
+          (elapsed 0.0)
+          (phase 0.0)
+          (fire-frames 42)
+          (rand-grenade-frames 540)
+          (turret-frames 360)
+          (diff-scale 0.0)
+          (rand-scale 0.0)
+          (turret-scale 0.0)
+          (rand-angle 0.0)
+          (rand-radius 0.0)
+          (turret-spread 0.0)
+          (turret-speed 0.0))
+
+      (vector-copy! src (-> self root trans))
+      (vector-copy! center-target (-> self focus-pos))
+      (+! (-> center-target y) (meters 3.5))
+
+      (vector-! to-jak center-target src)
+      (set! (-> to-jak y) 0.0)
+
+      (if (> (vector-length to-jak) 1.0)
+          (vector-normalize! to-jak (meters 1.0))
+          (begin
+            (set! (-> to-jak x) (meters 1.0))
+            (set! (-> to-jak y) 0.0)
+            (set! (-> to-jak z) (meters 0.0))
+            (set! (-> to-jak w) 1.0)))
+
+      (vector-cross! side to-jak *up-vector*)
+      (set! (-> side y) 0.0)
+
+      (if (> (vector-length side) 0.001)
+          (vector-normalize! side spread)
+          (begin
+            (set! (-> side x) spread)
+            (set! (-> side y) 0.0)
+            (set! (-> side z) 0.0)
+            (set! (-> side w) 1.0)))
+
+      (vector+! left-target center-target side)
+      (vector+float*! right-target center-target side -1.0)
+
+      (if (rand-vu-percent? 0.5)
+          (set! side-y-a (rand-vu-float-range (meters 4.0) (meters 6.0)))
+          (set! side-y-a (rand-vu-float-range (meters -6.0) (meters -4.0))))
+
+      (if (rand-vu-percent? 0.5)
+          (set! side-y-b (rand-vu-float-range (meters 4.0) (meters 6.0)))
+          (set! side-y-b (rand-vu-float-range (meters -6.0) (meters -4.0))))
+
+      (+! (-> left-target y) side-y-a)
+      (+! (-> right-target y) side-y-b)
+
+      (set! center-dist (vector-vector-distance src center-target))
+      (set! left-dist (vector-vector-distance src left-target))
+      (set! right_dist (vector-vector-distance src right-target))
+
+      (set! t (/ center-dist (meters 60.0)))
+      (when (< t 0.0) (set! t 0.0))
+      (when (> t 1.0) (set! t 1.0))
+      (set! center-power (* (lerp 28000.0 95000.0 t) 4.0))
+
+      (set! t (/ left-dist (meters 60.0)))
+      (when (< t 0.0) (set! t 0.0))
+      (when (> t 1.0) (set! t 1.0))
+      (set! left-power (* (lerp 28000.0 95000.0 t) 4.0))
+
+      (set! t (/ right_dist (meters 60.0)))
+      (when (< t 0.0) (set! t 0.0))
+      (when (> t 1.0) (set! t 1.0))
+      (set! right-power (* (lerp 28000.0 95000.0 t) 4.0))
+
+      (set! elapsed (the float (- (current-time) (-> self state-time))))
+      (set! phase (/ elapsed (seconds 30.0)))
+      (when (< phase 0.0) (set! phase 0.0))
+      (when (> phase 1.0) (set! phase 1.0))
+
+      (set! diff-scale (/ (the float (-> self diff-counter)) 7.0))
+      (when (< diff-scale 0.0) (set! diff-scale 0.0))
+      (when (> diff-scale 1.0) (set! diff-scale 1.0))
+
+      (set! fire-frames (the int (lerp 244.0 648.0 phase)))
+
+      (when (and (not (time-elapsed? (-> self state-time) (seconds 30.0)))
+                 (time-elapsed? (-> self wander-generate-time)
+                                (the-as uint fire-frames)))
+        (spawn-dp-bipedal-grenade self src center-target center-power)
+        (when (>= (-> self current-stage) 1)
+          (spawn-dp-bipedal-grenade self src left-target left-power)
         )
+        (when (>= (-> self current-stage) 2)
+          (spawn-dp-bipedal-grenade self src right-target right-power)
+        )
+        (set-time! (-> self wander-generate-time)))
+
+      (when (and (>= (-> self diff-counter) 2)
+                 (not (time-elapsed? (-> self state-time) (seconds 30.0))))
+        (set! rand-scale (/ (the float (- (-> self diff-counter) 2)) 5.0))
+        (when (< rand-scale 0.0) (set! rand-scale 0.0))
+        (when (> rand-scale 1.0) (set! rand-scale 1.0))
+
+        (set! rand-grenade-frames (the int (lerp 540.0 150.0 rand-scale)))
+
+        (when (time-elapsed? (-> self next-lightning-time)
+                             (the-as uint rand-grenade-frames))
+          (set! rand-angle (rand-vu-float-range 0.0 65536.0))
+          (set! rand-radius (rand-vu-float-range (meters 10.0) (meters 40.0)))
+
+          (vector-copy! rand-target src)
+          (+! (-> rand-target x) (* rand-radius (cos rand-angle)))
+          (+! (-> rand-target z) (* rand-radius (sin rand-angle)))
+          (+! (-> rand-target y) (rand-vu-float-range (meters -2.0) (meters 6.0)))
+
+          (set! rand-dist (vector-vector-distance src rand-target))
+          (set! t (/ rand-dist (meters 60.0)))
+          (when (< t 0.0) (set! t 0.0))
+          (when (> t 1.0) (set! t 1.0))
+          (set! rand-power (* (lerp 28000.0 95000.0 t) 4.0))
+
+          (spawn-dp-bipedal-grenade self src rand-target rand-power)
+          (set-time! (-> self next-lightning-time))))
+
+      (when (and (>= (-> self diff-counter) 3)
+                 (not (time-elapsed? (-> self state-time) (seconds 30.0))))
+        (set! turret-scale (/ (the float (- (-> self diff-counter) 3)) 4.0))
+        (when (< turret-scale 0.0) (set! turret-scale 0.0))
+        (when (> turret-scale 1.0) (set! turret-scale 1.0))
+
+        (set! turret-frames (the int (lerp 360.0 90.0 turret-scale)))
+        (set! turret-spread (lerp (meters 0.5) (meters 3.0) turret-scale))
+        (set! turret-speed (lerp 262144.0 491520.0 turret-scale))
+
+        (when (time-elapsed? (-> self new-spin-time)
+                             (the-as uint turret-frames))
+          (vector-copy! turret-target (-> self focus-pos))
+          (+! (-> turret-target y) (meters 1.5))
+          (+! (-> turret-target x) (rand-vu-float-range (- turret-spread) turret-spread))
+          (+! (-> turret-target z) (rand-vu-float-range (- turret-spread) turret-spread))
+          (+! (-> turret-target y) (rand-vu-float-range (meters -1.0) (meters 1.0)))
+
+          (vector-! turret-dir turret-target src)
+
+          (someone-fire-sat-purple self src turret-dir turret-speed)
+          (format #t "someone fired purple~%")
+          (set-time! (-> self new-spin-time)))))
+
     (sound-play "sat-hover" :id (-> self snd-hover))
-    (let ((s5-0 (new 'stack-no-clear 'vector)))
-      (vector-copy! s5-0 *x-vector*)
-      (let ((gp-0 (new 'stack-no-clear 'vector)))
-        (vector-normalize! s5-0 12288.0)
-        (vector-rotate-y! s5-0 s5-0 (-> self offset-angle))
-        (when (time-elapsed? (-> self wander-generate-time) (seconds 2))
-          (let* ((f30-0 -16384.0)
-                 (f28-0 32768.0)
-                 (v1-10 (/ (the-as int (rand-uint31-gen *random-generator*)) 256))
-                 (v1-11 (the-as number (logior #x3f800000 v1-10)))
-                 )
-            (set! (-> self offset-angle) (+ f30-0 (* f28-0 (+ -1.0 (the-as float v1-11))) (-> self offset-angle)))
-            )
-          (set! (-> self offset-angle) (the float (sar (shl (the int (-> self offset-angle)) 48) 48)))
-          (set-time! (-> self wander-generate-time))
-          )
-        (if (and (time-elapsed? (-> self state-time) (seconds 4))
-                 (or (< (vector-vector-xz-distance (-> self root trans) (-> self focus-pos)) 81920.0)
-                     (time-elapsed? (-> self state-time) (seconds 7))
-                     )
-                 )
-            (go-virtual neo-sat-laser-attack)
-            )
-        (vector+! gp-0 (-> self focus-pos) s5-0)
-        (let ((v1-34 (-> self nav state)))
-          (logclear! (-> v1-34 flags) (nav-state-flag directional-mode))
-          (logior! (-> v1-34 flags) (nav-state-flag target-poly-dirty))
-          (vector-copy! (-> v1-34 target-pos) gp-0)
-          )
+
+    0
+
+    (neo-sat-method-201 self)
+
+    (let* ((dt (seconds-per-frame))
+           (elapsed (the float (- (current-time) (-> self state-time))))
+           (phase 0.0)
+           (intro-phase 0.0)
+           (intro-ease 0.0)
+           (inv 0.0)
+           (major-radius 0.0)
+           (minor-radius 0.0)
+           (prev-pos (new 'stack-no-clear 'vector))
+           (orbit-pos (new 'stack-no-clear 'vector))
+           (orbit-speed 0.0)
+           (diff-scale 0.0))
+
+      (set! phase (/ elapsed (seconds 30.0)))
+      (when (< phase 0.0) (set! phase 0.0))
+      (when (> phase 1.0) (set! phase 1.0))
+
+      (set! intro-phase (/ elapsed (seconds 3.0)))
+      (when (< intro-phase 0.0) (set! intro-phase 0.0))
+      (when (> intro-phase 1.0) (set! intro-phase 1.0))
+
+      (set! inv (- 1.0 intro-phase))
+      (set! intro-ease (- 1.0 (* inv inv inv)))
+
+      (set! diff-scale (/ (the float (-> self diff-counter)) 7.0))
+      (when (< diff-scale 0.0) (set! diff-scale 0.0))
+      (when (> diff-scale 1.0) (set! diff-scale 1.0))
+      (set! orbit-speed (lerp 6144.0 12288.0 diff-scale))
+
+      (vector-copy! prev-pos (-> self root trans))
+
+      (if (not (time-elapsed? (-> self state-time) (seconds 30.0)))
+          (begin
+            (+! (-> self offset-angle) (* orbit-speed dt))
+            (set! (-> self offset-angle)
+                  (the float
+                       (sar (shl (the int (-> self offset-angle)) 48) 48)))
+
+            (set! major-radius
+                  (lerp (meters 60.0) (meters 14.0) phase))
+
+            (set! minor-radius (* major-radius 0.75))
+
+            (set! (-> orbit-pos x)
+                  (+ (-> self focus-pos x)
+                     (* major-radius
+                        (cos (-> self offset-angle)))))
+
+            (set! (-> orbit-pos y)
+                  (-> self root trans y))
+
+            (set! (-> orbit-pos z)
+                  (+ (-> self focus-pos z)
+                     (* minor-radius
+                        (sin (-> self offset-angle)))))
+
+            (set! (-> orbit-pos w) 1.0)
+
+            (set! (-> self root trans x)
+                  (lerp (-> self root trans x) (-> orbit-pos x) intro-ease))
+            (set! (-> self root trans z)
+                  (lerp (-> self root trans z) (-> orbit-pos z) intro-ease)))
+          (begin
+            (set! (-> self root transv x) 0.0)
+            (set! (-> self root transv z) 0.0)
+
+            (when (< (-> self next-lightning-time) (current-time))
+              (process-drawable-shock-effect
+                self
+                (-> *lightning-spec-id-table* 22)
+                lightning-probe-callback
+                (-> *part-id-table* 160)
+                0
+                0
+                40960.0)
+              (process-drawable-shock-effect
+                self
+                (-> *lightning-spec-id-table* 22)
+                lightning-probe-callback
+                (-> *part-id-table* 160)
+                0
+                0
+                40960.0)
+              (process-drawable-shock-effect
+                self
+                (-> *lightning-spec-id-table* 22)
+                lightning-probe-callback
+                (-> *part-id-table* 160)
+                0
+                0
+                40960.0)
+              (process-drawable-shock-effect
+                self
+                (-> *lightning-spec-id-table* 22)
+                lightning-probe-callback
+                (-> *part-id-table* 160)
+                0
+                0
+                40960.0)
+              (set! (-> self next-lightning-time) (+ (current-time) (seconds 0.02))))))
+
+      (set! (-> self root transv x)
+            (/ (- (-> self root trans x)
+                  (-> prev-pos x))
+               dt))
+
+      (set! (-> self root transv z)
+            (/ (- (-> self root trans z)
+                  (-> prev-pos z))
+               dt))
+
+      (when (time-elapsed?
+              (-> self state-time)
+              (seconds 31.0))
+        (go-virtual neo-sat-laser-attack)))
+
+    (neo-sat-method-233 self))
+
+  :code sleep-code
+
+  :post (behavior ()
+    (nav-enemy-method-187 self)))
+#|
+(defstate hostile (neo-sat)
+  :virtual #t
+  :event enemy-event-handler
+  :enter (behavior ()
+    (set! (-> self next-lightning-time) 0)
+    (sound-play "sat-arms" :id (-> self snd-arms-chatter))
+    (set! (-> self laser-rotate-angle) 0.0)
+    (sound-stop (-> self snd-laser-burn))
+    (set! (-> self fly-speed-scalar) 1.0)
+    (set! (-> self max-speed) 204800.0)
+    (set! (-> self active-laser-index) -1)
+
+    (let ((v1-5 self))
+      (if (not (logtest? (enemy-flag ef37) (-> v1-5 enemy-flags)))
+          (set! (-> v1-5 enemy-flags)
+                (the-as enemy-flag
+                        (logior (enemy-flag ef39) (-> v1-5 enemy-flags)))))
+      (set! (-> v1-5 enemy-flags)
+            (the-as enemy-flag
+                    (logior (enemy-flag ef37) (-> v1-5 enemy-flags))))
+      (set! (-> v1-5 nav callback-info)
+            (-> v1-5 enemy-info callback-info)))
+    0
+    (let ((v1-8 (-> self nav)))
+      (set! (-> v1-8 target-speed) 4096.0))
+    0
+    (set-time! (-> self state-time))
+    (set! (-> self hit-player?) #f)
+    (logclear! (-> self enemy-flags) (enemy-flag vulnerable))
+    (set-time! (-> self wander-generate-time))
+    (set! (-> self last-thrust-vec quad) (the-as uint128 0))
+    (set! (-> self ground-offset) 40960.0)
+    (set! (-> self desired-float-height) 49152.0)
+    (set! (-> self bob-speed-scalar) 1.0)
+    (set! (-> self offset-angle)
+          (rand-vu-float-range 0.0 65536.0))
+
+    (ja-channel-push! 1 (seconds 0.5))
+    (ja-no-eval :group! neo-satellite-active-ja :num! (loop!) :frame-num 0.0)
+    (set! (-> self anim-loop?) #t)
+    (set! (-> self play-anim?) #t)
+    (set! (-> self anim-speed) 0.6)
+
+    (neo-sat-method-204 self))
+
+  :exit (behavior ()
+    '())
+
+  :trans (behavior ()
+
+    (let ((src (new-stack-vector0))
+          (center-target (new-stack-vector0))
+          (left-target (new-stack-vector0))
+          (right-target (new-stack-vector0))
+          (to-jak (new-stack-vector0))
+          (side (new-stack-vector0))
+          (center-dist 0.0)
+          (left-dist 0.0)
+          (right-dist 0.0)
+          (center-power 0.0)
+          (left-power 0.0)
+          (right-power 0.0)
+          (side-y-a 0.0)
+          (side-y-b 0.0)
+          (spread (meters 3.5))
+          (t 0.0)
+          (elapsed 0.0)
+          (phase 0.0)
+          (fire-frames 42))
+
+      (vector-copy! src (-> self root trans))
+      (vector-copy! center-target (-> self focus-pos))
+      (+! (-> center-target y) (meters 1.5))
+
+      (vector-! to-jak center-target src)
+      (set! (-> to-jak y) 0.0)
+
+      (if (> (vector-length to-jak) 1.0)
+          (vector-normalize! to-jak (meters 1.0))
+          (begin
+            (set! (-> to-jak x) (meters 1.0))
+            (set! (-> to-jak y) 0.0)
+            (set! (-> to-jak z) (meters 0.0))
+            (set! (-> to-jak w) 1.0)))
+
+      (vector-cross! side to-jak *up-vector*)
+      (set! (-> side y) 0.0)
+
+      (if (> (vector-length side) 0.001)
+          (vector-normalize! side spread)
+          (begin
+            (set! (-> side x) spread)
+            (set! (-> side y) 0.0)
+            (set! (-> side z) 0.0)
+            (set! (-> side w) 1.0)))
+
+      (vector+! left-target center-target side)
+      (vector+float*! right-target center-target side -1.0)
+
+      (if (rand-vu-percent? 0.5)
+          (set! side-y-a (rand-vu-float-range (meters 2.0) (meters 4.0)))
+          (set! side-y-a (rand-vu-float-range (meters -4.0) (meters -2.0))))
+
+      (if (rand-vu-percent? 0.5)
+          (set! side-y-b (rand-vu-float-range (meters 2.0) (meters 4.0)))
+          (set! side-y-b (rand-vu-float-range (meters -4.0) (meters -2.0))))
+
+      (+! (-> left-target y) side-y-a)
+      (+! (-> right-target y) side-y-b)
+
+      (set! center-dist (vector-vector-distance src center-target))
+      (set! left-dist (vector-vector-distance src left-target))
+      (set! right-dist (vector-vector-distance src right-target))
+
+      (set! t (/ center-dist (meters 60.0)))
+      (when (< t 0.0) (set! t 0.0))
+      (when (> t 1.0) (set! t 1.0))
+      (cond
+        ((= (-> self current-stage) 0)
+          (set! center-power (* (lerp 28000.0 95000.0 t) 4.0))
+        )
+        ((= (-> self current-stage) 1)
+          (set! center-power (* (lerp 48000.0 115000.0 t) 4.0))
+        )
+        ((= (-> self current-stage) 2)
+          (set! center-power (* (lerp 68000.0 135000.0 t) 4.0))
         )
       )
-    0
-    (neo-sat-method-200 self)
-    (neo-sat-method-201 self)
-    (neo-sat-method-233 self)
-    )
-  :code sleep-code
-  :post (behavior ()
-    (nav-enemy-method-187 self)
-    )
-  )
 
+      (set! t (/ left-dist (meters 60.0)))
+      (when (< t 0.0) (set! t 0.0))
+      (when (> t 1.0) (set! t 1.0))
+      (cond
+        ((= (-> self current-stage) 0)
+          (set! left-power (* (lerp 28000.0 95000.0 t) 4.0))
+        )
+        ((= (-> self current-stage) 1)
+          (set! left-power (* (lerp 48000.0 115000.0 t) 4.0))
+        )
+        ((= (-> self current-stage) 2)
+          (set! left-power (* (lerp 68000.0 135000.0 t) 4.0))
+        )
+      )
+
+      (set! t (/ right-dist (meters 60.0)))
+      (when (< t 0.0) (set! t 0.0))
+      (when (> t 1.0) (set! t 1.0))
+      (cond
+        ((= (-> self current-stage) 0)
+          (set! right-power (* (lerp 28000.0 95000.0 t) 4.0))
+        )
+        ((= (-> self current-stage) 1)
+          (set! right-power (* (lerp 48000.0 115000.0 t) 4.0))
+        )
+        ((= (-> self current-stage) 2)
+          (set! right-power (* (lerp 68000.0 135000.0 t) 4.0))
+        )
+      )
+
+      (set! elapsed (the float (- (current-time) (-> self state-time))))
+      (set! phase (/ elapsed (seconds 30.0)))
+      (when (< phase 0.0) (set! phase 0.0))
+      (when (> phase 1.0) (set! phase 1.0))
+
+      (set! fire-frames (the int (lerp 244.0 648.0 phase)))
+
+      (when (and (not (time-elapsed? (-> self state-time) (seconds 30.0)))
+                 (time-elapsed? (-> self wander-generate-time)
+                                (the-as uint fire-frames)))
+        (spawn-dp-bipedal-grenade self src center-target center-power)
+        (spawn-dp-bipedal-grenade self src left-target left-power)
+        (spawn-dp-bipedal-grenade self src right-target right-power)
+        (set-time! (-> self wander-generate-time))))
+
+    (sound-play "sat-hover" :id (-> self snd-hover))
+
+    0
+
+    (neo-sat-method-201 self)
+
+    (let* ((dt (seconds-per-frame))
+           (elapsed (the float (- (current-time) (-> self state-time))))
+           (phase 0.0)
+           (intro-phase 0.0)
+           (intro-ease 0.0)
+           (inv 0.0)
+           (major-radius 0.0)
+           (minor-radius 0.0)
+           (prev-pos (new 'stack-no-clear 'vector))
+           (orbit-pos (new 'stack-no-clear 'vector)))
+
+      (set! phase (/ elapsed (seconds 30.0)))
+      (when (< phase 0.0) (set! phase 0.0))
+      (when (> phase 1.0) (set! phase 1.0))
+
+      (set! intro-phase (/ elapsed (seconds 3.0)))
+      (when (< intro-phase 0.0) (set! intro-phase 0.0))
+      (when (> intro-phase 1.0) (set! intro-phase 1.0))
+
+      (set! inv (- 1.0 intro-phase))
+      (set! intro-ease (- 1.0 (* inv inv inv)))
+
+      (vector-copy! prev-pos (-> self root trans))
+
+      (if (not (time-elapsed? (-> self state-time) (seconds 30.0)))
+          (begin
+            (+! (-> self offset-angle) (* 6144.0 dt))
+            (set! (-> self offset-angle)
+                  (the float
+                       (sar (shl (the int (-> self offset-angle)) 48) 48)))
+
+            (set! major-radius
+                  (lerp (meters 60.0) (meters 14.0) phase))
+
+            (set! minor-radius (* major-radius 0.75))
+
+            (set! (-> orbit-pos x)
+                  (+ (-> self focus-pos x)
+                     (* major-radius
+                        (cos (-> self offset-angle)))))
+
+            (set! (-> orbit-pos y)
+                  (-> self root trans y))
+
+            (set! (-> orbit-pos z)
+                  (+ (-> self focus-pos z)
+                     (* minor-radius
+                        (sin (-> self offset-angle)))))
+
+            (set! (-> orbit-pos w) 1.0)
+
+            (set! (-> self root trans x)
+                  (lerp (-> self root trans x) (-> orbit-pos x) intro-ease))
+            (set! (-> self root trans z)
+                  (lerp (-> self root trans z) (-> orbit-pos z) intro-ease)))
+          (begin
+            (set! (-> self root transv x) 0.0)
+            (set! (-> self root transv z) 0.0)
+
+            (when (< (-> self next-lightning-time) (current-time))
+              (process-drawable-shock-effect
+                self
+                (-> *lightning-spec-id-table* 22)
+                lightning-probe-callback
+                (-> *part-id-table* 160)
+                0
+                0
+                40960.0)
+              (process-drawable-shock-effect
+                self
+                (-> *lightning-spec-id-table* 22)
+                lightning-probe-callback
+                (-> *part-id-table* 160)
+                0
+                0
+                40960.0)
+              (process-drawable-shock-effect
+                self
+                (-> *lightning-spec-id-table* 22)
+                lightning-probe-callback
+                (-> *part-id-table* 160)
+                0
+                0
+                40960.0)
+              (process-drawable-shock-effect
+                self
+                (-> *lightning-spec-id-table* 22)
+                lightning-probe-callback
+                (-> *part-id-table* 160)
+                0
+                0
+                40960.0)
+              (set! (-> self next-lightning-time) (+ (current-time) (seconds 0.02))))))
+
+      (set! (-> self root transv x)
+            (/ (- (-> self root trans x)
+                  (-> prev-pos x))
+               dt))
+
+      (set! (-> self root transv z)
+            (/ (- (-> self root trans z)
+                  (-> prev-pos z))
+               dt))
+
+      (when (time-elapsed?
+              (-> self state-time)
+              (seconds 30.6))
+        (go-virtual neo-sat-laser-attack)))
+
+    (neo-sat-method-233 self))
+
+  :code sleep-code
+
+  :post (behavior ()
+    (nav-enemy-method-187 self)))
+|#
 (defstate sat-idle (neo-sat)
   :virtual #t
   :event enemy-event-handler
@@ -4221,3 +4912,63 @@
         )
         (none)
 )
+
+(defmethod neo-sat-spawn-stage-bipedals ((this neo-sat))
+  (let* ((count 0)
+         (radius (meters 14.0))
+         (base-angle (rand-vu-float-range 0.0 65536.0))
+         (angle-step 0.0)
+         (jak-pos (new-stack-vector0))
+         (spawn-pos (new-stack-vector0))
+         (ground-pos (new-stack-vector0))
+         (cq (new 'stack-no-clear 'collide-query)))
+
+    (set! count
+      (cond
+        ((= (-> this current-stage) 0) 1)
+        ((= (-> this current-stage) 1) 2)
+        (else 4)))
+
+    (vector-copy! jak-pos (-> *target* root trans))
+    (set! angle-step (/ 65536.0 (the float count)))
+
+    (dotimes (i count)
+      (let ((ang (+ base-angle (* angle-step (the float i)))))
+        (vector-copy! spawn-pos jak-pos)
+        (+! (-> spawn-pos x) (* radius (cos ang)))
+        (+! (-> spawn-pos z) (* radius (sin ang)))
+        (+! (-> spawn-pos y) (meters 20.0))
+
+        (vector-copy! (-> cq start-pos) spawn-pos)
+        (vector-float*! (-> cq move-dist) *y-vector* (meters -40.0))
+
+        (let ((v cq))
+          (set! (-> v radius) (meters 1.0))
+          (set! (-> v collide-with) (collide-spec obstacle))
+          (set! (-> v ignore-process0) this)
+          (set! (-> v ignore-process1) #f)
+          (set! (-> v action-mask) (collide-action solid)))
+
+        (when (>= (fill-and-probe-using-line-sphere *collide-cache* cq) 0.0)
+          (vector-copy! ground-pos (-> cq best-other-tri intersect))
+
+          (when (find-nearest-nav-mesh ground-pos 0.0)
+            (spawn-dark-maker ground-pos "dp-bipedal-c")
+            (print "spawned dp-bipedal")
+            )))))
+            (print "Done dp-bipedal")
+            (none)
+            )
+
+  (defun reset-all-sats ()
+    (task-node-open! (game-task-node darkworld-a1-intro) #t)
+    (task-node-open! (game-task-node darkworld-a2-intro) #t)
+    (task-node-open! (game-task-node darkworld-b1-intro) #t)
+    (task-node-open! (game-task-node darkworld-b2-intro) #t)
+    (task-node-open! (game-task-node darkworld-c1-intro) #t)
+    (task-node-open! (game-task-node darkworld-c2-intro) #t)
+    (task-node-open! (game-task-node darkworld-d1-intro) #t)
+    (task-node-open! (game-task-node darkworld-d2-intro) #t)
+    (auto-save-user)
+    (none)
+  )

@@ -68,6 +68,26 @@
 (def-pc-cheat-list *pc-cheats-list*
 ;;   name                                  cheat flag            can-toggle   avail-after
     ;(progress-cheats-music-player          music-player          #f           fortress-escape-introduction)
+    ;(progress-cheats-real-time-of-day      real-time-of-day      #t           fortress-escape-resolution)
+    ;(progress-cheats-board-tricks          board-tricks          #t           stadium-board1-gold)
+    ;(progress-cheats-health-bars           health-bars           #t           palace-boss-resolution      :unlock (progress-cheats-health-bars-unlock pc-cheat-health-bars-unlock))
+    ;(progress-cheats-vehicle-health-bars   vehicle-health-bars   #t           palace-boss-resolution      :unlock (progress-cheats-vehicle-health-bars-unlock pc-cheat-vehicle-health-bars-unlock))
+    ;(progress-cheats-weather-bad           weather-bad           #t           fortress-escape-resolution  :skill 85)
+    ;(progress-cheats-weather-good          weather-good          #t           fortress-escape-resolution  :skill 85)
+    ;(progress-cheats-suck-in-all           suck-in-all           #t           forest-scouts-get-board     :unlock (progress-cheats-suck-in-all-unlock pc-cheat-suck-in-all-unlock))
+    ;(progress-cheats-turbo-board           turbo-board           #t           sewer-board-introduction    :unlock (progress-cheats-turbo-board-unlock pc-cheat-board-fast-unlock))
+    ;(progress-cheats-fast-travel           fast-travel           auto         city-defend-stadium-introduction  :unlock (progress-cheats-fast-travel-unlock pc-cheat-fast-travel-unlock))
+    ;(progress-cheats-orb-tracker           orb-tracker           auto         nest-boss-resolution)
+    ;(progress-cheats-no-textures           no-textures           #t           nest-boss-resolution      :skill 115)
+    ;(progress-cheats-vehicle-invuln        vehicle-invuln        #t           nest-boss-resolution      :skill 185)
+    ;(progress-cheats-fast-movies           fast-movies           #t           nest-boss-resolution      :skill 200)
+    ;(progress-cheats-slow-movies           slow-movies           #t           nest-boss-resolution      :skill 200)
+    ;(progress-cheats-fast-speed            fast-speed            #t           nest-boss-resolution      :skill 250)
+    ;(progress-cheats-slow-speed            slow-speed            #t           nest-boss-resolution      :skill 250)
+    ;(progress-cheats-statistics            statistics            auto         atoll-water-introduction  :unlock (progress-cheats-statistics-unlock pc-cheat-statistics-unlock))
+    ;(progress-cheats-city-peace            city-peace            #t           nest-boss-resolution      :skill 200)
+    ;(progress-cheats-hijack-lines          hijack-lines          #t           nest-boss-resolution      :skill 200)
+    ;(progress-cheats-desert-peace          desert-peace          #t           nest-boss-resolution      :skill 200)
     )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -214,6 +234,11 @@
 
   (set! (-> obj music-unlocked) (new 'global 'bit-array (-> *music-player-tracks* length)))
   ((method-of-type pc-settings initialize) obj)
+  (set! (-> *setting-control* user-default sfx-volume) (-> obj memcard-volume-sfx))
+  (set! (-> *setting-control* user-default music-volume) (-> obj memcard-volume-music))
+  (set! (-> *setting-control* user-default dialog-volume) (-> obj memcard-volume-dialog))
+  (set! (-> *setting-control* user-default vibration) (-> obj memcard-vibration?))
+  (set! (-> *setting-control* user-default subtitle) (-> obj memcard-subtitles?))
   obj)
 
 (defmethod set-game-setting! ((obj pc-settings-jak3) (setting symbol) (value symbol))
@@ -612,6 +637,7 @@
     (("cheats-purchased") (set! (-> obj cheats-purchased) (the-as pc-cheats (file-stream-read-int file))))
     (("cheats-unlocked") (set! (-> obj cheats-unlocked) (the-as pc-cheats (file-stream-read-int file))))
     (("cheats-backup") (file-stream-read-int file)) ;; TODO - Don't remove this, parsing code can't handle unexpected keys
+    (("memcard-subtitles?") (set! (-> obj memcard-subtitles?) (file-stream-read-symbol file)))
     (("music-unlocked")
       (dotimes (i (/ (align64 (-> obj music-unlocked length)) 64))
         (bit-array<-int64 (-> obj music-unlocked) (* i 64) (file-stream-read-int file))
@@ -663,6 +689,7 @@
   (format file "  (cheats-revealed #x~x)~%" (-> obj cheats-revealed))
   (format file "  (cheats-purchased #x~x)~%" (-> obj cheats-purchased))
   (format file "  (cheats-unlocked #x~x)~%" (-> obj cheats-unlocked))
+  (format file "  (memcard-subtitles? ~A)~%" (-> obj memcard-subtitles?))
 
   (format file "  (music-unlocked")
   (dotimes (i (/ (align64 (-> obj music-unlocked length)) 64))

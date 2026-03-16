@@ -1794,6 +1794,7 @@
 
 ;; WARN: Return type mismatch entity-perm-status vs object.
 (defmethod init-from-entity! ((this wstd-fight-plat-large) (arg0 entity-actor))
+  "Set up a newly created process from the entity that created it."
   (process-entity-status! this (entity-perm-status dead) #t)
   )
 
@@ -2660,7 +2661,9 @@
   :virtual #t
   :exit (behavior ()
     (set! (-> self play-hint) #t)
-    (blank-hint! "Your weapons do more" "damage in <COLOR_PINK>DarkJak!" 170 400)
+    (when (task-node-open? (game-task-node arena-fight-2-fight))
+      (blank-hint! "Your weapons do more" "damage in <COLOR_PINK>DarkJak!" 170 400)
+    )
     (set-time! (-> self hint-time))
     (set-setting! 'music 'arenafi 0.0 0)
     (case (-> self node-info task)
@@ -3448,7 +3451,7 @@
     (else
       (let ((s5-3 (new 'stack-no-clear 'task-arrow-params)))
         (let ((a0-24 (new 'static 'vector :x 9523200.0 :y 49152.0 :z -1929216.0 :w 1.0)))
-          (set! (-> s5-3 pos quad) (-> a0-24 quad))
+          (vector-copy! (-> s5-3 pos) a0-24)
           )
         (quaternion-identity! (-> s5-3 quat))
         (set! (-> s5-3 flags) (task-arrow-flags taf5 taf8))

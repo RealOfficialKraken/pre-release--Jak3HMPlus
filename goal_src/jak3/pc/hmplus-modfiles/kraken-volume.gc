@@ -2,6 +2,8 @@
 
 ;my own shot in keeping track of the soundtrack and looping/alternating them
 
+;name: kraken-volume.gc
+
 (define-extern mainmenu-camera symbol)
 
 (deftype kraken-volume (process)
@@ -28,17 +30,17 @@ playing
     (('change-music)
         (case (-> arg3 param 0)
             (('main)
-                (stop-main-music)
+                (play-main-music "ejfiseuf" (-> this volume))
                 (play-main-music "snd/music/main-menu.wav" (-> this volume))
                 (set! (-> this track) "main-menu")
             )
             (('in-game)
-                (stop-main-music)
+                (play-main-music "ejfiseuf" (-> this volume))
                 (play-main-music "snd/music/dark-world-theme.wav" (-> this volume))
                 (set! (-> this track) "dark-world-theme")
             )
             (('combat)
-                (stop-main-music)
+                (play-main-music "ejfiseuf" (-> this volume))
                 (play-main-music "snd/music/combat.wav" (-> this volume))
                 (set! (-> this track) "combat")
             )
@@ -56,11 +58,23 @@ playing
 
 (defstate dead (kraken-volume)
  :virtual #t
+ :enter 
+    (behavior ()
+        (format #t "KV-1000 IN DYING STATE--STOPPING MUSIC~%")
+        (play-main-music "ejfiseuf" (-> self volume))
+    )
  :code 
     (behavior ()
-        (format *stdcon* "Dying")
-        (stop-main-music)
-        (process-deactivate)
+        (when
+                (and
+                    (= weather-dark-mode #f)
+                    (= in-main-menu? #f)
+                    (= (paused?) #f)
+                    (= (pause-allowed?) #t)
+                    *target*
+                )
+                (process-deactivate)
+            )
     )
 )
 
@@ -85,7 +99,7 @@ playing
         (loop
             (when (!= (the int (* (-> *setting-control* user-current sfx-volume) 100)) (-> self volume))
                 (set! (-> self volume) (the int (* (-> *setting-control* user-current sfx-volume) 100)))
-                (stop-main-music)
+                (play-main-music "ejfiseuf" (-> self volume))
                 (cond
                     ((string= (-> self track) "combat")
                         (play-main-music "snd/music/combat.wav" (-> self volume))
@@ -96,31 +110,59 @@ playing
                     ((string= (-> self track) "main-menu")
                         (play-main-music "snd/music/main-menu.wav" (-> self volume))
                     )
+                    ((and
+                        (= weather-dark-mode #f)
+                        (= in-main-menu? #f)
+                        (= (paused?) #f)
+                        (= (pause-allowed?) #t)
+                        *target*
+                    )
+                        (play-main-music "ejfiseuf" (-> self volume))
+                    )
                 )
             )
             (when 
                 (and
                     (or
-                        (search-process-tree *active-pool* (lambda ((p process)) (type? p dp-bipedal)))
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'wascitya)
+                            (= (-> (level-get-target-inside *level*) name) 'wascityb)
+                        )
                         (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat)))
                     )
                     (not (string= (-> self track) "combat"))
                 )
-                    (stop-main-music)
+                    (play-main-music "ejfiseuf" (-> self volume))
                     (play-main-music "snd/music/combat.wav" (-> self volume))
                     (set! (-> self track) "combat")
                 )
             (when 
                 (and
-                    (not (search-process-tree *active-pool* (lambda ((p process)) (type? p dp-bipedal))))
+                    (and
+                        (!= (-> (level-get-target-inside *level*) name) 'wascitya)
+                        (!= (-> (level-get-target-inside *level*) name) 'wascityb)
+                    )
                     (not (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat))))
                     (string= (-> self track) "combat")
                 )
-                    (stop-main-music)
+                    (play-main-music "ejfiseuf" (-> self volume))
                     (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))
                     (set! (-> self track) "dark-world-theme")
                 )
-            (format *stdcon* "kraken-volume~%vol: ~d~%track: ~s~%~%" (-> self volume) (-> self track))
+            (when
+                (and
+                    (= weather-dark-mode #f)
+                    (= in-main-menu? #f)
+                    (= (paused?) #f)
+                    (= (pause-allowed?) #t)
+                    *target*
+                )
+                (play-main-music "ejfiseuf" (-> self volume))
+                (go-virtual dead)
+            )
+            (when *debug-segment*
+                (format *stdcon* "kraken-volume~%vol: ~d~%track: ~s~%~%" (-> self volume) (-> self track))
+            )
             (suspend)
         )
     )

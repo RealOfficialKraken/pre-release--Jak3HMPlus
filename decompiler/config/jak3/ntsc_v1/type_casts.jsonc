@@ -9247,9 +9247,7 @@
   "(event idle fac-gun-tower-base)": [[[18, 86], "s4", "projectile"]],
   "(code idle fac-gun-tower-base)": [[10, "v1", "art-joint-anim"]],
   "(method 36 fac-gun-tower)": [[46, "s2", "process-focusable"]],
-  "(method 35 fac-gun-tower)": [
-    [[72,76], "a0", "vehicle"]
-  ],
+  "(method 35 fac-gun-tower)": [[[72, 76], "a0", "vehicle"]],
   "fac-robotank-init-by-other": [
     [182, "gp", "factory-manager"],
     [208, "gp", "factory-manager"],
@@ -11300,7 +11298,9 @@
     [[844, 847], "a0", "dma-gif-packet"],
     [[921, 924], "v1", "dma-gif-packet"]
   ],
-  "(method 9 blit-displays-work)": [[[2, 36], "v1", "(inline-array vector4w)"]],
+  "(method 9 blit-displays-work)": [
+    [[2, 36], "v1", "(inline-array vector4w)"]
+  ],
   "(method 10 blit-displays-work)": [
     [[2, 141], "v1", "(inline-array vector4w)"]
   ],

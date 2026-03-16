@@ -5,6 +5,13 @@
 ;; name in dgo: squad-control
 ;; dgos: HGA, LPATK, RAILA, LFACCAR, CWI, WASALL, LFACTORY, COMBA
 
+(deftype cquery-with-5vec (structure)
+  "target-pilot-post"
+  ((cquery collide-query :inline)
+   (vec    vector 5 :inline)
+   )
+  )
+
 (deftype squad-control-stack-type0 (structure)
   ((vec0 vector :inline :offset 0)
    (vec1 vector :inline :offset 16)

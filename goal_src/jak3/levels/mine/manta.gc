@@ -51,7 +51,6 @@
    (hit-ground-count          uint32)
    (fade-level                float)
    (pad                       uint8   8)
-   (albino?                   symbol)
    )
   (:state-methods
     land-approach
@@ -2011,7 +2010,6 @@
         (rand-vu-percent? 0.3)
       )
   (set-vector! (-> self draw color-mult) 255.0 255.0 255.0 255.0)
-  (set! (-> self albino?) #t)
 )
 (go (method-of-object self ambush))
 (none)

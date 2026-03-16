@@ -75,6 +75,7 @@ set(RUNTIME_SOURCE
         graphics/opengl_renderer/SkyBlendCPU.cpp
         graphics/opengl_renderer/SkyBlendGPU.cpp
         graphics/opengl_renderer/SkyRenderer.cpp
+        graphics/opengl_renderer/SlowTimeEffect.cpp
         graphics/opengl_renderer/sprite/GlowRenderer.cpp
         graphics/opengl_renderer/sprite/Sprite3_Distort.cpp
         graphics/opengl_renderer/sprite/Sprite3_Glow.cpp
@@ -292,6 +293,7 @@ set(RUNTIME_SOURCE
         settings/settings.cpp
         system/background_worker.cpp
         system/Deci2Server.cpp
+        system/hid/devices/dualsense_effects.cpp
         system/hid/devices/game_controller.cpp
         system/hid/devices/keyboard.cpp
         system/hid/devices/mouse.cpp
@@ -313,7 +315,7 @@ add_subdirectory(sound)
 # we build the runtime as a static library.
 add_library(runtime STATIC ${RUNTIME_SOURCE} "../third-party/glad/src/glad.c")
 
-target_link_libraries(runtime common fmt SDL2::SDL2 imgui discord-rpc sound stb_image libco libcurl)
+target_link_libraries(runtime common fmt SDL3::SDL3 imgui discord-rpc sound stb_image libco libcurl)
 if(WIN32)
     target_link_libraries(runtime mman)
 else()

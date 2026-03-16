@@ -1326,6 +1326,87 @@
             :play-continue "wasstada-start"
             :kiosk-play-continue #f
             )
+            (new 'static 'game-task-info
+              :name "darkworld-a1"
+              :pre-play-node (game-task-node darkworld-a1-intro)
+              :kiosk-play-node (game-task-node none)
+              :pre-play-continue #f
+              :play-node (game-task-node darkworld-a1-reso)
+              :play-continue #f
+              :kiosk-play-continue #f
+              )
+            (new 'static 'game-task-info
+              :name "darkworld-a2"
+              :pre-play-node (game-task-node darkworld-a2-intro)
+              :kiosk-play-node (game-task-node none)
+              :pre-play-continue #f
+              :play-node (game-task-node darkworld-a2-reso)
+              :play-continue #f
+              :kiosk-play-continue #f
+              )
+            (new 'static 'game-task-info
+              :name "darkworld-b1"
+              :pre-play-node (game-task-node darkworld-b1-intro)
+              :kiosk-play-node (game-task-node none)
+              :pre-play-continue #f
+              :play-node (game-task-node darkworld-b1-reso)
+              :play-continue #f
+              :kiosk-play-continue #f
+              )
+            (new 'static 'game-task-info
+              :name "darkworld-b2"
+              :pre-play-node (game-task-node darkworld-b2-intro)
+              :kiosk-play-node (game-task-node none)
+              :pre-play-continue #f
+              :play-node (game-task-node darkworld-b2-reso)
+              :play-continue #f
+              :kiosk-play-continue #f
+              )
+            (new 'static 'game-task-info
+              :name "darkworld-c1"
+              :pre-play-node (game-task-node darkworld-c1-intro)
+              :kiosk-play-node (game-task-node none)
+              :pre-play-continue #f
+              :play-node (game-task-node darkworld-c1-reso)
+              :play-continue #f
+              :kiosk-play-continue #f
+              )
+            (new 'static 'game-task-info
+              :name "darkworld-c2"
+              :pre-play-node (game-task-node darkworld-c2-intro)
+              :kiosk-play-node (game-task-node none)
+              :pre-play-continue #f
+              :play-node (game-task-node darkworld-c2-reso)
+              :play-continue #f
+              :kiosk-play-continue #f
+              )
+            (new 'static 'game-task-info
+              :name "darkworld-d1"
+              :pre-play-node (game-task-node darkworld-d1-intro)
+              :kiosk-play-node (game-task-node none)
+              :pre-play-continue #f
+              :play-node (game-task-node darkworld-d1-reso)
+              :play-continue #f
+              :kiosk-play-continue #f
+              )
+            (new 'static 'game-task-info
+              :name "darkworld-d2"
+              :pre-play-node (game-task-node darkworld-d2-intro)
+              :kiosk-play-node (game-task-node none)
+              :pre-play-continue #f
+              :play-node (game-task-node darkworld-d2-reso)
+              :play-continue #f
+              :kiosk-play-continue #f
+              )
+              (new 'static 'game-task-info
+              :name "dummytask"
+              :pre-play-node (game-task-node none)
+              :kiosk-play-node (game-task-node none)
+              :pre-play-continue #f
+              :play-node (game-task-node none)
+              :play-continue #f
+              :kiosk-play-continue #f
+              )
           )
         )
   (set! (-> game-info sub-task-list)
@@ -1505,7 +1586,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "desert-logo-title1"
             :when-open #f
             :flags (game-task-node-flag no-percent act1)
@@ -1527,7 +1608,7 @@
             )
           (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "desert-logo-title2"
             :when-open #f
             :flags (game-task-node-flag no-percent act1)
@@ -1591,7 +1672,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "tp-fb-ground"
             :when-open #f
             :flags (game-task-node-flag no-percent bbush)
@@ -1637,7 +1718,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "tp-fb-fight"
             :when-open #f
             :flags (game-task-node-flag no-percent)
@@ -1660,7 +1741,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "arena-replay-1-introduction"
             :when-open (new 'static 'boxed-array :type game-task-event
               (new 'static 'game-task-event
@@ -1691,7 +1772,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "arena-replay-1-fight"
             :when-open #f
             :flags (game-task-node-flag save-on-life act1)
@@ -1747,7 +1828,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "arena-replay-2-introduction"
             :when-open #f
             :flags (game-task-node-flag save-on-life act1 no-percent)
@@ -1771,7 +1852,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "arena-replay-2-fight"
             :when-open #f
             :flags (game-task-node-flag save-on-life act1)
@@ -1826,7 +1907,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "arena-replay-3-introduction"
             :when-open #f
             :flags (game-task-node-flag save-on-life act1 no-percent)
@@ -1850,7 +1931,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "arena-replay-3-fight"
             :when-open #f
             :flags (game-task-node-flag save-on-life act1)
@@ -1905,7 +1986,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "desertf-anchor-introduction"
             :when-open #f
             :flags (game-task-node-flag no-percent act1)
@@ -1927,7 +2008,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "desertf-anchor-resolution"
             :when-open #f
             :flags (game-task-node-flag act1 no-percent)
@@ -1959,7 +2040,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "desertc-anchor-introduction"
             :when-open #f
             :flags (game-task-node-flag no-percent act1)
@@ -1981,7 +2062,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "desertc-anchor-resolution"
             :when-open #f
             :flags (game-task-node-flag act1 no-percent)
@@ -2013,7 +2094,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "desertg-anchor-introduction"
             :when-open #f
             :flags (game-task-node-flag no-percent act1)
@@ -2035,7 +2116,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "desertg-anchor-resolution"
             :when-open #f
             :flags (game-task-node-flag act1 no-percent)
@@ -2067,7 +2148,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "ctyinda-anchor-introduction"
             :when-open #f
             :flags (game-task-node-flag no-percent act1)
@@ -2089,7 +2170,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "ctyinda-anchor-resolution"
             :when-open #f
             :flags (game-task-node-flag act1 no-percent)
@@ -2121,10 +2202,10 @@
             )
           (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "mody-fireball"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2143,10 +2224,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "mody-nukeonly"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2165,10 +2246,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "mody-freeze"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2187,10 +2268,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "modr-bigshot"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2209,10 +2290,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "modr-shield"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2231,10 +2312,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "modr-missles"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2253,10 +2334,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "modb-ammo"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2275,10 +2356,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "modb-disperser"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2297,10 +2378,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "modb-airstrike"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2319,10 +2400,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "modd-morpher"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2341,10 +2422,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "modd-random"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -2363,10 +2444,10 @@
             )
             (new 'static 'game-task-node-info
             :level 'city
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "modd-reaper"
             :when-open #f
-            :flags (game-task-node-flag no-percent close-task utility-node)
+            :flags (game-task-node-flag no-percent close-task)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node none)
               (game-task-node none)
@@ -25008,7 +25089,7 @@
             )
             (new 'static 'game-task-node-info
             :level 'desert
-            :task (game-task desert-interceptors)
+            :task (game-task dummy-task)
             :name "desert-ship-lod-introduction"
             :when-open #f
             :flags (game-task-node-flag bbush act1 save-on-life)
@@ -25234,6 +25315,358 @@
             :flags (game-task-node-flag bbush close-task no-percent)
             :parent-node (new 'static 'array game-task-node 4
               (game-task-node arena-challenge-9)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-a1)
+            :name "darkworld-a1-intro"
+            :when-open #f
+            :flags (game-task-node-flag no-percent add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-a1)
+            :name "darkworld-a1-reso"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node darkworld-a1-intro)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-a2)
+            :name "darkworld-a2-intro"
+            :when-open #f
+            :flags (game-task-node-flag no-percent add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-a2)
+            :name "darkworld-a2-reso"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node darkworld-a2-intro)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-b1)
+            :name "darkworld-b1-intro"
+            :when-open #f
+            :flags (game-task-node-flag no-percent add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-b1)
+            :name "darkworld-b1-reso"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node darkworld-b1-intro)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-b2)
+            :name "darkworld-b2-intro"
+            :when-open #f
+            :flags (game-task-node-flag no-percent add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-b2)
+            :name "darkworld-b2-reso"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node darkworld-b2-intro)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-c1)
+            :name "darkworld-c1-intro"
+            :when-open #f
+            :flags (game-task-node-flag no-percent add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-c1)
+            :name "darkworld-c1-reso"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node darkworld-c1-intro)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-c2)
+            :name "darkworld-c2-intro"
+            :when-open #f
+            :flags (game-task-node-flag no-percent add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-c2)
+            :name "darkworld-c2-reso"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node darkworld-c2-intro)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-d1)
+            :name "darkworld-d1-intro"
+            :when-open #f
+            :flags (game-task-node-flag no-percent add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-d1)
+            :name "darkworld-d1-reso"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node darkworld-d1-intro)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-d2)
+            :name "darkworld-d2-intro"
+            :when-open #f
+            :flags (game-task-node-flag no-percent add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              (game-task-node none)
+              )
+            :on-open #f
+            :manager #f
+            :borrow '()
+            :open? #f
+            :on-close #f
+            :reset #f
+            :suck-death-count #xa5
+            :command-index #x4
+            :faction-commands '()
+            )
+            (new 'static 'game-task-node-info
+            :level 'desert
+            :task (game-task darkworld-d2)
+            :name "darkworld-d2-reso"
+            :when-open #f
+            :flags (game-task-node-flag no-percent close-task add-exclusive)
+            :parent-node (new 'static 'array game-task-node 4
+              (game-task-node darkworld-d2-intro)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)

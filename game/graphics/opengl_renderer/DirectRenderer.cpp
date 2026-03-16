@@ -6,7 +6,7 @@
 
 #include "game/graphics/pipelines/opengl.h"
 
-#include "fmt/core.h"
+#include "fmt/format.h"
 #include "third-party/imgui/imgui.h"
 
 DirectRenderer::ScissorState DirectRenderer::m_scissor;
@@ -500,8 +500,8 @@ void DirectRenderer::update_gl_blend() {
       m_ogl.color_mult = 0.5;
     } else {
       // unsupported blend: a 0 b 2 c 2 d 1
-      lg::error("unsupported blend: a {} b {} c {} d {}", (int)state.a, (int)state.b, (int)state.c,
-                (int)state.d);
+      lg::error("unsupported blend (direct): a {} b {} c {} d {}", (int)state.a, (int)state.b,
+                (int)state.c, (int)state.d);
       //      ASSERT(false);
     }
   }

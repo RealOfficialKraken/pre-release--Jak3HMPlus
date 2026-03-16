@@ -673,7 +673,7 @@
             (= (pause-allowed?) #t)
         )
             (+! cdr-i 1)
-            (when (= cdr-i 18000)
+            (when (= cdr-i 6000)
                 (set! cdr-i 0)
                 (set! cdr-satbattle #f)
             )
@@ -806,6 +806,7 @@
                                 (= spawned-desertb1-poi? #f)
                                 rng-percent
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-b1-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
                             )
                                 (spawn-manipy-sat desert-spawn "manipy-sat-desertb1" #t)
@@ -817,11 +818,13 @@
                             (and
                                 (= spawned-desertb1-poi? #t)
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-b1-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
                             )
                                 (kill-by-name "manipy-sat-desertb1" *default-pool*)
                                 (kill-by-name "task-arrow-satellite" *default-pool*)
                                 (spawn-roaming-satellite desert-spawn)
+                                (task-node-close! (game-task-node darkworld-b1-intro) #t)
                                 (set! in-satbattle? #t)
                                 (when (< enemy-noto 18)
                                     (set! enemy-noto (rand-vu-int-range 10 18))
@@ -833,7 +836,7 @@
                     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                     ;(set-vector! (-> *target* control trans) (meters 3732.4335) (meters 22.4331) (meters 824.4011) 1.0)
                     ;;;;;;;;;;;;;;;;;;;;DESERTB2;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                    (let ((desert-spawn (new 'static 'vector :x (meters 3732.4335) :y (meters 22.4331) :z (meters 824.4011) :w 1.0)))
+                    (let ((desert-spawn (new 'static 'vector :x (meters 3414.1696) :y (meters 51.9653) :z (meters 1061.5860) :w 1.0)))
                         (when 
                             (and
                                 (= spawned-desertb2-poi? #t)
@@ -849,6 +852,7 @@
                                 (= spawned-desertb2-poi? #f)
                                 rng-percent
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-b2-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
                             )
                                 (spawn-manipy-sat desert-spawn "manipy-sat-desertb2" #t)
@@ -859,11 +863,13 @@
                             (and
                                 (= spawned-desertb2-poi? #t)
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-b2-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
                             )
                                 (kill-by-name "manipy-sat-desertb2" *default-pool*)
                                 (kill-by-name "task-arrow-satellite" *default-pool*)
                                 (spawn-roaming-satellite desert-spawn)
+                                (task-node-close! (game-task-node darkworld-b2-intro) #t)
                                 (set! in-satbattle? #t)
                                 (when (< enemy-noto 18)
                                     (set! enemy-noto (rand-vu-int-range 10 18))
@@ -891,6 +897,7 @@
                                 (= spawned-desertd1-poi? #f)
                                 rng-percent
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-d1-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
                             )
                                 (spawn-manipy-sat desert-spawn "manipy-sat-desertd1" #t)
@@ -901,11 +908,13 @@
                             (and
                                 (= spawned-desertd1-poi? #t)
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-d1-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
                             )
                                 (kill-by-name "manipy-sat-desertd1" *default-pool*)
                                 (kill-by-name "task-arrow-satellite" *default-pool*)
                                 (spawn-roaming-satellite desert-spawn)
+                                (task-node-close! (game-task-node darkworld-d1-intro) #t)
                                 (set! in-satbattle? #t)
                                 (when (< enemy-noto 18)
                                     (set! enemy-noto (rand-vu-int-range 10 18))
@@ -933,6 +942,7 @@
                                 (= spawned-desertd2-poi? #f)
                                 rng-percent
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-d2-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
                             )
                                 (spawn-manipy-sat desert-spawn "manipy-sat-desertd2" #t)
@@ -943,11 +953,13 @@
                             (and
                                 (= spawned-desertd2-poi? #t)
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-d2-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
                             )
                                 (kill-by-name "manipy-sat-desertd2" *default-pool*)
                                 (kill-by-name "task-arrow-satellite" *default-pool*)
                                 (spawn-roaming-satellite desert-spawn)
+                                (task-node-close! (game-task-node darkworld-d2-intro) #t)
                                 (set! in-satbattle? #t)
                                 (when (< enemy-noto 29)
                                     (set! enemy-noto (rand-vu-int-range 19 29))
@@ -975,6 +987,7 @@
                                 (= spawned-deserta1-poi? #f)
                                 rng-percent
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-a1-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
                             )
                                 (spawn-manipy-sat desert-spawn "manipy-sat-deserta1" #t)
@@ -985,11 +998,13 @@
                             (and
                                 (= spawned-deserta1-poi? #t)
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-a1-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
                             )
                                 (kill-by-name "manipy-sat-deserta1" *default-pool*)
                                 (kill-by-name "task-arrow-satellite" *default-pool*)
                                 (spawn-roaming-satellite desert-spawn)
+                                (task-node-close! (game-task-node darkworld-a1-intro) #t)
                                 (set! in-satbattle? #t)
                                 (when (< enemy-noto 18)
                                     (set! enemy-noto (rand-vu-int-range 10 18))
@@ -1017,6 +1032,7 @@
                                 (= spawned-deserta2-poi? #f)
                                 rng-percent
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-a2-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
                             )
                                 (spawn-manipy-sat desert-spawn "manipy-sat-deserta2" #t)
@@ -1027,11 +1043,13 @@
                             (and
                                 (= spawned-deserta2-poi? #t)
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-a2-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
                             )
                                 (kill-by-name "manipy-sat-deserta2" *default-pool*)
                                 (kill-by-name "task-arrow-satellite" *default-pool*)
                                 (spawn-roaming-satellite desert-spawn)
+                                (task-node-close! (game-task-node darkworld-a2-intro) #t)
                                 (set! in-satbattle? #t)
                                 (when (< enemy-noto 40)
                                     (set! enemy-noto (rand-vu-int-range 40 73))
@@ -1059,6 +1077,7 @@
                                 (= spawned-desertc1-poi? #f)
                                 rng-percent
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-c1-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
                             )
                                 (spawn-manipy-sat desert-spawn "manipy-sat-desertc1" #t)
@@ -1069,11 +1088,13 @@
                             (and
                                 (= spawned-desertc1-poi? #t)
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-c1-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
                             )
                                 (kill-by-name "manipy-sat-desertc1" *default-pool*)
                                 (kill-by-name "task-arrow-satellite" *default-pool*)
                                 (spawn-roaming-satellite desert-spawn)
+                                (task-node-close! (game-task-node darkworld-c1-intro) #t)
                                 (set! in-satbattle? #t)
                                 (when (< enemy-noto 32)
                                     (set! enemy-noto (rand-vu-int-range 40 72))
@@ -1101,6 +1122,7 @@
                                 (= spawned-desertc2-poi? #f)
                                 rng-percent
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-c2-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) bigsphere-rad)
                             )
                                 (spawn-manipy-sat desert-spawn "manipy-sat-desertc2" #t)
@@ -1111,11 +1133,13 @@
                             (and
                                 (= spawned-desertc2-poi? #t)
                                 (= cdr-satbattle #f)
+                                (task-node-open? (game-task-node darkworld-c2-intro))
                                 (<= (vector-vector-distance (target-pos 0) desert-spawn) noticesphere-rad)
                             )
                                 (kill-by-name "manipy-sat-desertc2" *default-pool*)
                                 (kill-by-name "task-arrow-satellite" *default-pool*)
                                 (spawn-roaming-satellite desert-spawn)
+                                (task-node-close! (game-task-node darkworld-c2-intro) #t)
                                 (set! in-satbattle? #t)
                                 (when (< enemy-noto 40)
                                     (set! enemy-noto (rand-vu-int-range 23 40))

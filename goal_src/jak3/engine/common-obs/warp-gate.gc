@@ -834,7 +834,8 @@
         (set-blackout-frames (seconds 0.05))
         )
     (start 'play arg0)
-    (suspend-for (seconds 1))
+    (suspend-for (seconds 1)
+      )
     (while (and *target* (and (>= 81920.0 (vector-vector-distance (-> self root trans) (-> *target* control trans)))
                               (not (logtest? (focus-status teleporting) (-> *target* focus-status)))
                               )
@@ -883,8 +884,8 @@
   (set! (-> this wait-for) #f)
   (set! (-> this continue) #f)
   (set! (-> this on-close) #f)
-  (set! (-> this part) (create-launch-control (-> *part-group-id-table* 202) this))
-  (set! (-> this center quad) (-> this root trans quad))
+  (set! (-> this part) (create-launch-control group-warpgate this))
+  (vector-copy! (-> this center) (-> this root trans))
   (+! (-> this center y) 13516.8)
   (set! (-> this sound)
         (new 'process 'ambient-sound (static-sound-spec "warpgate" :group 0 :fo-max 30) (-> this root trans) 0.0)
@@ -901,7 +902,7 @@
       (process-drawable-from-entity! self arg0)
       )
   (if arg1
-      (set! (-> self root trans quad) (-> arg1 quad))
+      (vector-copy! (-> self root trans) arg1)
       )
   (logior! (-> self mask) (process-mask actor-pause))
   (init-defaults! self)
@@ -935,6 +936,7 @@
 
 ;; WARN: Return type mismatch none vs object.
 (defmethod init-from-entity! ((this warp-gate) (arg0 entity-actor))
+  "Set up a newly created process from the entity that created it."
   (warp-gate-init arg0 (the-as vector #f))
   )
 
@@ -1341,9 +1343,9 @@
                              )
           )
     )
-  (set! (-> this part-exhaust-left) (create-launch-control (-> *part-group-id-table* 206) this))
-  (set! (-> this part-exhaust-right) (create-launch-control (-> *part-group-id-table* 206) this))
-  (set! (-> this part-dust) (create-launch-control (-> *part-group-id-table* 204) this))
+  (set! (-> this part-exhaust-left) (create-launch-control group-airtrain-thruster-off this))
+  (set! (-> this part-exhaust-right) (create-launch-control group-airtrain-thruster-off this))
+  (set! (-> this part-dust) (create-launch-control group-airtrain-dust-hover this))
   (set! (-> this root pause-adjust-distance) 368640.0)
   (set! (-> this hover-sound) (sound-play "air-train"))
   (cond

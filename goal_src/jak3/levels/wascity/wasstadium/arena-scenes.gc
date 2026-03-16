@@ -84,6 +84,9 @@
         (setting-reset part-bounds-check mode #f)
         (want-display 'wasstada 'special)
         (set! mm-hint-1 #t)(set! mm-hint-1i 0)
+        (when *kv*
+          (send-event (ppointer->process *kv*) 'die #t)
+        )
         (save)
         (apply ,(lambda :behavior scene-player
                   ()

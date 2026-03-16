@@ -40,6 +40,7 @@
   (board-tricks)
   (weather-bad)
   (weather-good)
+  (desert-peace)
   )
 
 (defun pc-cheats->string ((cheats pc-cheats) (buf object))
@@ -104,7 +105,14 @@
 
    ;; other
    (controller-led-status?    symbol)
+   (controller-swap-r1-r2?    symbol)
+   (pacman-dpad?              symbol)
    (speedrunner-mode-custom-bind uint32)
+
+   (memcard-subtitles? symbol)
+
+   (text-language pc-language) ;; language for game text
+   (subtitle-language pc-language)
 	 )
 
   (:methods
@@ -134,6 +142,16 @@
    )
   )
 
+
+;; duststorm fixes helper
+(deftype desert-dust-storm-helper (structure)
+  ((sparticle-time    time-frame)
+   )
+  )
+
+(define *duststorm-helper* (new 'static 'desert-dust-storm-helper))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; resets
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -152,6 +170,13 @@
   (false! (-> obj minimap-force-north))
   (false! (-> obj hires-clouds?))
   (set! (-> obj speedrunner-mode-custom-bind) 0)
+
+  (set! (-> obj memcard-volume-sfx) 0.5)
+  (set! (-> obj memcard-volume-music) 0.4)
+  (set! (-> obj memcard-volume-dialog) 0.75)
+  (set! (-> obj memcard-vibration?) #t)
+  (set! (-> obj memcard-subtitles?) #f)
+  (set! (-> obj hinttitles?) #t)
   0)
 
 (defmethod reset-extra ((obj pc-settings-jak3) (call-handlers symbol))

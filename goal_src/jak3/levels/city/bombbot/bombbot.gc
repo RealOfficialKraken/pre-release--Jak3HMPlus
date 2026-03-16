@@ -598,7 +598,7 @@
       (quaternion-identity! (-> gp-1 spawn-quat))
       (set! (-> gp-1 radius) 12288.0)
       (set! (-> gp-1 scale) 1.0)
-      (set! (-> gp-1 group) (-> *part-group-id-table* 219))
+      (set! (-> gp-1 group) group-kg-explosion)
       (set! (-> gp-1 collide-with)
             (collide-spec backgnd jak crate civilian enemy obstacle vehicle-sphere hit-by-others-list player-list pusher)
             )
@@ -782,8 +782,8 @@
     (vector-copy! (-> self rot-axis) s5-2)
     )
   (set! (-> self rot-angle) 65536.0)
-  (set! (-> self explode-part) (create-launch-control (-> *part-group-id-table* 219) self))
-  (set! (-> self warning-glow-part) (create-launch-control (-> *part-group-id-table* 525) self))
+  (set! (-> self explode-part) (create-launch-control group-kg-explosion self))
+  (set! (-> self warning-glow-part) (create-launch-control group-bombbot-bomb-warning-glow self))
   (logclear! (-> self mask) (process-mask actor-pause))
   (go-virtual idle)
   )
@@ -1411,13 +1411,13 @@
                                     (activate! *camera-smush-control* f30-1 37 600 1.0 0.1 (-> pp clock))
                                     )
                                 (cond
-                                  ((logtest? (-> *part-group-id-table* 23 flags) (sp-group-flag sp13))
+                                  ((logtest? (-> group-land-poof-stn flags) (sp-group-flag sp13))
                                    (vector-copy! (-> *launch-matrix* trans) (-> s1-0 position))
-                                   (part-tracker-spawn part-tracker-subsampler :to this :group (-> *part-group-id-table* 23))
+                                   (part-tracker-spawn part-tracker-subsampler :to this :group group-land-poof-stn)
                                    )
                                   (else
                                     (vector-copy! (-> *launch-matrix* trans) (-> s1-0 position))
-                                    (part-tracker-spawn part-tracker :to this :group (-> *part-group-id-table* 23))
+                                    (part-tracker-spawn part-tracker :to this :group group-land-poof-stn)
                                     )
                                   )
                                 (when (or (zero? s4-0) (= s4-0 1))
@@ -1686,22 +1686,15 @@
        )
      )
     (('explode)
+    (enemy-killed? (rand-vu-float-range 350.0 450.0))
      (if (not (and (-> this next-state) (= (-> this next-state name) 'explode)))
          (go (method-of-object this explode))
          )
-         (enemy-killed? (rand-vu-float-range 350.0 450.0))
      )
     (('blow-wall)
      (go (method-of-object this blow-wall))
      )
     (('touched 'touch 'attack)
-    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-                (set! hpbar-max-hit-points 12500.0)
-                (set! hpbar-max-hit-points 4000.0)
-              )
-              (when (> hpbar-hit-points hpbar-max-hit-points)
-                (set! hpbar-hit-points hpbar-max-hit-points)
-              )
      (if (logtest? (process-mask vehicle) (-> arg0 mask))
          (send-event
            arg0
@@ -2471,7 +2464,7 @@
         (quaternion-identity! (-> gp-0 spawn-quat))
         (set! (-> gp-0 radius) 61440.0)
         (set! (-> gp-0 scale) 1.0)
-        (set! (-> gp-0 group) (-> *part-group-id-table* 217))
+        (set! (-> gp-0 group) group-kg-huge-explosion)
         (set! (-> gp-0 collide-with)
               (collide-spec backgnd jak crate civilian enemy obstacle vehicle-sphere hit-by-others-list player-list pusher)
               )
@@ -3250,14 +3243,7 @@
     (vector-copy! (-> this nav state heading) s5-3)
     )
   0
-  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-    (set! (-> this hit-points) 5000.0)
-    (set! (-> this hit-points) 2500.0)
-    )
-  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-    (set! (-> this max-hit-points) 5000.0)
-    (set! (-> this max-hit-points) 2500.0)
-  )
+  (set! (-> this max-hit-points) (-> this hit-points))
   0
   (none)
   )
@@ -3482,10 +3468,7 @@
   (set-time! (-> this stop-shoot))
   (set! (-> this shoot-duration) 1.0)
   (set! (-> this draw light-index) (the-as uint 10))
-  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-    (set! (-> this hit-points) 5000.0)
-    (set! (-> this hit-points) 2500.0)
-    )
+  (set! (-> this hit-points) 35.0)
   (let ((v1-19 (-> this nav state))
         (a0-13 (-> this root trans))
         )
@@ -3494,10 +3477,7 @@
     (vector-copy! (-> v1-19 target-pos) a0-13)
     )
   0
-  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-    (set! (-> this max-hit-points) 5000.0)
-    (set! (-> this max-hit-points) 2500.0)
-  )
+  (set! (-> this max-hit-points) (-> this hit-points))
   (go (method-of-object this hostile))
   )
 
@@ -3978,8 +3958,8 @@
   (set! (-> self shoot-duration) 1.0)
   (set! (-> self hold-fire) #f)
   (set! (-> self draw light-index) (the-as uint 10))
-  (set! (-> self max-hit-points) (the float (+ (* (+ 50 (* cars-level 20))) (+ 50 (* cars-level 12)))))
-    (set! (-> self hit-points) (-> self max-hit-points))
+  (set! (-> self max-hit-points) (the float (+ (* 50 (the int (you-suck-scale *game-info* #f 0))) 50)))
+  (set! (-> self hit-points) (-> self max-hit-points))
   (set! (-> self health-hud)
         (ppointer->handle (process-spawn bombbot-hud :init hud-init-by-other :name "bombbot-hud" :to self))
         )
@@ -4100,25 +4080,25 @@
 (define *blow-barricade-kg-squad-member-settings* (new 'static 'inline-array kg-squad-member-settings 4
                                                     (new 'static 'kg-squad-member-settings
                                                       :object-type (traffic-type roboguard)
-                                                      :max-target-count 0
-                                                      :target-count 0
+                                                      :max-target-count #x7f
+                                                      :target-count 3
                                                       :enemy-type (traffic-type guard-a)
                                                       )
                                                     (new 'static 'kg-squad-member-settings
                                                       :object-type (traffic-type roboguard)
-                                                      :max-target-count 0
+                                                      :max-target-count #x7f
                                                       :enemy-type (traffic-type guard-b)
                                                       )
                                                     (new 'static 'kg-squad-member-settings
                                                       :object-type (traffic-type flying-turret)
-                                                      :max-target-count 0
-                                                      :target-count 0
+                                                      :max-target-count #x7f
+                                                      :target-count 3
                                                       :enemy-type (traffic-type metalhead-grunt)
                                                       )
                                                     (new 'static 'kg-squad-member-settings
                                                       :object-type (traffic-type spydroid)
-                                                      :max-target-count 0
-                                                      :target-count 0
+                                                      :max-target-count #x7f
+                                                      :target-count 3
                                                       :enemy-type (traffic-type metalhead-flitter)
                                                       )
                                                     )

@@ -1175,7 +1175,7 @@
                       )
                     (set! a0-3 #f)
                     (label cfg-29)
-                    (or a0-3 (logtest? (-> v1-1 flags) (game-task-node-flag auto-close disk-close)))
+                    (or a0-3 (logtest? (-> v1-1 flags) (game-task-node-flag auto-close disk-close add-exclusive)))
                     )
                   )
               (or (not (-> v1-1 open?)) ((-> v1-1 open?) v1-1))

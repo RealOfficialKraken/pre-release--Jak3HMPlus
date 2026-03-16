@@ -114,7 +114,7 @@
       (if (not (logtest? (-> self darkjak stage) (darkjak-stage force-on endless-dark)))
           ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-button-invis-inc)))
           (when *debug-segment*
-              (print "none")
+              (print "")
             )
           )
       )
@@ -187,6 +187,9 @@
     (if (and (using-gun? self)
              (and (-> self next-state) (= (-> self next-state name) 'target-walk))
              ;(not (and (focus-test? self dark) (nonzero? (-> self darkjak))))
+             (when *debug-segment*
+              (print "")
+            )
              )
         (go target-gun-walk)
         )
@@ -233,10 +236,6 @@
       (target-invisible-start (seconds 30))
       (if (not (logtest? (-> self darkjak stage) (darkjak-stage force-on endless-dark)))
           (send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-button-invis-inc)))
-          
-          (when *debug-segment*
-              (print "none")
-            )
           )
       )
     (when (and (and (focus-test? self light) (nonzero? (-> self lightjak)))
@@ -2107,9 +2106,8 @@
                  )
              )
         ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-spin-inc)))
-        
-          (when *debug-segment*
-              (print "none")
+        (when *debug-segment*
+              (print "")
             )
           )
     (set! (-> self control mod-surface) *attack-mods*)
@@ -2618,9 +2616,8 @@
                  )
              )
         ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-punch-inc)))
-        
-          (when *debug-segment*
-              (print "none")
+        (when *debug-segment*
+              (print "")
             )
           )
     (initialize (-> self control impact-ctrl) self 28 3276.8 (-> self control root-prim prim-core collide-with))
@@ -2720,13 +2717,13 @@
                        )
               (when (= (-> s5-3 best-other-tri pat mode) (pat-mode wall))
                 (cond
-                  ((logtest? (-> *part-group-id-table* 12 flags) (sp-group-flag sp13))
+                  ((logtest? (-> group-punch-hit flags) (sp-group-flag sp13))
                    (vector-copy! (-> *launch-matrix* trans) (-> s5-3 best-other-tri intersect))
-                   (part-tracker-spawn part-tracker-subsampler :to self :group (-> *part-group-id-table* 12))
+                   (part-tracker-spawn part-tracker-subsampler :to self :group group-punch-hit)
                    )
                   (else
                     (vector-copy! (-> *launch-matrix* trans) (-> s5-3 best-other-tri intersect))
-                    (part-tracker-spawn part-tracker :to self :group (-> *part-group-id-table* 12))
+                    (part-tracker-spawn part-tracker :to self :group group-punch-hit)
                     )
                   )
                 (let ((name (if (using-gun? self)
@@ -2879,9 +2876,8 @@
                  )
              )
         ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-spin-inc)))
-        
-          (when *debug-segment*
-              (print "none")
+        (when *debug-segment*
+              (print "")
             )
           )
     (set! (-> self control mod-surface) *jump-attack-mods*)
@@ -3078,9 +3074,8 @@
                  )
              )
         ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-uppercut-inc)))
-        
-          (when *debug-segment*
-              (print "none")
+        (when *debug-segment*
+              (print "")
             )
           )
     (set! (-> self control mod-surface) *uppercut-mods*)
@@ -3551,7 +3546,7 @@
                )
           ;(send-event self 'get-pickup (pickup-type eco-pill-dark) (- (-> *FACT-bank* darkjak-flop-inc)))
           (when *debug-segment*
-              (print "none")
+              (print "")
             )
           )
       )

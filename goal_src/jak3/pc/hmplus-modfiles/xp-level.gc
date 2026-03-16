@@ -16,9 +16,56 @@
     (define draw-levelup-int 0)
     (define xp-bar-spawned? #f)
 
+    (defun-extern draw-targbar-hp (none))
+    (defun-extern draw-targbar-dark (none))
+    (defun-extern draw-targbar-light (none))
+
     (define levelup-color #f)
     (define lui 0)
     (define levelup-string "")
+
+    (define enemy-hp-percent 1.0)
+    (define enemy-hp-display-percent 1.0)
+    (define enemy-hp-start-percent 1.0)
+    (define enemy-hp-target-percent 1.0)
+    (define enemy-hp-anim-timer 0.0)
+    (define enemy-hp-anim-duration 0.35)
+    
+    (define level-display-percent 0.0)
+    (define level-start-percent 0.0)
+    (define level-target-percent 0.0)
+    (define level-anim-timer 0.75)
+    (define level-anim-duration 0.75)
+
+    (define guns-display-percent 0.0)
+    (define guns-start-percent 0.0)
+    (define guns-target-percent 0.0)
+    (define guns-anim-timer 0.75)
+    (define guns-anim-duration 0.75)
+
+    (define vehicle-display-percent 0.0)
+    (define vehicle-start-percent 0.0)
+    (define vehicle-target-percent 0.0)
+    (define vehicle-anim-timer 0.75)
+    (define vehicle-anim-duration 0.75)
+
+    (define targbar-hp-display-percent 1.0)
+    (define targbar-hp-start-percent 1.0)
+    (define targbar-hp-target-percent 1.0)
+    (define targbar-hp-anim-timer 0.18)
+    (define targbar-hp-anim-duration 0.18)
+
+    (define targbar-dark-display-percent 1.0)
+    (define targbar-dark-start-percent 1.0)
+    (define targbar-dark-target-percent 1.0)
+    (define targbar-dark-anim-timer 0.22)
+    (define targbar-dark-anim-duration 0.22)
+
+    (define targbar-light-display-percent 1.0)
+    (define targbar-light-start-percent 1.0)
+    (define targbar-light-target-percent 1.0)
+    (define targbar-light-anim-timer 0.22)
+    (define targbar-light-anim-duration 0.22)
 
 (defun levelup-reset-color ()
     (set! (-> *part-id-table* 1701 init-specs 4 initial-valuef) 160.0) ;r 1
@@ -410,235 +457,234 @@
     (none)
 )
 
-(defun draw-targbar-hp ()
-    (let 
-            (
-                (x 7)
-                (y 358)
-                (progress 0.0)
-                (arg3 (new 'static 'rgba 
-                    :r 0
-                    :g 255
-                    :b 0
-                    :a #x40
-                    )
-                    )
-            )
-            (let (
-                    (level-cap (-> *target* fact health-max))
-                    (arg1 (-> *target* fact health))
-                    )
-                        (when (!= progress (/ arg1 level-cap))
-                            (set! progress (/ arg1 level-cap))
-                        )
-                    )
-                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                    (bucket-id particles)
-                                    )
-            (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)
-            )
-            )
-    (none)
-)
-(defun draw-targbar-dark ()
-    (let 
-            (
-                (x 7)
-                (y 342)
-                (progress 0.0)
-                (arg3 (new 'static 'rgba 
-                    :r 155
-                    :g 0
-                    :b 255
-                    :a #x40
-                    )
-                    )
-            )
-            (let (
-                    (level-cap (-> *FACT-bank* eco-pill-dark-max-default))
-                    (arg1 (-> *game-info* eco-pill-dark))
-                    )
-                        (when (!= progress (/ arg1 level-cap))
-                            (set! progress (/ arg1 level-cap))
-                        )
-                    )
-                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                    (bucket-id particles)
-                                    )
-            (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)
-            )
-            )
-    (none)
-)
-(defun draw-targbar-light ()
-    (let 
-            (
-                (x 7)
-                (y 326)
-                (progress 0.0)
-                (arg3 (new 'static 'rgba 
-                    :r 200
-                    :g 200
-                    :b 200
-                    :a #x40
-                    )
-                    )
-            )
-            (let (
-                    (level-cap (-> *FACT-bank* eco-pill-light-max-default))
-                    (arg1 (-> *game-info* eco-pill-light))
-                    )
-                        (when (!= progress (/ arg1 level-cap))
-                            (set! progress (/ arg1 level-cap))
-                        )
-                    )
-                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                    (bucket-id particles)
-                                    )
-            (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)
-            )
-            )
-    (none)
-)
+
 
 (defun draw-XP-bar ()
-(when 
+  (when
     (and
-        *target*
-        (not *scene-player*)
-        (= (paused?) #f)
+      *target*
+      (not *scene-player*)
+      (= (paused?) #f))
     )
-    
-    )
-    ;;;;;;;;;;;;;;;;;;;;;;;;;Notoriety;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (when 
-        (or 
-            (= in-menu? #f)
-            (and
-                (= in-skill? #t)
-                (= menu-slot 0)
-            )
-        )
-        (let 
-            (
-                (x noto-draw-x)
-                (y noto-draw-y)
-                (progress level-percent)
-                (arg3 (new 'static 'rgba 
-                    :r 255
-                    :g 255
-                    :b 0
-                    :a #x40
-                    )
-                    )
-            )
-                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                    (bucket-id particles)
-                                    )
-            (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff)
-            )
 
-            (let (
-                    (level-cap (the float (* (+ (* notoriety-level 60) (* notoriety-level 100)) notoriety-level)))
-                    (arg1 (-> *game-info* karma))
-                    )
-                        (when (!= level-percent (/ arg1 level-cap))
-                            (set! level-percent (/ arg1 level-cap))
-                        )
-                    )
-            )
-    )
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Notoriety ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (when
+    (or
+      (= in-menu? #f)
+      (and
+        (= in-skill? #t)
+        (= menu-slot 0)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Guns;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when 
-        (or 
-            (= in-menu? #f)
-            (and
-                (= in-skill? #t)
-                (= menu-slot 1)
-            )
-        )
-        (when (task-node-closed? (game-task-node arena-fight-1-introduction))
-            (let 
-            (
-                (x guns-draw-x)
-                (y guns-draw-y)
-                (progress guns-percent)
-                (arg3 (new 'static 'rgba 
-                    :r 255
-                    :g 1
-                    :b 0
-                    :a #x40
-                    )
-                    )
-            )
-                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                    (bucket-id particles)
-                                    )
-            (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff)
-            )
+    ;;update percent and restart animation if changed
+    (let* ((level-cap (the float (* (+ (* notoriety-level 60) (* notoriety-level 100)) notoriety-level)))
+           (arg1 (-> *game-info* karma))
+           (new-percent 0.0))
+      (when (> level-cap 0.0)
+        (set! new-percent (/ arg1 level-cap))
 
-            (let (
-                    (level-cap (the float (* (+ (* guns-level 120) (* guns-level 200)) guns-level)))
-                    (arg1 (the float (-> *game-info* buzzer-total)))
-                    )
-                        (when (!= guns-percent (/ arg1 level-cap))
-                            (set! guns-percent (/ arg1 level-cap))
-                        )
-                    )
-            )
-        )
-)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (< new-percent 0.0)
+          (set! new-percent 0.0))
+        (when (> new-percent 1.0)
+          (set! new-percent 1.0))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Vehicles;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when 
-        (or 
-            (= in-menu? #f)
-            (and
-                (= in-skill? #t)
-                (= menu-slot 2)
-            )
-        )
-        (when (!= (-> *game-info* total-deaths) 0)
-            (let 
-            (
-                (x car-draw-x)
-                (y car-draw-y)
-                (progress vehicle-percent)
-                (arg3 (new 'static 'rgba 
-                    :r 255
-                    :g 0
-                    :b 255
-                    :a #x40
-                    )
-                    )
-            )
-                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                    (bucket-id particles)
-                                    )
-            (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff)
-            )
+        (when (!= level-percent new-percent)
+          (set! level-percent new-percent)
+          (set! level-start-percent level-display-percent)
+          (set! level-target-percent level-percent)
+          (set! level-anim-timer 0.0))))
 
-            (let (
-                    (level-cap (the float (* (+ (* cars-level 30) (* cars-level 175)) cars-level)))
-                    (arg1 (-> *game-info* fuel))
-                    )
-                        (when (!= vehicle-percent (/ arg1 level-cap))
-                            (set! vehicle-percent (/ arg1 level-cap))
-                        )
-                    )
-            )
-        )
-)
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;animate displayed percent
+    (let* ((dt (seconds-per-frame))
+           (dur level-anim-duration)
+           (u 0.0)
+           (inv 0.0)
+           (ease 0.0))
+      (when (< dur 0.001)
+        (set! dur 0.001))
+
+      (when (< level-anim-timer dur)
+        (+! level-anim-timer dt)
+        (when (> level-anim-timer dur)
+          (set! level-anim-timer dur)))
+
+      (set! u (/ level-anim-timer dur))
+
+      (when (< u 0.0)
+        (set! u 0.0))
+      (when (> u 1.0)
+        (set! u 1.0))
+
+      ;;ease-out anim
+      (set! inv (- 1.0 u))
+      (set! ease (- 1.0 (* inv inv inv)))
+
+      (set! level-display-percent
+        (+ level-start-percent
+           (* (- level-target-percent level-start-percent) ease)))
+
+      (when (= u 1.0)
+        (set! level-display-percent level-target-percent)))
+
+    (when (< level-display-percent 0.0)
+      (set! level-display-percent 0.0))
+    (when (> level-display-percent 1.0)
+      (set! level-display-percent 1.0))
+
+    ;;draw bar
+    (let ((x noto-draw-x)
+          (y noto-draw-y)
+          (progress level-display-percent)
+          (arg3 (new 'static 'rgba
+                     :r 255
+                     :g 255
+                     :b 0
+                     :a #x40)))
+      (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                   (bucket-id particles))
+        (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+        (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff))))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Guns ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (when
+    (or
+      (= in-menu? #f)
+      (and
+        (= in-skill? #t)
+        (= menu-slot 1)))
+
+    (when (task-node-closed? (game-task-node arena-fight-1-introduction))
+      (let* ((level-cap (the float (* (+ (* guns-level 120) (* guns-level 200)) guns-level)))
+             (arg1 (the float (-> *game-info* buzzer-total)))
+             (new-percent 0.0))
+        (when (> level-cap 0.0)
+          (set! new-percent (/ arg1 level-cap))
+
+          (when (< new-percent 0.0)
+            (set! new-percent 0.0))
+          (when (> new-percent 1.0)
+            (set! new-percent 1.0))
+
+          (when (!= guns-percent new-percent)
+            (set! guns-percent new-percent)
+            (set! guns-start-percent guns-display-percent)
+            (set! guns-target-percent guns-percent)
+            (set! guns-anim-timer 0.0))))
+      (let* ((dt (seconds-per-frame))
+             (dur guns-anim-duration)
+             (u 0.0)
+             (inv 0.0)
+             (ease 0.0))
+        (when (< dur 0.001)
+          (set! dur 0.001))
+
+        (when (< guns-anim-timer dur)
+          (+! guns-anim-timer dt)
+          (when (> guns-anim-timer dur)
+            (set! guns-anim-timer dur)))
+
+        (set! u (/ guns-anim-timer dur))
+
+        (when (< u 0.0)
+          (set! u 0.0))
+        (when (> u 1.0)
+          (set! u 1.0))
+        (set! inv (- 1.0 u))
+        (set! ease (- 1.0 (* inv inv inv)))
+
+        (set! guns-display-percent
+          (+ guns-start-percent
+             (* (- guns-target-percent guns-start-percent) ease)))
+
+        (when (= u 1.0)
+          (set! guns-display-percent guns-target-percent)))
+
+      (when (< guns-display-percent 0.0)
+        (set! guns-display-percent 0.0))
+      (when (> guns-display-percent 1.0)
+        (set! guns-display-percent 1.0))
+      (let ((x guns-draw-x)
+            (y guns-draw-y)
+            (progress guns-display-percent)
+            (arg3 (new 'static 'rgba
+                       :r 255
+                       :g 1
+                       :b 0
+                       :a #x40)))
+        (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                     (bucket-id particles))
+          (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+          (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff)))))
+
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Vehicles ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (when
+    (or
+      (= in-menu? #f)
+      (and
+        (= in-skill? #t)
+        (= menu-slot 2)))
+
+    (when (!= (-> *game-info* total-deaths) 0)
+      (let* ((level-cap (the float (* (+ (* cars-level 30) (* cars-level 175)) cars-level)))
+             (arg1 (-> *game-info* fuel))
+             (new-percent 0.0))
+        (when (> level-cap 0.0)
+          (set! new-percent (/ arg1 level-cap))
+
+          (when (< new-percent 0.0)
+            (set! new-percent 0.0))
+          (when (> new-percent 1.0)
+            (set! new-percent 1.0))
+
+          (when (!= vehicle-percent new-percent)
+            (set! vehicle-percent new-percent)
+            (set! vehicle-start-percent vehicle-display-percent)
+            (set! vehicle-target-percent vehicle-percent)
+            (set! vehicle-anim-timer 0.0))))
+      (let* ((dt (seconds-per-frame))
+             (dur vehicle-anim-duration)
+             (u 0.0)
+             (inv 0.0)
+             (ease 0.0))
+        (when (< dur 0.001)
+          (set! dur 0.001))
+
+        (when (< vehicle-anim-timer dur)
+          (+! vehicle-anim-timer dt)
+          (when (> vehicle-anim-timer dur)
+            (set! vehicle-anim-timer dur)))
+
+        (set! u (/ vehicle-anim-timer dur))
+
+        (when (< u 0.0)
+          (set! u 0.0))
+        (when (> u 1.0)
+          (set! u 1.0))
+        (set! inv (- 1.0 u))
+        (set! ease (- 1.0 (* inv inv inv)))
+
+        (set! vehicle-display-percent
+          (+ vehicle-start-percent
+             (* (- vehicle-target-percent vehicle-start-percent) ease)))
+
+        (when (= u 1.0)
+          (set! vehicle-display-percent vehicle-target-percent)))
+
+      (when (< vehicle-display-percent 0.0)
+        (set! vehicle-display-percent 0.0))
+      (when (> vehicle-display-percent 1.0)
+        (set! vehicle-display-percent 1.0))
+      (let ((x car-draw-x)
+            (y car-draw-y)
+            (progress vehicle-display-percent)
+            (arg3 (new 'static 'rgba
+                       :r 255
+                       :g 0
+                       :b 255
+                       :a #x40)))
+        (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                     (bucket-id particles))
+          (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+          (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff)))))
 
   (none)
   )
@@ -880,7 +926,7 @@
 
             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HPBAR;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-        (when (= enemy-hp #t)
+        #|(when (= enemy-hp #t)
             (+! hpi 1)
                 (let (
                     (color-string "<COLOR_WHITE>Lv. ") ;color tags for levels
@@ -1003,7 +1049,207 @@
                     (set! enemy-hp #f)
                 )
             )
-        )
+        )|#
+
+        ;NEW HP BAR:
+        (when (= enemy-hp #t)
+            (+! hpi 1)
+            (let (
+                    (color-string "<COLOR_WHITE>Lv. ")
+                )
+                (when (and
+                        (<= enemy-noto (+ notoriety-level 3))
+                        (> enemy-noto (- notoriety-level 3))
+                        (not (string= color-string "<COLOR_YELLOW>Lv. "))
+                    )
+                (set! color-string "<COLOR_YELLOW>Lv. ")
+                )
+                (when (and
+                        (>= enemy-noto (+ notoriety-level 3))
+                        (not (string= color-string "<COLOR_RED>Lv. "))
+                    )
+                (set! color-string "<COLOR_RED>Lv. ")
+                )
+                (when (and
+                        (<= enemy-noto (- notoriety-level 3))
+                        (> enemy-noto (- notoriety-level 7))
+                        (not (string= color-string "<COLOR_GREEN>Lv. "))
+                    )
+                (set! color-string "<COLOR_GREEN>Lv. ")
+                )
+                (when (and
+                        (< enemy-noto (- notoriety-level 7))
+                        (not (string= color-string "<COLOR_TRANSPARENT>Lv. "))
+                    )
+                (set! color-string "<COLOR_TRANSPARENT>Lv. ")
+                )
+
+                (when
+                (and
+                    *target*
+                    (not *scene-player*)
+                    (= (paused?) #f)
+                    (= in-menu? #f)
+                )
+
+                ;; update actual hp percent
+                (let (
+                        (level-cap hpbar-max-hit-points)
+                        (arg1 hpbar-hit-points)
+                    )
+                    (when (< level-cap arg1)
+                    (set! arg1 0.0)
+                    )
+                    (when (!= level-cap 0.0)
+                    (when (!= enemy-hp-percent (/ arg1 level-cap))
+                        ;; restart animation from the CURRENT displayed value
+                        (set! enemy-hp-percent (/ arg1 level-cap))
+                        (set! enemy-hp-start-percent enemy-hp-display-percent)
+                        (set! enemy-hp-target-percent enemy-hp-percent)
+                        (set! enemy-hp-anim-timer 0.0)
+                    )
+                    )
+                )
+
+                ;; animate displayed hp percent with ease-out cubic
+                (let* (
+                        (dt (seconds-per-frame))
+                        (dur enemy-hp-anim-duration)
+                        (u 0.0)
+                        (inv 0.0)
+                        (ease 0.0)
+                        )
+                    (when (< dur 0.001)
+                    (set! dur 0.001)
+                    )
+
+                    (when (< enemy-hp-anim-timer dur)
+                    (+! enemy-hp-anim-timer dt)
+                    (when (> enemy-hp-anim-timer dur)
+                        (set! enemy-hp-anim-timer dur)
+                    )
+                    )
+
+                    (set! u (/ enemy-hp-anim-timer dur))
+                    (when (< u 0.0)
+                    (set! u 0.0)
+                    )
+                    (when (> u 1.0)
+                    (set! u 1.0)
+                    )
+
+                    ;; ease-out cubic: 1 - (1-u)^3
+                    (set! inv (- 1.0 u))
+                    (set! ease (- 1.0 (* inv inv inv)))
+
+                    (set! enemy-hp-display-percent
+                    (+ enemy-hp-start-percent
+                        (* (- enemy-hp-target-percent enemy-hp-start-percent) ease))
+                    )
+
+                    (when (= u 1.0)
+                    (set! enemy-hp-display-percent enemy-hp-target-percent)
+                    )
+                )
+
+                ;; clamp displayed percent just in case
+                (when (< enemy-hp-display-percent 0.0)
+                    (set! enemy-hp-display-percent 0.0)
+                )
+                (when (> enemy-hp-display-percent 1.0)
+                    (set! enemy-hp-display-percent 1.0)
+                )
+
+                ;; draw enemy name / level
+                (let ((health-pos 0))
+                    (when (= hud-timer-on? #f)
+                    (set! health-pos 10)
+                    )
+                    (when (or (= hud-timer-on? #t) (= r3-noto #t))
+                    (set! health-pos 80)
+                    )
+
+                    (when
+                    (and
+                        (= weather-dark-mode #f)
+                        (= onfoot-battle? #f)
+                    )
+                    (clear matt-str)
+                    (clear *pc-encoded-matt-str*)
+                    (format matt-str "~s~%~%<COLOR_WHITE>~s~d"
+                        enemy-string
+                        color-string
+                        draw-enemy-noto
+                    )
+                    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                        (dma-buffer-add-gs-set-flusha
+                        buf
+                        (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
+                        (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1))
+                        )
+                        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                        (set! (-> font-ctx scale) 0.325)
+                        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)
+                        )
+                    )
+                    )
+
+                    (when
+                    (or
+                        (= weather-dark-mode #t)
+                        (= onfoot-battle? #t)
+                    )
+                    (clear matt-str)
+                    (clear *pc-encoded-matt-str*)
+                    (format matt-str "~s~%~%<COLOR_WHITE>~s<COLOR_RED>??"
+                        enemy-string
+                        color-string
+                    )
+                    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                        (dma-buffer-add-gs-set-flusha
+                        buf
+                        (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
+                        (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1))
+                        )
+                        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                        (set! (-> font-ctx scale) 0.325)
+                        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)
+                        )
+                    )
+                    )
+                )
+
+                ;; draw hp bar using DISPLAY percent, not actual percent
+                (let (
+                        (x 100)
+                        (y 21)
+                        (progress enemy-hp-display-percent)
+                        (arg3 (new 'static 'rgba
+                                :r 255
+                                :g 0
+                                :b 0
+                                :a #x40
+                            ))
+                    )
+                    (when (or (= hud-timer-on? #t) (= r3-noto #t))
+                    (set! y 90)
+                    )
+                    (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                                (bucket-id particles))
+                    (draw-sprite2d-xy s2-0 x y 310 8 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+                    (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 310.0 progress)) 6 arg3 #x3fffff)
+                    )
+                )
+                )
+            )
+
+            (when (= hpi 400)
+                (set! hpi 0)
+                (set! enemy-hp #f)
+            )
+            )
 
         ;TARGBAR
         (when 
@@ -1439,9 +1685,9 @@
             )
             (when ;DARK-WORLD
                 (and
-                    (!= enemy-noto (+ notoriety-level 26))
+                    (!= enemy-noto (+ notoriety-level 15))
                 )
-                (set! enemy-noto 154)
+                (set! enemy-noto (+ notoriety-level 15))
             )
         )
 
@@ -2148,3 +2394,213 @@
 
     (none)
 )
+
+(defun draw-targbar-hp ()
+  (let ((x 7)
+        (y 358)
+        (progress 0.0)
+        (arg3 (new 'static 'rgba
+                   :r 0
+                   :g 255
+                   :b 0
+                   :a #x40)))
+
+    (let ((level-cap (-> *target* fact health-max))
+          (arg1 (-> *target* fact health))
+          (new-percent 0.0))
+
+      (when (> level-cap 0.0)
+        (set! new-percent (/ arg1 level-cap))
+
+        (when (< new-percent 0.0)
+          (set! new-percent 0.0))
+        (when (> new-percent 1.0)
+          (set! new-percent 1.0))
+
+        (when (!= targbar-hp-target-percent new-percent)
+          (set! targbar-hp-start-percent targbar-hp-display-percent)
+          (set! targbar-hp-target-percent new-percent)
+          (set! targbar-hp-anim-timer 0.0))))
+
+    (let* ((dt (seconds-per-frame))
+           (dur targbar-hp-anim-duration)
+           (u 0.0)
+           (inv 0.0)
+           (ease 0.0))
+
+      (when (< dur 0.001)
+        (set! dur 0.001))
+
+      (when (< targbar-hp-anim-timer dur)
+        (+! targbar-hp-anim-timer dt)
+        (when (> targbar-hp-anim-timer dur)
+          (set! targbar-hp-anim-timer dur)))
+
+      (set! u (/ targbar-hp-anim-timer dur))
+
+      (when (< u 0.0)
+        (set! u 0.0))
+      (when (> u 1.0)
+        (set! u 1.0))
+      (set! inv (- 1.0 u))
+      (set! ease (- 1.0 (* inv inv inv)))
+
+      (set! targbar-hp-display-percent
+            (+ targbar-hp-start-percent
+               (* (- targbar-hp-target-percent targbar-hp-start-percent) ease)))
+
+      (when (= u 1.0)
+        (set! targbar-hp-display-percent targbar-hp-target-percent)))
+
+    (when (< targbar-hp-display-percent 0.0)
+      (set! targbar-hp-display-percent 0.0))
+    (when (> targbar-hp-display-percent 1.0)
+      (set! targbar-hp-display-percent 1.0))
+
+    (set! progress targbar-hp-display-percent)
+
+    (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                 (bucket-id particles))
+      (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+      (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)))
+  (none))
+
+  (defun draw-targbar-dark ()
+  (let ((x 7)
+        (y 342)
+        (progress 0.0)
+        (arg3 (new 'static 'rgba
+                   :r 155
+                   :g 0
+                   :b 255
+                   :a #x40)))
+
+    (let ((level-cap (-> *FACT-bank* eco-pill-dark-max-default))
+          (arg1 (-> *game-info* eco-pill-dark))
+          (new-percent 0.0))
+
+      (when (> level-cap 0.0)
+        (set! new-percent (/ arg1 level-cap))
+
+        (when (< new-percent 0.0)
+          (set! new-percent 0.0))
+        (when (> new-percent 1.0)
+          (set! new-percent 1.0))
+
+        (when (!= targbar-dark-target-percent new-percent)
+          (set! targbar-dark-start-percent targbar-dark-display-percent)
+          (set! targbar-dark-target-percent new-percent)
+          (set! targbar-dark-anim-timer 0.0))))
+
+    (let* ((dt (seconds-per-frame))
+           (dur targbar-dark-anim-duration)
+           (u 0.0)
+           (inv 0.0)
+           (ease 0.0))
+
+      (when (< dur 0.001)
+        (set! dur 0.001))
+
+      (when (< targbar-dark-anim-timer dur)
+        (+! targbar-dark-anim-timer dt)
+        (when (> targbar-dark-anim-timer dur)
+          (set! targbar-dark-anim-timer dur)))
+
+      (set! u (/ targbar-dark-anim-timer dur))
+
+      (when (< u 0.0)
+        (set! u 0.0))
+      (when (> u 1.0)
+        (set! u 1.0))
+      (set! inv (- 1.0 u))
+      (set! ease (- 1.0 (* inv inv inv)))
+
+      (set! targbar-dark-display-percent
+            (+ targbar-dark-start-percent
+               (* (- targbar-dark-target-percent targbar-dark-start-percent) ease)))
+
+      (when (= u 1.0)
+        (set! targbar-dark-display-percent targbar-dark-target-percent)))
+
+    (when (< targbar-dark-display-percent 0.0)
+      (set! targbar-dark-display-percent 0.0))
+    (when (> targbar-dark-display-percent 1.0)
+      (set! targbar-dark-display-percent 1.0))
+
+    (set! progress targbar-dark-display-percent)
+
+    (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                 (bucket-id particles))
+      (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+      (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)))
+  (none))
+
+  (defun draw-targbar-light ()
+  (let ((x 7)
+        (y 326)
+        (progress 0.0)
+        (arg3 (new 'static 'rgba
+                   :r 200
+                   :g 200
+                   :b 200
+                   :a #x40)))
+
+    (let ((level-cap (-> *FACT-bank* eco-pill-light-max-default))
+          (arg1 (-> *game-info* eco-pill-light))
+          (new-percent 0.0))
+
+      (when (> level-cap 0.0)
+        (set! new-percent (/ arg1 level-cap))
+
+        (when (< new-percent 0.0)
+          (set! new-percent 0.0))
+        (when (> new-percent 1.0)
+          (set! new-percent 1.0))
+
+        (when (!= targbar-light-target-percent new-percent)
+          (set! targbar-light-start-percent targbar-light-display-percent)
+          (set! targbar-light-target-percent new-percent)
+          (set! targbar-light-anim-timer 0.0))))
+
+    (let* ((dt (seconds-per-frame))
+           (dur targbar-light-anim-duration)
+           (u 0.0)
+           (inv 0.0)
+           (ease 0.0))
+
+      (when (< dur 0.001)
+        (set! dur 0.001))
+
+      (when (< targbar-light-anim-timer dur)
+        (+! targbar-light-anim-timer dt)
+        (when (> targbar-light-anim-timer dur)
+          (set! targbar-light-anim-timer dur)))
+
+      (set! u (/ targbar-light-anim-timer dur))
+
+      (when (< u 0.0)
+        (set! u 0.0))
+      (when (> u 1.0)
+        (set! u 1.0))
+      (set! inv (- 1.0 u))
+      (set! ease (- 1.0 (* inv inv inv)))
+
+      (set! targbar-light-display-percent
+            (+ targbar-light-start-percent
+               (* (- targbar-light-target-percent targbar-light-start-percent) ease)))
+
+      (when (= u 1.0)
+        (set! targbar-light-display-percent targbar-light-target-percent)))
+
+    (when (< targbar-light-display-percent 0.0)
+      (set! targbar-light-display-percent 0.0))
+    (when (> targbar-light-display-percent 1.0)
+      (set! targbar-light-display-percent 1.0))
+
+    (set! progress targbar-light-display-percent)
+
+    (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                 (bucket-id particles))
+      (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+      (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)))
+  (none))

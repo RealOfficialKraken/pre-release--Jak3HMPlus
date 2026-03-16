@@ -167,6 +167,8 @@
   "cam-update-h.o"
   "hud-h.o"
   "progress-h.o"
+  "progress-h-pc.o" ;; added
+  "progress-generic-h-pc.o" ;; added
   "rpc-h.o"
   "path-h.o"
   "nav-mesh-h.o"
@@ -174,6 +176,7 @@
   "spatial-hash-h.o"
   "actor-hash-h.o"
   "rigid-body-h.o"
+  "damage-number.o"
   "load-dgo.o"
   "ramdisk.o"
   "gsound.o"
@@ -389,8 +392,13 @@
   "hud-classes.o"
   "secrets-menu.o"
   "progress-static.o"
+  "progress-static-pc.o" ;; added
   "progress.o"
+  "progress-pc.o" ;; added
+  "progress-generic-pc.o" ;; added
   "progress-draw.o"
+  "progress-draw-pc.o" ;; added
+  "progress-generic-draw-pc.o" ;; added
   "ocean.o"
   "ocean-vu0.o"
   "ocean-texture.o"
@@ -534,6 +542,9 @@
   "rope-system.o"
   "rope-prim-system-h.o"
   "rope-prim-system.o"
+  "target-turret-shot.o"
+  "target-turret.o"
+  "for-turret-shot.o"
   "neo-satellite.o"
   "entity-boss.o"
   "dp-bipedal-part.o"
@@ -541,8 +552,6 @@
   "dp-bipedal.o"
   "marauder.o"
   "maker-part.o"
-  "target-turret-shot.o"
-  "target-turret.o"
   "wasgun-h.o"
   "wascity-turret-shot.o"
   "dm-flyer.o"
@@ -566,7 +575,6 @@
   "level-spawner.o"
   "kraken-volume.o"
   "gyro-warp.o"
-  "for-turret-shot.o"
   "arena-events.o"
   "mhcity-obs.o"
   "mhcity-obs2.o"

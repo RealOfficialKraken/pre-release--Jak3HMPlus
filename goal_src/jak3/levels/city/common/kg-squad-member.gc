@@ -36,12 +36,10 @@
 
 ;; WARN: disable def twice: 6. This may happen when a cond (no else) is nested inside of another conditional, but it should be rare.
 (defmethod get-current-enemy ((this kg-squad-member))
-  (let ((en (-> this attacker-info enemy)))
-    (if en
-      (handle->process en)
-      (squad-control-city-method-35 (-> this squad) this (-> this focus handle))
+  (if #t
+      (handle->process (-> this attacker-info enemy))
+      (squad-control-city-method-35 (-> this squad) this (-> this current-enemy))
       )
-  )
   )
 
 (defmethod go-from-behavior ((this kg-squad-member) (arg0 traffic-object-spawn-params))

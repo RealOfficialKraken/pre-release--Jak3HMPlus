@@ -356,19 +356,14 @@
   :event (behavior ((proc process) (argc int) (message symbol) (block event-message-block))
     (case message
       (('hit)
-       (if (logtest? (-> *part-group-id-table* 521 flags) (sp-group-flag sp13))
+       (if (logtest? (-> group-leaper-ring-explode flags) (sp-group-flag sp13))
            (part-tracker-spawn
              part-tracker-subsampler
              :to *entity-pool*
-             :group (-> *part-group-id-table* 521)
+             :group group-leaper-ring-explode
              :mat-joint (-> self mat)
              )
-           (part-tracker-spawn
-             part-tracker
-             :to *entity-pool*
-             :group (-> *part-group-id-table* 521)
-             :mat-joint (-> self mat)
-             )
+           (part-tracker-spawn part-tracker :to *entity-pool* :group group-leaper-ring-explode :mat-joint (-> self mat))
            )
        (update self)
        (if (not (-> self active?))
@@ -388,7 +383,7 @@
             (set! (-> self minimap) (add-icon! *minimap* self (the-as uint 13) (the-as int #f) (the-as vector #t) 0))
             )
         (when s4-0
-          (set! (-> gp-0 quad) (-> s4-0 control trans quad))
+          (vector-copy! gp-0 (-> s4-0 control trans))
           (+! (-> gp-0 y) 8192.0)
           (vector-! gp-0 gp-0 (-> self root trans))
           (let ((s5-0 (-> self root quat)))
@@ -402,26 +397,26 @@
                    (cond
                      ((-> self is-final?)
                       (sound-play "ring-final")
-                      (if (logtest? (-> *part-group-id-table* 523 flags) (sp-group-flag sp13))
+                      (if (logtest? (-> group-player-leaper-ring-explode-final flags) (sp-group-flag sp13))
                           (part-tracker-spawn
                             part-tracker-subsampler
                             :to *entity-pool*
-                            :group (-> *part-group-id-table* 523)
+                            :group group-player-leaper-ring-explode-final
                             :mat-joint (-> self mat)
                             )
                           (part-tracker-spawn
                             part-tracker
                             :to *entity-pool*
-                            :group (-> *part-group-id-table* 523)
+                            :group group-player-leaper-ring-explode-final
                             :mat-joint (-> self mat)
                             )
                           )
                       )
-                     ((begin (sound-play "ring-pass") (logtest? (-> *part-group-id-table* 522 flags) (sp-group-flag sp13)))
+                     ((begin (sound-play "ring-pass") (logtest? (-> group-player-leaper-ring-explode flags) (sp-group-flag sp13)))
                       (part-tracker-spawn
                         part-tracker-subsampler
                         :to *entity-pool*
-                        :group (-> *part-group-id-table* 522)
+                        :group group-player-leaper-ring-explode
                         :mat-joint (-> self mat)
                         )
                       )
@@ -429,7 +424,7 @@
                        (part-tracker-spawn
                          part-tracker
                          :to *entity-pool*
-                         :group (-> *part-group-id-table* 522)
+                         :group group-player-leaper-ring-explode
                          :mat-joint (-> self mat)
                          )
                        )
@@ -499,6 +494,12 @@
   )
 
 (defmethod update ((this wascity-race-ring))
+  (when (and
+          (!= enemy-noto 1)
+          (task-node-open? (game-task-node wascity-leaper-race-resolution))
+        )
+    (set! enemy-noto 1)
+  )
   (with-pp
     (if (and (-> this entity) (logtest? (-> this entity extra perm status) (entity-perm-status dead)))
         (go (method-of-object this die))
@@ -567,19 +568,20 @@
   )
 
 (defmethod init-from-entity! ((this wascity-race-ring) (arg0 entity-actor))
+  "Set up a newly created process from the entity that created it."
   (logclear! (-> this mask) (process-mask actor-pause))
   (set! (-> this root) (new 'process 'trsqv))
   (process-drawable-from-entity! this arg0)
   (set! (-> this active?) #f)
   (set! (-> this minimap) #f)
   (quaternion->matrix (-> this mat) (-> this root quat))
-  (set! (-> this mat trans quad) (-> this root trans quad))
+  (vector-copy! (-> this mat trans) (-> this root trans))
   (set! (-> this taskman) (the-as handle #f))
-  (set! (-> this part) (create-launch-control (-> *part-group-id-table* 518) this))
-  (set! (-> this player-part) (create-launch-control (-> *part-group-id-table* 519) this))
+  (set! (-> this part) (create-launch-control group-leaper-ring this))
+  (set! (-> this player-part) (create-launch-control group-player-leaper-ring this))
   (set! (-> this player-ring?) #f)
   (set! (-> this is-final?) #f)
-  (set! (-> this part-final) (create-launch-control (-> *part-group-id-table* 520) this))
+  (set! (-> this part-final) (create-launch-control group-player-leaper-ring-final this))
   (go (method-of-object this idle))
   )
 
@@ -1020,7 +1022,7 @@
     (set-time! (-> self hint-timer))
     (set-time! (-> self state-time))
     (set! *enemies-explode* #t)
-    (blank-hint! "<COLOR_RED>OH NO" "<COLOR_YELLOW>All enemies <COLOR_ORANGE>explode<COLOR_YELLOW> on death!" 340 300)
+    (blank-hint! "<COLOR_RED>OH NO" "<COLOR_YELLOW>All enemies <COLOR_ORANGE>explode<COLOR_YELLOW> on death!" 140 300)
     (when (!= enemy-noto 1)
       (set! enemy-noto 1)
     )
