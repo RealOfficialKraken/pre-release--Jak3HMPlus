@@ -19,7 +19,7 @@ The game is designed with an RPG-Inspired leveling system for Jak's Guns, Vehicl
 - Increases damage on projectiles fired by Jak. Depleting ammo will gain experience in this field.
 
 #### Leveling Vehicles
-- Enhances certain fire times of a vehicle weapon, increases armor, and a bigger boost tank each level. Slaying enemies or destorying cars **while on a vehicle** will gain experience in this field.
+- Enhances certain fire times of a vehicle weapon, increases armor, and a bigger boost tank each level. Slaying enemies/destorying cars **while on a vehicle** will gain experience in this field.
 ## Storyline
 
 Starting from an easter egg found in Jak II's HeroMode+, and continued from the end of Roguelike Jak II, this mod's story comes to it's climax in an epic conclusion. The story itself is progressed through the main missions of the game, and requires the player to traverse through the dark eco realm: a void and desolate dimension where no one but the dark precursors exist. You and Vin tag team to find and collect Dark Eco Crystals across the dimensions, in order to find and destroy The Entity, which threatens existence itself.
@@ -67,7 +67,7 @@ The third area you cannot backtrack to, but can access it through the warp gate.
 Similar to Ratchet and Clank, there are a series of challenges with increasingly better rewards as they get more and more difficult. All three arenas can be replayed to an infinite time. Additionally, there is also a new arena called THE DEATH DOME, which is all three arenas at the same time. There's a timer indicating how much time has passed, and how many marauders have been killed. When the timer reaches 3 Minutes and 25 Seconds, Arena Events will occur, which starts a random event that affects the whole arena. As time goes by, the Marauders will increasingly gain levels infinitely.
 ## Custom/Remixed Missions
 
-Some missions have either been altered, redone, or completely replaced by custom missions. Most of these mission alterations do not give the gameplay of Jak and Daxter any justice (like the turret mission). All of these changes are done to make the game either more difficult, or to be *difficult enough* so you can have room to level up your character.
+Mostly all missions have either been altered, redone, or completely replaced by custom missions. Most of these mission alterations do not give the gameplay of Jak and Daxter any justice (like the turret mission). All of these changes are done to make the game either more difficult, or to be *difficult enough* so you can have room to level up your character.
 ## Loot Drop System
 
 Enemies have a chance to drop loot crates upon death. These crates vary from Tier 1-3.
