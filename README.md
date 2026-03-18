@@ -10,7 +10,7 @@ After a year of development, I can surely say that this mod is one of the bigges
 
 ## Leveling System
 
-The game is designed with an RPG-Inspired leveling system for Jak's Guns, Vehicles, and his overall Hero Level.
+The game is designed with a skill-based leveling system for Jak's Guns, Vehicles, and his overall Hero Level.
 
 #### Leveling Hero Level
 - Increases HP, Eco containers, and Melee Damage. Guns and Vehicles can also be affected at higher levels. Slaying enemies and completing missions gains experience in this field.
