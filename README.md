@@ -93,3 +93,9 @@ Some areas have places for enemies to respawn over and over, for farming purpose
 ## Fast Travel
 
 From the HeroMode+ Mod Menu, you can fast travel to some locations if you have them discovered already.
+## Altered HP, Dark, and Light Eco bars
+
+Since Jak levels up and those containers gradually increase, the HP HUD on the bottom left has been redone into 3 bars. Additionally, enemies also have a HUD when attacked, indicating their name, level, and current HP. Each enemy's health bar has drastically increased HP depending on their current level.
+## Damage Outputs
+
+The way the game handles damage now is different. Since Jak can have greatly increased HP, the damage outputs are also different based off of the enemy's level. Receiving damage from enemies is the lowest when your Hero Level is 3 or more above the enemy's. Damage is increased from the enemy the higher the level it is from your Hero Level. When the enemy is 3 levels or more above yours, the enemy's level will appear red on the HP Bar. Finally, if the enemy's level is 7 levels or more above your Hero Level, the enemy's damage has the capacity to one-shot kill--so be careful treading into areas where this is the case!
