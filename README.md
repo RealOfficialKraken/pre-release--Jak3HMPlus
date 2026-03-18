@@ -82,7 +82,7 @@ This drop is uncommon, and Jak's Hero Level must at least be at 7. They drop a g
 This drop is the rarest, it only drops after Jak's Hero Level reaches past 18. They drop a huge amount of skull gems, dark eco crystals, and weapons. Sometimes it will drop a super gun mod.
 ## Dark Maker Ships
 
-The Dark Maker Ship is a random event that occurs when the player's level is past level 18, and will sit stationary in either a certain part of the wasteland, or in Haven City. Upon getting close, the event activates and fireballs rain down from above the huge ship. Dark Precursors will spawn in waves, and in some waves, Kha'ast Moorog, a giant Dark Precursor MiniBoss, will spawn to lob the player with 5-6 dark eco grenades. Completing this event makes the ship disappear and drops a group of crates, and a really good chance of obtaining a weapon.
+The Dark Maker Ship is a random event that occurs when the player's level is past level 18, and will sit stationary in either a certain part of the wasteland, or in Haven City. Upon getting close, the event activates and fireballs rain down from the huge ship above. Dark Precursors will spawn in waves, and in some waves, Kha'ast Moorog, a giant Dark Precursor MiniBoss, will spawn to lob the player with 5-6 dark eco grenades. Completing this event makes the ship disappear and drops a group of crates, and a really good chance of obtaining a weapon.
 
 ## Satellite Fights
 
