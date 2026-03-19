@@ -150,6 +150,9 @@ playing
                     (set! (-> self track) "dark-world-theme")
                 )
             (when
+                (or
+                    (<= (-> *target* fact health) 0.0)
+                )
                 (and
                     (= weather-dark-mode #f)
                     (= in-main-menu? #f)

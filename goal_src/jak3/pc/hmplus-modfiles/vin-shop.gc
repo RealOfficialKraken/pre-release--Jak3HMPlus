@@ -275,7 +275,7 @@
         )
         ((= vin-hinti 8)
             (set! vinhs1 "<COLOR_YELLOW>Dropped crates will vary more tiers when")
-            (set! vinhs2 "you level up Jak's <COLOR_ORANGE>Notoriety<COLOR_YELLOW>.")
+            (set! vinhs2 "you level up Jak's <COLOR_ORANGE>Hero Level<COLOR_YELLOW>.")
             (set! vinhs3 "Grouped drops will increase the higher your level is.")
             (set! vinhs4 "")
         )

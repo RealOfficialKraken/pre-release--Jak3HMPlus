@@ -885,11 +885,11 @@
 
 ;; WARN: disable def twice: 6. This may happen when a cond (no else) is nested inside of another conditional, but it should be rare.
 (defmethod crimson-guard-method-290 ((this crimson-guard))
-  (if #t
-      (handle->process (-> this attacker-info enemy))
-      (squad-control-city-method-35 (-> this squad) this (-> this focus handle))
-      )
-  )
+  (let ((en (handle->process (-> this attacker-info enemy))))
+    (if en
+        en
+        *target*))
+)
 
 (defmethod crimson-guard-method-261 ((this crimson-guard))
   (when (not (handle->process (-> this target-status handle)))
@@ -1713,7 +1713,7 @@
   (set! (-> this next-update-target-time) 0)
   (set! (-> this pursuit-start-time) 0)
   (set! (-> this last-choose-new-enemy-time) 0)
-  (if (logtest? (-> this flags) (citizen-flag dark-guard))
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
       (set! (-> this hit-points) (+ (* 14.0 (-> this enemy-info default-hit-points)) (* (the float enemy-noto) 3)))
       (set! (-> this hit-points) (+ (-> this enemy-info default-hit-points) (* (the float enemy-noto) 3)))
     )

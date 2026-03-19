@@ -1978,6 +1978,7 @@
         )
       )
     )
+  (set! (-> this arena-dead?) #f)
   (init-los! (-> this los) this (seconds 0.2) 327680.0 (collide-spec backgnd hit-by-others-list los-blocker))
   (cond
     ((and (task-node-closed? (game-task-node desert-chase-marauders-introduction))

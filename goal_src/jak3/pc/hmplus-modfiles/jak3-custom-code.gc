@@ -5,30 +5,26 @@
 
 #|
 TODO:
-- (optional) add to title screen, like a dark ship or enemies in the background, or the rage ghost
 - (CRITICAL) Add the sounds to the rage-ghost, and the anchor event
 - (CRITICAL) Add a NG+ to continue levelling with your current stats, higher level enemies, and extremely hard story missions
 - (CRITICAL) Make TP-FB with the terraformer in dark-world
-- (optional) Maybe port the nest worms over to desert and add a worm boss, too
 
 After all of these, the mod will be at a v1.0 state. Mod releasing is determined by Jak 3's open release
 
 BUGS:
-- dropped boss/group crates dont reset their vectors
 - Bipedal Boss' shield isnt strength 999
 - Crystal in hud has no texture
 - Blocking plane at course-race doesn't spawn
 - General Gouge doesn't have his attributes or hpbar name
 
 :CRASHES
-- terraformer in dark-world makes auto-saving fail, and causes a memory leak.
-- Dark world can remain after using fast travel to go anywhere except for when you go back to the warp room.
+- 
 |#
 
 
 
 ;;MOD VERSION
-(define mod-version "0.71")
+(define mod-version "0.8.1")
 ;;
 
 (defun-extern freeze-enemies-in-menu! (none))
@@ -987,7 +983,7 @@ BUGS:
         (when (and (>= tutorial-freeze 20) (< tutorial-freeze 700))
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "<COLOR_ORANGE>Jak now has a main level, that being his Notoriety~%<COLOR_YELLOW>His level affects with how powerful Jak is~%Slay enemies and complete missions to earn XP"
+            (format matt-str "<COLOR_ORANGE>Jak now has a main level, that being his Hero Level~%<COLOR_YELLOW>His level affects with how powerful Jak is~%Slay enemies and complete missions to earn XP"
             )
             (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
             (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -1222,7 +1218,7 @@ BUGS:
         (when (and (>= tutorial-freeze 960)(< tutorial-freeze 1900))
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "<COLOR_CYAN>In the Wasteland, enemies and cars will start off with a level 2 below your <COLOR_ORANGE>Notoriety~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_CYAN>Then gradually, <COLOR_RED>enemy levels will raise up slowly, but endlessly~%<COLOR_YELLOW>Don't take too long in the Wasteland!"
+            (format matt-str "<COLOR_CYAN>In the Wasteland, enemies and cars will start off with a level 2 below your <COLOR_ORANGE>Hero Level~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_CYAN>Then gradually, <COLOR_RED>enemy levels will raise up slowly, but endlessly~%<COLOR_YELLOW>Don't take too long in the Wasteland!"
             )
             (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
             (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -2425,7 +2421,7 @@ BUGS:
     (= menu-slot 0)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_PINK>All Skills:~%~%<COLOR_ORANGE>Notoriety <COLOR_GREEN>Level <COLOR_CYAN> ~d <COLOR_GREEN>(<)~%<COLOR_RED>Guns <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_WHITE>(<)~%<COLOR_PINK>Vehicle <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_PINK>All Skills:~%~%<COLOR_ORANGE>Hero Level <COLOR_GREEN>Level <COLOR_CYAN> ~d <COLOR_GREEN>(<)~%<COLOR_RED>Guns <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_WHITE>(<)~%<COLOR_PINK>Vehicle <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_WHITE>(<)"
         notoriety-level
         guns-level
         cars-level
@@ -2441,7 +2437,7 @@ BUGS:
     (= menu-slot 1)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_PINK>All Skills:~%~%<COLOR_ORANGE>Notoriety <COLOR_GREEN>Level <COLOR_CYAN> ~d <COLOR_WHITE>(<)~%<COLOR_RED>Guns <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_GREEN>(<)~%<COLOR_PINK>Vehicle <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_PINK>All Skills:~%~%<COLOR_ORANGE>Hero Level <COLOR_GREEN>Level <COLOR_CYAN> ~d <COLOR_WHITE>(<)~%<COLOR_RED>Guns <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_GREEN>(<)~%<COLOR_PINK>Vehicle <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_WHITE>(<)"
         notoriety-level
         guns-level
         cars-level
@@ -2457,7 +2453,7 @@ BUGS:
     (= menu-slot 2)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_PINK>All Skills:~%~%<COLOR_ORANGE>Notoriety <COLOR_GREEN>Level <COLOR_CYAN> ~d <COLOR_WHITE>(<)~%<COLOR_RED>Guns <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_WHITE>(<)~%<COLOR_PINK>Vehicle <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_GREEN>(<)"
+        (format matt-str "<COLOR_PINK>All Skills:~%~%<COLOR_ORANGE>Hero Level <COLOR_GREEN>Level <COLOR_CYAN> ~d <COLOR_WHITE>(<)~%<COLOR_RED>Guns <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_WHITE>(<)~%<COLOR_PINK>Vehicle <COLOR_GREEN>Level<COLOR_CYAN> ~d <COLOR_GREEN>(<)"
         notoriety-level
         guns-level
         cars-level
@@ -2494,7 +2490,7 @@ BUGS:
     )
     (cond
         ((>= notoriety-level 25)
-            (set! skill-noto-string2 "<COLOR_GREEN>Notoriety level now affects the damage of weapons")
+            (set! skill-noto-string2 "<COLOR_GREEN>Hero Level now affects the damage of weapons")
         )
         (else
             (set! skill-noto-string2 "<COLOR_RED>LOCKED")
@@ -2520,7 +2516,7 @@ BUGS:
     (= menu-slot 0)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Notoriety Level:<COLOR_CYAN> ~d ~%~%<COLOR_GREEN>Your Notoriety Level unlocks more things the higher it gets.~%Fighting enemies will become easier, and crates will drop with better chances.~%~%Enemies will also have a level for themselves, all tied to the areas they're in~%~%<COLOR_YELLOW>Complete Main-Line/Side Missions, and level other skills to earn XP~%~%~%<COLOR_ORANGE>At Level 10~%~s~%<COLOR_ORANGE>At Level 25~%~s~%<COLOR_ORANGE>At Level 40~%~s~%<COLOR_ORANGE>At Level 60~%~S"
+        (format matt-str "<COLOR_ORANGE>Hero Level:<COLOR_CYAN> ~d ~%~%<COLOR_GREEN>Your Hero Level unlocks more things the higher it gets.~%Fighting enemies will become easier, and crates will drop with better chances.~%~%Enemies will also have a level for themselves, all tied to the areas they're in~%~%<COLOR_YELLOW>Complete Main-Line/Side Missions, and level other skills to earn XP~%~%~%<COLOR_ORANGE>At Level 10~%~s~%<COLOR_ORANGE>At Level 25~%~s~%<COLOR_ORANGE>At Level 40~%~s~%<COLOR_ORANGE>At Level 60~%~S"
         notoriety-level
         skill-noto-string1
         skill-noto-string2
@@ -2727,7 +2723,7 @@ BUGS:
 (when (and (= (-> *game-info* total-deaths) 0)(= menu-unlocked? #t)(= on-vehicle? #f)(not *scene-player*)(= in-menu? #t))
     (clear matt-str)
     (clear *pc-encoded-matt-str*)
-    (format matt-str "~%~%<COLOR_WHITE>Welcome to <COLOR_BLUE>Hero<COLOR_RED>Mode<COLOR_CYAN>+~%<COLOR_GREEN>Made by Kraken~%~%<COLOR_CYAN>RPG Elements have been added~%Information about your levels can be accessed in the <COLOR_ORANGE>Skills<COLOR_CYAN> tab~%~%The new way to get weapons is to find them in enemy-dropped~%crates, which can be found in any tier.~%<COLOR_PINK>Black crates<COLOR_CYAN> are unlocked after <COLOR_ORANGE>Notoriety Lv.<COLOR_YELLOW> 18~%~%<COLOR_CYAN>Super Gun Mods are new additions that mod the <COLOR_GREEN>type<COLOR_CYAN> of each colored gun.~%They only mod the specified colored weapon, and~%it becomes more powerful with each one~%attached~%~%They can be found very rarely in black crates only, or by~%completing certain challenges in the future.~%~%Enemies also have a level, so be careful treading into certain areas~%<COLOR_ORANGE>Main missions are now <COLOR_RED>very difficult<COLOR_ORANGE>, and certain outlier levels~%can be incredibly difficult, but Leveling can make~%a difference!~%~%<COLOR_GREEN>Have fun! - <COLOR_BLUE>Kraken"
+    (format matt-str "~%~%<COLOR_WHITE>Welcome to <COLOR_BLUE>Hero<COLOR_RED>Mode<COLOR_CYAN>+~%<COLOR_GREEN>Made by Kraken~%~%<COLOR_CYAN>RPG Elements have been added~%Information about your levels can be accessed in the <COLOR_ORANGE>Skills<COLOR_CYAN> tab~%~%The new way to get weapons is to find them in enemy-dropped~%crates, which can be found in any tier.~%<COLOR_PINK>Black crates<COLOR_CYAN> are unlocked after <COLOR_ORANGE>Hero Level<COLOR_YELLOW> 18~%~%<COLOR_CYAN>Super Gun Mods are new additions that mod the <COLOR_GREEN>type<COLOR_CYAN> of each colored gun.~%They only mod the specified colored weapon, and~%it becomes more powerful with each one~%attached~%~%They can be found very rarely in black crates only, or by~%completing certain challenges in the future.~%~%Enemies also have a level, so be careful treading into certain areas~%<COLOR_ORANGE>Main missions are now <COLOR_RED>very difficult<COLOR_ORANGE>, and certain outlier levels~%can be incredibly difficult, but Leveling can make~%a difference!~%~%<COLOR_GREEN>Have fun! - <COLOR_BLUE>Kraken"
     )
     (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
     (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -4744,7 +4740,7 @@ BUGS:
         )
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "<COLOR_YELLOW>Hint:~%<COLOR_WHITE>Your level may be too low!~%<COLOR_PINK>Vehicle Level <COLOR_ORANGE>affects your <COLOR_GREEN>HP~%<COLOR_YELLOW>Notoriety<COLOR_ORANGE> and <COLOR_RED>Guns<COLOR_ORANGE> levels affects your laser damage"
+            (format matt-str "<COLOR_YELLOW>Hint:~%<COLOR_WHITE>Your level may be too low!~%<COLOR_PINK>Vehicle Level <COLOR_ORANGE>affects your <COLOR_GREEN>HP~%<COLOR_YELLOW>Hero Level<COLOR_ORANGE> and <COLOR_RED>Guns<COLOR_ORANGE> levels affects your laser damage"
             )
             (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
             (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -4825,52 +4821,52 @@ BUGS:
                 )
                 ((task-node-open? (game-task-node arena-challenge-2))
                     (set! achallenge-str "Kill 30 Marauders in under 30 seconds!")
-                    (set! areward-str "Level up in <COLOR_RED>Guns<COLOR_PINK>,<COLOR_YELLOW> Notoriety<COLOR_PINK>, and Vehicles.")
+                    (set! areward-str "Level up in <COLOR_RED>Guns<COLOR_PINK>,<COLOR_YELLOW> Hero Level<COLOR_PINK>, and Vehicles.")
                     (set! aarena-str "Arena 1")
                 )
                 ((task-node-open? (game-task-node arena-challenge-3))
-                    (set! achallenge-str "Kill 85 Marauders in under 2 minutes!")
-                    (set! areward-str "Level up in <COLOR_RED>Guns<COLOR_PINK>,<COLOR_YELLOW> Notoriety<COLOR_PINK>, and Vehicles.")
+                    (set! achallenge-str "Kill 75 Marauders in under 2 minutes!")
+                    (set! areward-str "Level up in <COLOR_RED>Guns<COLOR_PINK>,<COLOR_YELLOW> Hero Level<COLOR_PINK>, and Vehicles.")
                     (set! aarena-str "Arena 2")
                 )
                 ((task-node-open? (game-task-node arena-challenge-4))
-                    (set! achallenge-str "Kill 50 Marauders in under 75 seconds!")
-                    (set! areward-str "Level up in <COLOR_RED>Guns<COLOR_PINK>,<COLOR_YELLOW> Notoriety<COLOR_PINK>, and Vehicles.")
+                    (set! achallenge-str "Kill 40 Marauders in under 75 seconds!")
+                    (set! areward-str "Level up in <COLOR_RED>Guns<COLOR_PINK>,<COLOR_YELLOW> Hero Level<COLOR_PINK>, and Vehicles.")
                     (set! aarena-str "Arena 3")
                 )
                 ((task-node-open? (game-task-node arena-challenge-5))
-                    (set! achallenge-str "Slay a Kh'aast Moorog at Enemy Level 50")
-                    (set! areward-str "<COLOR_RED>A Gun Mod")
+                    (set! achallenge-str "Reach Enemy Level 50 Marauders")
+                    (set! areward-str "<COLOR_RED>A Random Weapon or Level-Up")
                     (set! aarena-str "Any")
                 )
                 ((task-node-open? (game-task-node arena-challenge-6))
                     (set! achallenge-str "Last 10 minutes in <COLOR_RED>THE DEATH DOME")
-                    (set! areward-str "<COLOR_RED>A Gun Mod")
-                    (set! aarena-str "Arena 3")
+                    (set! areward-str "<COLOR_RED>A Random Weapon or Level-Up")
+                    (set! aarena-str "DEATH DOME")
                 )
                 ((task-node-open? (game-task-node arena-challenge-7))
-                    (set! achallenge-str "Approach Enemy Level 75")
-                    (set! areward-str "<COLOR_RED>A Gun Mod")
+                    (set! achallenge-str "Reach Enemy Level 75 Marauders")
+                    (set! areward-str "<COLOR_RED>A Random Weapon or Level-Up")
                     (set! aarena-str "Any")
                 )
                 ((task-node-open? (game-task-node arena-challenge-8))
-                    (set! achallenge-str "Kill 200 Marauders in under 5 minutes!")
-                    (set! areward-str "<COLOR_RED>A Gun Mod")
+                    (set! achallenge-str "Kill 200 Marauders in under 3 minutes!")
+                    (set! areward-str "<COLOR_CYAN>A Super Gun Mod")
                     (set! aarena-str "Arena 1")
                 )
                 ((task-node-open? (game-task-node arena-challenge-9))
-                    (set! achallenge-str "Kill 100 Marauders in under 6 minutes!")
-                    (set! areward-str "<COLOR_RED>A Gun Mod")
+                    (set! achallenge-str "Kill 100 Marauders in under 2 minutes!")
+                    (set! areward-str "<COLOR_CYAN>A Super Gun Mod")
                     (set! aarena-str "Arena 2")
                 )
                 ((task-node-open? (game-task-node arena-challenge-10))
-                    (set! achallenge-str "Approach Enemy Level 100")
-                    (set! areward-str "<COLOR_RED>A Gun Mod")
+                    (set! achallenge-str "Approach Enemy Level 100 in <COLOR_RED>THE DEATH DOME")
+                    (set! areward-str "<COLOR_CYAN>A Super Gun Mod")
                     (set! aarena-str "Any")
                 )
                 (else
                     (set! achallenge-str "All Challenges Completed")
-                    (set! areward-str "")
+                    (set! areward-str "You Get Nothing! You Lose! Good Day, Sir!")
                 )
             )
             (when (>= arena-menu-delay 1000)
@@ -5057,6 +5053,7 @@ BUGS:
                                 (set! enemy-noto 1)
                                 (set-vector! (-> *target* control trans) (meters 2328.2661) (meters 13.4661) (meters -450.7846) 1.0)
                                 (summon-arena-event)
+                                (arena-death-dome-grenades)
                                 (spawn-kraken-timer)
                             )
                         )
@@ -6808,16 +6805,16 @@ BUGS:
 
   (defun birth-drop2 ((vec vector))
     (let ((fact (new 'static 'fact-info))
-          (rnd (rand-vu-int-range 1 4))
+          (rnd (rand-vu-int-range 1 5))
           (rnd-count-gem (rand-vu-int-range 3 7))
           (rnd-crystal (rand-vu-int-range 1 1))
           (rnd-lvl 0.0)
           )
         (when (rand-vu-percent? 0.02)
-            (set! rnd 5)
+            (set! rnd 6)
         )
         (when (rand-vu-percent? 0.0025)
-            (set! rnd 6)
+            (set! rnd 7)
         )
         (when (>= notoriety-level 35)
             (set! rnd-lvl 0.0007)
@@ -6832,7 +6829,7 @@ BUGS:
             (set! rnd-lvl 0.001)
         )
         (when (rand-vu-percent? rnd-lvl)
-            (set! rnd 7)
+            (set! rnd 8)
         )
         (set! (-> fact options) (actor-option blocked))
         (cond
@@ -6875,14 +6872,18 @@ BUGS:
             (set! (-> fact pickup-amount) (the float rnd-count-gem))
          )
          ((= rnd 5)
+            (set! (-> fact pickup-type) (pickup-type eco-pill-dark))
+            (set! (-> fact pickup-amount) 64.0)
+         )
+         ((= rnd 6)
             (set! (-> fact pickup-type) (pickup-type eco-crystal-dark-c))
             (set! (-> fact pickup-amount) (the float rnd-crystal))
          )
-         ((= rnd 6)
+         ((= rnd 7)
             (set! (-> fact pickup-type) (pickup-type gun-yellow-1))
             (set! (-> fact pickup-amount) 1.0)
          )
-         ((= rnd 7)
+         ((= rnd 8)
             (set! (-> fact pickup-type) (pickup-type gun-mod-upgrade))
          )
         )

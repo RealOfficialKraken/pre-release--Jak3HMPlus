@@ -2,6 +2,9 @@
 
 ;name: arena-events.gc
 
+(declare-type vehicle-grenade projectile-bounce)
+(declare-type vehicle-bomb-grenade vehicle-grenade)
+(defun-extern vehicle-bomb-grenade-spawn process vector vehicle-bomb-grenade)
 
 (deftype arena-event (process)
 ((gen-i                                    int)
@@ -31,6 +34,7 @@ dead
  (arena-event-method-4  (_type_) none)
  (arena-event-method-5  (_type_) none)
  (arena-event-handler (_type_ process int symbol event-message-block) none)
+ (spawn-bomb-above-jak (_type_) none)
 )
 )
 
@@ -174,7 +178,7 @@ dead
 
 (defmethod arena-event-method-1 ((this arena-event))
     (send-event (ppointer->process *arena-event*) 'diff-increase #t)
-    (let ((rnd (rand-vu-int-range 1 4))
+    (let ((rnd (rand-vu-int-range 1 3)) ;; disable barrels for now until further notice
          )
          (when (= rnd 1)
             (set! (-> this event-mode) "Meteor Shower~%Take Erasive Action")
@@ -185,12 +189,12 @@ dead
             (send-event (ppointer->process *arena-event*) 'tesla #t)
          )
          (when (= rnd 3)
-            (set! (-> this event-mode) "Barrel Rain")
-            (send-event (ppointer->process *arena-event*) 'barrels #t)
-         )
-         (when (= rnd 4)
             (set! (-> this event-mode) "Enemies explode on Death")
             (send-event (ppointer->process *arena-event*) 'entity-explode #t)
+         )
+         (when (= rnd 4)
+            (set! (-> this event-mode) "Barrel Rain")
+            (send-event (ppointer->process *arena-event*) 'barrels #t)
          )
     )
     (none)
@@ -291,27 +295,58 @@ dead
     )
 )
 
+(defmethod spawn-bomb-above-jak ((this arena-event))
+  (let ((pos (new 'stack-no-clear 'vector)))
+    (vector-copy! pos (-> *target* root trans))
+    (+! (-> pos y) (meters 20))
+    (vehicle-bomb-grenade-spawn this pos)
+    )
+    (none)
+  )
+
 (defstate barrels! (arena-event)
-    :virtual #t
-    :event arena-event-event-handler
-    :code
-    (behavior ()
-        (blank-hint! "<COLOR_PINK>ITS RAINING BARRELS" "" 110 300)
-        (loop
-            (+! (-> self gen-i) 1)
-            ;put event here
-            (when (>= (-> self gen-i) (-> self event-timer))
-                (go-virtual idle)
-            )
-            (format *stdcon* "~%~s, barrels!,~%gen-i: ~d/~D~%" (-> self name) (-> self gen-i) (-> self event-timer))
-            (suspend)
+  :virtual #t
+  :event arena-event-event-handler
+  :code
+  (behavior ()
+    (blank-hint! "<COLOR_PINK>ITS RAINING BOMBS!" "" 110 300)
+    (loop
+      (+! (-> self gen-i) 1)
+
+      (let ((pos (new 'stack-no-clear 'vector))
+            (gp-0 (the-as process #f)))
+        (vector-copy! pos (-> *target* root trans))
+        (+! (-> pos y) (meters 7))
+
+        (when (rand-vu-percent? 0.1)
+            (let* ((proc (get-process *default-dead-pool* vehicle-bomb-grenade #x4000 1))
+               (pptr (when proc
+                       (let ((activate-func (method-of-type process activate)))
+                         (activate-func proc (the-as process self) "vehicle-bomb-grenade" (the-as pointer #x70004000))
+                         )
+                       (run-now-in-process proc vehicle-bomb-grenade-init-by-other pos)
+                       (-> proc ppointer)
+                       )))
+          (when pptr
+            (set! gp-0 (-> pptr 0)))
+          )
         )
+
+        gp-0
+        )
+
+      (when (>= (-> self gen-i) (-> self event-timer))
+        (go-virtual idle)
+        )
+      (format *stdcon* "~%~s, barrels!,~%gen-i: ~d/~D~%" (-> self name) (-> self gen-i) (-> self event-timer))
+      (suspend)
+      )
     )
-    :exit
-    (behavior ()
-        (set! (-> self gen-i) 0)
+  :exit
+  (behavior ()
+    (set! (-> self gen-i) 0)
     )
-)
+  )
 
 (defstate entity-explode! (arena-event)
     :virtual #t

@@ -651,9 +651,12 @@
 
   (defun-extern launch-disclaimer none)
   (define in-disclaimer? #f)
+  (define launch-disclaimer? #f)
   (define-extern mod-version string)
   (define launch-mmenu-delay #f)
   (define lmmi 0)
+
+  (defun-extern arena-death-dome-grenades (none))
 
   (define disable-targbar #f)
 

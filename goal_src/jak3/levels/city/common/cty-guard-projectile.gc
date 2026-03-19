@@ -583,3 +583,196 @@
       )
   (call-parent-method this arg0 arg1)
   )
+;; ============================================================
+;; vehicle-bomb-grenade
+;; ============================================================
+
+(deftype vehicle-bomb-grenade (vehicle-grenade)
+  ((bomb-scale       float)
+   (explode-delay    time-frame)
+   (next-flash-time  time-frame)
+   (flash-state      symbol)
+   )
+  (:state-methods
+    armed
+    )
+  (:methods
+    (vehicle-bomb-grenade-update-flash! (_type_) none)
+    (vehicle-bomb-grenade-reset-visual! (_type_) none)
+    )
+  )
+
+;; ------------------------------------------------------------
+;; init-by-other
+;; arg0 = spawn position only
+;; ------------------------------------------------------------
+(defbehavior vehicle-bomb-grenade-init-by-other vehicle-bomb-grenade ((arg0 vector))
+  (ctywide-entity-hack)
+  (stack-size-set! (-> self main-thread) 256)
+
+  (setup-collision! self)
+  (init-proj-settings! self)
+
+  ;; important for projectile-move-fill-line-sphere
+  (set! (-> self ignore-handle) (the-as handle #f))
+  (set! (-> self notify-handle) (the-as handle #f))
+  (set! (-> self target-pos quad) (the-as uint128 0))
+
+  (vector-copy! (-> self root trans) arg0)
+  (set-vector! (-> self root transv) 0.0 -16384.0 0.0 0.0)
+
+  (set! (-> self bomb-scale) 10.0)
+  (set! (-> self explode-delay) (seconds 3.0))
+  (set! (-> self flash-state) #f)
+
+  (set-vector! (-> self root scale)
+               (-> self bomb-scale)
+               (-> self bomb-scale)
+               (-> self bomb-scale)
+               1.0)
+
+  (go-virtual armed)
+  0
+  )
+
+;; ------------------------------------------------------------
+;; stock grenade setup, but with bigger blast and long timeout
+;; ------------------------------------------------------------
+(defmethod init-proj-settings! ((this vehicle-bomb-grenade))
+  (let ((t9-0 (method-of-type vehicle-grenade init-proj-settings!)))
+    (t9-0 this)
+    )
+  (set! (-> this timeout) (seconds 999.0))
+  (set! (-> this blast-radius) 24576.0)
+  0
+  (none)
+  )
+
+;; ------------------------------------------------------------
+;; restore normal size
+;; ------------------------------------------------------------
+(defmethod vehicle-bomb-grenade-reset-visual! ((this vehicle-bomb-grenade))
+  (set-vector! (-> this root scale)
+               (-> this bomb-scale)
+               (-> this bomb-scale)
+               (-> this bomb-scale)
+               1.0)
+  (none)
+  )
+
+;; ------------------------------------------------------------
+;; flash via size pulse
+;; ------------------------------------------------------------
+(defmethod vehicle-bomb-grenade-update-flash! ((this vehicle-bomb-grenade))
+  (if (-> this flash-state)
+      (begin
+        (set-vector! (-> this root scale)
+                     (* (-> this bomb-scale) 1.12)
+                     (* (-> this bomb-scale) 1.12)
+                     (* (-> this bomb-scale) 1.12)
+                     1.0)
+        (set! (-> this flash-state) #f)
+        )
+      (begin
+        (vehicle-bomb-grenade-reset-visual! this)
+        (set! (-> this flash-state) #t)
+        )
+      )
+  (none)
+  )
+
+;; ------------------------------------------------------------
+;; explode when thwacked/spun by Jak
+;; ------------------------------------------------------------
+(defmethod proj-event-handler ((this vehicle-bomb-grenade) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (case arg2
+    (('attack)
+     (if (and
+           (!= (-> this owner-handle) (process->handle arg0))
+           (logtest?
+             (get-penetrate-using-from-attack-event (the-as process-drawable arg0) arg3)
+             (penetrate spin)
+             )
+           )
+         (go (method-of-object this impact))
+         ((method-of-type projectile proj-event-handler) this arg0 arg1 arg2 arg3)
+         )
+     )
+    (else
+      ((method-of-type projectile proj-event-handler) this arg0 arg1 arg2 arg3)
+      )
+    )
+  )
+
+;; ------------------------------------------------------------
+;; armed
+;; custom movement + countdown only
+;; no stock grenade state transitions here
+;; ------------------------------------------------------------
+(defstate armed (vehicle-bomb-grenade)
+  :virtual #t
+  :enter (behavior ()
+    (set-time! (-> self state-time))
+    (set-time! (-> self next-flash-time))
+    (set! (-> self flash-state) #f)
+    )
+  :trans (behavior ()
+    (let* ((elapsed (the float (- (current-time) (-> self state-time))))
+           (total   (the float (-> self explode-delay)))
+           (t       (fmin 1.0 (/ elapsed total)))
+           (t2      (* t t))
+           (interval (seconds (lerp 0.45 0.05 t2))))
+      (when (time-elapsed? (-> self next-flash-time) interval)
+        (set-time! (-> self next-flash-time))
+        (vehicle-bomb-grenade-update-flash! self)
+        (sound-play "grenade-bounce")
+        )
+      (when (>= elapsed total)
+        (vehicle-bomb-grenade-reset-visual! self)
+        (go-virtual impact)
+        )
+      )
+    )
+  :code (behavior ()
+    (+! (-> self root trans y) (* -16384.0 (seconds-per-frame)))
+    )
+  :post (behavior ()
+    (ja-post)
+    )
+  )
+
+;; ------------------------------------------------------------
+;; spawn helper
+;; ------------------------------------------------------------
+(defun vehicle-bomb-grenade-spawn ((arg0 process) (arg1 vector))
+  (let ((gp-0 (the-as process #f)))
+    (let* ((s3-0 (get-process *default-dead-pool* vehicle-bomb-grenade #x4000 1))
+           (v1-0 (when s3-0
+                   (let ((t9-0 (method-of-type process activate)))
+                     (t9-0 s3-0 arg0 "vehicle-bomb-grenade" (the-as pointer #x70004000))
+                     )
+                   (run-now-in-process s3-0 vehicle-bomb-grenade-init-by-other arg1)
+
+                   ;; cast before touching projectile fields
+                   (set! (-> (the-as vehicle-bomb-grenade s3-0) ignore-handle)
+                         (process->handle arg0))
+
+                   (-> s3-0 ppointer)
+                   )))
+      (when v1-0
+        (set! gp-0 (-> v1-0 0))))
+    (the-as vehicle-bomb-grenade gp-0)))
+
+
+
+
+
+
+  (defun arena-start ()
+    (send-event (ppointer->process *arena-event*) 'start #t)
+    (none)
+  )
+  (defun arena-barrels ()
+    (send-event (ppointer->process *arena-event*) 'barrels #t)
+    (none)
+  )

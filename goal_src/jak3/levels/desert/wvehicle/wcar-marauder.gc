@@ -124,6 +124,51 @@
   (let ((t9-0 (method-of-type wcar-base control-hook-ai)))
     (t9-0 this arg0)
     )
+    (let ((parent (method-of-type wcar-base control-hook-ai)))
+    (parent this arg0))
+
+  ;; absurd AI speed request
+  (set! (-> this ai-min-speed) 100000000.0)
+  (set! (-> this ai-max-speed) 100000000.0)
+  (set! (-> this path-deviation) 0.0)
+  (set! (-> this shortcut-speed-factor) 999.0)
+
+  ;; live drivetrain values
+  (set! (-> this final-drive-ratio) 100.0)
+  (set! (-> this engine-max-torque) 1000000000.0)
+  (set! (-> this engine-torque) 1000000000.0)
+
+  ;; constant data
+  (set! (-> this engine-max-torque) 50000000.0)
+  (set! (-> this engine-torque) 50000000.0)
+  (set! (-> this info engine max-torque) 500000000.0)
+
+  ;; physics caps
+  (set! (-> this info handling max-engine-thrust) (meters 2000))
+  (set! (-> this info handling inv-max-engine-thrust) 0.00000012207031)
+  (set! (-> this info handling max-xz-speed) (meters 2000))
+
+  ;; remove all resistance
+  (set! (-> this info handling drag-force-factor) 0.0)
+  (set! (-> this info handling rolling-resistance) 0.0)
+  (set! (-> this info handling speed-scrubbing-drag) 0.0)
+  (set! (-> this info handling speed-limiting-drag) 0.0)
+  (set! (-> this info handling air-drag-factor) 0.0)
+
+  ;; AI always pushes
+  (set! (-> this info handling ai-throttle-factor) 100.0)
+
+  ;; kill drift / maximize grip
+  (dotimes (i 4)
+    (set! (-> this wheel i side-vel) 0.0)
+    (set! (-> this wheel i forward-slip-vel) 0.0)
+    (set! (-> this wheel i friction-coef) 100.0))
+
+  ;; insane tire bite
+  (set! (-> this info handling tire-static-friction) 2000.0)
+  (set! (-> this info handling tire-dynamic-friction) 2000.0)
+  (set! (-> this info handling tire-static-friction-speed) 1000000.0)
+  (set! (-> this info handling tire-dynamic-friction-speed) 1000000.0)
   (let ((s5-0 (-> this target-status)))
     (when (< 122880.0 (vector-vector-distance (-> s5-0 position) (-> this root trans)))
       (let ((f1-0 (vector-length (-> s5-0 velocity))))

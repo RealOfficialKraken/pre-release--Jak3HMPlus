@@ -269,7 +269,7 @@
     (+! (-> *game-info* total-trys) arg0)
     (set! (-> *game-info* karma) extra-offthetop)
     (set! draw-levelup-noto #t)
-    (set! noto-string "<COLOR_ORANGE>Notoriety<COLOR_YELLOW>")
+    (set! noto-string "<COLOR_ORANGE>Hero<COLOR_YELLOW>")
     (set! draw-levelup-int (-> *game-info* total-trys))
     (cond
         ((>= notoriety-level 10)
@@ -2303,7 +2303,7 @@
     )
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Notoriety: ~d~%~%<COLOR_YELLOW>~d/~d"
+        (format matt-str "<COLOR_ORANGE>Hero Level: ~d~%~%<COLOR_YELLOW>~d/~d"
         notoriety-level
         (the int (-> *game-info* karma))
         (the int (* (+ (* notoriety-level 60) (* notoriety-level 100)) notoriety-level))

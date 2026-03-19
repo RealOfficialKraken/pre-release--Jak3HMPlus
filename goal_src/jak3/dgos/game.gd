@@ -575,6 +575,7 @@
   "level-spawner.o"
   "kraken-volume.o"
   "gyro-warp.o"
+  "cty-guard-projectile.o"
   "arena-events.o"
   "mhcity-obs.o"
   "mhcity-obs2.o"
