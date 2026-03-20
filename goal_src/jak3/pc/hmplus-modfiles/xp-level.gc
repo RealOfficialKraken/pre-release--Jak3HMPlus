@@ -1944,7 +1944,7 @@
                 (set! enemy-noto (rand-vu-int-range 19 20))
             )
             ((task-node-open? (game-task-node city-port-assault-resolution))
-                (set! enemy-noto 64)
+                (set! enemy-noto 40)
             )
             )
             (when ;ctyinda

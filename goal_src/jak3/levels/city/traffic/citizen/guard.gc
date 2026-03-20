@@ -883,12 +883,36 @@
     )
   )
 
+(defun guard-find-nearest-hostile-faction-process ((this crimson-guard))
+  (let ((best (the-as process #f))
+        (best-dist (the-as float #x7f800000)))
+    (when *cty-attack-controller*
+      (dotimes (i (-> *cty-attack-controller* attackers length))
+        (let ((ai (-> *cty-attack-controller* attackers data i)))
+          (when (logtest? (-> ai flags) (city-attacker-info-flag cai0))
+            (let ((p (handle->process (-> ai proc))))
+              (when (and p
+                         (!= p this)
+                         (not (focus-test? (the-as process-focusable p) dead))
+                         (not (focus-test? (the-as process-focusable p) inactive))
+                         (let ((fac (city-target-type->cty-faction
+                                      (the-as city-target-type (-> ai self-type)))))
+                           (or (= fac (cty-faction kg))
+                               (= fac (cty-faction mh)))))
+                (let ((d (vector-vector-xz-distance
+                           (-> this root trans)
+                           (-> (the-as process-drawable p) root trans))))
+                  (when (< d best-dist)
+                    (set! best-dist d)
+                    (set! best p)))))))))
+    best))
+
 ;; WARN: disable def twice: 6. This may happen when a cond (no else) is nested inside of another conditional, but it should be rare.
 (defmethod crimson-guard-method-290 ((this crimson-guard))
   (let ((en (handle->process (-> this attacker-info enemy))))
     (if en
         en
-        *target*))
+        (guard-find-nearest-hostile-faction-process this)))
 )
 
 (defmethod crimson-guard-method-261 ((this crimson-guard))

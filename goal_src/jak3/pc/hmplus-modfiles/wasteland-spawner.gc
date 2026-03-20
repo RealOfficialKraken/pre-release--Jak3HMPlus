@@ -673,7 +673,7 @@
             (= (pause-allowed?) #t)
         )
             (+! cdr-i 1)
-            (when (= cdr-i 6000)
+            (when (= cdr-i 599)
                 (set! cdr-i 0)
                 (set! cdr-satbattle #f)
             )

@@ -1814,6 +1814,7 @@
   :virtual #t
   :code (behavior ()
     (set-setting! 'borrow-hold-perm '(ctycara) 0.0 0)
+    (set! in-desert-game-task? #t)
     (while (or (!= (level-status? *level* 'ctycara #f) 'active) (!= (level-status? *level* 'mhcitya #f) 'active))
       (suspend)
       )

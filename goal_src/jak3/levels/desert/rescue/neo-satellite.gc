@@ -12,7 +12,9 @@
 (define-extern *curve-sat-explo-alpha* curve2d-fast)
 (define-extern *curve-sat-explo-scale-x* curve2d-fast)
 (define-extern *curve-sat-explo-scale-y* curve2d-fast)
+(define-extern trajectory-prediction (function vector vector vector vector vector float float symbol))
 
+(define-extern spawn-satellite-grenade (function process-focusable vector vector float (none)))
 (define-extern spawn-dp-bipedal-grenade (function process-focusable vector vector float (none)))
 
 ;; DECOMP BEGINS
@@ -3594,6 +3596,33 @@
       (vector-copy! src (-> self root trans))
       (vector-copy! center-target (-> self focus-pos))
       (+! (-> center-target y) (meters 3.5))
+      (let ((predict-dist 0.0)
+          (predict-t 0.0)
+          (predict-power 0.0))
+      (set! predict-dist (vector-vector-distance src center-target))
+      (set! predict-t (/ predict-dist (meters 60.0)))
+      (when (< predict-t 0.0) (set! predict-t 0.0))
+      (when (> predict-t 1.0) (set! predict-t 1.0))
+      (cond
+        ((= (-> self current-stage) 0)
+          (set! predict-power (* (lerp 28000.0 95000.0 predict-t) 4.0))
+        )
+        ((= (-> self current-stage) 1)
+          (set! predict-power (* (lerp 48000.0 115000.0 predict-t) 4.0))
+        )
+        ((= (-> self current-stage) 2)
+          (set! predict-power (* (lerp 68000.0 135000.0 predict-t) 4.0))
+        )
+      )
+      (when *target*
+        (trajectory-prediction
+          center-target
+          src
+          (-> self root transv)
+          (-> *target* root trans)
+          (-> *target* root transv)
+          (* predict-power 0.75)
+          102400.0)))
 
       (vector-! to-jak center-target src)
       (set! (-> to-jak y) 0.0)
@@ -3605,10 +3634,8 @@
             (set! (-> to-jak y) 0.0)
             (set! (-> to-jak z) (meters 0.0))
             (set! (-> to-jak w) 1.0)))
-
       (vector-cross! side to-jak *up-vector*)
       (set! (-> side y) 0.0)
-
       (if (> (vector-length side) 0.001)
           (vector-normalize! side spread)
           (begin
@@ -3616,60 +3643,48 @@
             (set! (-> side y) 0.0)
             (set! (-> side z) 0.0)
             (set! (-> side w) 1.0)))
-
       (vector+! left-target center-target side)
       (vector+float*! right-target center-target side -1.0)
-
       (if (rand-vu-percent? 0.5)
           (set! side-y-a (rand-vu-float-range (meters 4.0) (meters 6.0)))
           (set! side-y-a (rand-vu-float-range (meters -6.0) (meters -4.0))))
-
       (if (rand-vu-percent? 0.5)
           (set! side-y-b (rand-vu-float-range (meters 4.0) (meters 6.0)))
           (set! side-y-b (rand-vu-float-range (meters -6.0) (meters -4.0))))
-
       (+! (-> left-target y) side-y-a)
       (+! (-> right-target y) side-y-b)
-
       (set! center-dist (vector-vector-distance src center-target))
       (set! left-dist (vector-vector-distance src left-target))
       (set! right_dist (vector-vector-distance src right-target))
-
       (set! t (/ center-dist (meters 60.0)))
       (when (< t 0.0) (set! t 0.0))
       (when (> t 1.0) (set! t 1.0))
       (set! center-power (* (lerp 28000.0 95000.0 t) 4.0))
-
       (set! t (/ left-dist (meters 60.0)))
       (when (< t 0.0) (set! t 0.0))
       (when (> t 1.0) (set! t 1.0))
       (set! left-power (* (lerp 28000.0 95000.0 t) 4.0))
-
       (set! t (/ right_dist (meters 60.0)))
       (when (< t 0.0) (set! t 0.0))
       (when (> t 1.0) (set! t 1.0))
       (set! right-power (* (lerp 28000.0 95000.0 t) 4.0))
-
       (set! elapsed (the float (- (current-time) (-> self state-time))))
       (set! phase (/ elapsed (seconds 30.0)))
       (when (< phase 0.0) (set! phase 0.0))
       (when (> phase 1.0) (set! phase 1.0))
-
       (set! diff-scale (/ (the float (-> self diff-counter)) 7.0))
       (when (< diff-scale 0.0) (set! diff-scale 0.0))
       (when (> diff-scale 1.0) (set! diff-scale 1.0))
-
       (set! fire-frames (the int (lerp 244.0 648.0 phase)))
-
       (when (and (not (time-elapsed? (-> self state-time) (seconds 30.0)))
                  (time-elapsed? (-> self wander-generate-time)
                                 (the-as uint fire-frames)))
-        (spawn-dp-bipedal-grenade self src center-target center-power)
+        (spawn-satellite-grenade self src center-target center-power)
         (when (>= (-> self current-stage) 1)
-          (spawn-dp-bipedal-grenade self src left-target left-power)
+          (spawn-satellite-grenade self src left-target left-power)
         )
         (when (>= (-> self current-stage) 2)
-          (spawn-dp-bipedal-grenade self src right-target right-power)
+          (spawn-satellite-grenade self src right-target right-power)
         )
         (set-time! (-> self wander-generate-time)))
 
