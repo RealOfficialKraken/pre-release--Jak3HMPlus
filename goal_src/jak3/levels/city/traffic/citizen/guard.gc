@@ -8,6 +8,7 @@
 ;; DECOMP BEGINS
 
 (define *guard-died-recently?* #f)
+(define-extern city-target-type->cty-faction (function city-target-type cty-faction))
 
 (defskelgroup skel-crimson-guard crimson-guard crimson-guard-lod0-jg -1
               ((crimson-guard-lod0-mg (meters 20)) (crimson-guard-lod2-mg (meters 999999)))

@@ -1695,6 +1695,13 @@
      (go (method-of-object this blow-wall))
      )
     (('touched 'touch 'attack)
+    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                (set! hpbar-max-hit-points 12500.0)
+                (set! hpbar-max-hit-points 4000.0)
+              )
+              (when (> hpbar-hit-points hpbar-max-hit-points)
+                (set! hpbar-hit-points hpbar-max-hit-points)
+              )
      (if (logtest? (process-mask vehicle) (-> arg0 mask))
          (send-event
            arg0
@@ -3243,7 +3250,14 @@
     (vector-copy! (-> this nav state heading) s5-3)
     )
   0
-  (set! (-> this max-hit-points) (-> this hit-points))
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (set! (-> this hit-points) 5000.0)
+    (set! (-> this hit-points) 2500.0)
+    )
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (set! (-> this max-hit-points) 5000.0)
+    (set! (-> this max-hit-points) 2500.0)
+  )
   0
   (none)
   )
@@ -3468,7 +3482,10 @@
   (set-time! (-> this stop-shoot))
   (set! (-> this shoot-duration) 1.0)
   (set! (-> this draw light-index) (the-as uint 10))
-  (set! (-> this hit-points) 35.0)
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (set! (-> this hit-points) 5000.0)
+    (set! (-> this hit-points) 2500.0)
+    )
   (let ((v1-19 (-> this nav state))
         (a0-13 (-> this root trans))
         )
@@ -3477,7 +3494,10 @@
     (vector-copy! (-> v1-19 target-pos) a0-13)
     )
   0
-  (set! (-> this max-hit-points) (-> this hit-points))
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (set! (-> this max-hit-points) 5000.0)
+    (set! (-> this max-hit-points) 2500.0)
+  )
   (go (method-of-object this hostile))
   )
 
@@ -3907,6 +3927,7 @@
     (while (-> self child)
       (suspend)
       )
+    (set! in-desert-game-task? #f)
     (cleanup-for-death self)
     )
   )
@@ -3958,7 +3979,7 @@
   (set! (-> self shoot-duration) 1.0)
   (set! (-> self hold-fire) #f)
   (set! (-> self draw light-index) (the-as uint 10))
-  (set! (-> self max-hit-points) (the float (+ (* 50 (the int (you-suck-scale *game-info* #f 0))) 50)))
+  (set! (-> self max-hit-points) (the float (+ (* (+ 50 (* cars-level 20))) (+ 50 (* cars-level 12)))))
   (set! (-> self hit-points) (-> self max-hit-points))
   (set! (-> self health-hud)
         (ppointer->handle (process-spawn bombbot-hud :init hud-init-by-other :name "bombbot-hud" :to self))
@@ -4004,6 +4025,7 @@
     )
   :enter (behavior ()
     (set-time! (-> self state-time))
+    (set! in-desert-game-task? #t)
     )
   :exit (behavior ()
     (remove-setting! 'entity-name)
@@ -4125,12 +4147,17 @@
   (set-setting! 'disable-parking-spots? #t 0.0 0)
   (when *cty-attack-controller*
     (let ((s5-0 (push-back-hatred *cty-attack-controller*)))
-      (set! (-> s5-0 hatred) 0.6)
-      (set! (-> s5-0 hatred-dist) 245760.0)
-      (set! (-> s5-0 dist-scale) 0.5)
-      (set! (-> s5-0 attacker-scale) 0.01)
-      (set! (-> s5-0 max-consider-dist) 614400.0)
-      (set-hatred-indices-for-all *cty-attack-controller* 0 (get-hatred-at-idx *cty-attack-controller* 9 0) s5-0 13)
+        (set! (-> s5-0 hatred) 0.6)
+        (set! (-> s5-0 hatred-dist) 245760.0)
+        (set! (-> s5-0 dist-scale) 0.5)
+        (set! (-> s5-0 attacker-scale) 0.01)
+        (set! (-> s5-0 max-consider-dist) 614400.0)
+
+        ;; KG only -> bombbot-player type 13
+        (set-hatred-indices *cty-attack-controller* s5-0 9 13)   ;; roboguard
+        (set-hatred-indices *cty-attack-controller* s5-0 10 13)  ;; turret
+        (set-hatred-indices *cty-attack-controller* s5-0 11 13)  ;; spydroid
+        (set-hatred-indices *cty-attack-controller* s5-0 12 13)  ;; roboguard-giant
       )
     )
   (set-vector! (-> this start-point) 2538700.8 31539.2 6048399.5 1.0)
