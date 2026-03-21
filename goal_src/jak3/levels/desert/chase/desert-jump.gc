@@ -1130,36 +1130,29 @@
                )
               (else
                 (+! (-> this interceptor-count) 1)
-                (set! (-> s5-0 kamikaze?) (rand-vu-percent? 0.3))
-                (cond
-                  ((-> s5-0 kamikaze?)
-                   (set! (-> (the-as wvehicle s2-1) minimap)
-                         (add-icon! *minimap* s2-1 (the-as uint 128) (the-as int #f) (the-as vector #t) 0)
-                         )
-                   (if (logtest? (-> group-kamikaze-interceptor-fire flags) (sp-group-flag sp13))
-                       (part-tracker-spawn
-                         part-tracker-subsampler
-                         :to s2-1
-                         :group group-kamikaze-interceptor-fire
-                         :duration -1
-                         :callback (the-as (function part-tracker vector) part-tracker-check-parent)
-                         :target s2-1
-                         :mat-joint 3
-                         )
-                       (part-tracker-spawn
-                         part-tracker
-                         :to s2-1
-                         :group group-kamikaze-interceptor-fire
-                         :duration -1
-                         :callback (the-as (function part-tracker vector) part-tracker-check-parent)
-                         :target s2-1
-                         :mat-joint 3
-                         )
-                       )
-                   )
-                  (else
+                (set! (-> s5-0 kamikaze?) #t)
+                (set! (-> (the-as wvehicle s2-1) minimap)
+                      (add-icon! *minimap* s2-1 (the-as uint 128) (the-as int #f) (the-as vector #t) 0))
+                (if (logtest? (-> group-kamikaze-interceptor-fire flags) (sp-group-flag sp13))
+                    (part-tracker-spawn
+                      part-tracker-subsampler
+                      :to s2-1
+                      :group group-kamikaze-interceptor-fire
+                      :duration -1
+                      :callback (the-as (function part-tracker vector) part-tracker-check-parent)
+                      :target s2-1
+                      :mat-joint 3
+                      )
+                    (part-tracker-spawn
+                      part-tracker
+                      :to s2-1
+                      :group group-kamikaze-interceptor-fire
+                      :duration -1
+                      :callback (the-as (function part-tracker vector) part-tracker-check-parent)
+                      :target s2-1
+                      :mat-joint 3
+                      )
                     )
-                  )
                 )
               )
             (when (not (-> s5-0 kamikaze?))

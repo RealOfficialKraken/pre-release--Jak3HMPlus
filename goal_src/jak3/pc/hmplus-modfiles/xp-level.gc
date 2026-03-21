@@ -1379,6 +1379,7 @@
                     (= in-satbattle? #f)
                     (!= enemy-noto notoriety-level)
                     (= start-was-uprising #f)
+                    (not (task-node-open? (game-task-node desert-jump-mission-protect-doors)))
                 )
                 (when (>= notoriety-level 3)
                     (set! enemy-noto (+ notoriety-level 5))
@@ -1516,6 +1517,12 @@
             (when ;SEW1
                 (and
                     (= (-> (level-get-target-inside *level*) name) 'sewa)
+                    (or
+                        (task-node-open? (game-task-node sewer-kg-met-introduction))
+                        (task-node-open? (game-task-node sewer-kg-met-button0-pressed))
+                        (task-node-open? (game-task-node sewer-kg-met-button1-pressed))
+                        (task-node-open? (game-task-node sewer-kg-met-resolution))
+                    )
                     (!= enemy-noto 161)
                     (!= enemy-noto 162)
                 )
@@ -1523,9 +1530,12 @@
             )
             (when ;SEW2
                 (and
-                    (= (-> (level-get-target-inside *level*) name) 'sewb)
-                    (= (-> (level-get-target-inside *level*) name) 'sewc)
-                    (= (-> (level-get-target-inside *level*) name) 'sewd)
+                    (task-node-open? (game-task-node sewer-hum-kg-switch-off))
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'sewb)
+                        (= (-> (level-get-target-inside *level*) name) 'sewc)
+                        (= (-> (level-get-target-inside *level*) name) 'sewd)
+                    )
                     (!= enemy-noto 210)
                 )
                 (set! enemy-noto 210)
@@ -1772,6 +1782,7 @@
             (when ;DESERT
                 (and
                     (= (-> (level-get-target-inside *level*) name) 'desert)
+                    (not (task-node-open? (game-task-node desert-jump-mission-protect-doors)))
                     (= in-satbattle? #f)
                     (!= enemy-noto notoriety-level)
                     (= start-was-uprising #f)
@@ -1784,6 +1795,18 @@
                 (when (< notoriety-level 3)
                     (set! enemy-noto notoriety-level)
                 )
+                ;(set! cdr-satbattle #t)
+                ;(set! cdr-i (rand-vu-int-range 2400 14000))
+            )
+            (when ;DESERT
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'desert)
+                    (task-node-open? (game-task-node desert-jump-mission-protect-doors))
+                    (= in-satbattle? #f)
+                    (!= enemy-noto notoriety-level)
+                    (= start-was-uprising #f)
+                )
+                (set! enemy-noto 20)
                 ;(set! cdr-satbattle #t)
                 ;(set! cdr-i (rand-vu-int-range 2400 14000))
             )
@@ -1919,6 +1942,12 @@
             )
             (when ;SEW1
                 (and
+                    (or
+                        (task-node-open? (game-task-node sewer-kg-met-introduction))
+                        (task-node-open? (game-task-node sewer-kg-met-button0-pressed))
+                        (task-node-open? (game-task-node sewer-kg-met-button1-pressed))
+                        (task-node-open? (game-task-node sewer-kg-met-resolution))
+                    )
                     (= (-> (level-get-target-inside *level*) name) 'sewa)
                     (!= enemy-noto 18)
                     (!= enemy-noto 19)
@@ -1927,12 +1956,15 @@
             )
             (when ;SEW2
                 (and
-                    (= (-> (level-get-target-inside *level*) name) 'sewb)
-                    (= (-> (level-get-target-inside *level*) name) 'sewc)
-                    (= (-> (level-get-target-inside *level*) name) 'sewd)
-                    (!= enemy-noto 60)
+                    (task-node-open? (game-task-node sewer-hum-kg-switch-off))
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'sewb)
+                        (= (-> (level-get-target-inside *level*) name) 'sewc)
+                        (= (-> (level-get-target-inside *level*) name) 'sewd)
+                    )
+                    (!= enemy-noto 45)
                 )
-                (set! enemy-noto 60)
+                (set! enemy-noto 45)
             )
             (cond ;ctyport
                 ((and
