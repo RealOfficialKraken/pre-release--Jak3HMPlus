@@ -53,6 +53,9 @@ There are 3 extra mods for each colored gun, making a total of 12 super gun mods
 
 Inside of the vehicle selection room in the wasteland, you'll find several warp gates going to different places. 
 
+![Warp Room Image](goal_src/jak3/pc/hmplus-modfiles/screenshots/warp-room.png)
+![Dark Tower Image](goal_src/jak3/pc/hmplus-modfiles/screenshots/dark-tower.png)
+
 #### Dark Eco Realm
 One of these goes to the Dark Eco Realm, a desolate world filled with high-level enemies of unknown value. There are 8 Satellites scattered around in the wasteland area, each one being more and more difficult as you destroy them. A dark forest is present nearby the enterance. One of them, a large tower, looks to be the center of all the power in the dimension. It towers so high up, it can be seen from mostly anywhere in the wasteland. Cyber Vin is also present here, and you can talk to him to either progress the story, or purchase things from the black market with Dark Eco Crystals.
 
@@ -83,6 +86,8 @@ This drop is uncommon, and Jak's Hero Level must at least be at 7. They drop a g
 #### Tier 3 (Black Krimzon Crate)
 This drop is the rarest, it only drops after Jak's Hero Level reaches past 18. They drop a huge amount of skull gems, dark eco crystals, and weapons. Sometimes it will drop a super gun mod.
 ## Dark Maker Ships
+
+![Dark Maker Ship Image](goal_src/jak3/pc/hmplus-modfiles/screenshots/dark-ship.png)
 
 The Dark Maker Ship is a random event that occurs when the player's level is past level 18, and will sit stationary in either a certain part of the wasteland, or in Haven City. Upon getting close, the event activates and fireballs rain down from the huge ship above. Dark Precursors will spawn in waves, and in some waves, Kha'ast Moorog, a giant Dark Precursor MiniBoss, will spawn to lob the player with 5-6 dark eco grenades. Completing this event makes the ship disappear and drops a group of crates, and a really good chance of obtaining a weapon.
 
