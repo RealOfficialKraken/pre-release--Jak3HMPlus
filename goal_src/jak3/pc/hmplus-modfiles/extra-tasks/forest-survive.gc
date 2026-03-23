@@ -1,0 +1,350 @@
+(in-package goal)
+
+;; name forest-survive.gc
+
+(define complete-statue-survive #f)
+
+(defun-extern spawn-splitter-missle vector none)
+
+(define complete-statue-1 #f)
+(define complete-statue-2 #f)
+(define complete-statue-3 #f)
+(define complete-statue-4 #f)
+(define complete-statue-5 #f)
+
+(define forest-survive-lose #f)
+
+(deftype tm-forest-survive (process)
+    ((general-i              int)
+     (curr-statue            int)
+     (statue-1-hit?          symbol)
+     (statue-2-hit?          symbol)
+     (statue-3-hit?          symbol)
+     (statue-4-hit?          symbol)
+     (statue-5-hit?          symbol)
+     (statue-lose            symbol)
+     (max-time               int)
+     (proj-spawn-pos         vector :inline)
+    )
+    (:methods
+    (survivor-event-handler (_type_ process int symbol event-message-block) none)
+    (dm-complete-statue     (_type_) none)
+    )
+    (:state-methods
+    waiting
+    statue-1
+    statue-2
+    statue-3
+    statue-4
+    statue-5
+    lose
+    win-statue
+    )
+)
+
+(defmethod dm-complete-statue ((this tm-forest-survive))
+    (cond
+        ((= (-> this curr-statue) 1)
+            (set! complete-statue-1 #t)
+        )
+        ((= (-> this curr-statue) 2)
+            (set! complete-statue-2 #t)
+        )
+        ((= (-> this curr-statue) 3)
+            (set! complete-statue-3 #t)
+        )
+        ((= (-> this curr-statue) 4)
+            (set! complete-statue-4 #t)
+        )
+        ((= (-> this curr-statue) 5)
+            (set! complete-statue-5 #t)
+        )
+    )
+    (none)
+)
+
+(defbehavior tm-forest-survive-event-handler tm-forest-survive ((arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (survivor-event-handler self arg0 arg1 arg2 arg3)
+  (none)
+  )
+
+(defmethod survivor-event-handler ((this tm-forest-survive) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+    (case arg2
+        (('statue-1)
+            (set! (-> this statue-1-hit?) #t)
+        )
+        (('statue-2)
+            (set! (-> this statue-2-hit?) #t)
+        )
+        (('statue-3)
+            (set! (-> this statue-3-hit?) #t)
+        )
+        (('statue-4)
+            (set! (-> this statue-4-hit?) #t)
+        )
+        (('statue-5)
+            (set! (-> this statue-5-hit?) #t)
+        )
+        (('lose)
+            (set! (-> this statue-lose) #t)
+        )
+    )
+    (none)
+)
+
+(defbehavior tm-forest-survive-init-by-other tm-forest-survive ()
+    (set! (-> self general-i) 0)
+    (set! (-> self curr-statue) 0)
+    (set! (-> self statue-1-hit?) #f)
+    (set! (-> self statue-2-hit?) #f)
+    (set! (-> self statue-3-hit?) #f)
+    (set! (-> self statue-4-hit?) #f)
+    (set! (-> self statue-5-hit?) #f)
+    (set! (-> self statue-lose) #f)
+    (set! (-> self max-time) 0)
+    (go-virtual waiting)
+)
+
+(defun spawn-forest-survive ()
+    (set! *forest-survive-eh* 
+        (process-spawn tm-forest-survive :name "tm-forest-survive")
+    )
+    (none)
+)
+
+(defstate waiting (tm-forest-survive)
+    :virtual #t
+    :event tm-forest-survive-event-handler
+    :code
+    (behavior ()
+        (loop
+            (cond
+                ((= (-> self statue-1-hit?) #t)
+                    (set! (-> self curr-statue) 1)
+                    (set! (-> self statue-1-hit?) #f)
+                    (set! (-> self max-time) 3200)
+                    (let ((vec (new 'static 'vector :x (meters -614.1850) :y (meters 33.4687) :z (meters 956.0170) :w 1.0)))
+                        (vector-copy! (-> self proj-spawn-pos) vec)
+                    )
+                    (go-virtual statue-1)
+                )
+                ((= (-> self statue-2-hit?) #t)
+                    (set! (-> self curr-statue) 2)
+                    (set! (-> self statue-2-hit?) #f)
+                    (set! (-> self max-time) 300)
+                    (go-virtual statue-2)
+                )
+                ((= (-> self statue-3-hit?) #t)
+                    (set! (-> self curr-statue) 3)
+                    (set! (-> self statue-3-hit?) #f)
+                    (set! (-> self max-time) 300)
+                    (go-virtual statue-3)
+                )
+                ((= (-> self statue-4-hit?) #t)
+                    (set! (-> self curr-statue) 4)
+                    (set! (-> self statue-4-hit?) #f)
+                    (set! (-> self max-time) 300)
+                    (go-virtual statue-4)
+                )
+                ((= (-> self statue-5-hit?) #t)
+                    (set! (-> self curr-statue) 5)
+                    (set! (-> self statue-5-hit?) #f)
+                    (set! (-> self max-time) 300)
+                    (go-virtual statue-5)
+                )
+            )
+            (format *stdcon* "tm-forest-survive: waiting~%")
+            (suspend)
+        )
+    )
+)
+
+(defstate lose (tm-forest-survive)
+    :virtual #t
+    :event tm-forest-survive-event-handler
+    :enter
+    (behavior ()
+        (set! (-> self statue-lose) #f)
+        (set! forest-survive-lose #t)
+        (set! (-> self general-i) 0)
+        (set! (-> self curr-statue) 0)
+        (set! (-> self statue-1-hit?) #f)
+        (set! (-> self statue-2-hit?) #f)
+        (set! (-> self statue-3-hit?) #f)
+        (set! (-> self statue-4-hit?) #f)
+        (set! (-> self statue-5-hit?) #f)
+        (set! (-> self statue-lose) #f)
+        (format #t "~%Lost mission~%~%")
+    )
+    :code
+    (behavior ()
+        (go-virtual waiting)
+        (set! *forest-survive-eh* #f)
+    )
+)
+
+(define start-splitter-attack #f)
+(define splitter-count 0)
+(define splitter-max 0)
+
+(defstate statue-1 (tm-forest-survive)
+    :virtual #t
+    :event tm-forest-survive-event-handler
+    :code
+    (behavior ()
+        (loop
+            (format *stdcon* "tm-forest-survive: statue-1~%")
+            (let ((vec (new 'static 'vector :x (meters -620.4437) :y (meters 21.9916) :z (meters 961.8020) :w 1.0)))
+                (cond (complete-statue-survive
+                    (set! complete-statue-survive #f)
+                    (go-virtual win-statue)
+                )
+                ((>= (vector-vector-distance vec (target-pos 0)) (meters 50))
+                    (go-virtual lose)
+                )
+                )
+                (when (> (-> self general-i) (-> self max-time))
+                    (set! complete-statue-survive #t)
+                )
+                (when (<= (-> self general-i) (-> self max-time))
+                    (+! (-> self general-i) 1)
+                    (when (and (rand-vu-percent? 0.006) (= start-splitter-attack #f))
+                        (set! start-splitter-attack #t)
+                        (set! splitter-max (rand-vu-int-range 6 12))
+                    )
+                    (when (and (rand-vu-percent? 0.23) (= start-splitter-attack #t))
+                        (spawn-splitter-missle (-> self proj-spawn-pos))
+                        (+! splitter-count 1)
+                        (when (>= splitter-count splitter-max)
+                            (set! start-splitter-attack #f)
+                            (set! splitter-count 0)
+                        )
+                    )
+                )
+            )
+            (suspend)
+        )
+    )
+)
+(defstate statue-2 (tm-forest-survive)
+    :virtual #t
+    :event tm-forest-survive-event-handler
+    :code
+    (behavior ()
+        (loop
+            (let ((vec (new 'static 'vector :x (meters -697.0499) :y (meters 23.7422) :z (meters 1094.1295) :w 1.0)))
+                (cond (complete-statue-survive
+                    (set! complete-statue-survive #f)
+                    (go-virtual win-statue)
+                )
+                ((>= (vector-vector-distance vec (target-pos 0)) (meters 50))
+                    (go-virtual lose)
+                )
+                )
+                (when (> (-> self general-i) 300)
+                    (set! complete-statue-survive #t)
+                )
+                (when (<= (-> self general-i) 300)
+                    (+! (-> self general-i) 1)
+                    ;;place stuff here
+                )
+            )
+            (format *stdcon* "tm-forest-survive: statue-2~%")
+            (suspend)
+        )
+    )
+)
+(defstate statue-3 (tm-forest-survive)
+    :virtual #t
+    :event tm-forest-survive-event-handler
+    :code
+    (behavior ()
+        (loop
+            (let ((vec (new 'static 'vector :x (meters -776.0646) :y (meters 31.0085) :z (meters 956.4083) :w 1.0)))
+                (cond (complete-statue-survive
+                    (set! complete-statue-survive #f)
+                    (go-virtual win-statue)
+                )
+                ((>= (vector-vector-distance vec (target-pos 0)) (meters 50))
+                    (go-virtual lose)
+                )
+                )
+                (when (> (-> self general-i) 300)
+                    (set! complete-statue-survive #t)
+                )
+                (when (<= (-> self general-i) 300)
+                    (+! (-> self general-i) 1)
+                    ;;place stuff here
+                )
+            )
+            (format *stdcon* "tm-forest-survive: statue-3~%")
+            (suspend)
+        )
+    )
+)
+(defstate statue-4 (tm-forest-survive)
+    :virtual #t
+    :event tm-forest-survive-event-handler
+    :code
+    (behavior ()
+        (loop
+            (let ((vec (new 'static 'vector :x (meters -825.0479) :y (meters 25.2858) :z (meters 1039.2130) :w 1.0)))
+                (cond (complete-statue-survive
+                    (set! complete-statue-survive #f)
+                    (go-virtual win-statue)
+                )
+                ((>= (vector-vector-distance vec (target-pos 0)) (meters 100))
+                    (go-virtual lose)
+                )
+                )
+                (when (> (-> self general-i) 300)
+                    (set! complete-statue-survive #t)
+                )
+                (when (<= (-> self general-i) 300)
+                    (+! (-> self general-i) 1)
+                    ;;place stuff here
+                )
+            )
+            (format *stdcon* "tm-forest-survive: statue-4~%")
+            (suspend)
+        )
+    )
+)
+(defstate statue-5 (tm-forest-survive)
+    :virtual #t
+    :event tm-forest-survive-event-handler
+    :code
+    (behavior ()
+        (loop
+            (let ((vec (new 'static 'vector :x (meters -699.3718) :y (meters 50.6780) :z (meters 1148.8024) :w 1.0)))
+                (cond (complete-statue-survive
+                    (set! complete-statue-survive #f)
+                    (go-virtual win-statue)
+                )
+                ((>= (vector-vector-distance vec (target-pos 0)) (meters 1000))
+                    (go-virtual lose)
+                )
+                )
+                (when (> (-> self general-i) 300)
+                    (set! complete-statue-survive #t)
+                )
+                (when (<= (-> self general-i) 300)
+                    (+! (-> self general-i) 1)
+                    ;;place stuff here
+                )
+            )
+            (format *stdcon* "tm-forest-survive: statue-5~%")
+            (suspend)
+        )
+    )
+)
+
+(defstate win-statue (tm-forest-survive)
+    :virtual #t
+    :event tm-forest-survive-event-handler
+    :code
+    (behavior ()
+        (dm-complete-statue self)
+        (go-virtual waiting)
+    )
+)

@@ -534,6 +534,9 @@
   (define arena-delay-blockers #f)
   (define arena-delay 0)
 
+  (declare-type tm-forest-survive process)
+  (define *forest-survive-eh* (the (pointer tm-forest-survive) #f))
+
   (defun-extern objective-completed (none))
   (define objective-win #f)
   (define obj-i 0)

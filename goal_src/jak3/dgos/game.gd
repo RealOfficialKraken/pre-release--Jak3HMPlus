@@ -583,4 +583,6 @@
   "darkworld-tower.o"
   "tp-fb.o"
   "darkjak-weapons.o"
+  "forest-survive.o"
+  "splitter-missle.o"
  ))
