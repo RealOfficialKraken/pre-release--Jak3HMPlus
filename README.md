@@ -3,6 +3,8 @@
 
 Similar to the Jak II HeroMode+ mod, this mod adds a whole new set of mechanics to completely overhaul the gameplay of Jak 3.
 
+[!alt HMPlus Logo (goal_src/jak3/pc/hmplus-modfiles/screenshots/hmplus-screen.png]
+
 After a year of development, I can surely say that this mod is one of the biggest and craziest that I've ever made, hands down. There is so much to cover, so not all changes are listed here. But I will do my best to list all of them here :)
 
 
