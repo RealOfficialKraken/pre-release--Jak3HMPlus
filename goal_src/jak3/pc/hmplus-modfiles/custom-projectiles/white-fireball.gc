@@ -1,0 +1,277 @@
+(in-package goal)
+
+;; ============================================================
+;; white-fireball
+;; custom curved catapult shot
+;; ============================================================
+
+(deftype white-fireball (v-catapult-shot)
+  ((curve-start-x    float)
+   (curve-start-y    float)
+   (curve-start-z    float)
+
+   (curve-end-x      float)
+   (curve-end-y      float)
+   (curve-end-z      float)
+
+   (curve-right-x    float)
+   (curve-right-y    float)
+   (curve-right-z    float)
+
+   (curve-last-x     float)
+   (curve-last-y     float)
+   (curve-last-z     float)
+
+   (curve-time       float)
+   (curve-elapsed    float)
+   (curve-height     float)
+   (curve-width      float)
+   (curve-sign       float)
+   (curve-done?      symbol))
+  )
+
+;; ------------------------------------------------------------
+;; helper:
+;; pos(u) = lerp(start,end,u)
+;;        + up    * height * 4u(1-u)
+;;        + right * width  * sign * 4u(1-u)
+;;
+;; both vertical and sideways go to 0 at start/end and peak at mid.
+;; ------------------------------------------------------------
+(defun white-fireball-eval-pos ((this white-fireball) (u float) (out vector))
+  (let ((lift (* 4.0 u (- 1.0 u)))
+        (side (* (-> this curve-sign) 4.0 u (- 1.0 u))))
+
+    ;; base lerp
+    (set! (-> out x)
+          (+ (* (- 1.0 u) (-> this curve-start-x))
+             (* u         (-> this curve-end-x))))
+
+    (set! (-> out y)
+          (+ (* (- 1.0 u) (-> this curve-start-y))
+             (* u         (-> this curve-end-y))
+             (* (-> this curve-height) lift)))
+
+    (set! (-> out z)
+          (+ (* (- 1.0 u) (-> this curve-start-z))
+             (* u         (-> this curve-end-z))))
+
+    ;; sideways split
+    (+! (-> out x) (* (-> this curve-right-x) (-> this curve-width) side))
+    (+! (-> out y) (* (-> this curve-right-y) (-> this curve-width) side))
+    (+! (-> out z) (* (-> this curve-right-z) (-> this curve-width) side))
+
+    (set! (-> out w) 1.0))
+  (none)
+  )
+
+;; ------------------------------------------------------------
+;; custom velocity update
+;; compute desired curve position at next frame, then set transv
+;; so gren-canister-move carries/collides normally.
+;; ------------------------------------------------------------
+(defun white-fireball-update-velocity ((this white-fireball))
+  (let* ((dt (seconds-per-frame))
+         (next-pos (new 'stack-no-clear 'vector))
+         (delta (new 'stack-no-clear 'vector))
+         (u 0.0))
+
+    (when (not (-> this curve-done?))
+      (+! (-> this curve-elapsed) dt)
+
+      (if (<= (-> this curve-time) 0.0)
+          (set! u 1.0)
+          (set! u (fmin 1.0 (/ (-> this curve-elapsed) (-> this curve-time)))))
+
+      (white-fireball-eval-pos this u next-pos)
+
+      (vector-! delta next-pos (-> this root trans))
+      (vector-float*! (-> this root transv) delta (/ 1.0 dt))
+
+      (when (> (vector-length (-> this root transv)) (-> this max-speed))
+        (vector-normalize! (-> this root transv) (-> this max-speed)))
+
+      (set! (-> this curve-last-x) (-> next-pos x))
+      (set! (-> this curve-last-y) (-> next-pos y))
+      (set! (-> this curve-last-z) (-> next-pos z))
+
+      (when (>= u 1.0)
+        (set! (-> this curve-done?) #t)
+        (set-vector! (-> this root transv) 0.0 0.0 0.0 0.0)
+        (set! (-> this root trans x) (-> this curve-end-x))
+        (set! (-> this root trans y) (-> this curve-end-y))
+        (set! (-> this root trans z) (-> this curve-end-z))
+        (set! (-> this root trans w) 1.0)
+        (set! (-> this root event-self) 'touched))))
+  (none)
+  )
+
+(defmethod init-proj-settings! ((this white-fireball))
+  ;; parent visuals / blast / trail / sound
+  ((method-of-type v-catapult-shot init-proj-settings!) this)
+
+  ;; IMPORTANT:
+  ;; override stock gravity behavior
+  ;; stock v-catapult-shot uses projectile-update-velocity-add-gravity
+  ;; and gren-canister-move. We keep move, replace update. :contentReference[oaicite:1]{index=1}
+  (set! (-> this update-velocity) white-fireball-update-velocity)
+  (set! (-> this move) gren-canister-move)
+
+  ;; turn gravity off because our curve handles the whole path
+  (set! (-> this root dynam gravity y) 0.0)
+  (set! (-> this root dynam gravity-length) 0.0)
+  (set! (-> this root dynam gravity-max) 0.0)
+
+  ;; default values
+  (set! (-> this curve-time) (the float (seconds 1.25)))
+  (set! (-> this curve-elapsed) 0.0)
+  (set! (-> this curve-height) (meters 10.0))
+  (set! (-> this curve-width) (meters 14.0))
+  (set! (-> this curve-sign) 1.0)
+  (set! (-> this curve-done?) #f)
+
+  (none)
+  )
+
+;; ------------------------------------------------------------
+;; initialize one curved fireball after spawn
+;; ------------------------------------------------------------
+(defun setup-white-fireball-curve ((proj white-fireball)
+                                   (start vector)
+                                   (finish vector)
+                                   (right-axis vector)
+                                   (height float)
+                                   (width float)
+                                   (time float)
+                                   (sign float))
+  (set! (-> proj curve-start-x) (-> start x))
+  (set! (-> proj curve-start-y) (-> start y))
+  (set! (-> proj curve-start-z) (-> start z))
+
+  (set! (-> proj curve-end-x) (-> finish x))
+  (set! (-> proj curve-end-y) (-> finish y))
+  (set! (-> proj curve-end-z) (-> finish z))
+
+  (set! (-> proj curve-right-x) (-> right-axis x))
+  (set! (-> proj curve-right-y) (-> right-axis y))
+  (set! (-> proj curve-right-z) (-> right-axis z))
+
+  (set! (-> proj curve-last-x) (-> start x))
+  (set! (-> proj curve-last-y) (-> start y))
+  (set! (-> proj curve-last-z) (-> start z))
+
+  (set! (-> proj curve-height) height)
+  (set! (-> proj curve-width) width)
+  (set! (-> proj curve-time) time)
+  (set! (-> proj curve-elapsed) 0.0)
+  (set! (-> proj curve-sign) sign)
+  (set! (-> proj curve-done?) #f)
+
+  ;; DO NOT touch root trans / transv here.
+  ;; spawn-projectile already got gp-0 pos and gp-0 vel.
+  (none)
+  )
+
+;; ------------------------------------------------------------
+;; spawns a single white-fireball and configures its curve
+;; ------------------------------------------------------------
+(defun spawn-one-white-fireball-curve ((start vector)
+                                       (finish vector)
+                                       (right-axis vector)
+                                       (height float)
+                                       (width float)
+                                       (time float)
+                                       (sign float))
+  (let ((owner (the-as process-focusable #f))
+        (gp-0 (new 'stack-no-clear 'projectile-init-by-other-params))
+        (proj (the-as (pointer white-fireball) #f)))
+
+    (set! (-> gp-0 ent) (the-as entity #f))
+    (set! (-> gp-0 charge) 1.0)
+    (set! (-> gp-0 options) (projectile-options))
+    (logclear! (-> gp-0 options) (projectile-options po14 po15 po16))
+
+    (set! (-> gp-0 pos quad) (-> start quad))
+    (set! (-> gp-0 notify-handle) (the-as handle #f))
+    (set! (-> gp-0 owner-handle) (the-as handle #f))
+    (set! (-> gp-0 target-handle) (the-as handle #f))
+    (set! (-> gp-0 target-pos quad) (-> finish quad))
+    (set! (-> gp-0 ignore-handle) (the-as handle #f))
+
+    (let* ((gi *game-info*)
+           (new-id (+ (-> gi attack-id) 1)))
+      (set! (-> gi attack-id) new-id)
+      (set! (-> gp-0 attack-id) new-id))
+
+    (set-vector! (-> gp-0 vel) 0.0 0.0 0.0 0.0)
+    (set! (-> gp-0 timeout) (seconds 4.0))
+
+    (set! proj
+          (the-as
+            (pointer white-fireball)
+            (spawn-projectile white-fireball gp-0
+                              (if owner owner *target*)
+                              *default-dead-pool*)))
+
+    (when proj
+      (setup-white-fireball-curve
+        (the-as white-fireball proj)
+        start
+        finish
+        right-axis
+        height
+        width
+        time
+        sign))
+
+    proj))
+
+;; ------------------------------------------------------------
+;; public helper:
+;; spawn TWO mirrored fireballs from same point that split apart
+;; and meet again at the same target point.
+;; ------------------------------------------------------------
+(defun spawn-white-fireball-pair ((start vector))
+  (let ((end-pos (new 'stack-no-clear 'vector))
+        (start-pos (new 'stack-no-clear 'vector))
+        (forward (new 'stack-no-clear 'vector))
+        (right (new 'stack-no-clear 'vector))
+        (height (meters 10.0))
+        (width (meters 16.0))
+        (time (the float (seconds 1.20))))
+
+    (when *target*
+      (vector-copy! start-pos start)
+
+      ;; snapshot Jak's position NOW so both projectiles meet at same place
+      (vector-copy! end-pos (-> *target* control trans))
+
+      ;; forward from start to target
+      (vector-! forward end-pos start-pos)
+
+      (when (< (vector-length forward) 0.001)
+        (set-vector! forward 1.0 0.0 0.0 0.0))
+
+      (vector-normalize! forward 1.0)
+
+      ;; right axis for sideways split
+      ;; cross(forward, up) where up = (0,1,0):
+      ;; right = (-forward.z, 0, forward.x)
+      (set-vector! right
+                   (- 0.0 (-> forward z))
+                   0.0
+                   (-> forward x)
+                   0.0)
+
+      (when (< (vector-length right) 0.001)
+        (set-vector! right 1.0 0.0 0.0 0.0))
+
+      (vector-normalize! right 1.0)
+
+      ;; left arc
+      (spawn-one-white-fireball-curve start-pos end-pos right height width time -1.0)
+
+      ;; right arc
+      (spawn-one-white-fireball-curve start-pos end-pos right height width time 1.0)))
+  (none)
+  )

@@ -40,7 +40,7 @@
    (attack-delay-factor  float)
    (target-speed         float)
    (nav-mesh             nav-mesh)
-   (units                handle  10)
+   (units                handle  60)
    )
   (:methods
     (spawn-unit (_type_ vector quaternion) none)
@@ -59,7 +59,7 @@
   (set! (-> this min-spawn-delay) (the-as uint 0))
   (set! (-> this max-spawn-delay) (the-as uint 300))
   (set! (-> this nav-mesh) (get-nav-mesh (the-as actor-id #xa7d6)))
-  (dotimes (v1-5 10)
+  (dotimes (v1-5 60)
     (if (zero? (-> this units v1-5))
         (set! (-> this units v1-5) (the-as handle #f))
         )
@@ -102,7 +102,7 @@
     (label cfg-15)
     (+! s5-0 1)
     (label cfg-16)
-    (b! (< s5-0 10) cfg-1)
+    (b! (< s5-0 60) cfg-1)
     )
   (format #t "was-squad-control::add-unit failed~%")
   (label cfg-18)
@@ -423,7 +423,7 @@
       (vector-rotate-around-y! (-> s5-1 1 uvec) (-> s5-1 0 trans) -14563.556)
       (set! (-> s5-1 1 rvec w) (- (vector-dot (-> s5-1 1 rvec) (-> s5-1 0 uvec))))
       (set! (-> s5-1 1 uvec w) (- (vector-dot (-> s5-1 1 uvec) (-> s5-1 0 uvec))))
-      (dotimes (s4-1 10)
+      (dotimes (s4-1 60)
         (let ((s3-0 (as-type (handle->process (-> this units s4-1)) process-focusable)))
           (when (and s3-0
                      (not (focus-test? (the-as process-focusable s3-0) dead))
@@ -472,7 +472,7 @@
   (let ((s5-2 0)
         (s4-2 0)
         )
-    (dotimes (s3-1 10)
+    (dotimes (s3-1 60)
       (let ((v1-62 (as-type (handle->process (-> this units s3-1)) process-focusable)))
         (when v1-62
           (+! s5-2 1)
@@ -494,7 +494,7 @@
           (cond
             ((and (< (-> this active-count) (-> this target-count))
                   (> (-> this reserve-count) 0)
-                  (< (-> this process-count) 10)
+                  (< (-> this process-count) 30)
                   (-> this nav-mesh)
                   (not (logtest? (-> this nav-mesh flags) (nav-mesh-flag water)))
                   (nav-mesh-method-11 (-> this nav-mesh) (-> v1-71 rvec))
@@ -601,7 +601,7 @@
         (task-node-closed? (game-task-node nest-eggs-gas))
       )
       (set! (-> *was-squad-control* active-count) 0)
-      (set! (-> *was-squad-control* reserve-count) 10)
+      (set! (-> *was-squad-control* reserve-count) 30)
       (kill-by-type v-marauder *active-pool*)
     )
     (when 

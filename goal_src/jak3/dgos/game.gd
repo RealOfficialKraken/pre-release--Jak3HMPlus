@@ -584,5 +584,6 @@
   "tp-fb.o"
   "darkjak-weapons.o"
   "forest-survive.o"
-  "splitter-missle.o"
+  "nebula-splitter.o"
+  "white-fireball.o"
  ))

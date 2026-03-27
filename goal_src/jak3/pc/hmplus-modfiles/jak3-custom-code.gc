@@ -7596,6 +7596,7 @@ BUGS:
     (kill-by-name "jak3logo-flicker" *active-pool*)
     (kill-by-name "Entity-Boss" *active-pool*)
     (kill-by-name "tm-forest-survive" *active-pool*)
+    (kill-by-name "nebula-splitter" *active-pool*)
     (when (ppointer->process *forest-survive-eh*)
         (set! *forest-survive-eh* #f)
     )

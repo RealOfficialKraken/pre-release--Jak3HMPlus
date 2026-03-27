@@ -537,6 +537,9 @@
   (declare-type tm-forest-survive process)
   (define *forest-survive-eh* (the (pointer tm-forest-survive) #f))
 
+  (declare-type nebula-splitter process)
+  (define *nebula-splitter* (the (pointer nebula-splitter) #f))
+
   (defun-extern objective-completed (none))
   (define objective-win #f)
   (define obj-i 0)

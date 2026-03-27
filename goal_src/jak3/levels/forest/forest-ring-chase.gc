@@ -1935,55 +1935,55 @@
 
 
 (defmethod handle-statue-button-pressed! ((this task-manager-forest-ring-chase) (statue-id int))
+  (when (handle->process (-> this arrow))
+    (send-event (handle->process (-> this arrow)) 'die)
+    (set! (-> this arrow) (the-as handle #f))
+    )
+
   (case statue-id
     ((1)
      (when (not (-> this statue-1-started?))
        (set! (-> this statue-1-started?) #t)
        (set! (-> this statue-1-complete?) #f)
-       ;; Statue 1 params
+       (send-event (handle->process (-> this arrow)) 'die)
        (when *forest-survive-eh*
-        (send-event (ppointer->process *forest-survive-eh*) 'statue-1 #t)
-       )
+         (send-event (ppointer->process *forest-survive-eh*) 'statue-1 #t))
        )
      )
     ((2)
      (when (not (-> this statue-2-started?))
        (set! (-> this statue-2-started?) #t)
        (set! (-> this statue-2-complete?) #f)
-       ;; Statue 2 params
+       (send-event (handle->process (-> this arrow)) 'die)
        (when *forest-survive-eh*
-        (send-event (ppointer->process *forest-survive-eh*) 'statue-2 #t)
-       )
+         (send-event (ppointer->process *forest-survive-eh*) 'statue-2 #t))
        )
      )
     ((3)
      (when (not (-> this statue-3-started?))
        (set! (-> this statue-3-started?) #t)
        (set! (-> this statue-3-complete?) #f)
-       ;; Statue 3 params
+       (send-event (handle->process (-> this arrow)) 'die)
        (when *forest-survive-eh*
-        (send-event (ppointer->process *forest-survive-eh*) 'statue-3 #t)
-       )
+         (send-event (ppointer->process *forest-survive-eh*) 'statue-3 #t))
        )
      )
     ((4)
      (when (not (-> this statue-4-started?))
        (set! (-> this statue-4-started?) #t)
        (set! (-> this statue-4-complete?) #f)
-       ;; Statue 4 params
+       (send-event (handle->process (-> this arrow)) 'die)
        (when *forest-survive-eh*
-        (send-event (ppointer->process *forest-survive-eh*) 'statue-4 #t)
-       )
+         (send-event (ppointer->process *forest-survive-eh*) 'statue-4 #t))
        )
      )
     ((5)
      (when (not (-> this statue-5-started?))
        (set! (-> this statue-5-started?) #t)
        (set! (-> this statue-5-complete?) #f)
-       ;; Statue 5 params
+       (send-event (handle->process (-> this arrow)) 'die)
        (when *forest-survive-eh*
-        (send-event (ppointer->process *forest-survive-eh*) 'statue-5 #t)
-       )
+         (send-event (ppointer->process *forest-survive-eh*) 'statue-5 #t))
        )
      )
     )
@@ -2245,6 +2245,25 @@
 
   (define-extern forest-survive-lose symbol)
 
+  (defun current-statue-fail-info ((this task-manager-forest-ring-chase))
+  (case (-> this current-statue)
+    ((0) (-> *game-info* sub-task-list (game-task-node forest-ring-chase-statues) reset fail-info))
+    ((1) (-> *game-info* sub-task-list (game-task-node forest-ring-chase-statue-1) reset fail-info))
+    ((2) (-> *game-info* sub-task-list (game-task-node forest-ring-chase-statue-2) reset fail-info))
+    ((3) (-> *game-info* sub-task-list (game-task-node forest-ring-chase-statue-3) reset fail-info))
+    ((4) (-> *game-info* sub-task-list (game-task-node forest-ring-chase-statue-4) reset fail-info))
+    ((5) (-> *game-info* sub-task-list (game-task-node forest-ring-chase-statue-5) reset fail-info))
+    (else (-> this node-info reset fail-info))
+    )
+  )
+
+(defun force-ring-timeout ((this task-manager-forest-ring-chase))
+  (logior! (-> this info mask) (task-manager-mask time-limit))
+  (set! (-> this time-limit) (seconds 0.1))
+  (set! (-> this start-time) (- (current-time) (seconds 1.0)))
+  (none)
+)
+
 ;; WARN: Return type mismatch time-frame vs none.
 (defmethod task-manager-method-26 ((this task-manager-forest-ring-chase))
   (with-pp
@@ -2353,6 +2372,13 @@
                        )
                  )
           (when (and (not (handle->process (-> this arrow)))
+                      (not (case (-> this current-statue)
+                        ((0) (-> this statue-1-started?))
+                        ((1) (-> this statue-2-started?))
+                        ((2) (-> this statue-3-started?))
+                        ((3) (-> this statue-4-started?))
+                        ((4) (-> this statue-5-started?))
+                        (else #f)))
                      (not (logtest? (-> s5-1 extra perm status) (entity-perm-status subtask-complete)))
                      )
             (let ((s2-0 (new 'stack-no-clear 'task-arrow-params)))
@@ -2403,7 +2429,7 @@
               (set! (-> this statue-5-started?) #f)
               (set! (-> this statue-5-complete?) #f))
             )
-            (go (method-of-object this fail) (-> this node-info reset fail-info))
+            (force-ring-timeout this)
         )
           )
       )
