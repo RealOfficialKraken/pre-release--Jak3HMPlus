@@ -61,7 +61,9 @@ playing
  :enter 
     (behavior ()
         (format #t "KV-1000 IN DYING STATE--STOPPING MUSIC~%")
-        (play-main-music "ejfiseuf" (-> self volume))
+        (when (not in-main-menu?)
+            (play-main-music "ejfiseuf" (-> self volume))
+        )
     )
  :code 
     (behavior ()

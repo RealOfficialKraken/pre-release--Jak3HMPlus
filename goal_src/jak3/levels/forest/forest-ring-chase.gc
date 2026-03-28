@@ -1933,6 +1933,7 @@
     )
 )
 
+(defun-extern spawn-weather-flux none)
 
 (defmethod handle-statue-button-pressed! ((this task-manager-forest-ring-chase) (statue-id int))
   (when (handle->process (-> this arrow))
@@ -1948,6 +1949,9 @@
        (send-event (handle->process (-> this arrow)) 'die)
        (when *forest-survive-eh*
          (send-event (ppointer->process *forest-survive-eh*) 'statue-1 #t))
+        (when (not *weather-flux*)
+          (spawn-weather-flux)
+        )
        )
      )
     ((2)
@@ -1957,6 +1961,10 @@
        (send-event (handle->process (-> this arrow)) 'die)
        (when *forest-survive-eh*
          (send-event (ppointer->process *forest-survive-eh*) 'statue-2 #t))
+        (when (not *weather-flux*)
+          (spawn-weather-flux)
+        )
+         
        )
      )
     ((3)
@@ -1966,6 +1974,9 @@
        (send-event (handle->process (-> this arrow)) 'die)
        (when *forest-survive-eh*
          (send-event (ppointer->process *forest-survive-eh*) 'statue-3 #t))
+        (when (not *weather-flux*)
+          (spawn-weather-flux)
+        )
        )
      )
     ((4)
@@ -1975,6 +1986,9 @@
        (send-event (handle->process (-> this arrow)) 'die)
        (when *forest-survive-eh*
          (send-event (ppointer->process *forest-survive-eh*) 'statue-4 #t))
+        (when (not *weather-flux*)
+          (spawn-weather-flux)
+        )
        )
      )
     ((5)
@@ -1984,6 +1998,9 @@
        (send-event (handle->process (-> this arrow)) 'die)
        (when *forest-survive-eh*
          (send-event (ppointer->process *forest-survive-eh*) 'statue-5 #t))
+        (when (not *weather-flux*)
+          (spawn-weather-flux)
+        )
        )
      )
     )

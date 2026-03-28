@@ -300,6 +300,21 @@ BUGS:
 (none)
 )
 
+(define hmplus-intro-cam-pos
+  (new 'static 'vector
+    :x (meters 3750.8801)
+    :y (meters 49.7246)
+    :z (meters 551.7658)
+    :w 1.0))
+  (define hmplus-intro-target-pos
+  (new 'static 'vector
+    :x (meters 3748.8801)
+    :y (meters 68.0837)
+    :z (meters 552.7658)
+    :w 1.0))
+
+(define hmplus-intro-fx-started? #f)
+
 (defun runs-jak3-every-frame () ;;START RUNNING EVERY FRAME
 (when ;autosave-delayed
     (and
@@ -398,6 +413,154 @@ BUGS:
             (cpad-pressed? 0 square)
         )
         (toggle-picture-mode)
+    )
+)
+
+
+(when
+  (and
+    hmplus-intro-active?
+    *target*
+    (not *scene-player*)
+    (= (paused?) #f)
+    (= (pause-allowed?) #t))
+  (cond
+    ((= hmplus-intro-phase 0)
+      (disable-hudmap)
+      (send-event *target* 'draw #f)
+      (set! hmplus-intro-phase 1)
+      (set! hmplus-intro-frame 0)
+      (set! hmplus-intro-fx-started? #f))
+    ((= hmplus-intro-phase 1)
+      (send-event *target* 'draw #f)
+      (when (= hmplus-intro-frame 1)
+        (play-sound-file "snd/made-by-kraken.wav" 30))
+      (when (and (not hmplus-intro-fx-started?) (< hmplus-intro-frame 90))
+        (set! hmplus-intro-fx-started? #t)
+        (set! (-> *display* force-sync) (the-as uint 215))
+        (persist-with-delay *setting-control* 'blur-a (seconds 4.4) 'blur-a 'abs 0.9 0)
+        (sound-play "trans3"))
+      (if (< hmplus-intro-frame 150)
+          (let ((cam-pos (new 'stack 'vector))
+                (tpos    (new 'stack 'vector))
+                (j1 0.0)
+                (j2 0.0)
+                (j3 0.0)
+                (falloff 1.0))
+            (vector-copy! cam-pos hmplus-intro-cam-pos)
+            (vector-copy! tpos hmplus-intro-target-pos)
+            (set! falloff (- 1.0 (/ (the float hmplus-intro-frame) 150.0)))
+            (set! j1 (* falloff (rand-vu-float-range -12.0 12.0)))
+            (set! j2 (* falloff (rand-vu-float-range -6.0 6.0)))
+            (set! j3 (* falloff (rand-vu-float-range -18.0 18.0)))
+            (+! (-> cam-pos x) (meters (* 0.08 j3)))
+            (+! (-> cam-pos y) (meters (* 0.05 j2)))
+            (+! (-> cam-pos z) (meters (* 0.08 j1)))
+            (+! (-> tpos x) (meters (* 0.20 j1)))
+            (+! (-> tpos y) (meters (* 0.30 j3)))
+            (+! (-> tpos z) (meters (* 0.20 j2)))
+            (turn-to-scene-camera cam-pos tpos #f))
+          (turn-to-scene-camera hmplus-intro-cam-pos hmplus-intro-target-pos #f))
+      (when (and (>= hmplus-intro-frame 30) (< hmplus-intro-frame 470))
+        (let ((draw-x 255.0)
+              (draw-y 180.0)
+              (text-scale 0.46)
+              (spiral-start 30)
+              (spiral-end 280)
+              (midpoint 155)
+              (spiral-frame 0)
+              (spiral-len 0.0)
+              (t 0.0)
+              (t2 0.0)
+              (radius-y 0.0)
+              (angle 0.0)
+              (chaos 0.0)
+              (jx 0.0)
+              (jy 0.0)
+              (js 0.0))
+          (set! spiral-frame (- hmplus-intro-frame spiral-start))
+          (set! spiral-len (the float (- spiral-end spiral-start)))
+          (if (< hmplus-intro-frame spiral-end)
+              (begin
+                (set! t (/ (the float spiral-frame) spiral-len))
+                (if (< hmplus-intro-frame midpoint)
+                    (begin
+                      (set! t2 (/ (the float (- hmplus-intro-frame spiral-start))
+                                  (the float (- midpoint spiral-start))))
+                      (set! radius-y (* (- 1.0 t2) 300.0))
+                      (set! angle (* t2 10.995574))
+                      (set! jx (* t2 (rand-vu-float-range -18.0 18.0)))
+                      (set! jy (* t2 (rand-vu-float-range -28.0 28.0)))
+                      (set! js (* t2 (rand-vu-float-range -0.04 0.04)))
+                      (set! draw-x (+ 255.0
+                                      (* 18.0 (sin angle))
+                                      jx))
+                      (set! draw-y (+ 180.0
+                                      radius-y
+                                      (* 16.0 (cos angle))
+                                      jy))
+                      (set! text-scale (+ 0.46
+                                          (* (- 1.0 t2) 0.32)
+                                          js)))
+                    (begin
+                      (set! t2 (/ (the float (- hmplus-intro-frame midpoint))
+                                  (the float (- spiral-end midpoint))))
+                      (set! chaos (+ 0.15 (* t2 t2 1.35)))
+                      (set! angle (+ 10.995574
+                                     (* t2 75.39822)))
+                      (set! jx (* chaos (rand-vu-float-range -55.0 55.0)))
+                      (set! jy (* chaos (rand-vu-float-range -85.0 85.0)))
+                      (set! js (* chaos (rand-vu-float-range -0.12 0.12)))
+                      (set! draw-x (+ 255.0
+                                      (* 26.0 (sin angle))
+                                      jx))
+                      (set! draw-y (+ 180.0
+                                      (* 24.0 (cos angle))
+                                      jy))
+                      (set! text-scale (+ 0.46
+                                          (* chaos 0.10)
+                                          js))))
+                (when (< text-scale 0.38)
+                  (set! text-scale 0.38))
+                (when (> text-scale 1.10)
+                  (set! text-scale 1.10)))
+              (begin
+                (set! draw-x 255.0)
+                (set! draw-y 180.0)
+                (set! text-scale 0.46)))
+          (clear matt-str)
+          (clear *pc-encoded-matt-str*)
+          (format matt-str "<COLOR_CYAN>Kraken Presents~%~%<COLOR_ORANGE>Hero<COLOR_YELLOW>Mode<COLOR_RED>+ <COLOR_ORANGE>Jak 3")
+          (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+          (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf))
+                                       (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf
+              (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
+              (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx
+                    (new 'stack 'font-context
+                      *font-default-matrix*
+                      (the int draw-x)
+                      (the int draw-y)
+                      0.0
+                      (font-color default)
+                      (font-flags middle shadow kerning large))))
+              (set! (-> font-ctx scale) text-scale)
+              (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))))
+      (+! hmplus-intro-frame 1)
+      (when (>= hmplus-intro-frame 470)
+        (set! hmplus-intro-phase 2)
+        (set! hmplus-intro-frame 0)))
+    ((= hmplus-intro-phase 2)
+      (camera-unlocked)
+      (send-event *target* 'draw #t)
+      (enable-hudmap)
+      (set! hmplus-intro-active? #f)
+      (set! hmplus-intro-phase 0)
+      (set! hmplus-intro-frame 0)
+      (set! hmplus-intro-fx-started? #f)
+      (launch-mmenu)
+      )
     )
 )
 
@@ -4120,6 +4283,7 @@ BUGS:
                 (= in-factory-level? #f)
                 (= (-> *time-of-day-context* overide-enable) #t)
                 (= (-> *mood-control* overide-weather-flag) #t)
+                (not *weather-flux*)
             )
                 (set! (-> *time-of-day-context* overide-enable) #f)
                 (set! (-> *mood-control* overide-weather-flag) #f)
@@ -7297,6 +7461,18 @@ BUGS:
     (none)
   )
 
+(defun launch-pre-mmenu ()
+  (when (not hmplus-intro-active?)
+    (set! hmplus-intro-active? #t)
+    (set! hmplus-intro-phase 0)
+    (set! hmplus-intro-frame 0)
+    (when *target*
+      (send-event *target* 'draw #f)
+      (send-event *target* 'continue
+        (get-continue-by-name *game-info* "desertb-intro-start"))))
+  (none)
+)
+
 (defun launch-mmenu ()
     (initialize! *game-info* 'game (the-as game-save #f) "desert-bd-start" (the-as resetter-spec #f))
     (set! (-> *game-info* mode) 'play)
@@ -7597,6 +7773,9 @@ BUGS:
     (kill-by-name "Entity-Boss" *active-pool*)
     (kill-by-name "tm-forest-survive" *active-pool*)
     (kill-by-name "nebula-splitter" *active-pool*)
+    (when (ppointer->process *weather-flux*)
+        (send-event (ppointer->process *weather-flux*) 'die #t)
+    )
     (when (ppointer->process *forest-survive-eh*)
         (set! *forest-survive-eh* #f)
     )

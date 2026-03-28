@@ -537,6 +537,9 @@
   (declare-type tm-forest-survive process)
   (define *forest-survive-eh* (the (pointer tm-forest-survive) #f))
 
+  (declare-type weather-flux process)
+  (define *weather-flux* (the (pointer weather-flux) #f))
+
   (declare-type nebula-splitter process)
   (define *nebula-splitter* (the (pointer nebula-splitter) #f))
 
@@ -661,6 +664,10 @@
   (define-extern mod-version string)
   (define launch-mmenu-delay #f)
   (define lmmi 0)
+  (defun-extern launch-pre-mmenu none)
+  (define hmplus-intro-active? #f)
+  (define hmplus-intro-phase 0)
+  (define hmplus-intro-frame 0)
 
   (defun-extern arena-death-dome-grenades (none))
 

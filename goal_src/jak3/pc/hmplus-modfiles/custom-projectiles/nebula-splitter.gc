@@ -277,7 +277,7 @@
         (up-amt 0.0))
     (when (<= (-> *target* fact health) 0.0)
       (projectile-method-26 this)
-      (go-impact! this)
+      (deactivate this)
     )
     (cond
       ((= (-> this phase) 0)

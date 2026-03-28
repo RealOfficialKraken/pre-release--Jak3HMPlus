@@ -14412,6 +14412,26 @@
                       :want-sound (new 'static 'array symbol 3 'wasall1 'desert2 'desert1)
                       )
                     (new 'static 'continue-point
+                      :name "desertb-intro-start"
+                      :level 'desertb
+                      :flags (continue-flags no-auto)
+                      :trans (new 'static 'vector :x 11371971.0 :y 94167.04 :z 962314.25 :w 1.0)
+                      :camera-trans (new 'static 'vector :x 11116160.0 :y 122627.69 :z 970056.5 :w 1.0)
+                      :quat (new 'static 'vector4h :data (new 'static 'array int16 4 #x1b7 #x5bee -377 #x5907))
+                      :camera-rot (new 'static 'array int16 9 -527 0 -32760 #xf69 #x7f0f -62 #x7f09 -3945 -524)
+                      :on-goto #f
+                      :vis-nick 'desert
+                      :vehicle-type #xc
+                      :want-count 4
+                      :want (new 'static 'inline-array level-buffer-state-small 4
+                        (new 'static 'level-buffer-state-small :name 'wasall :display? 'special)
+                        (new 'static 'level-buffer-state-small :name 'desert-game :display? 'display)
+                        (new 'static 'level-buffer-state-small :name 'desertb :display? 'display)
+                        (new 'static 'level-buffer-state-small :name 'desertd :display? #f)
+                        )
+                      :want-sound (new 'static 'array symbol 3 'wasall1 'desert2 'desert1)
+                      )
+                    (new 'static 'continue-point
                       :name "desertb-race-test-start"
                       :level 'desertb
                       :flags (continue-flags no-auto race)

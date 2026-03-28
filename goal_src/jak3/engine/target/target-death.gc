@@ -48,7 +48,7 @@
      ;(go target-title #t)
      (if (= launch-disclaimer? #t)
       (launch-disclaimer)
-      (launch-mmenu)
+      (launch-pre-mmenu)
      )
      )
     ((logtest? (-> arg0 flags) (continue-flags title-movie))
@@ -59,7 +59,7 @@
      
      (if (= launch-disclaimer? #t)
       (launch-disclaimer)
-      (launch-mmenu)
+      (launch-pre-mmenu)
      )
      )
     ((logtest? (-> arg0 flags) (continue-flags hero-mode))
