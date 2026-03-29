@@ -679,6 +679,61 @@
 
   (defun-extern to-final-boss! (none))
 
+  (declare-type target process-focusable)
+  (define enemy-hp-percent 1.0)
+    (define enemy-hp-display-percent 1.0)
+    (define enemy-hp-start-percent 1.0)
+    (define enemy-hp-target-percent 1.0)
+    (define enemy-hp-anim-timer 0.0)
+    (define enemy-hp-anim-duration 0.35)
+    (define enemy-hp-chip-active #f)
+    (define enemy-hp-chip-percent 1.0)
+    (define enemy-hp-chip-timer 0.0)
+    (define enemy-hp-chip-delay 0.3)
+    (define enemy-hp-chip-shrink-duration 0.3)
+    (define enemy-hp-last-target (the-as target #f))
+    (define enemy-hp-target-swapped? #f)
+    (define enemy-hp-force-full-reset? #f)
+    (define hpbar-pre-hit-points 0.0)
+    
+    (define level-display-percent 0.0)
+    (define level-start-percent 0.0)
+    (define level-target-percent 0.0)
+    (define level-anim-timer 0.75)
+    (define level-anim-duration 0.75)
+
+    (define guns-display-percent 0.0)
+    (define guns-start-percent 0.0)
+    (define guns-target-percent 0.0)
+    (define guns-anim-timer 0.75)
+    (define guns-anim-duration 0.75)
+
+    (define vehicle-display-percent 0.0)
+    (define vehicle-start-percent 0.0)
+    (define vehicle-target-percent 0.0)
+    (define vehicle-anim-timer 0.75)
+    (define vehicle-anim-duration 0.75)
+
+    (define targbar-hp-display-percent 1.0)
+    (define targbar-hp-start-percent 1.0)
+    (define targbar-hp-target-percent 1.0)
+    (define targbar-hp-anim-timer 0.18)
+    (define targbar-hp-anim-duration 0.18)
+
+    (define targbar-dark-display-percent 1.0)
+    (define targbar-dark-start-percent 1.0)
+    (define targbar-dark-target-percent 1.0)
+    (define targbar-dark-anim-timer 0.22)
+    (define targbar-dark-anim-duration 0.22)
+
+    (define targbar-light-display-percent 1.0)
+    (define targbar-light-start-percent 1.0)
+    (define targbar-light-target-percent 1.0)
+    (define targbar-light-anim-timer 0.22)
+    (define targbar-light-anim-duration 0.22)
+
+    (defun-extern init-enemy-bpbar none)
+
 
 ;; +++game-items
 (defenum game-items

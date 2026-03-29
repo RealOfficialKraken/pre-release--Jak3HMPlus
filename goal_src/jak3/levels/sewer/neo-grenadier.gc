@@ -1800,7 +1800,7 @@
       )
       (set! hpbar-hit-points (-> this hit-points))
       (set! enemy-string "Calamity Slinger")
-      (set! enemy-hp #t)
+      (init-enemy-hpbar 'normal)
       (when (<= (-> this hit-points) 0.0)
         (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
           (go (method-of-object this knocked))

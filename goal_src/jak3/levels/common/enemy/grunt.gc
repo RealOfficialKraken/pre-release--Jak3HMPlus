@@ -1962,7 +1962,7 @@
         (set! hpbar-max-hit-points (-> this hit-points))
       )
       (set! hpbar-hit-points (-> this hit-points))
-      (set! enemy-hp #t)
+      (init-enemy-hpbar 'normal)
       (let ((gp-0 (new 'stack-no-clear 'explosion-init-params)))
           (set! (-> gp-0 spawn-point quad) (-> self root trans quad))
           (quaternion-identity! (-> gp-0 spawn-quat))

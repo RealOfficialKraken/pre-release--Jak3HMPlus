@@ -1004,7 +1004,7 @@
               )
               (set! hpbar-hit-points (-> this hit-points))
               (set! enemy-string "Steamroller")
-              (set! enemy-hp #t)
+              (init-enemy-hpbar 'normal)
      )
      (when
       (and

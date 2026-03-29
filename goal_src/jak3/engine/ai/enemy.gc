@@ -1776,9 +1776,10 @@
             )
             (let ((f0-1 0.0))
               (when (not *debug-unkillable*)
+                  (set! hpbar-pre-hit-points (-> this hit-points))
                   (set! f0-1 (damage-enemy-from-attack! this proc block))
                   (set! hpbar-hit-points (-> this hit-points))
-                  (set! enemy-hp #t)
+                  (init-enemy-hpbar 'use-pre-hit)
                   (set! draw-enemy-noto enemy-noto)
                   (let ((enemy-name (remap-enemy-type-name (-> this type))))
                     (cond 

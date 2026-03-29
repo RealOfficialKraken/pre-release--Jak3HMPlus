@@ -1110,7 +1110,7 @@
             )
             (set! hpbar-hit-points (-> this hit-points))
             (set! draw-enemy-noto enemy-noto)
-            (set! enemy-hp #t)
+            (init-enemy-hpbar 'normal)
             (cond 
               ((= enemy-name 'v-marauder)
                 (cond 

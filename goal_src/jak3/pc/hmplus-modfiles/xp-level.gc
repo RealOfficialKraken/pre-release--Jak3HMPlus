@@ -24,48 +24,67 @@
     (define lui 0)
     (define levelup-string "")
 
-    (define enemy-hp-percent 1.0)
-    (define enemy-hp-display-percent 1.0)
-    (define enemy-hp-start-percent 1.0)
-    (define enemy-hp-target-percent 1.0)
-    (define enemy-hp-anim-timer 0.0)
-    (define enemy-hp-anim-duration 0.35)
-    
-    (define level-display-percent 0.0)
-    (define level-start-percent 0.0)
-    (define level-target-percent 0.0)
-    (define level-anim-timer 0.75)
-    (define level-anim-duration 0.75)
+    (defun init-enemy-hpbar ((mode symbol))
+  (let ((level-cap hpbar-max-hit-points)
+        (arg1 hpbar-hit-points)
+        (pre-hit hpbar-pre-hit-points)
+        (new-percent 1.0)
+        (pre-percent 1.0)
+        (new-target? #f))
+    (when (< level-cap arg1)
+      (set! arg1 0.0))
+    (when (< level-cap pre-hit)
+      (set! pre-hit level-cap))
+    (when (< pre-hit 0.0)
+      (set! pre-hit 0.0))
 
-    (define guns-display-percent 0.0)
-    (define guns-start-percent 0.0)
-    (define guns-target-percent 0.0)
-    (define guns-anim-timer 0.75)
-    (define guns-anim-duration 0.75)
+    (when (> level-cap 0.0)
+      (set! new-percent (/ arg1 level-cap))
+      (when (< new-percent 0.0)
+        (set! new-percent 0.0))
+      (when (> new-percent 1.0)
+        (set! new-percent 1.0))
 
-    (define vehicle-display-percent 0.0)
-    (define vehicle-start-percent 0.0)
-    (define vehicle-target-percent 0.0)
-    (define vehicle-anim-timer 0.75)
-    (define vehicle-anim-duration 0.75)
+      (set! pre-percent (/ pre-hit level-cap))
+      (when (< pre-percent 0.0)
+        (set! pre-percent 0.0))
+      (when (> pre-percent 1.0)
+        (set! pre-percent 1.0)))
 
-    (define targbar-hp-display-percent 1.0)
-    (define targbar-hp-start-percent 1.0)
-    (define targbar-hp-target-percent 1.0)
-    (define targbar-hp-anim-timer 0.18)
-    (define targbar-hp-anim-duration 0.18)
+    (set! new-target?
+      (or (= enemy-hp-last-target (the-as target #f))
+          (!= enemy-hp-last-target *target*)))
 
-    (define targbar-dark-display-percent 1.0)
-    (define targbar-dark-start-percent 1.0)
-    (define targbar-dark-target-percent 1.0)
-    (define targbar-dark-anim-timer 0.22)
-    (define targbar-dark-anim-duration 0.22)
+    (set! enemy-hp #t)
+    (set! hpi 0)
 
-    (define targbar-light-display-percent 1.0)
-    (define targbar-light-start-percent 1.0)
-    (define targbar-light-target-percent 1.0)
-    (define targbar-light-anim-timer 0.22)
-    (define targbar-light-anim-duration 0.22)
+    (when new-target?
+      (set! enemy-hp-last-target *target*)
+      (set! enemy-hp-target-swapped? #t)
+
+      (cond
+        ((= mode 'use-pre-hit)
+          (set! enemy-hp-percent new-percent)
+          (set! enemy-hp-display-percent pre-percent)
+          (set! enemy-hp-start-percent pre-percent)
+          (set! enemy-hp-target-percent new-percent)
+          (set! enemy-hp-anim-timer 0.0)
+          (set! enemy-hp-chip-active #t)
+          (set! enemy-hp-chip-percent pre-percent)
+          (set! enemy-hp-chip-timer 0.0))
+        (else
+          (set! enemy-hp-percent new-percent)
+          (set! enemy-hp-display-percent new-percent)
+          (set! enemy-hp-start-percent new-percent)
+          (set! enemy-hp-target-percent new-percent)
+          (set! enemy-hp-anim-timer enemy-hp-anim-duration)
+          (set! enemy-hp-chip-active #f)
+          (set! enemy-hp-chip-percent new-percent)
+          (set! enemy-hp-chip-timer 0.0))))
+
+    (when (not new-target?)
+      (set! enemy-hp-target-swapped? #f)))
+  (none))
 
 (defun levelup-reset-color ()
     (set! (-> *part-id-table* 1701 init-specs 4 initial-valuef) 160.0) ;r 1
@@ -1053,203 +1072,205 @@
 
         ;NEW HP BAR:
         (when (= enemy-hp #t)
-            (+! hpi 1)
-            (let (
-                    (color-string "<COLOR_WHITE>Lv. ")
-                )
-                (when (and
-                        (<= enemy-noto (+ notoriety-level 3))
-                        (> enemy-noto (- notoriety-level 3))
-                        (not (string= color-string "<COLOR_YELLOW>Lv. "))
-                    )
-                (set! color-string "<COLOR_YELLOW>Lv. ")
-                )
-                (when (and
-                        (>= enemy-noto (+ notoriety-level 3))
-                        (not (string= color-string "<COLOR_RED>Lv. "))
-                    )
-                (set! color-string "<COLOR_RED>Lv. ")
-                )
-                (when (and
-                        (<= enemy-noto (- notoriety-level 3))
-                        (> enemy-noto (- notoriety-level 7))
-                        (not (string= color-string "<COLOR_GREEN>Lv. "))
-                    )
-                (set! color-string "<COLOR_GREEN>Lv. ")
-                )
-                (when (and
-                        (< enemy-noto (- notoriety-level 7))
-                        (not (string= color-string "<COLOR_TRANSPARENT>Lv. "))
-                    )
-                (set! color-string "<COLOR_TRANSPARENT>Lv. ")
-                )
+  (+! hpi 1)
+  (let ((color-string "<COLOR_WHITE>Lv. "))
+    (when (and
+            (<= enemy-noto (+ notoriety-level 3))
+            (> enemy-noto (- notoriety-level 3))
+            (not (string= color-string "<COLOR_YELLOW>Lv. ")))
+      (set! color-string "<COLOR_YELLOW>Lv. "))
+    (when (and
+            (>= enemy-noto (+ notoriety-level 3))
+            (not (string= color-string "<COLOR_RED>Lv. ")))
+      (set! color-string "<COLOR_RED>Lv. "))
+    (when (and
+            (<= enemy-noto (- notoriety-level 3))
+            (> enemy-noto (- notoriety-level 7))
+            (not (string= color-string "<COLOR_GREEN>Lv. ")))
+      (set! color-string "<COLOR_GREEN>Lv. "))
+    (when (and
+            (< enemy-noto (- notoriety-level 7))
+            (not (string= color-string "<COLOR_TRANSPARENT>Lv. ")))
+      (set! color-string "<COLOR_TRANSPARENT>Lv. "))
+    (when
+      (and
+        *target*
+        (not *scene-player*)
+        (= (paused?) #f)
+        (= in-menu? #f))
+      (let ((level-cap hpbar-max-hit-points)
+            (arg1 hpbar-hit-points)
+            (new-percent 0.0)
+            (dt (seconds-per-frame)))
+        (when (< level-cap arg1)
+          (set! arg1 0.0))
+        (when (!= level-cap 0.0)
+          (set! new-percent (/ arg1 level-cap))
+          (when (< new-percent 0.0)
+            (set! new-percent 0.0))
+          (when (> new-percent 1.0)
+            (set! new-percent 1.0))
 
-                (when
-                (and
-                    *target*
-                    (not *scene-player*)
-                    (= (paused?) #f)
-                    (= in-menu? #f)
-                )
+          (when (= enemy-hp-force-full-reset? #t)
+            (set! enemy-hp-percent 1.0)
+            (set! enemy-hp-display-percent 1.0)
+            (set! enemy-hp-start-percent 1.0)
+            (set! enemy-hp-target-percent 1.0)
+            (set! enemy-hp-anim-timer enemy-hp-anim-duration)
+            (set! enemy-hp-chip-active #f)
+            (set! enemy-hp-chip-percent 1.0)
+            (set! enemy-hp-chip-timer 0.0)
+            (set! enemy-hp-force-full-reset? #f))
 
-                ;; update actual hp percent
-                (let (
-                        (level-cap hpbar-max-hit-points)
-                        (arg1 hpbar-hit-points)
-                    )
-                    (when (< level-cap arg1)
-                    (set! arg1 0.0)
-                    )
-                    (when (!= level-cap 0.0)
-                    (when (!= enemy-hp-percent (/ arg1 level-cap))
-                        ;; restart animation from the CURRENT displayed value
-                        (set! enemy-hp-percent (/ arg1 level-cap))
-                        (set! enemy-hp-start-percent enemy-hp-display-percent)
-                        (set! enemy-hp-target-percent enemy-hp-percent)
-                        (set! enemy-hp-anim-timer 0.0)
-                    )
-                    )
-                )
+          (when (!= enemy-hp-percent new-percent)
+            (when (< new-percent enemy-hp-percent)
+              (when (or (= enemy-hp-chip-active #f)
+                        (= enemy-hp-target-swapped? #t))
+                (set! enemy-hp-chip-percent enemy-hp-display-percent))
+              (set! enemy-hp-chip-active #t)
+              (set! enemy-hp-chip-timer 0.0))
+            (when (> new-percent enemy-hp-percent)
+              (set! enemy-hp-chip-active #f)
+              (set! enemy-hp-chip-percent new-percent))
+            (set! enemy-hp-percent new-percent)
+            (set! enemy-hp-start-percent enemy-hp-display-percent)
+            (set! enemy-hp-target-percent enemy-hp-percent)
+            (set! enemy-hp-anim-timer 0.0)
+            (set! enemy-hp-target-swapped? #f))
 
-                ;; animate displayed hp percent with ease-out cubic
-                (let* (
-                        (dt (seconds-per-frame))
-                        (dur enemy-hp-anim-duration)
-                        (u 0.0)
-                        (inv 0.0)
-                        (ease 0.0)
-                        )
-                    (when (< dur 0.001)
-                    (set! dur 0.001)
-                    )
-
-                    (when (< enemy-hp-anim-timer dur)
-                    (+! enemy-hp-anim-timer dt)
-                    (when (> enemy-hp-anim-timer dur)
-                        (set! enemy-hp-anim-timer dur)
-                    )
-                    )
-
-                    (set! u (/ enemy-hp-anim-timer dur))
-                    (when (< u 0.0)
-                    (set! u 0.0)
-                    )
-                    (when (> u 1.0)
-                    (set! u 1.0)
-                    )
-
-                    ;; ease-out cubic: 1 - (1-u)^3
-                    (set! inv (- 1.0 u))
-                    (set! ease (- 1.0 (* inv inv inv)))
-
-                    (set! enemy-hp-display-percent
-                    (+ enemy-hp-start-percent
-                        (* (- enemy-hp-target-percent enemy-hp-start-percent) ease))
-                    )
-
-                    (when (= u 1.0)
-                    (set! enemy-hp-display-percent enemy-hp-target-percent)
-                    )
-                )
-
-                ;; clamp displayed percent just in case
-                (when (< enemy-hp-display-percent 0.0)
-                    (set! enemy-hp-display-percent 0.0)
-                )
-                (when (> enemy-hp-display-percent 1.0)
-                    (set! enemy-hp-display-percent 1.0)
-                )
-
-                ;; draw enemy name / level
-                (let ((health-pos 0))
-                    (when (= hud-timer-on? #f)
-                    (set! health-pos 10)
-                    )
-                    (when (or (= hud-timer-on? #t) (= r3-noto #t))
-                    (set! health-pos 80)
-                    )
-
-                    (when
-                    (and
-                        (= weather-dark-mode #f)
-                        (= onfoot-battle? #f)
-                    )
-                    (clear matt-str)
-                    (clear *pc-encoded-matt-str*)
-                    (format matt-str "~s~%~%<COLOR_WHITE>~s~d"
-                        enemy-string
-                        color-string
-                        draw-enemy-noto
-                    )
-                    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-                    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-                        (dma-buffer-add-gs-set-flusha
-                        buf
-                        (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
-                        (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1))
-                        )
-                        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
-                        (set! (-> font-ctx scale) 0.325)
-                        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)
-                        )
-                    )
-                    )
-
-                    (when
-                    (or
-                        (= weather-dark-mode #t)
-                        (= onfoot-battle? #t)
-                    )
-                    (clear matt-str)
-                    (clear *pc-encoded-matt-str*)
-                    (format matt-str "~s~%~%<COLOR_WHITE>~s<COLOR_RED>??"
-                        enemy-string
-                        color-string
-                    )
-                    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-                    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-                        (dma-buffer-add-gs-set-flusha
-                        buf
-                        (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
-                        (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1))
-                        )
-                        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
-                        (set! (-> font-ctx scale) 0.325)
-                        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)
-                        )
-                    )
-                    )
-                )
-
-                ;; draw hp bar using DISPLAY percent, not actual percent
-                (let (
-                        (x 100)
-                        (y 21)
-                        (progress enemy-hp-display-percent)
-                        (arg3 (new 'static 'rgba
-                                :r 255
-                                :g 0
-                                :b 0
-                                :a #x40
-                            ))
-                    )
-                    (when (or (= hud-timer-on? #t) (= r3-noto #t))
-                    (set! y 90)
-                    )
-                    (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                                (bucket-id particles))
-                    (draw-sprite2d-xy s2-0 x y 310 8 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-                    (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 310.0 progress)) 6 arg3 #x3fffff)
-                    )
-                )
-                )
-            )
-
-            (when (= hpi 400)
-                (set! hpi 0)
-                (set! enemy-hp #f)
-            )
-            )
+          (when (= enemy-hp-chip-active #t)
+            (+! enemy-hp-chip-timer dt)
+            (when (> enemy-hp-chip-timer (+ enemy-hp-chip-delay enemy-hp-chip-shrink-duration))
+              (set! enemy-hp-chip-active #f)
+              (set! enemy-hp-chip-percent enemy-hp-display-percent)))))
+      (let* ((dt (seconds-per-frame))
+             (dur enemy-hp-anim-duration)
+             (u 0.0)
+             (inv 0.0)
+             (ease 0.0))
+        (when (< dur 0.001)
+          (set! dur 0.001))
+        (when (< enemy-hp-anim-timer dur)
+          (+! enemy-hp-anim-timer dt)
+          (when (> enemy-hp-anim-timer dur)
+            (set! enemy-hp-anim-timer dur)))
+        (set! u (/ enemy-hp-anim-timer dur))
+        (when (< u 0.0)
+          (set! u 0.0))
+        (when (> u 1.0)
+          (set! u 1.0))
+        (set! inv (- 1.0 u))
+        (set! ease (- 1.0 (* inv inv inv)))
+        (set! enemy-hp-display-percent
+              (+ enemy-hp-start-percent
+                 (* (- enemy-hp-target-percent enemy-hp-start-percent) ease)))
+        (when (= u 1.0)
+          (set! enemy-hp-display-percent enemy-hp-target-percent)))
+      (when (< enemy-hp-display-percent 0.0)
+        (set! enemy-hp-display-percent 0.0))
+      (when (> enemy-hp-display-percent 1.0)
+        (set! enemy-hp-display-percent 1.0))
+      (when (< enemy-hp-chip-percent 0.0)
+        (set! enemy-hp-chip-percent 0.0))
+      (when (> enemy-hp-chip-percent 1.0)
+        (set! enemy-hp-chip-percent 1.0))
+      (let ((health-pos 0))
+        (when (= hud-timer-on? #f)
+          (set! health-pos 10))
+        (when (or (= hud-timer-on? #t) (= r3-noto #t))
+          (set! health-pos 80))
+        (when
+          (and
+            (= weather-dark-mode #f)
+            (= onfoot-battle? #f))
+          (clear matt-str)
+          (clear *pc-encoded-matt-str*)
+          (format matt-str "~s~%~%<COLOR_WHITE>~s~d"
+                  enemy-string
+                  color-string
+                  draw-enemy-noto)
+          (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+          (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha
+              buf
+              (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
+              (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
+              (set! (-> font-ctx scale) 0.325)
+              (draw-string-adv *pc-encoded-matt-str* buf font-ctx))))
+        (when
+          (or
+            (= weather-dark-mode #t)
+            (= onfoot-battle? #t))
+          (clear matt-str)
+          (clear *pc-encoded-matt-str*)
+          (format matt-str "~s~%~%<COLOR_WHITE>~s<COLOR_RED>??"
+                  enemy-string
+                  color-string)
+          (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+          (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha
+              buf
+              (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
+              (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
+              (set! (-> font-ctx scale) 0.325)
+              (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))))
+      (let* ((x 100)
+       (y 21)
+       (progress enemy-hp-display-percent)
+       (chip-progress enemy-hp-chip-percent)
+       (chip-u 0.0)
+       (chip-height 6)
+       (chip-y (+ y 1))
+       (arg3 (new 'static 'rgba :r 255 :g 0 :b 0 :a #x40))
+       (white-arg
+         (if (and *target* (focus-test? *target* dark))
+             (new 'static 'rgba :r 40 :g 0 :b 100 :a #x70)
+             (new 'static 'rgba :r 255 :g 255 :b 255 :a #x60))))
+  (when (or (= hud-timer-on? #t) (= r3-noto #t))
+    (set! y 90)
+    (set! chip-y (+ y 1)))
+  (when (= enemy-hp-chip-active #t)
+    (when (> enemy-hp-chip-timer enemy-hp-chip-delay)
+      (set! chip-u (/ (- enemy-hp-chip-timer enemy-hp-chip-delay)
+                      enemy-hp-chip-shrink-duration))
+      (when (< chip-u 0.0)
+        (set! chip-u 0.0))
+      (when (> chip-u 1.0)
+        (set! chip-u 1.0))
+      (set! chip-height (the int (* 6.0 (- 1.0 chip-u))))
+      (set! chip-y (+ (+ y 1) (the int (* 6.0 chip-u))))))
+  (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                               (bucket-id particles))
+    (draw-sprite2d-xy s2-0 x y 310 8 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+    (when (and (= enemy-hp-chip-active #t)
+               (> chip-progress progress)
+               (> chip-height 0))
+      (let ((red-w (the int (* 310.0 progress)))
+            (chip-w (the int (* 310.0 chip-progress))))
+        (when (> chip-w red-w)
+          (draw-sprite2d-xy s2-0
+                            (+ (+ x 1) red-w)
+                            chip-y
+                            (- chip-w red-w)
+                            chip-height
+                            white-arg
+                            #x3fffff))))
+    (draw-sprite2d-xy s2-0
+                      (+ x 1)
+                      (+ y 1)
+                      (the int (* 310.0 progress))
+                      6
+                      arg3
+                      #x3fffff)))))
+  (when (= hpi 400)
+    (set! hpi 0)
+    (set! enemy-hp #f)
+    (set! enemy-hp-chip-active #f)
+    (set! enemy-hp-last-target (the-as target #f))
+    (set! enemy-hp-target-swapped? #f)
+    (set! enemy-hp-force-full-reset? #f)))
 
         ;TARGBAR
         (when 
@@ -1716,7 +1737,7 @@
             )
             (when
                 (not in-arena-fight?)
-                    (when (not (task-node-closed? (game-task-node wascity-pre-game-introduction)))
+                    (when (not (task-node-closed? (game-task-node arena-fight-2-resolution)))
                     (when ;WASCITYA
                         (and
                             (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
@@ -1735,7 +1756,7 @@
                         (set! enemy-noto 2)
                     )
                 )
-                (when (task-node-closed? (game-task-node wascity-pre-game-introduction))
+                (when (task-node-closed? (game-task-node arena-fight-2-resolution))
                     (when ;WASCITYA
                         (and
                             (= (-> (level-get-target-inside *level*) name) 'wascitya)

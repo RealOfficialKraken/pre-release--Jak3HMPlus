@@ -1736,7 +1736,7 @@
       (-> this enemy-info default-hit-points)
     )
   )
-  (set! enemy-hp #t)
+  (init-enemy-hpbar 'normal)
   (go (method-of-object this sat-idle))
   (none)
   )

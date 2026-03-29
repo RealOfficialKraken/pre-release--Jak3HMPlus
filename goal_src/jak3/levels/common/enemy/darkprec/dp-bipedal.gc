@@ -3108,7 +3108,7 @@
                 (set! hpbar-hit-points hpbar-max-hit-points)
               )
               (set! hpbar-hit-points (-> this hit-points))
-              (set! enemy-hp #t)
+              (init-enemy-hpbar 'normal)
      (when (type? this bipedal-boss)
       (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
                 (set! hpbar-max-hit-points (+ 4400.0 (* (the float enemy-noto) 3)))
@@ -3119,7 +3119,7 @@
               )
               (set! hpbar-hit-points (-> this hit-points))
               (set! enemy-string "Kh'aast Moorog")
-              (set! enemy-hp #t)
+              (init-enemy-hpbar 'normal)
      )
      (when 
         (and

@@ -777,6 +777,7 @@
     (send-event *camera* 'joystick 0.0 0.0)
     )
   :code (behavior ((arg0 continue-point))
+    (play-main-music "ejfiseuf" 0)
     (local-vars (v1-38 symbol))
     (kill-current-talker '() '() 'exit)
     (set-setting! 'mode-name 'cam-fixed 0.0 0)

@@ -310,7 +310,7 @@
         (set! hpbar-max-hit-points (+ (+ 600.0 (* enemy-noto 10)) (/ (the float enemy-noto) 3)))
         (set! hpbar-hit-points (-> self hit-points))
         (set! draw-enemy-noto enemy-noto)
-        (set! enemy-hp #t)
+        (init-enemy-hpbar 'normal)
         (let ((enemy-name (remap-enemy-type-name (-> self type))))
           (set! enemy-string "Precursor Minibot")
         )

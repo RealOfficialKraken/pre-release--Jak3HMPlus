@@ -1799,7 +1799,7 @@
     (when (> hpbar-hit-points hpbar-max-hit-points)
         (set! hpbar-hit-points hpbar-max-hit-points)
     )
-    (set! enemy-hp #t)
+    (init-enemy-hpbar 'normal)
      (when
        (or (= (-> this hit-points) 0.0)
             (and (>= 1.0 (-> this hit-points)) (= (-> this incoming knocked-type) (knocked-type blue-shot)))

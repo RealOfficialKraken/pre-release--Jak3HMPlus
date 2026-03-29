@@ -1680,7 +1680,7 @@
                     (set! hpbar-max-hit-points (+ 6000.0 (/ (the float enemy-noto) 3)))
                   )
                   (set! hpbar-hit-points (-> self hit-points))
-                  (set! enemy-hp #t)
+                  (init-enemy-hpbar 'normal)
                   (let ((enemy-name (remap-enemy-type-name (-> self type))))
                     (set! enemy-string (the string enemy-name))
                   )

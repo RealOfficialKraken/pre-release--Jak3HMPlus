@@ -1231,7 +1231,7 @@
           (set! hpbar-hit-points hpbar-max-hit-points)
       )
       (set! enemy-string "KG Gunship")
-      (set! enemy-hp #t)
+      (init-enemy-hpbar 'normal)
        (let ((v1-1 (the-as attack-info (-> block param 1))))
          (when (!= (-> v1-1 id) (-> self last-attack-id))
            (set! (-> self last-attack-id) (-> v1-1 id))

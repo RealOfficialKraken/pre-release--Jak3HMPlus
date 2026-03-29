@@ -1759,7 +1759,7 @@
          (set! (-> *game-info* health-bar) (-> self hit-points))
          (set! hpbar-hit-points (-> self hit-points))
         (set! hpbar-max-hit-points 100.0)
-        (set! enemy-hp #t)
+        (init-enemy-hpbar 'normal)
         (set! draw-enemy-noto 52)
         (set! enemy-string "Metalhead Centipede")
          (cond

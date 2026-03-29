@@ -220,7 +220,7 @@
       (suspend)
       (set! v1-29
             (or (not *target*)
-                (let ((f30-0 0.5))
+                (let ((f30-0 0.0))
                   (< f30-0 (the-as float (send-event (handle->process (-> *target* gun charge-active?)) 'charge)))
                   )
                 )

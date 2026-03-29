@@ -1766,7 +1766,7 @@
       (set! hpbar-max-hit-points (+ 1000.0 (/ (the float enemy-noto) 3)))
     )
     (set! hpbar-hit-points (-> self hit-points))
-    (set! enemy-hp #t)
+    (init-enemy-hpbar 'normal)
     (set! enemy-string "Wasteland Metalhead Beast")
     (when (<= (-> this hit-points) 0.0) 
       (set! hpbar-hit-points 0.0)
