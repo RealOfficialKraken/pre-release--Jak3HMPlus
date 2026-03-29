@@ -5,7 +5,7 @@
 (define complete-statue-survive #f)
 
 (defun-extern spawn-nebula-splitter vector int none)
-(defun-extern spawn-white-fireball-pair vector none)
+(defun-extern spawn-light-eco-fireball vector none)
 
 (define complete-statue-1 #f)
 (define complete-statue-2 #f)
@@ -306,7 +306,7 @@
                 (when (<= (-> self general-i) (-> self max-time))
                     (+! (-> self general-i) 1)
                     (when (rand-vu-percent? 0.01)
-                        (spawn-white-fireball-pair (-> self proj-spawn-pos))
+                        (spawn-light-eco-fireball (-> self proj-spawn-pos))
                     )
                 )
             )
