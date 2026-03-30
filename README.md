@@ -59,6 +59,8 @@ Inside of the vehicle selection room in the wasteland, you'll find several warp 
 #### Dark Eco Realm
 One of these goes to the Dark Eco Realm, a desolate world filled with high-level enemies of unknown value. There are 8 Satellites scattered around in the wasteland area, each one being more and more difficult as you destroy them. A dark forest is present nearby the enterance. One of them, a large tower, looks to be the center of all the power in the dimension. It towers so high up, it can be seen from mostly anywhere in the wasteland. Cyber Vin is also present here, and you can talk to him to either progress the story, or purchase things from the black market with Dark Eco Crystals.
 
+![HMPlus Logo](goal_src/jak3/pc/hmplus-modfiles/screenshots/dark-volcano.png)
+
 #### Dark Volcano
 The first area you cannot backtrack to after completing it's mission, the volcano area can be accessed to level off of the enemies there. Their levels range from 11-18 each time you traverse through the warp gate. There are two mini-bosses found here. One of them being General Gouge, a bigger mantis that hops around and cannot be knocked back. The other is named Steamroller, which is a giant spiky frog that rolls around.
 
