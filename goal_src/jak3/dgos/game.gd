@@ -586,4 +586,7 @@
   "forest-survive.o"
   "nebula-splitter.o"
   "white-fireball.o"
+  "sewer-mood.o"
+  "sew-laser-guard.o"
+  "sew-laser-turret.o"
  ))

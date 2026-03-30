@@ -7774,6 +7774,7 @@ BUGS:
     (kill-by-name "Entity-Boss" *active-pool*)
     (kill-by-name "tm-forest-survive" *active-pool*)
     (kill-by-name "nebula-splitter" *active-pool*)
+    (kill-by-name "laser-spin-attack" *active-pool*)
     (when (ppointer->process *weather-flux*)
         (send-event (ppointer->process *weather-flux*) 'die #t)
     )

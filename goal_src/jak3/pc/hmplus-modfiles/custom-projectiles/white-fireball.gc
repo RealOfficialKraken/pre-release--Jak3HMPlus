@@ -2,11 +2,130 @@
 
 ;name: white-fireball.gc
 
+(defpartgroup group-light-eco-fireball
+  :id 1866
+  :flags (sp0)
+  :bounds (static-bspherem 0 0 0 4)
+  :parts ((sp-item 5852) (sp-item 5853))
+)
+
+(defpart 5852
+  :init-specs ((:texture (glow level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 6) (meters 1.2))
+    (:scale-y :copy scale-x)
+    (:r 255.0) (:g 255.0) (:b 255.0)
+    (:a 18.0 28.0)
+    (:timer (seconds 0.02))
+    (:flags (sp-cpuinfo-flag-3))
+))
+
+(defpart 5853
+  :init-specs ((:texture (glow-hotdot level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 2.2) (meters 0.8))
+    (:scale-y :copy scale-x)
+    (:r 255.0) (:g 255.0) (:b 255.0)
+    (:a 160.0)
+    (:scalevel-x (meters -0.035))
+    (:scalevel-y :copy scalevel-x)
+    (:timer (seconds 0.12))
+    (:flags (sp-cpuinfo-flag-0 sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+))
+
+(defpartgroup group-light-eco-fireball-trail
+  :id 1867
+  :flags (sp0 sp13)
+  :bounds (static-bspherem 0 0 0 4)
+  :parts ((sp-item 5854))
+)
+
+(defpart 5854
+  :init-specs ((:texture (radial-gradient-yellow level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 2.5) (meters 0.6))
+    (:scale-y :copy scale-x)
+    (:r 255.0) (:g 255.0) (:b 255.0)
+    (:a 80.0 20.0)
+    (:scalevel-x (meters -0.004))
+    (:scalevel-y :copy scalevel-x)
+    (:fade-a -0.4)
+    (:friction 0.98)
+    (:timer (seconds 0.8))
+    (:flags (sp-cpuinfo-flag-0 sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+))
+
+(defpartgroup group-light-eco-fireball-explosion
+  :id 1868
+  :duration (seconds 0.28)
+  :flags (sp0)
+  :bounds (static-bspherem 0 0 0 10)
+  :parts ((sp-item 5855) (sp-item 5856) (sp-item 5857))
+)
+
+(defpart 5855
+  :init-specs ((:texture (starflash level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 7.5))
+    (:rot-x (degrees 2.25))
+    (:rot-z (degrees 0) (degrees 360))
+    (:scale-y :copy scale-x)
+    (:r 255.0) (:g 255.0) (:b 255.0)
+    (:a 110.0)
+    (:omega (degrees 5000))
+    (:scalevel-x (meters -0.18))
+    (:scalevel-y :copy scalevel-x)
+    (:fade-a -0.65)
+    (:timer (seconds 0.12))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 glow))
+))
+
+(defpart 5856
+  :init-specs ((:texture (glow-soft level-default-sprite))
+    (:num 5.0)
+    (:scale-x (meters 0.45) (meters 0.25))
+    (:rot-z (degrees 0) (degrees 360))
+    (:scale-y :copy scale-x)
+    (:r 255.0) (:g 255.0) (:b 255.0)
+    (:a 60.0)
+    (:vel-y (meters 0.18) (meters 0.35))
+    (:scalevel-x (meters 0.006))
+    (:scalevel-y :copy scalevel-x)
+    (:fade-a -0.5)
+    (:friction 0.82)
+    (:timer (seconds 0.2))
+    (:flags (sp-cpuinfo-flag-0 sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+    (:conerot-x (degrees 0) (degrees 3600))
+    (:conerot-y (degrees 0) (degrees 3600))
+))
+
+(defpart 5857
+  :init-specs ((:texture (explosion-edge level-default-sprite))
+    (:num 3.0)
+    (:scale-x (meters 1.1) (meters 0.7))
+    (:rot-y (degrees 0) (degrees 360))
+    (:scale-y :copy scale-x)
+    (:r 255.0) (:g 255.0) (:b 255.0)
+    (:a 48.0)
+    (:vel-y (meters 0.22) (meters 0.38))
+    (:scalevel-x (meters 0.035))
+    (:scalevel-y :copy scalevel-x)
+    (:fade-a -0.48)
+    (:friction 0.78)
+    (:timer (seconds 0.18))
+    (:flags (sp-cpuinfo-flag-0 sp-cpuinfo-flag-2 sp-cpuinfo-flag-13))
+    (:func 'sparticle-2d-spline-align-instant)
+    (:conerot-x (degrees 0) (degrees 3600))
+    (:rotate-y (degrees 0) (degrees 3600))
+))
+
 (deftype light-eco-fireball (projectile)
   ((travel-time   float)
    (elapsed       float)
    (arc-height    float)
    (explode-rad   float)
+   (arc-tilt      float)
+   (exploded?     symbol)
    )
   (:methods
     (impact-white-fireball (_type_) none)
@@ -64,8 +183,13 @@
           (next-pos (new 'stack-no-clear 'vector))
           (prev-pos (new 'stack-no-clear 'vector))
           (disp (new 'stack-no-clear 'vector))
+          (forward (new 'stack-no-clear 'vector))
+          (up (new 'stack-no-clear 'vector))
+          (right (new 'stack-no-clear 'vector))
+          (bend-dir (new 'stack-no-clear 'vector))
           (dist 0.0)
-          (arc 0.0))
+          (arc 0.0)
+          (dot 0.0))
 
       (vector-copy! prev-pos (-> this root trans))
 
@@ -84,16 +208,55 @@
       (if (> u 1.0)
           (set! u 1.0))
 
-      ; straight line from start to target in full xyz
+      ;; straight line from start to target in full xyz
       (vector-! dx (-> this target-pos) (-> this starting-pos))
       (vector-copy! base (-> this starting-pos))
       (vector+*! base base dx u)
 
-      ; simple parabola: 0 at ends, peak in middle
+      ;; simple parabola: 0 at ends, peak in middle
       (set! arc (* 4.0 (-> this arc-height) u (- 1.0 u)))
 
+      ;; forward direction
+      (vector-copy! forward dx)
+      (if (< (vector-length forward) 0.001)
+          (set-vector! forward 0.0 0.0 1.0 1.0))
+      (vector-normalize! forward 1.0)
+
+      ;; build local up perpendicular to forward
+      (set-vector! up 0.0 1.0 0.0 1.0)
+      (set! dot (vector-dot up forward))
+      (vector+*! up up forward (- dot))
+
+      ;; fallback if shot is too vertical
+      (when (< (vector-length up) 0.001)
+        (set-vector! up 1.0 0.0 0.0 1.0)
+        (set! dot (vector-dot up forward))
+        (vector+*! up up forward (- dot)))
+
+      (vector-normalize! up 1.0)
+
+      ;; right = forward x up
+      (set! (-> right x) (- (* (-> forward y) (-> up z))
+                            (* (-> forward z) (-> up y))))
+      (set! (-> right y) (- (* (-> forward z) (-> up x))
+                            (* (-> forward x) (-> up z))))
+      (set! (-> right z) (- (* (-> forward x) (-> up y))
+                            (* (-> forward y) (-> up x))))
+      (set! (-> right w) 1.0)
+      (vector-normalize! right 1.0)
+
+      ;; 45 degree tilted parabola = halfway between local up and local right
+      (let ((c (cos (-> this arc-tilt)))
+          (s (sin (-> this arc-tilt))))
+      (vector-float*! bend-dir up c)
+      (vector+*! bend-dir bend-dir right s)
+      (if (< (vector-length bend-dir) 0.001)
+          (vector-copy! bend-dir up))
+      (vector-normalize! bend-dir 1.0))
+
+      ;; apply tilted arc
       (vector-copy! next-pos base)
-      (+! (-> next-pos y) arc)
+      (vector+*! next-pos next-pos bend-dir arc)
 
       (vector-! disp next-pos prev-pos)
       (if (> dt 0.00001)
@@ -112,6 +275,8 @@
 
 (defmethod init-proj-settings! ((this light-eco-fireball))
   (vector-copy! (-> this target-pos) (-> this desired-target-pos))
+  (set! (-> this arc-tilt) (-> this charge-level))
+  (set! (-> this exploded?) #f)
   (set! (-> this attack-mode) 'eco-yellow)
   (set! (-> this explode-rad) 12288.0)
   (set! (-> this damage) 8.0)
@@ -119,9 +284,9 @@
   (set! (-> this max-hits) 1)
   (set! (-> this update-velocity) light-eco-fireball-no-velocity)
   (set! (-> this move) light-eco-fireball-move)
-  (set! (-> this part) (create-launch-control (-> *part-group-id-table* 450) this))
+  (set! (-> this part) (create-launch-control (-> *part-group-id-table* 1866) this))
   (set! (-> this timeout) (seconds 3.0))
-  (set! (-> this arc-height) 24576.0)
+  (set! (-> this arc-height) 45056.0)
   (set! (-> this elapsed) 0.0)
   (set! (-> this sound-id) (new-sound-id))
   (set! (-> this root dynam gravity y) 0.0)
@@ -138,53 +303,82 @@
 )
 
 (defmethod projectile-method-26 ((this light-eco-fireball))
-  (cond
-    ((logtest? (-> *part-group-id-table* 452 flags) (sp-group-flag sp13))
-     (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
-     (part-tracker-spawn part-tracker-subsampler :to this :group (-> *part-group-id-table* 452)))
-    (else
-      (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
-      (part-tracker-spawn part-tracker :to this :group (-> *part-group-id-table* 452))))
   0
   (none)
 )
 
 (defmethod impact-white-fireball ((this light-eco-fireball))
-  (projectile-method-29 this)
-  (projectile-method-26 this)
+  (when (not (-> this exploded?))
+    (set! (-> this exploded?) #t)
 
-  (when *target*
-    (let ((dist2 (vector-vector-distance-squared (-> this root trans) (-> *target* root trans)))
-          (rad (-> this explode-rad)))
-      (when (< dist2 (* rad rad))
-        (let ((atk (new 'stack 'attack-info)))
-          (set! (-> atk mode) (-> this attack-mode))
-          (set! (-> atk id) (-> this attack-id))
-          (set! (-> atk mask) (attack-mask mode id))
-          (set! (-> atk damage) (-> this damage))
-          (logior! (-> atk mask) (attack-mask damage))
-          (when (!= (-> this owner-handle) #f)
-            (set! (-> atk attacker) (-> this owner-handle))
-            (logior! (-> atk mask) (attack-mask attacker)))
-          (send-event *target* 'attack (new 'stack-no-clear 'event-message-block) atk)))))
+    (projectile-method-29 this)
 
-  (cleanup-for-death this)
+    ;; visual explosion only
+    (let ((ep (new 'stack-no-clear 'explosion-init-params)))
+      (vector-copy! (-> ep spawn-point) (-> this root trans))
+      (quaternion-identity! (-> ep spawn-quat))
+      (set! (-> ep radius) (meters 3.0))
+      (set! (-> ep scale) 1.0)
+      (set! (-> ep group) (-> *part-group-id-table* 1868))
+      (set! (-> ep collide-with)
+            (collide-spec backgnd jak civilian obstacle vehicle-sphere hit-by-others-list player-list pusher))
+      (set! (-> ep damage) 0.0)
+      (set! (-> ep damage-scale) 1.0)
+      (set! (-> ep vehicle-damage-factor) 1.0)
+      (set! (-> ep vehicle-impulse-factor) 1.0)
+      (set! (-> ep ignore-proc) (process->handle #f))
+      (explosion-spawn ep (the-as process-drawable *default-pool*)))
+    (play-sound-file "snd/white-fireball-land.wav" 40)
+    ;; manual splash damage to Jak
+    (when *target*
+      (let ((dist2 (vector-vector-distance-squared (-> this root trans) (-> *target* root trans)))
+            (rad (-> this explode-rad)))
+        (when (< dist2 (* rad rad))
+          (let ((atk (new 'stack 'attack-info)))
+            (set! (-> atk mode) (-> this attack-mode))
+            (set! (-> atk id) (-> this attack-id))
+            (set! (-> atk mask) (attack-mask mode id))
+            (set! (-> atk damage) (-> this damage))
+            (logior! (-> atk mask) (attack-mask damage))
+            (when (!= (-> this owner-handle) #f)
+              (set! (-> atk attacker) (-> this owner-handle))
+              (logior! (-> atk mask) (attack-mask attacker)))
+            (send-event *target* 'attack (new 'stack-no-clear 'event-message-block) atk)))))
+
+    (cleanup-for-death this))
   0
   (none)
 )
 
-(defun spawn-light-eco-fireball ((vec vector))
+(define-extern trajectory-prediction (function vector vector vector vector vector float float))
+
+(defun spawn-light-eco-fireball-angle ((vec vector) (ang float))
   (when *target*
     (let ((owner (the-as process-focusable *target*))
           (gp-0 (new 'stack-no-clear 'projectile-init-by-other-params))
           (aim-pos (new 'stack-no-clear 'vector))
-          (to-target (new 'stack-no-clear 'vector)))
+          (to-target (new 'stack-no-clear 'vector))
+          (src-vel (new 'stack-no-clear 'vector))
+          (tgt-pos (new 'stack-no-clear 'vector))
+          (tgt-vel (new 'stack-no-clear 'vector)))
 
-      (vector-copy! aim-pos (-> *target* root trans))
+      (vector-reset! src-vel)
+      (vector-copy! tgt-pos (get-trans (the-as process-focusable *target*) 1))
+      (vector-copy! tgt-vel (get-transv (the-as process-focusable *target*)))
+      (vector-copy! aim-pos tgt-pos)
+
+      (trajectory-prediction
+        aim-pos
+        vec
+        src-vel
+        tgt-pos
+        tgt-vel
+        122880.0)
+
       (vector-! to-target aim-pos vec)
 
       (set! (-> gp-0 ent) (if owner (-> owner entity) (the-as entity #f)))
-      (set! (-> gp-0 charge) 1.0)
+      (set! (-> gp-0 charge) ang)
       (set! (-> gp-0 options) (projectile-options))
       (logclear! (-> gp-0 options) (projectile-options po14 po15 po16))
 
@@ -202,9 +396,331 @@
       (set! (-> gp-0 timeout) (seconds 3.0))
       (vector-copy! (-> gp-0 pos) vec)
       (vector-normalize-copy! (-> gp-0 vel) to-target 1.0)
-
-      (the-as
-        (pointer light-eco-fireball)
-        (spawn-projectile light-eco-fireball gp-0 *target* *default-dead-pool*))))
+      (play-sound-file "snd/white-fireball.wav" 40)
+      (spawn-projectile light-eco-fireball gp-0 *target* *default-dead-pool*)))
   (none)
+)
+
+(defun spawn-light-eco-fireball-angle-direct ((vec vector) (ang float))
+  (when *target*
+    (let ((owner (the-as process-focusable *target*))
+          (gp-0 (new 'stack-no-clear 'projectile-init-by-other-params))
+          (aim-pos (new 'stack-no-clear 'vector))
+          (to-target (new 'stack-no-clear 'vector)))
+
+      (vector-copy! aim-pos (get-trans (the-as process-focusable *target*) 1))
+      (vector-! to-target aim-pos vec)
+
+      (set! (-> gp-0 ent) (if owner (-> owner entity) (the-as entity #f)))
+      (set! (-> gp-0 charge) ang)
+      (set! (-> gp-0 options) (projectile-options))
+      (logclear! (-> gp-0 options) (projectile-options po14 po15 po16))
+
+      (set! (-> gp-0 notify-handle) (the-as handle #f))
+      (set! (-> gp-0 owner-handle) (if owner (process->handle owner) (the-as handle #f)))
+      (set! (-> gp-0 ignore-handle) (if owner (process->handle owner) (the-as handle #f)))
+      (set! (-> gp-0 target-handle) (ppointer->handle *target*))
+      (vector-copy! (-> gp-0 target-pos) aim-pos)
+
+      (let* ((gi *game-info*)
+             (new-id (+ (-> gi attack-id) 1)))
+        (set! (-> gi attack-id) new-id)
+        (set! (-> gp-0 attack-id) new-id))
+
+      (set! (-> gp-0 timeout) (seconds 3.0))
+      (vector-copy! (-> gp-0 pos) vec)
+      (vector-normalize-copy! (-> gp-0 vel) to-target 1.0)
+      (play-sound-file "snd/white-fireball.wav" 40)
+      (spawn-projectile light-eco-fireball gp-0 *target* *default-dead-pool*)))
+  (none)
+)
+
+(defun spawn-light-eco-fireball-v ((vec vector) (deg float))
+  (spawn-light-eco-fireball-angle vec deg)
+  (spawn-light-eco-fireball-angle vec (- deg))
+  (none)
+)
+
+(defun spawn-light-eco-fireball-v-direct ((vec vector) (deg float))
+  (spawn-light-eco-fireball-angle-direct vec deg)
+  (spawn-light-eco-fireball-angle-direct vec (- deg))
+  (none)
+)
+
+(deftype white-fireball (process)
+  ((gen-i                    int)
+   (spawn-count              int)
+   (first-degree           float)
+   (second-degree          float)
+   (spawn-pos     vector :inline)
+  )
+  (:state-methods
+    idle
+    die
+  )
+)
+
+(defbehavior white-fireball-init-by-other white-fireball ((vec vector) (deg0 float) (deg1 float))
+  (set! (-> self gen-i) 0)
+  (set! (-> self spawn-count) 0)
+  (set! (-> self first-degree) deg0)
+  (set! (-> self second-degree) deg1)
+  (vector-copy! (-> self spawn-pos) vec)
+  (go-virtual idle)
+  (none)
+)
+
+(defun spawn-white-fireball ((vec vector) (deg0 float) (deg1 float))
+  (set! *white-fireball* 
+    (process-spawn white-fireball vec deg0 deg1 :name "white-fireball")
+  )
+  (none)
+)
+
+(defstate idle (white-fireball)
+  :virtual #t
+  :code (behavior ()
+    (loop
+      (when (< (-> self gen-i) 30)
+        (+! (-> self gen-i) 1)
+      )
+      (when (= (-> self gen-i) 1)
+        (spawn-light-eco-fireball-v (-> self spawn-pos) (degrees (-> self first-degree)))
+      )
+      (when (= (-> self gen-i) 29)
+        (spawn-light-eco-fireball-v-direct (-> self spawn-pos) (degrees (-> self second-degree)))
+      )
+      (when (>= (-> self gen-i) 30)
+        (go-virtual die)
+      )
+      (suspend)
+    )
+  )
+)
+
+(defstate die (white-fireball) ;;cleanup
+  :virtual #t
+  :code (behavior ()
+    (set! *white-fireball* #f)
+    (deactivate self)
+  )
+)
+
+(deftype laser-spin-attack (process)
+  ((spawn-pos             vector :inline)
+   (spin-speed            float)
+   (spin-angle            float)
+   (spinning-left?        symbol)
+   (timer-max             int)
+   (gen-i                 int)
+   (hit-cooldown          int)
+   (num-lasers            int)
+  )
+  (:state-methods
+    spinning
+    die
+  )
+)
+
+(defbehavior laser-spin-attack-init-by-other laser-spin-attack ((vec vector) (spin-time int) (laser-count int))
+  (vector-copy! (-> self spawn-pos) vec)
+  (set! (-> self timer-max) spin-time)
+  (set! (-> self gen-i) 0)
+  (set! (-> self spin-speed) 0.0)
+  (set! (-> self spin-angle) 0.0)
+  (set! (-> self hit-cooldown) 0)
+  (if (< laser-count 1)
+    (set! (-> self num-lasers) 1)
+    (set! (-> self num-lasers) laser-count)
+  )
+  (if (rand-vu-percent? 0.5)
+    (set! (-> self spinning-left?) #f)
+    (set! (-> self spinning-left?) #t)
+  )
+  (go-virtual spinning)
+  (none)
+)
+
+(defun laser-spin-attack-hit-player! ((arg0 vector) (arg1 vector) (arg2 laser-spin-attack) (arg3 float))
+  (let ((s5-0 (new 'stack-no-clear 'collide-query)))
+    (vector-copy! (-> s5-0 start-pos) arg0)
+    (vector-float*! (-> s5-0 move-dist) arg1 arg3)
+    (let ((v1-3 s5-0))
+      (set! (-> v1-3 radius) 40.96)
+      (set! (-> v1-3 collide-with) (collide-spec jak player-list))
+      (set! (-> v1-3 ignore-process0) (the-as process arg2))
+      (set! (-> v1-3 ignore-process1) #f)
+      (set! (-> v1-3 ignore-pat)
+            (new 'static 'pat-surface :noentity #x1 :nojak #x1 :probe #x1 :noendlessfall #x1 :board #x1)
+      )
+      (set! (-> v1-3 action-mask) (collide-action solid))
+    )
+
+    (let ((f0-2 (fill-and-probe-using-line-sphere *collide-cache* s5-0)))
+      (if (>= f0-2 0.0)
+        (vector-float*! (-> s5-0 move-dist) (-> s5-0 move-dist) f0-2)
+        (set! (-> s5-0 best-other-tri collide-ptr) #f)
+      )
+    )
+
+    (when (and (-> s5-0 best-other-tri collide-ptr)
+               (as-type (-> s5-0 best-other-tri collide-ptr) collide-shape-prim-sphere))
+      (let ((hit-proc
+              (-> (the-as collide-shape-prim-sphere
+                    (as-type (-> s5-0 best-other-tri collide-ptr) collide-shape-prim-sphere))
+                  cshape
+                  process)))
+        (send-event
+          hit-proc
+          'attack
+          #f
+          (static-attack-info
+            :mask (vehicle-impulse-factor)
+            ((id (new-attack-id))
+             (damage 1.0)
+             (vehicle-damage-factor 1.0)
+             (vehicle-impulse-factor 1.0)
+             (mode 'shock))
+          )
+        )
+        (send-event arg2 'notify 'attack hit-proc)
+      )
+    )
+  )
+  (none)
+)
+
+(defun fire-laser-spin! ((arg0 vector) (arg1 vector) (arg2 laser-spin-attack) (arg3 float))
+  (let ((s5-0 (new 'stack-no-clear 'collide-query)))
+    (vector-copy! (-> s5-0 start-pos) arg0)
+    (vector-float*! (-> s5-0 move-dist) arg1 arg3)
+    (let ((v1-3 s5-0))
+      (set! (-> v1-3 radius) 40.96)
+      (set! (-> v1-3 collide-with) (collide-spec backgnd jak enemy obstacle hit-by-others-list player-list))
+      (set! (-> v1-3 ignore-process0) (the-as process arg2))
+      (set! (-> v1-3 ignore-process1) #f)
+      (set! (-> v1-3 ignore-pat)
+            (new 'static 'pat-surface :noentity #x1 :nojak #x1 :probe #x1 :noendlessfall #x1 :board #x1)
+      )
+      (set! (-> v1-3 action-mask) (collide-action solid))
+    )
+
+    (let ((f0-2 (fill-and-probe-using-line-sphere *collide-cache* s5-0)))
+      (if (>= f0-2 0.0)
+        (vector-float*! (-> s5-0 move-dist) (-> s5-0 move-dist) f0-2)
+        (set! (-> s5-0 best-other-tri collide-ptr) #f)
+      )
+    )
+
+    (cond
+      ((and (-> s5-0 best-other-tri collide-ptr)
+            (as-type (-> s5-0 best-other-tri collide-ptr) collide-shape-prim-sphere))
+        (sound-play
+          "laser-hit-jak"
+          :position (vector+! (new 'stack-no-clear 'vector) (-> s5-0 start-pos) (-> s5-0 move-dist))
+        )
+        (vector-normalize! (-> s5-0 move-dist) (+ 2048.0 (vector-length (-> s5-0 move-dist))))
+      )
+      (else
+        (sound-play
+          "laser-sizzle"
+          :position (vector+! (new 'stack-no-clear 'vector) (-> s5-0 start-pos) (-> s5-0 move-dist))
+        )
+      )
+    )
+
+    (set! (-> *part-id-table* 4935 init-specs 4 initial-valuef) (vector-length (-> s5-0 move-dist)))
+    (draw-beam (-> *part-id-table* 4935) arg0 (-> s5-0 move-dist) #f)
+    (launch-particles (-> *part-id-table* 4936) arg0)
+    (launch-particles (-> *part-id-table* 4937) arg0)
+    (launch-particles (-> *part-id-table* 4938) (vector+! (new 'stack-no-clear 'vector) (-> s5-0 move-dist) arg0))
+    (launch-particles (-> *part-id-table* 4939) (vector+! (new 'stack-no-clear 'vector) (-> s5-0 move-dist) arg0))
+
+    (laser-spin-attack-hit-player! arg0 arg1 arg2 arg3)
+  )
+  (none)
+)
+
+(defun laser-spin-attack-fire ((this laser-spin-attack))
+  (let ((step-angle (/ 65536.0 (the float (-> this num-lasers))))
+        (i 0)
+        (ang 0.0)
+        (dir (new 'stack-no-clear 'vector))
+        (q (new 'stack-no-clear 'quaternion))
+        (start (new 'stack-no-clear 'vector)))
+    (while (< i (-> this num-lasers))
+      (set! ang (+ (-> this spin-angle) (* step-angle (the float i))))
+
+      (quaternion-vector-angle! q *up-vector* ang)
+      (vector-z-quaternion! dir q)
+
+      (set! (-> dir y) 0.0)
+      (vector-normalize! dir 1.0)
+
+      (vector+*! start (-> this spawn-pos) dir 256.0)
+      (fire-laser-spin! start dir this 491520.0)
+
+      (+! i 1)
+    )
+  )
+)
+
+(defun spawn-laser-spin-attack ((vec vector) (spin-time int) (laser-count int))
+  (set! *laser-spin-attack*
+    (process-spawn laser-spin-attack vec spin-time laser-count :name "laser-spin-attack")
+  )
+)
+
+(defstate spinning (laser-spin-attack)
+  :virtual #t
+  :code
+  (behavior ()
+    (loop
+      (if (< (-> self gen-i) (-> self timer-max))
+        (+! (-> self gen-i) 1)
+        (go-virtual die)
+      )
+
+      (when (> (-> self hit-cooldown) 0)
+        (-! (-> self hit-cooldown) 1)
+      )
+
+      (let ((progress 0.0)
+            (ramp-progress 0.0)
+            (max-spin-speed 700.0))
+        (set! progress (/ (the float (-> self gen-i))
+                          (the float (-> self timer-max))))
+        (when (< progress 0.0)
+          (set! progress 0.0)
+        )
+        (when (> progress 1.0)
+          (set! progress 1.0)
+        )
+
+        (set! ramp-progress (/ progress 0.35))
+        (when (> ramp-progress 1.0)
+          (set! ramp-progress 1.0)
+        )
+
+        (set! (-> self spin-speed) (* max-spin-speed ramp-progress))
+
+        (if (-> self spinning-left?)
+          (+! (-> self spin-angle) (* (-> self spin-speed) (seconds-per-frame)))
+          (-! (-> self spin-angle) (* (-> self spin-speed) (seconds-per-frame)))
+        )
+      )
+
+      (laser-spin-attack-fire self)
+
+      (suspend)
+    )
+  )
+)
+
+(defstate die (laser-spin-attack)
+  :virtual #t
+  :code (behavior ()
+    (set! *laser-spin-attack* #f)
+    (deactivate self)
+  )
 )
