@@ -6,6 +6,7 @@
 
 (defun-extern spawn-nebula-splitter vector int none)
 (defun-extern spawn-white-fireball vector float float none)
+(defun-extern spawn-laser-spin-attack vector int int none)
 
 (define complete-statue-1 #f)
 (define complete-statue-2 #f)
@@ -193,7 +194,7 @@
                     (set! (-> self statue-5-hit?) #f)
                     (set! (-> self max-time) 3200)
                     (set! (-> self statue-3-pattern-step) 0)
-                    (let ((vec (new 'static 'vector :x (meters -696.3768) :y (meters 52.9250) :z (meters 1156.6093) :w 1.0)))
+                    (let ((vec (new 'static 'vector :x (meters -696.3768) :y (meters 52.2250) :z (meters 1156.6093) :w 1.0)))
                         (vector-copy! (-> self proj-spawn-pos) vec)
                     )
                     (set-time! (-> self splitter-spawn-time))
@@ -495,30 +496,46 @@
         )
     )
 )
+
 (defstate statue-5 (tm-forest-survive)
     :virtual #t
     :event tm-forest-survive-event-handler
     :enter (behavior ()
-        (spawn-laser-spin-attack (-> self proj-spawn-pos) 3200 8)
+        (spawn-laser-spin-attack (-> self proj-spawn-pos) 3200 5)
     )
     :code
     (behavior ()
         (loop
             (let ((vec (new 'static 'vector :x (meters -696.3768) :y (meters 52.9250) :z (meters 1156.6093) :w 1.0)))
-                (cond (complete-statue-survive
-                    (set! complete-statue-survive #f)
-                    (go-virtual win-statue)
+                (cond
+                    ((or (-> self statue-lose)
+                         (and *target* (<= (-> *target* fact health) 0.0)))
+                        (go-virtual lose)
+                    )
+                    (complete-statue-survive
+                        (set! complete-statue-survive #f)
+                        (go-virtual win-statue)
+                    )
+                    ((>= (vector-vector-distance vec (target-pos 0)) (meters 15))
+                        (go-virtual lose)
+                    )
                 )
-                ((>= (vector-vector-distance vec (target-pos 0)) (meters 15))
-                    (go-virtual lose)
-                )
-                )
+
                 (when (> (-> self general-i) (-> self max-time))
                     (set! complete-statue-survive #t)
                 )
-                (when (<= (-> self general-i) (-> self max-time))
-                    (+! (-> self general-i) 1)
-                    ;;place stuff here
+
+                (when (and *target* (not (-> self statue-lose)))
+                    (when (<= (-> self general-i) (-> self max-time))
+                        (+! (-> self general-i) 1)
+
+                        (when (and (not *white-fireball*)
+                                   (> (-> *target* fact health) 0.0)
+                                   (time-elapsed? (-> self splitter-spawn-time) (seconds 6.0)))
+                            (spawn-nebula-splitter (-> self proj-spawn-pos) (rand-vu-int-range 1 4))
+                            (set-time! (-> self splitter-spawn-time))
+                        )
+                    )
                 )
             )
             (format *stdcon* "tm-forest-survive: statue-5~%")

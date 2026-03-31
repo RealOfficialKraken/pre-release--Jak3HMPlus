@@ -669,6 +669,7 @@
   (set! *laser-spin-attack*
     (process-spawn laser-spin-attack vec spin-time laser-count :name "laser-spin-attack")
   )
+  (none)
 )
 
 (defstate spinning (laser-spin-attack)
@@ -685,29 +686,82 @@
         (-! (-> self hit-cooldown) 1)
       )
 
-      (let ((progress 0.0)
-            (ramp-progress 0.0)
-            (max-spin-speed 700.0))
-        (set! progress (/ (the float (-> self gen-i))
-                          (the float (-> self timer-max))))
-        (when (< progress 0.0)
-          (set! progress 0.0)
-        )
-        (when (> progress 1.0)
-          (set! progress 1.0)
+      (let ((phase-frame 0)
+            (ramp-up-frames (seconds 0.3))
+            (hold-frames (seconds 2))
+            (slow-down-frames (seconds 0.2))
+            (cycle-frames (+ (seconds 0.3) (seconds 2) (seconds 0.2)
+                             (seconds 0.3) (seconds 2) (seconds 0.2)))
+            (max-spin-speed 8775.0)
+            (dir-sign 1.0)
+            (t 0.0))
+
+        (set! phase-frame (mod (-> self gen-i) cycle-frames))
+
+        (cond
+          ((< phase-frame ramp-up-frames)
+            (set! t (/ (the float phase-frame)
+                       (the float ramp-up-frames)))
+            (set! (-> self spin-speed) (* max-spin-speed t))
+            (if (-> self spinning-left?)
+              (set! dir-sign 1.0)
+              (set! dir-sign -1.0)
+            )
+          )
+
+          ((< phase-frame (+ ramp-up-frames hold-frames))
+            (set! (-> self spin-speed) max-spin-speed)
+            (if (-> self spinning-left?)
+              (set! dir-sign 1.0)
+              (set! dir-sign -1.0)
+            )
+          )
+
+          ((< phase-frame (+ ramp-up-frames hold-frames slow-down-frames))
+            (set! t
+              (/ (the float (- phase-frame (+ ramp-up-frames hold-frames)))
+                 (the float slow-down-frames)))
+            (set! (-> self spin-speed) (* max-spin-speed (- 1.0 t)))
+            (if (-> self spinning-left?)
+              (set! dir-sign 1.0)
+              (set! dir-sign -1.0)
+            )
+          )
+
+          ((< phase-frame (+ ramp-up-frames hold-frames slow-down-frames ramp-up-frames))
+            (set! t
+              (/ (the float (- phase-frame (+ ramp-up-frames hold-frames slow-down-frames)))
+                 (the float ramp-up-frames)))
+            (set! (-> self spin-speed) (* max-spin-speed t))
+            (if (-> self spinning-left?)
+              (set! dir-sign -1.0)
+              (set! dir-sign 1.0)
+            )
+          )
+
+          ((< phase-frame (+ ramp-up-frames hold-frames slow-down-frames
+                              ramp-up-frames hold-frames))
+            (set! (-> self spin-speed) max-spin-speed)
+            (if (-> self spinning-left?)
+              (set! dir-sign -1.0)
+              (set! dir-sign 1.0)
+            )
+          )
+
+          (else
+            (set! t
+              (/ (the float (- phase-frame (+ ramp-up-frames hold-frames slow-down-frames
+                                              ramp-up-frames hold-frames)))
+                 (the float slow-down-frames)))
+            (set! (-> self spin-speed) (* max-spin-speed (- 1.0 t)))
+            (if (-> self spinning-left?)
+              (set! dir-sign -1.0)
+              (set! dir-sign 1.0)
+            )
+          )
         )
 
-        (set! ramp-progress (/ progress 0.35))
-        (when (> ramp-progress 1.0)
-          (set! ramp-progress 1.0)
-        )
-
-        (set! (-> self spin-speed) (* max-spin-speed ramp-progress))
-
-        (if (-> self spinning-left?)
-          (+! (-> self spin-angle) (* (-> self spin-speed) (seconds-per-frame)))
-          (-! (-> self spin-angle) (* (-> self spin-speed) (seconds-per-frame)))
-        )
+        (+! (-> self spin-angle) (* dir-sign (-> self spin-speed) (seconds-per-frame)))
       )
 
       (laser-spin-attack-fire self)
