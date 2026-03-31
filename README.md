@@ -12,7 +12,7 @@ After a year of development, I can surely say that this mod is one of the bigges
 
 ## Leveling System
 
-The game is designed with a skill-based leveling system for Jak's Guns, Vehicles, and his overall Hero Level.
+The mod is designed with a skill-based leveling system for Jak's Guns, Vehicles, and his overall Hero Level.
 
 #### Leveling Hero Level
 - Increases HP, Eco containers, and Melee Damage. Guns and Vehicles can also be affected at higher levels. Slaying enemies and completing missions gains experience in this field.
@@ -22,9 +22,13 @@ The game is designed with a skill-based leveling system for Jak's Guns, Vehicles
 
 #### Leveling Vehicles
 - Enhances certain fire times of a vehicle weapon, increases armor, and a bigger boost tank each level. Slaying enemies/destorying cars **while on a vehicle** will gain experience in this field.
+
+#### Skills
+When Jak levels up his Guns, Vehicle, or Hero Level, he gains advantages pertaining to the skill. These are unlocked and useable automatically, rather than chosen with skill points.
+
 ## Storyline
 
-Starting from an easter egg found in Jak II's HeroMode+, and continued from the end of Roguelike Jak II, this mod's story comes to it's climax in an epic conclusion. The story itself is progressed through the main missions of the game, and requires the player to traverse through the dark eco realm: a void and desolate dimension where no one but the dark precursors exist. You and Vin tag team to find and collect Dark Eco Crystals across the dimensions, in order to find and destroy The Entity, which threatens existence itself.
+Starting from an easter egg found in Jak II's HeroMode+, and continued from the end of Roguelike Jak II, this mod's story comes to it's climax in an epic conclusion. The story is progressed through the main missions of the game, and requires the player to traverse through the dark eco realm: a void and desolate dimension where no one but the dark precursors exist. You and Vin tag team to find and collect Dark Eco Crystals across the dimensions, in order to find and destroy The Entity, which threatens existence itself.
 ## Weapon Additions & Super Gun Mods
 
 Weapons are not obtained by regular means anymore. At the very start, you get the Scattergun and Blaster mods as usual, but all of the rest are either found via crates dropped by enemies, or by completing certain story missions/optional tasks. They can also be bought in the Black Market, mentioned further down.
@@ -89,6 +93,9 @@ This drop is uncommon, and Jak's Hero Level must at least be at 7. They drop a g
 
 #### Tier 3 (Black Krimzon Crate)
 This drop is the rarest, it only drops after Jak's Hero Level reaches past 18. They drop a huge amount of skull gems, dark eco crystals, and weapons. Sometimes it will drop a super gun mod.
+## Vin's Black Market
+In the Dark Eco Realm, inside of the vehicle selection room, you will find Vin's floating head. When talking with him, you can purchase rewards with Dark Eco Crystals you collect throughout the mod's drop systems. Vin also states that he needs Dark Eco Crystals to research, and in doing so, progresses the mod's storyline.
+
 ## Dark Maker Ships
 
 ![Dark Maker Ship Image](goal_src/jak3/pc/hmplus-modfiles/screenshots/dark-ship.png)
