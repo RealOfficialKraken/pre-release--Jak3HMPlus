@@ -1223,11 +1223,40 @@
        (chip-u 0.0)
        (chip-height 6)
        (chip-y (+ y 1))
-       (arg3 (new 'static 'rgba :r 255 :g 0 :b 0 :a #x40))
-       (white-arg
-         (if (and *target* (focus-test? *target* dark))
-             (new 'static 'rgba :r 40 :g 0 :b 100 :a #x70)
-             (new 'static 'rgba :r 255 :g 255 :b 255 :a #x60))))
+       (chip-alpha #x70)
+       (arg3
+         (let ((hp-color-t enemy-hp-display-percent)
+               (r 0.0)
+               (g 0.0)
+               (b 0.0))
+           (when (< hp-color-t 0.0)
+             (set! hp-color-t 0.0))
+           (when (> hp-color-t 1.0)
+             (set! hp-color-t 1.0))
+
+           (if (< hp-color-t 0.20)
+            (begin
+            (set! r 255.0)
+            (set! g 0.0)
+            (set! b 0.0))
+            (let ((t (/ (- hp-color-t 0.20) 0.80)))
+            (when (< t 0.5)
+                (let ((t2 (/ t 0.5)))
+                (set! r 255.0)
+                (set! g (lerp 0.0 200.0 t2))
+                (set! b 0.0)))
+            (when (>= t 0.5)
+                (let ((t2 (/ (- t 0.5) 0.5)))
+                (set! r (lerp 255.0 0.0 t2))
+                (set! g 200.0)
+                (set! b 0.0)))))
+
+           (new 'static 'rgba
+             :r (the int r)
+             :g (the int g)
+             :b (the int b)
+             :a #x40)))
+       (chip-arg (new 'static 'rgba :r 255 :g 0 :b 0 :a chip-alpha)))
   (when (or (= hud-timer-on? #t) (= r3-noto #t))
     (set! y 90)
     (set! chip-y (+ y 1)))
@@ -1240,13 +1269,16 @@
       (when (> chip-u 1.0)
         (set! chip-u 1.0))
       (set! chip-height (the int (* 6.0 (- 1.0 chip-u))))
-      (set! chip-y (+ (+ y 1) (the int (* 6.0 chip-u))))))
+      (set! chip-y (+ (+ y 1) (the int (* 6.0 chip-u))))
+      (set! chip-alpha (the int (* 112.0 (- 1.0 chip-u))))
+      (set! chip-arg (new 'static 'rgba :r 255 :g 0 :b 0 :a chip-alpha))))
   (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
                                (bucket-id particles))
     (draw-sprite2d-xy s2-0 x y 310 8 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
     (when (and (= enemy-hp-chip-active #t)
                (> chip-progress progress)
-               (> chip-height 0))
+               (> chip-height 0)
+               (> chip-alpha 0))
       (let ((red-w (the int (* 310.0 progress)))
             (chip-w (the int (* 310.0 chip-progress))))
         (when (> chip-w red-w)
@@ -1255,7 +1287,7 @@
                             chip-y
                             (- chip-w red-w)
                             chip-height
-                            white-arg
+                            chip-arg
                             #x3fffff))))
     (draw-sprite2d-xy s2-0
                       (+ x 1)
