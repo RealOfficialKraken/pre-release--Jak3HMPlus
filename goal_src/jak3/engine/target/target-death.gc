@@ -141,7 +141,11 @@
           (set! (-> s5-1 quad) (-> wgf-vec quad))
           (+! (-> s5-1 y) 9011.2)
           (set-continue! *game-info* "factorys-start" #t)
-          (when (= in-factory-level? #f)
+          (when 
+            (and 
+              (= in-factory-level? #f)
+              (task-node-closed? (game-task-node factory-boss-resolution))
+            )
             (factory-level)
           )
           (auto-save-user)

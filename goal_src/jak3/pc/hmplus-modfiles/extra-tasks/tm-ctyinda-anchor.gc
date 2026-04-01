@@ -386,9 +386,14 @@
                 (set! (-> self general-i) 0)
                 (cond 
                     ((and
-                            (!= (-> (level-get-target-inside *level*) name) 'desert)
-                            (!= (-> (level-get-target-inside *level*) name) 'desertg)
-                            (!= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                            (!= (-> (level-get-target-inside *level*) name) 'ctyinda)
+                            (!= (-> (level-get-target-inside *level*) name) 'ctyindb)
+                            (!= (-> (level-get-target-inside *level*) name) 'ctyport)
+                            (!= (-> (level-get-target-inside *level*) name) 'ctysluma)
+                            (!= (-> (level-get-target-inside *level*) name) 'ctyslumb)
+                            (!= (-> (level-get-target-inside *level*) name) 'ctyslumc)
+                            (!= (-> (level-get-target-inside *level*) name) 'mhcitya)
+                            (!= (-> (level-get-target-inside *level*) name) 'mhcityb)
                         )
                         (go-virtual dormant)
                     )

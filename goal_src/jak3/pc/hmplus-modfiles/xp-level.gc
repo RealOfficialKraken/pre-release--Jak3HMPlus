@@ -194,7 +194,7 @@
             (< (-> self y-ofs) 33.0)
             (<= notoriety-level (- enemy-noto 7))
         )
-        (set! (-> self rep-string) "(+ High Level Bonus)~%~S: +~D Reputation")
+        (set! (-> self rep-string) "(+ Hi~+7Vg~-7Vh Level Bonus)~%~S: +~D Re~+7Vp~-7Vutation")
         (set! (-> self xp-gain) (+ (-> self xp-gain) (* (-> self xp-gain) 1.93)))
       )
       (+! (-> self y-ofs) (* 0.6 (-> self clock time-adjust-ratio)))
@@ -245,7 +245,7 @@
       (set! (-> self font) (new 'process 'font-context *font-default-matrix* 0 0 0.0 (font-color default) (font-flags shadow kerning))))
   (set! (-> self xp-string) xp-string)
   (set! (-> self xp-gain) *xp-gain*)
-  (set! (-> self rep-string) "~S: +~D Reputation")
+  (set! (-> self rep-string) "~S: +~D Re~+7Vp~-7Vutation")
   (set-scale! (-> self font) 0.2)
   (set-flags! (-> self font) (font-flags shadow kerning large middle))
   (set-width! (-> self font) 350)
@@ -424,7 +424,7 @@
             )
             (+! (-> *game-info* fuel) xp-gain3)
         )
-        (set! xp-string "Enemy Killed")
+        (set! xp-string "Enem~+7Vy~-7V Killed")
         (spawn-rep-text)
         (auto-save-delayed)
         (set! xpi 0)
@@ -1690,9 +1690,9 @@
                     (or
                         (= (-> (level-get-target-inside *level*) name) 'factorya)
                         (= (-> (level-get-target-inside *level*) name) 'factoryb)
-                        (= (-> (level-get-target-inside *level*) name) 'factoryc)
                         (= (-> (level-get-target-inside *level*) name) 'lfacrm1)
                     )
+                    (not (= (-> (level-get-target-inside *level*) name) 'factoryd))
                     (!= enemy-noto 311)
                     (!= enemy-noto 312)
                     (!= enemy-noto 313)
@@ -1705,6 +1705,13 @@
                     (!= enemy-noto 320)
                 )
                 (set! enemy-noto (rand-vu-int-range 311 320))
+            )
+            (when ;factory-boss
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'factoryd)
+                    (!= enemy-noto 1000)
+                )
+                (set! enemy-noto 1000)
             )
 
             (when 
@@ -2154,6 +2161,7 @@
                         (= (-> (level-get-target-inside *level*) name) 'factoryc)
                         (= (-> (level-get-target-inside *level*) name) 'lfacrm1)
                     )
+                    (not (= (-> (level-get-target-inside *level*) name) 'factoryd))
                     (!= enemy-noto 72)
                     (!= enemy-noto 73)
                     (!= enemy-noto 74)
@@ -2166,6 +2174,13 @@
                     (!= enemy-noto 81)
                 )
                 (set! enemy-noto (rand-vu-int-range 72 81))
+            )
+            (when ;factory-boss
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'factoryd)
+                    (!= enemy-noto 100)
+                )
+                (set! enemy-noto 100)
             )
 
             (when 

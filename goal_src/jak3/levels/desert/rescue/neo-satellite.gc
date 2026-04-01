@@ -3621,7 +3621,7 @@
           (-> self root transv)
           (-> *target* root trans)
           (-> *target* root transv)
-          (* predict-power 0.75)
+          (* predict-power 0.40)
           102400.0)))
 
       (vector-! to-jak center-target src)

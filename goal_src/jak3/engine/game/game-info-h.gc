@@ -68,6 +68,8 @@
 (define-extern entity-boss type)
 (define-extern mantis-boss type)
 (define-extern neo-grenadier-boss type)
+(define-extern kg-grunt type)
+(define-extern neo-wasp type)
 (declare-type rage-ghost process-focusable)
 (define *rage-ghost* (the (pointer rage-ghost) #f))
 (declare-type leaper-boss process-focusable)
@@ -132,6 +134,8 @@
     ((type-type? en-type leaper-boss) 'leaper-boss)
     ((type-type? en-type roboguard-giant) 'robogiant)
     ((type-type? en-type wland-passenger) 'wland-passenger)
+    ((type-type? en-type kg-grunt) 'kg-grunt)
+    ((type-type? en-type neo-wasp) 'neo-wasp)
     (else (-> en-type symbol)))
   )
 

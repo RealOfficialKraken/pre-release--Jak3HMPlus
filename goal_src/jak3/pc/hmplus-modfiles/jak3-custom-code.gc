@@ -5004,7 +5004,7 @@ BUGS:
                     (set! aarena-str "Any")
                 )
                 ((task-node-open? (game-task-node arena-challenge-6))
-                    (set! achallenge-str "Last 10 minutes in <COLOR_RED>THE DEATH DOME")
+                    (set! achallenge-str "Last 6 minutes in <COLOR_RED>THE DEATH DOME")
                     (set! areward-str "<COLOR_RED>A Random Weapon or Level-Up")
                     (set! aarena-str "DEATH DOME")
                 )
@@ -6180,8 +6180,14 @@ BUGS:
             (send-event *target* 'change-mode 'normal)
         )
 
+    ;; Mine Level task arrow
+
     (when
         (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
             (or
                 (task-node-open? (game-task-node mine-explore-introduction))
                 (task-node-open? (game-task-node mine-explore-elevator))
@@ -6214,6 +6220,10 @@ BUGS:
 
     (when
         (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
             (or
                 (task-node-open? (game-task-node mine-explore-introduction))
                 (task-node-open? (game-task-node mine-explore-elevator))
@@ -6230,6 +6240,110 @@ BUGS:
                 (= (-> (level-get-target-inside *level*) name) 'mineb)
                 (= (-> (level-get-target-inside *level*) name) 'minec)
             )
+            (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c)))
+        )
+        (kill-by-name "task-arrow-custom" *default-pool*)
+        (set! task-arrow-spawned? #f)
+    )
+
+    ;;Factory Level task arrow
+
+    (when
+        (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
+            (or
+                (task-node-open? (game-task-node factory-assault-introduction))
+                (task-node-closed? (game-task-node factory-assault-introduction))
+            )
+            (not (task-node-closed? (game-task-node factory-assault-broke-ultimate-fence)))
+            (and
+                (!= (-> (level-get-target-inside *level*) name) 'factorya)
+                (!= (-> (level-get-target-inside *level*) name) 'lfaccar)
+                (!= (-> (level-get-target-inside *level*) name) 'factoryc)
+                (!= (-> (level-get-target-inside *level*) name) 'lfacrm2)
+                (!= (-> (level-get-target-inside *level*) name) 'factoryd)
+            )
+            (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
+        )
+        (let ((level-factory (new 'static 'vector  :x (meters 2213.8623)  :y (meters 33.4158)  :z (meters 172.5839)  :w 1.0)))
+            (task-arrow-custom level-factory #t)
+            (task-node-open! (game-task-node factory-assault-indax-1-introduction) #t)
+        )
+    )
+
+    (when
+        (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
+            (or
+                (task-node-open? (game-task-node factory-assault-introduction))
+                (task-node-closed? (game-task-node factory-assault-introduction))
+            )
+            (or
+                (= (-> (level-get-target-inside *level*) name) 'factorya)
+                (= (-> (level-get-target-inside *level*) name) 'lfaccar)
+                (= (-> (level-get-target-inside *level*) name) 'factoryc)
+                (= (-> (level-get-target-inside *level*) name) 'lfacrm2)
+                (= (-> (level-get-target-inside *level*) name) 'factoryd)
+            )
+            (not (task-node-closed? (game-task-node factory-assault-resolution)))
+            (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c)))
+        )
+        (kill-by-name "task-arrow-custom" *default-pool*)
+        (set! task-arrow-spawned? #f)
+    )
+
+    (when
+        (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
+            (or
+                (task-node-open? (game-task-node factory-assault-broke-ultimate-fence))
+                (task-node-closed? (game-task-node factory-assault-broke-ultimate-fence))
+            )
+            (not (task-node-closed? (game-task-node factory-boss-resolution)))
+            (and
+                (!= (-> (level-get-target-inside *level*) name) 'factorya)
+                (!= (-> (level-get-target-inside *level*) name) 'lfaccar)
+                (!= (-> (level-get-target-inside *level*) name) 'factoryc)
+                (!= (-> (level-get-target-inside *level*) name) 'lfacrm2)
+                (!= (-> (level-get-target-inside *level*) name) 'factoryd)
+            )
+            (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
+        )
+        (let ((level-factory (new 'static 'vector  :x (meters 2213.8623)  :y (meters 33.4158)  :z (meters 172.5839)  :w 1.0)))
+            (task-arrow-custom level-factory #t)
+            (task-node-open! (game-task-node factory-assault-resolution) #t)
+        )
+    )
+
+    (when
+        (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
+            (or
+                (task-node-open? (game-task-node factory-assault-broke-ultimate-fence))
+                (task-node-open? (game-task-node factory-assault-resolution))
+                (task-node-open? (game-task-node factory-boss-introduction))
+                (task-node-open? (game-task-node factory-boss-resolution))
+            )
+            (or
+                (= (-> (level-get-target-inside *level*) name) 'factorya)
+                (= (-> (level-get-target-inside *level*) name) 'lfaccar)
+                (= (-> (level-get-target-inside *level*) name) 'factoryc)
+                (= (-> (level-get-target-inside *level*) name) 'lfacrm2)
+                (= (-> (level-get-target-inside *level*) name) 'factoryd)
+            )
+            (not (task-node-closed? (game-task-node factory-boss-resolution)))
             (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c)))
         )
         (kill-by-name "task-arrow-custom" *default-pool*)

@@ -718,12 +718,12 @@
              )
             ((or (= s5-1 (knocked-type yellow-shot)) (= s5-1 (knocked-type blue-shot)))
              (set! (-> this incoming knocked-type) (knocked-type none))
-             (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+             (when (or (<= (-> this hit-points) 0.0)(< enemy-noto 100))
               (go (method-of-object this knocked))
             )
              )
             (else
-              (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+              (when (or (<= (-> this hit-points) 0.0)(< enemy-noto 100))
                 (go (method-of-object this knocked))
               )
               )
@@ -731,7 +731,7 @@
           )
         )
        (else
-         (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+         (when (or (<= (-> this hit-points) 0.0)(< enemy-noto 100))
           (go (method-of-object this knocked))
          )
          )

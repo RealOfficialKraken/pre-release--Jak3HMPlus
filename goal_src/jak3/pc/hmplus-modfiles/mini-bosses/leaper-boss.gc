@@ -1028,7 +1028,7 @@
         (drop-loot-crate! (-> this root trans) 0.3 0.14)
         (boss-killed? 2500.0)
       )
-      (when (or (<= (-> this hit-points) 0.0)(<= enemy-noto 100))
+      (when (or (<= (-> this hit-points) 0.0)(< enemy-noto 100))
           (go (method-of-object this knocked))
          )
      )
