@@ -102,6 +102,14 @@ tasks:
         msg: "Couldn't locate formatter executable in '{{.FORMATTER_BIN_RELEASE_DIR}}/formatter'"
     cmds:
       - "{{.FORMATTER_BIN_RELEASE_DIR}}/formatter --write --file '{{.FILE}}'"
+  # DEVELOPMENT
+  mod-base-info:
+    desc: "Show the most recent shared commit with OG-Mod-Base upstream + mod base info banner"
+    preconditions:
+      - sh: test -f ./scripts/tasks/mod-base-info.py
+        msg: "Couldn't find the mod base info script at ./scripts/tasks/mod-base-info.py"
+    cmds:
+      - '{{.PYTHON}} ./scripts/tasks/mod-base-info.py'
   # DECOMPILING
   decomp:
     cmds:
