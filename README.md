@@ -98,7 +98,7 @@ In the Dark Eco Realm, inside of the vehicle selection room, you will find Vin's
 
 ## Dark Maker Ships
 
-![Dark Maker Ship Image](goal_src/jak3/pc/hmplus-modfiles/screenshots/dark-ship-3.png)
+![Dark Maker Ship Image](goal_src/jak3/pc/hmplus-modfiles/screenshots/dark-ship-over-mountain.png)
 
 The Dark Maker Ship is a random event that occurs when the player's level is past level 18, and will sit stationary in either a certain part of the wasteland, or in Haven City. Upon getting close, the event activates and fireballs rain down from the huge ship above. Dark Precursors will spawn in waves, and in some waves, Kha'ast Moorog, a giant Dark Precursor MiniBoss, will spawn to lob the player with 5-6 dark eco grenades. Completing this event makes the ship disappear and drops a group of crates, and a really good chance of obtaining a weapon.
 
