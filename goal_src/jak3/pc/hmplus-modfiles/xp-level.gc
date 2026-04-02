@@ -1917,26 +1917,58 @@
                 )
                 (set! enemy-noto (rand-vu-int-range 14 20))
             )
-            (when ;TEMPLEA
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'templea)
-                    (!= enemy-noto 11)
+            (cond ((not (task-node-closed? (game-task-node factory-boss-resolution)))
+                (when ;TEMPLEA
+                    (and
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'templea)
+                            (= (-> (level-get-target-inside *level*) name) 'templex)
+                        )
+                        (!= enemy-noto 11)
+                    )
+                    (set! enemy-noto (+ notoriety-level 3))
                 )
-                (set! enemy-noto (+ notoriety-level 3))
+                (when ;TEMPLEB
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'templeb)
+                        (!= enemy-noto 14)
+                    )
+                    (set! enemy-noto (+ notoriety-level 3))
+                )
+                (when ;TEMPLED
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'templed)
+                        (!= enemy-noto 84)
+                    )
+                    (set! enemy-noto 84)
+                )
             )
-            (when ;TEMPLEB
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'templeb)
-                    (!= enemy-noto 14)
+                ((task-node-closed? (game-task-node factory-boss-resolution))
+                    (when ;TEMPLEA
+                        (and
+                            (or
+                                (= (-> (level-get-target-inside *level*) name) 'templea)
+                                (= (-> (level-get-target-inside *level*) name) 'templex)
+                            )
+                            (!= enemy-noto 85)
+                        )
+                        (set! enemy-noto 85)
+                    )
+                    (when ;TEMPLEB
+                        (and
+                            (= (-> (level-get-target-inside *level*) name) 'templeb)
+                            (!= enemy-noto 89)
+                        )
+                        (set! enemy-noto 89)
+                    )
+                    (when ;TEMPLED
+                        (and
+                            (= (-> (level-get-target-inside *level*) name) 'templed)
+                            (!= enemy-noto 94)
+                        )
+                        (set! enemy-noto 94)
+                    )
                 )
-                (set! enemy-noto (+ notoriety-level 3))
-            )
-            (when ;TEMPLED
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'templeb)
-                    (!= enemy-noto 84)
-                )
-                (set! enemy-noto 84)
             )
             (when ;COMBABX
                 (and

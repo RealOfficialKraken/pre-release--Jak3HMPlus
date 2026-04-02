@@ -6180,6 +6180,52 @@ BUGS:
             (send-event *target* 'change-mode 'normal)
         )
 
+    ;; Volcano Level task arrow
+
+    (when
+        (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
+            (or
+                (task-node-closed? (game-task-node volcano-darkeco-introduction))
+                (task-node-open? (game-task-node volcano-darkeco-introduction))
+            )
+            (not (task-node-closed? (game-task-node volcano-darkeco-resolution)))
+            (and
+                (!= (-> (level-get-target-inside *level*) name) 'volcanox)
+                (!= (-> (level-get-target-inside *level*) name) 'volcanoa)
+            )
+            (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
+        )
+        (let ((level-volcano (new 'static 'vector  :x (meters 2231.5979)  :y (meters 31.7789)  :z (meters 158.4346)  :w 1.0)))
+            (task-arrow-custom level-volcano #t)
+            (task-node-open! (game-task-node volcano-darkeco-introduction) #t)
+        )
+    )
+
+    (when
+        (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
+            (or
+                (task-node-closed? (game-task-node volcano-darkeco-introduction))
+                (task-node-open? (game-task-node volcano-darkeco-introduction))
+            )
+            (not (task-node-closed? (game-task-node volcano-darkeco-resolution)))
+            (or
+                (= (-> (level-get-target-inside *level*) name) 'volcanox)
+                (= (-> (level-get-target-inside *level*) name) 'volcanoa)
+            )
+            (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c)))
+        )
+        (kill-by-name "task-arrow-custom" *default-pool*)
+        (set! task-arrow-spawned? #f)
+    )
+
     ;; Mine Level task arrow
 
     (when

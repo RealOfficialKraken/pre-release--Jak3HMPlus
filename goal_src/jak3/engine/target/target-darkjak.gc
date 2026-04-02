@@ -401,7 +401,7 @@
   (set! (-> this timeout) (seconds 4))
   (set! (-> this sound-id) (new-sound-id))
   (set! (-> this explode-sound) (the-as uint (new-sound-id)))
-  (set! (-> this damage) 8.0)
+  (set! (-> this damage) (+ 8.0 (/ notoriety-level 8.0)))
   (set! (-> this vehicle-damage-factor) 2.0)
   (set! (-> this vehicle-impulse-factor) 3.0)
   (logior! (-> this options) (projectile-options po13))
@@ -919,22 +919,26 @@
          )
        )
       (('touched)
-       (if ((method-of-type touching-shapes-entry prims-touching?)
+        (if ((method-of-type touching-shapes-entry prims-touching?)
             (the-as touching-shapes-entry (-> block param 0))
             (-> self control)
-            (the-as uint 1920)
-            )
-           (target-send-attack
-             proc
-             (-> self control danger-mode)
-             (the-as touching-shapes-entry (-> block param 0))
-             (the-as int (-> self control target-attack-id))
-             (the-as int (-> self control attack-count))
-             (-> self control penetrate-using)
-             )
-           (target-generic-event-handler proc argc message block)
-           )
-       )
+            (the-as uint 1920))
+            (let ((dmg 0.0))
+              (set! dmg (+ 8.0 (/ notoriety-level 8.0)))
+              (send-event
+                proc
+                'attack
+                (the-as touching-shapes-entry (-> block param 0))
+                (static-attack-info
+                  :mask (vehicle-impulse-factor penetrate-using)
+                  ((id (the-as int (-> self control target-attack-id)))
+                  (damage dmg)
+                  (vehicle-damage-factor 1.0)
+                  (vehicle-impulse-factor 1.0)
+                  (mode 'bomb)
+                  (penetrate-using (-> self control penetrate-using)))))
+            (target-generic-event-handler proc argc message block)))
+      )
       (('attack-invinc)
        (target-attacked
          message
@@ -2240,7 +2244,7 @@
              'attack
              #f
              (static-attack-info :mask (vehicle-impulse-factor) ((id (the-as uint arg2))
-                                                                 (damage (+ 15.0 (/ notoriety-level 6)))
+                                                                 (damage (+ 15.0 (/ notoriety-level 2)))
                                                                  (vehicle-damage-factor 1.0)
                                                                  (vehicle-impulse-factor 1.0)
                                                                  (mode 'ice)

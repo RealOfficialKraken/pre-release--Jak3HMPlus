@@ -176,7 +176,7 @@
           (set! (-> s5-1 quad) (-> wgv-vec quad))
           (+! (-> s5-1 y) 9011.2)
           (set-continue! *game-info* "volcanoa-start" #t)
-          (when (= in-volcano-level? #f)
+          (when (and (= in-volcano-level? #f) (task-node-closed? (game-task-node volcano-darkeco-resolution)))
             (volcano-level)
           )
           (auto-save-user)

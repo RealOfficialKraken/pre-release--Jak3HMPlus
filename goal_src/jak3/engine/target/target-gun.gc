@@ -140,6 +140,7 @@
            (nonzero? (-> arg0 gun using-gun-type))
            (begin
              (set! v1-43 (and (cpad-hold? (-> arg0 control cpad number) r1)
+                              (not (focus-test? *target* dark))
                               (not (focus-test? arg0 grabbed))
                               (begin (set! v1-43 #t) (set! (-> arg0 gun latch?) v1-43) v1-43)
                               )
