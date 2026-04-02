@@ -1958,7 +1958,7 @@
                       (set! enemy-string "KG Bomb-Bot")
                     )
                     ((= enemy-name 'bipedal-boss)
-                      (set! enemy-string "Kh'aast Moorog")
+                      (set! enemy-string "Dark Precursor Titan")
                     )
                     ((= enemy-name 'rage-ghost)
                       (set! enemy-string "Rage Ghost")
