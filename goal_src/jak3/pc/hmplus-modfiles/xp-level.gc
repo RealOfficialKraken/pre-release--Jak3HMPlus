@@ -1743,8 +1743,38 @@
                     (set! wasi 0)
                     (set! start-was-uprising #f)
                 )
+
+            (when ;STADIUMA+B
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'stadiuma)
+                        (= (-> (level-get-target-inside *level*) name) 'stadiumb)
+                        (= (-> (level-get-target-inside *level*) name) 'stadium)
+                    )
+                    (or
+                        (< enemy-noto 560)
+                        (> enemy-noto 590)
+                    )
+                )
+                (set! enemy-noto (rand-vu-int-range 560 590))
+            )
+
+            (when ;DARK SHIP
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'precura)
+                        (= (-> (level-get-target-inside *level*) name) 'precurb)
+                        (= (-> (level-get-target-inside *level*) name) 'precurc)
+                        (= (-> (level-get-target-inside *level*) name) 'precurd)
+                    )
+                    (task-node-closed? (game-task-node precursor-tour-resolution))
+                    (!= enemy-noto 1000)
+                )
+                (set! enemy-noto 1000)
+            )
             )
         )
+        
 
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;level based enemy-levels in NORMALS
 
@@ -2160,6 +2190,7 @@
                     (or
                         (= (-> (level-get-target-inside *level*) name) 'stadiuma)
                         (= (-> (level-get-target-inside *level*) name) 'stadiumb)
+                        (= (-> (level-get-target-inside *level*) name) 'stadium)
                     )
                     (or
                         (< enemy-noto 81)
@@ -2177,9 +2208,9 @@
                         (= (-> (level-get-target-inside *level*) name) 'precurd)
                     )
                     (task-node-closed? (game-task-node precursor-tour-resolution))
-                    (!= enemy-noto (+ notoriety-level 5))
+                    (!= enemy-noto 100)
                 )
-                (set! enemy-noto (+ notoriety-level 5))
+                (set! enemy-noto 100)
             )
             (when ;FORESTA
                 (and
@@ -2216,19 +2247,6 @@
             (when ;factory-boss
                 (and
                     (= (-> (level-get-target-inside *level*) name) 'factoryd)
-                    (!= enemy-noto 100)
-                )
-                (set! enemy-noto 100)
-            )
-            (when ;factory-boss
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'preca)
-                    (= (-> (level-get-target-inside *level*) name) 'precb)
-                    (= (-> (level-get-target-inside *level*) name) 'precc)
-                    (= (-> (level-get-target-inside *level*) name) 'precd)
-                    (not (task-node-open? (game-task-node precursor-tour-introduction)))
-                    (not (task-node-open? (game-task-node precursor-tour-generator-trigger)))
-                    (not (task-node-open? (game-task-node precursor-tour-resolution)))
                     (!= enemy-noto 100)
                 )
                 (set! enemy-noto 100)

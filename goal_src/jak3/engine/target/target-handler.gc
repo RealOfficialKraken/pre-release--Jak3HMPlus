@@ -332,6 +332,8 @@
   (none)
   )
 
+(declare-type enemy process-drawable)
+
 (defbehavior target-send-attack target ((arg0 process) (arg1 symbol) (arg2 touching-shapes-entry) (arg3 int) (arg4 int) (arg5 penetrate))
   (local-vars (sv-96 symbol) (sv-128 vector) (sv-132 touching-prims-entry) (sv-136 int) (sv-144 int))
   (set! sv-144 arg3)
@@ -354,9 +356,10 @@
           (>= notoriety-level 45)
           (logtest? s0-0 (penetrate punch spin dark-punch dark-smack)))
       (set! f30-0 (* f30-0 15.0)))
-      (when (rand-vu-percent? 0.06)
-        (toggle-freeze-2 arg1)
-      )
+      (let ((enemy-hit (as-type arg0 enemy)))
+      (when (and enemy-hit
+                (rand-vu-percent? 0.06))
+        (toggle-freeze-2 arg1)))
       (set! sv-96
             (the-as symbol (send-event
                              arg0

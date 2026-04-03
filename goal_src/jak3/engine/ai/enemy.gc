@@ -1880,7 +1880,10 @@
                       (set! enemy-string "Metalhead Bat")
                     )
                     ((= enemy-name 'mantis)
-                      (set! enemy-string "Mantishead")
+                      (if (rand-vu-percent? 0.01)
+                        (set! enemy-string "Mortishead")
+                        (set! enemy-string "Mantishead")
+                      )
                     )
                     ((or 
                       (= enemy-name 'flamer)
