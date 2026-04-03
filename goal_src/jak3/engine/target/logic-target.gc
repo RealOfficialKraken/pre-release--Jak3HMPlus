@@ -8,6 +8,7 @@
 ;; DECOMP BEGINS
 
 (defun-extern activate-crystalhud process-focusable none)
+(define-extern *hmplus-hit-freeze-end-time* time-frame)
 
 (defbehavior build-conversions target ((arg0 vector))
   (when (!= (-> self control prev-surf) (-> self control surf))
@@ -2621,6 +2622,12 @@
   )
 
 (defbehavior target-post target ()
+  (when (and *target*
+           (handle->process (-> *target* lightjak freeze-control))
+           (time-elapsed? *hmplus-hit-freeze-end-time* 0))
+  (send-event (handle->process (-> *target* lightjak freeze-control)) 'die #f)
+  (set! (-> *target* lightjak freeze-control) (the-as handle #f))
+  (set! *hmplus-hit-freeze-end-time* (the-as time-frame 0)))
   (target-real-post)
   (none)
   )

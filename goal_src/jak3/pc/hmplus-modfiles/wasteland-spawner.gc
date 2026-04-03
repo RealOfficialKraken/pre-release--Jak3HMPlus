@@ -315,7 +315,7 @@
     (kill-by-name "manipy-sat-desertd1" *default-pool*)
     (kill-by-name "manipy-sat-desertd2" *default-pool*)
     (kill-by-name "dp-bipedal-c" *default-pool*)
-    (kill-by-name "Bipedal Boss" *default-pool*)
+    (kill-by-name "Bipedal-Boss" *default-pool*)
     (kill-by-name "task-arrow-satellite" *default-pool*)
     (when (= (-> (level-get-target-inside *level*) name) 'desert)
         (set! enemy-noto (+ notoriety-level 1))

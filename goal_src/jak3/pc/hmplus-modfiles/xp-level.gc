@@ -1316,6 +1316,8 @@
                 (not mainmenu-camera)
                 (not disable-targbar)
                 (not hmplus-intro-active?)
+                (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
+                (not (task-node-open? (game-task-node city-blow-tower-resolution)))
             )
                 (draw-targbar-hp)
                 (draw-targbar-dark)
@@ -1670,6 +1672,8 @@
                     (or
                         (= (-> (level-get-target-inside *level*) name) 'ltowera)
                         (= (-> (level-get-target-inside *level*) name) 'ltowerb)
+                        (= (-> (level-get-target-inside *level*) name) 'towera)
+                        (= (-> (level-get-target-inside *level*) name) 'towerb)
                     )
                     (!= enemy-noto 289)
                     (!= enemy-noto 290)
@@ -2135,6 +2139,8 @@
                     (or
                         (= (-> (level-get-target-inside *level*) name) 'ltowera)
                         (= (-> (level-get-target-inside *level*) name) 'ltowerb)
+                        (= (-> (level-get-target-inside *level*) name) 'towera)
+                        (= (-> (level-get-target-inside *level*) name) 'towerb)
                     )
                     (!= enemy-noto 76)
                     (!= enemy-noto 77)
@@ -2147,7 +2153,7 @@
                     (!= enemy-noto 84)
                     (!= enemy-noto 85)
                 )
-                (set! enemy-noto (rand-vu-int-range 289 298))
+                (set! enemy-noto (rand-vu-int-range 76 85))
             )
             (when ;STADIUMA+B
                 (and
@@ -2214,7 +2220,19 @@
                 )
                 (set! enemy-noto 100)
             )
-
+            (when ;factory-boss
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'preca)
+                    (= (-> (level-get-target-inside *level*) name) 'precb)
+                    (= (-> (level-get-target-inside *level*) name) 'precc)
+                    (= (-> (level-get-target-inside *level*) name) 'precd)
+                    (not (task-node-open? (game-task-node precursor-tour-introduction)))
+                    (not (task-node-open? (game-task-node precursor-tour-generator-trigger)))
+                    (not (task-node-open? (game-task-node precursor-tour-resolution)))
+                    (!= enemy-noto 100)
+                )
+                (set! enemy-noto 100)
+            )
             (when 
             (and 
                 (= start-was-uprising #t)

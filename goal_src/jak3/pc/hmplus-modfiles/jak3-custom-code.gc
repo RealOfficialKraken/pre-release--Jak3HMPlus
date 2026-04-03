@@ -2661,7 +2661,7 @@ BUGS:
     )
     (cond
         ((>= notoriety-level 40)
-            (set! skill-noto-string3 "<COLOR_GREEN>10x increased melee damage")
+            (set! skill-noto-string3 "<COLOR_GREEN>15x increased melee damage")
         )
         (else
             (set! skill-noto-string3 "<COLOR_RED>LOCKED")
@@ -4379,6 +4379,7 @@ BUGS:
                 (= (-> (level-get-target-inside *level*) name) 'waspala)
             )
             (intro-play)
+            (logclear! (-> *game-info* secrets) (game-secrets jak-is-jak2))
             (kill-by-name "warp-gate-intro" *default-pool*)
             (set! weather-dark-mode #f)
         )
@@ -7569,6 +7570,28 @@ BUGS:
     (none)
   )
 
+  (defun toggle-freeze-2 ((arg1 symbol))
+    (when
+    (or (= arg1 'punch)
+        (= arg1 'uppercut)
+        (= arg1 'spin)
+        (= arg1 'spin-air)
+        (= arg1 'duck-spin)
+        (= arg1 'dark-smack)
+    )
+  (when (not (handle->process (-> *target* lightjak freeze-control)))
+    (set! (-> *target* lightjak freeze-control)
+          (ppointer->handle
+            (process-spawn
+              freeze-control
+              :init freeze-control-init
+              (the-as sound-id #f)
+              :name "freeze-control"
+              :to *target*))))
+  (set! *hmplus-hit-freeze-end-time* (+ (current-time) (seconds 6.0))))
+    (none)
+  )
+
   (defun dark-weather-override ()
     (set! (-> *overide-mood-fog-table* data (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2))) fog-color x) 255.0)
     (set! (-> *overide-mood-fog-table*
@@ -7636,6 +7659,9 @@ BUGS:
 
 (defun launch-mmenu ()
     (initialize! *game-info* 'game (the-as game-save #f) "desert-bd-start" (the-as resetter-spec #f))
+    (logior! (-> *game-info* secrets) (game-secrets jak-is-jak2))
+    (stop 'game)
+    (start 'game (get-current-continue-forced *game-info*))
     (set! (-> *game-info* mode) 'play)
     (send-event (ppointer->process *time-of-day*) 'change 'hour 19)
     (set! (-> *time-of-day-context* mode) (the-as time-of-day-palette-id 5))
@@ -7914,7 +7940,7 @@ BUGS:
     (kill-by-name "Fallen Satellite" *default-pool*)
     (kill-by-name "manipy-sat" *default-pool*)
     (kill-by-name "dp-bipedal-c" *default-pool*)
-    (kill-by-name "Bipedal Boss" *default-pool*)
+    (kill-by-name "Bipedal-Boss" *default-pool*)
     (kill-by-name "marauder-c" *default-pool*)
     (kill-by-name "goredrinker" *default-pool*)
     (kill-by-name "vin-effect" *default-pool*)

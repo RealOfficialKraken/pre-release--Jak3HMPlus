@@ -6,6 +6,7 @@
 #include <random>
 #include <thread>
 #include <list>
+#include <set>
 
 #define MINIAUDIO_IMPLEMENTATION
 // NOTE - this is needed, because on macOS, there is a file called `MacTypes.h`
@@ -77,6 +78,7 @@ Timer ee_clock_timer;
 
 MiniAudioLib::ma_engine maEngine;
 std::map<std::string, std::list<MiniAudioLib::ma_sound*>> maSoundMap;
+std::set<MiniAudioLib::ma_sound*> pausedSounds;
 MiniAudioLib::ma_sound* mainMusicSound;
 
 void kmachine_init_globals_common() {
@@ -183,6 +185,30 @@ void stopAllSounds() {
   maSoundMap.clear();
 }
 
+// Function to pause all currently playing sounds.
+void pauseSoundFiles() {
+  std::lock_guard<std::mutex> lock(activeMusicsMutex);
+  for (auto& pair : maSoundMap) {
+    for (auto* sound : pair.second) {
+      if (sound && MiniAudioLib::ma_sound_is_playing(sound)) {
+        MiniAudioLib::ma_sound_stop(sound);
+        pausedSounds.insert(sound);
+      }
+    }
+  }
+}
+
+// Function to resume all paused sounds.
+void resumeSoundFiles() {
+  std::lock_guard<std::mutex> lock(activeMusicsMutex);
+  for (auto* sound : pausedSounds) {
+    if (sound && !MiniAudioLib::ma_sound_is_playing(sound)) {
+      MiniAudioLib::ma_sound_start(sound);
+    }
+  }
+  pausedSounds.clear();
+}
+
 // Function to get the names of currently playing files.
 std::vector<std::string> getPlayingFileNames() {
   std::vector<std::string> playingFileNames;
@@ -237,7 +263,7 @@ u64 playMP3_internal(u32 filePathu32, u32 volume, bool isMainMusic) {
     }
 
     // sleep/loop until we're no longer main music, or non-looping sound is stopped/ends
-    while (mainMusicSound == sound || MiniAudioLib::ma_sound_is_playing(sound)) {
+    while (mainMusicSound == sound || MiniAudioLib::ma_sound_is_playing(sound) || pausedSounds.count(sound) > 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
@@ -250,6 +276,7 @@ u64 playMP3_internal(u32 filePathu32, u32 volume, bool isMainMusic) {
       if (maSoundMap.find(filePath) != maSoundMap.end()) {
         maSoundMap[filePath].remove(sound);
       }
+      pausedSounds.erase(sound);
     }
     
     delete sound;
@@ -1347,6 +1374,10 @@ void init_common_pc_port_functions(
 
   // Stop all sounds
   make_func_symbol_func("stop-all-sounds", (void*)stopAllSounds);
+
+  // Pause and resume all sounds
+  make_func_symbol_func("pause-sound-files", (void*)pauseSoundFiles);
+  make_func_symbol_func("resume-sound-files", (void*)resumeSoundFiles);
 
   // Main music stuff
   make_func_symbol_func("play-main-music", (void*)playMainMusic);

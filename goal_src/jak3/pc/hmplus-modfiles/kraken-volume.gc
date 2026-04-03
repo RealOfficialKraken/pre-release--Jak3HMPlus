@@ -109,6 +109,9 @@ playing
                     ((string= (-> self track) "dark-world-theme")
                         (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))
                     )
+                    ((string= (-> self track) "alternate-darkworld")
+                        (play-main-music "snd/music/alternate-darkworld.wav" (-> self volume))
+                    )
                     ((string= (-> self track) "main-menu")
                         (play-main-music "snd/music/main-menu.wav" (-> self volume))
                     )
@@ -126,10 +129,6 @@ playing
             (when 
                 (and
                     (or
-                        (or
-                            (= (-> (level-get-target-inside *level*) name) 'wascitya)
-                            (= (-> (level-get-target-inside *level*) name) 'wascityb)
-                        )
                         (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat)))
                     )
                     (not (string= (-> self track) "combat"))
@@ -138,6 +137,18 @@ playing
                     (play-main-music "snd/music/combat.wav" (-> self volume))
                     (set! (-> self track) "combat")
                 )
+            (when
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'wascitya)
+                        (= (-> (level-get-target-inside *level*) name) 'wascityb)
+                    )
+                    (not (string= (-> self track) "alternate-darkworld"))
+                )
+                (play-main-music "ejfiseuf" (-> self volume))
+                (play-main-music "snd/music/alternate-darkworld.wav" (-> self volume))
+                (set! (-> self track) "alternate-darkworld")
+            )
             (when 
                 (and
                     (and
@@ -145,7 +156,10 @@ playing
                         (!= (-> (level-get-target-inside *level*) name) 'wascityb)
                     )
                     (not (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat))))
-                    (string= (-> self track) "combat")
+                    (and
+                        (string= (-> self track) "combat")
+                        (string= (-> self track) "alternate-darkworld")
+                    )
                 )
                     (play-main-music "ejfiseuf" (-> self volume))
                     (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))

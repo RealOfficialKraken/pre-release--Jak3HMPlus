@@ -216,6 +216,15 @@ dead
                 (task-node-closed? (game-task-node temple-oracle-resolution))
                 (not (task-node-open? (game-task-node temple-tests-introduction)))
                 (not (task-node-open? (game-task-node temple-tests-hover-training)))
+                (not (task-node-open? (game-task-node temple-defend-introduction)))
+                (not (task-node-open? (game-task-node temple-defend-talk-box)))
+                (not (task-node-open? (game-task-node temple-defend-door-1)))
+                (not (task-node-open? (game-task-node temple-defend-door-2)))
+                (not (task-node-open? (game-task-node temple-defend-door-3)))
+                (not (task-node-open? (game-task-node temple-defend-door-4)))
+                (not (task-node-open? (game-task-node temple-defend-oracle)))
+                (not (task-node-open? (game-task-node temple-defend-training)))
+                (not (task-node-open? (game-task-node temple-defend-resolution)))
                 (or
                     (= (-> (level-get-target-inside *level*) name) 'templea)
                     (= (-> (level-get-target-inside *level*) name) 'templec)
@@ -223,7 +232,7 @@ dead
                 (<= (vector-vector-distance (target-pos 0) temple-vbspawner) 500000.0)
                 (= temple-bspawner #f)
             )
-            (init-respawner! temple-vbspawner dp-bipedal "Bipedal Boss" 860)
+            (init-respawner! temple-vbspawner bipedal-boss "Bipedal-Boss" 860)
             (set! temple-bspawner #t)
             )
             ((and
@@ -286,6 +295,9 @@ dead
             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;MHCITYA AREAS;;;;;;;;;;;;;;;;;;;;
             ((and
                 (task-node-closed? (game-task-node city-destroy-darkeco-resolution))
+                (not (task-node-open? (game-task-node city-blow-tower-introduction)))
+                (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
+                (not (task-node-open? (game-task-node city-blow-tower-resolution)))
                 (or
                     (= (-> (level-get-target-inside *level*) name) 'mhcitya)
                     (= (-> (level-get-target-inside *level*) name) 'ctyport)
@@ -312,6 +324,9 @@ dead
                     (= (-> (level-get-target-inside *level*) name) 'ctyindb)
                 )
                 (not (task-node-open? (game-task-node city-blow-barricade-resolution)))
+                (not (task-node-open? (game-task-node city-blow-tower-introduction)))
+                (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
+                (not (task-node-open? (game-task-node city-blow-tower-resolution)))
                 (= ctyinda-bspawner #f)
             )
             (init-respawner! ctyinda-vbspawner-8 roboguard "roboguard" 600)
@@ -337,6 +352,9 @@ dead
             ((and
                 (task-node-closed? (game-task-node city-destroy-darkeco-resolution))
                 (not (task-node-open? (game-task-node city-blow-barricade-resolution)))
+                (not (task-node-open? (game-task-node city-blow-tower-introduction)))
+                (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
+                (not (task-node-open? (game-task-node city-blow-tower-resolution)))
                 (or
                     (= (-> (level-get-target-inside *level*) name) 'ctypesc)
                     (= (-> (level-get-target-inside *level*) name) 'ctyindb)
@@ -364,6 +382,9 @@ dead
                     (= (-> (level-get-target-inside *level*) name) 'ctyport)
                 )
                 (not (task-node-open? (game-task-node city-blow-barricade-resolution)))
+                (not (task-node-open? (game-task-node city-blow-tower-introduction)))
+                (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
+                (not (task-node-open? (game-task-node city-blow-tower-resolution)))
                 (= ctyport-bspawner #f)
             )
             (init-respawner! ctyport-vbspawner-1 roboguard "roboguard" 600)
@@ -430,5 +451,5 @@ dead
 )
 
 ;(init-respawner! (target-pos 0) dp-bipedal "dp-bipedal-c" 600)
-;(init-respawner! (target-pos 0) bipedal-boss "Bipedal Boss" 800)
+;(init-respawner! (target-pos 0) bipedal-boss "Bipedal-Boss" 800)
 ;(init-respawner! (target-pos 0) mantis-boss "Mantis Boss" 800)

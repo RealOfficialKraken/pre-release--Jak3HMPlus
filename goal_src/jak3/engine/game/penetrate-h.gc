@@ -88,6 +88,7 @@
   (penetrate61 61)
   (penetrate64 62)
   (penetrate63 63)
+  (hmplus-melee-x10 64)
   )
 ;; ---penetrate
 

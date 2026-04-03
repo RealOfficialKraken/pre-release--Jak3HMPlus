@@ -7,6 +7,9 @@
 
 ;; DECOMP BEGINS
 
+(define *hmplus-hit-freeze-end-time* (the-as time-frame 0))
+(defun-extern toggle-freeze-2 symbol none)
+
 (defbehavior target-shoved target ((arg0 meters) (arg1 meters) (arg2 process) (arg3 (state object object target)))
   (let ((s5-0 (new 'static 'attack-info)))
     (set! (-> s5-0 attacker) (process->handle arg2))
@@ -347,6 +350,13 @@
            (s5-0 (as-type arg0 process-focusable))
            (s2-1 (and s5-0 (focus-test? s5-0 dead hit)))
            )
+      (when (and
+          (>= notoriety-level 45)
+          (logtest? s0-0 (penetrate punch spin dark-punch dark-smack)))
+      (set! f30-0 (* f30-0 15.0)))
+      (when (rand-vu-percent? 0.06)
+        (toggle-freeze-2 arg1)
+      )
       (set! sv-96
             (the-as symbol (send-event
                              arg0

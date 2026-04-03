@@ -32,7 +32,7 @@
 
 
 (defmethod draw ((this hud-neo-spawner-health))
-  (let ((f0-1 (fmax 0.0 (fmin 1.0 (* 0.1 (the float (-> this values 0 current)))))))
+  (let ((f0-1 (fmax 0.0 (fmin 1.0 (* 0.2 (the float (-> this values 0 current)))))))
     (set! (-> this sprites 1 color x) (the int (* 255.0 (- 1.0 f0-1))))
     (set! (-> this sprites 1 color y) (the int (* 255.0 f0-1)))
     (set! (-> this sprites 1 color z) 0)
@@ -811,7 +811,7 @@
   (set! (-> this manager-entity) (entity-actor-lookup (-> this entity) 'alt-actor 1))
   (set! (-> this turret-entity) (entity-actor-lookup (-> this entity) 'alt-actor 2))
   (set! (-> this minimap) #f)
-  (set! (-> this health) 1.0)
+  (set! (-> this health) 5.0)
   (set! (-> this health-hud-timer) 0.0)
   (set! (-> this triggered?) #f)
   (set! (-> this hud-health) (the-as handle #f))
