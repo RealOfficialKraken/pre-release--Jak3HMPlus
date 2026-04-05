@@ -577,6 +577,9 @@
   (define has-more-enemies? #f)
   (define camera-locked? #f)
 
+  (defun-extern spawn-jak2-stayas none)
+  (define asked-jak-if-jak2? #f)
+
   (define-extern *xp-gain* float)
   (define-extern xp-draw symbol)
   (define xp-draw-override #f)

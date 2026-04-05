@@ -313,6 +313,105 @@ BUGS:
     :z (meters 552.7658)
     :w 1.0))
 
+(deftype stay-as-jak2 (process)
+    ((jak2-select               int)
+    )
+    (:state-methods
+        active
+        die
+    )
+)
+
+(defbehavior stay-as-jak2-init-by-other stay-as-jak2 ()
+    (stack-size-set! (-> self main-thread) 512)
+    (set! (-> self jak2-select) 0)
+    (go-virtual active)
+    (none)
+)
+
+(defun spawn-jak2-stayas ()
+    (process-spawn stay-as-jak2 :name "stay-as-jak2" *active-pool*)
+    (none)
+)
+
+(defstate active (stay-as-jak2)
+    :virtual #t
+    :enter (behavior ()
+        (process-grab? *target* #f)
+    )
+    :code (behavior ()
+        (loop
+            (case (-> self jak2-select)
+                ((0)
+                    (clear matt-str)
+                    (clear *pc-encoded-matt-str*)
+                    (format matt-str "<COLOR_CYAN>Which model would you like to play as?~%<COLOR_PINK>This can be changed at any time in the mod menu~%~%<COLOR_GREEN>Jak II <COLOR_RED>Jak 3"
+                    )
+                    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                    (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                    (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 60 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                    (set! (-> font-ctx scale) 0.325)
+                    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+                )
+                ((1)
+                    (clear matt-str)
+                    (clear *pc-encoded-matt-str*)
+                    (format matt-str "<COLOR_CYAN>Which model would you like to play as?~%<COLOR_PINK>This can be changed at any time in the mod menu~%~%<COLOR_RED>Jak II <COLOR_GREEN>Jak 3"
+                    )
+                    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                    (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                    (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 60 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                    (set! (-> font-ctx scale) 0.325)
+                    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+                )
+            )
+            (when (cpad-pressed? 0 left)
+                (when (< (-> self jak2-select) 0)
+                    (set! (-> self jak2-select) 1)
+                )
+                (when (and (> (-> self jak2-select) 0))
+                    (-! (-> self jak2-select) 1)
+                )
+                (format #t "Selected option: ~D~%" (-> self jak2-select))
+            )
+            (when (cpad-pressed? 0 right)
+                (when (> (-> self jak2-select) 1)
+                    (set! (-> self jak2-select) 0)
+                )
+                (when (and (< (-> self jak2-select) 1))
+                    (+! (-> self jak2-select) 1)
+                )
+                (format #t "Selected option: ~D~%" (-> self jak2-select))
+            )
+            (when (cpad-pressed? 0 x)
+                (case (-> self jak2-select)
+                    ((0)
+                        (logior! (-> *game-info* secrets) (game-secrets jak-is-jak2))
+                    )
+                    ((1)
+                        (logclear! (-> *game-info* secrets) (game-secrets jak-is-jak2))
+                    )
+                )
+                (go-virtual die)
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate die (stay-as-jak2)
+    :virtual #t
+    :code (behavior ()
+        (process-release? *target*)
+        (camera-unlocked)
+        (initialize! *game-info* 'dead (the-as game-save #f) (the-as string #f) (the-as resetter-spec #f))
+        (kill-by-name "stay-as-jak2" *active-pool*)
+        (deactivate self)
+    )
+)
+
 (define hmplus-intro-fx-started? #f)
 
 (defun runs-jak3-every-frame () ;;START RUNNING EVERY FRAME
@@ -705,6 +804,28 @@ BUGS:
 (set! sq-string "Warp to location!")
 )
 
+(when 
+(and 
+(cpad-pressed? 0 x) ;select jak model and exit menu
+*target*
+(= (paused?) #f)
+(= (pause-allowed?) #t)
+(not *scene-player*)
+(= in-menu? #t)
+(= in-modifiers? #f)
+(= in-gunmods? #f)
+(= in-superpowers? #f)
+(= in-skill? #f)
+(= menu-select 4)
+)
+(set! in-menu? #f)
+(kill-by-name "proc-mask-enemyfreeze" *active-pool*)
+(when (= (-> *game-info* total-deaths) 0)
+    (level-up-cars! 1)
+)
+(spawn-jak2-stayas)
+)
+
 
 (when 
 (and 
@@ -750,6 +871,7 @@ BUGS:
     (level-up-cars! 1)
 )
 )
+
 (when 
 (and 
 (cpad-pressed? 0 square) ;select skillset inside superpowers
@@ -785,7 +907,7 @@ BUGS:
         (cpad-pressed? 0 down)
         )
     (+! menu-select 1)
-    (when (> menu-select 3)
+    (when (> menu-select 4)
         (set! menu-select 1)
     )
     )
@@ -797,7 +919,7 @@ BUGS:
         )
     (-! menu-select 1)
     (when (< menu-select 1)
-        (set! menu-select 3)
+        (set! menu-select 4)
     )
     )
 )
@@ -959,6 +1081,19 @@ BUGS:
         )
         (task-node-close! (game-task-node desert-vin-quest-resolution) #t)
     )
+)
+
+(when
+    (and
+        (task-node-open? (game-task-node arena-training-1-collect))
+        *target*
+        (not *scene-player*)
+        (= (paused?) #f)
+        (= (pause-allowed?) #t)
+        (= asked-jak-if-jak2? #f)
+    )
+    (set! asked-jak-if-jak2? #t)
+    (spawn-jak2-stayas)
 )
 
 (when (= mm-hint-1 #t)
@@ -1681,7 +1816,7 @@ BUGS:
     (= menu-select 0)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -1694,7 +1829,7 @@ BUGS:
     (= menu-select 1)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_GREEN>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_GREEN>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -1707,7 +1842,7 @@ BUGS:
     (= menu-select 2)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_GREEN>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_GREEN>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -1720,7 +1855,20 @@ BUGS:
     (= menu-select 3)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_GREEN>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_GREEN>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)"
+        )
+        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 50 0.0 (font-color default) (font-flags middle shadow kerning large))))
+        (set! (-> font-ctx scale) 0.325)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+    )
+    (when
+    (= menu-select 4)
+        (clear matt-str)
+        (clear *pc-encoded-matt-str*)
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_GREEN>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -4379,7 +4527,6 @@ BUGS:
                 (= (-> (level-get-target-inside *level*) name) 'waspala)
             )
             (intro-play)
-            (logclear! (-> *game-info* secrets) (game-secrets jak-is-jak2))
             (kill-by-name "warp-gate-intro" *default-pool*)
             (set! weather-dark-mode #f)
         )
@@ -4393,7 +4540,6 @@ BUGS:
             (let ((vec (new 'static 'vector :x (meters 2387.7595) :y (meters 36.5880) :z (meters 539.4780) :w 1.0)))
             (when (>= (vector-vector-distance (target-pos 0) vec) 8200000.0)
                 (intro-play)
-                (logclear! (-> *game-info* secrets) (game-secrets jak-is-jak2))
                 (kill-by-name "warp-gate-intro" *default-pool*)
                 (set! weather-dark-mode #f)
             )
@@ -6615,6 +6761,7 @@ BUGS:
          )
     (set-vector! vec1 (meters 3343.6374) (meters -100.7223) (meters 335.9116) 1.0)
     (set-vector! vec2 (meters 3551.5637) (meters -100.0751) (meters 522.5238) 1.0)
+    (spawn-blocking-plane-course vec1 vec2 (meters 400) 0.0 #t)
     (spawn-blocking-plane-course vec1 vec2 (meters 400) 0.0 #t)
     )
     (none)

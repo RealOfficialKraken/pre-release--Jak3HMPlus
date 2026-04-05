@@ -358,6 +358,7 @@
       (set! f30-0 (* f30-0 15.0)))
       (let ((enemy-hit (as-type arg0 enemy)))
       (when (and enemy-hit
+                (>= notoriety-level 60)
                 (rand-vu-percent? 0.06))
         (toggle-freeze-2 arg1)))
       (set! sv-96

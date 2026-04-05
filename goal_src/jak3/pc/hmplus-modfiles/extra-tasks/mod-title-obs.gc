@@ -4,6 +4,56 @@
 
 ;code
 
+(defpartgroup group-jak3logo-sparks
+  :id 1544
+  :duration (seconds 0.1)
+  :linger-duration (seconds 0.05)
+  :flags (sp0 sp4)
+  :bounds (static-bspherem 0 0 0 10)
+  :parts ((sp-item 5244 :flags (sp7)) (sp-item 5245 :flags (sp7)))
+)
+
+(defpart 5244
+  :init-specs ((:texture (hitspark level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 0.1) (meters 0.5))
+    (:rot-z (degrees 0) (degrees 360))
+    (:scale-y :copy scale-x)
+    (:r 128.0)
+    (:g 128.0)
+    (:b 128.0)
+    (:a 255.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-3))
+    )
+  )
+
+(defpart 5245
+  :init-specs ((:texture (motion-blur-part level-default-sprite))
+    (:num 0.5 0.5)
+    (:scale-x (meters 0.05) (meters 0.05))
+    (:rot-x 4)
+    (:scale-y :copy scale-x)
+    (:r 128.0)
+    (:g 128.0)
+    (:b 128.0)
+    (:a 255.0)
+    (:omega (degrees 0.0225))
+    (:vel-x (meters -0.20) (meters 0.40))
+    (:vel-y (meters 0.12) (meters 0.20))
+    (:vel-z (meters -0.20) (meters 0.40))
+    (:fade-g -0.64)
+    (:fade-b -2.56)
+    (:fade-a -1.28 -1.28)
+    (:accel-y (meters -0.004))
+    (:friction 0.97)
+    (:timer (seconds 0.335))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+    (:func 'sparticle-motion-blur)
+    (:conerot-x (degrees 0) (degrees 360))
+    (:rotate-y (degrees 0) (degrees 3600))
+  )
+)
 
 ;spawn the jak3 sign as a manipy
 (defun spawn-jak3logo ((vec vector) (arg0 float) (arg1 float) (arg2 float) (arg3 int))
@@ -75,6 +125,36 @@
 (none)
 )
 
+(defun pick-random-spark-fx ((rnd int))
+  (case rnd
+      ((1)
+        (play-sound-file "snd/snd-eft/spark1.wav" 3)
+      )
+      ((2)
+        (play-sound-file "snd/snd-eft/spark2.wav" 3)
+      )
+      ((3)
+        (play-sound-file "snd/snd-eft/spark3.wav" 3)
+      )
+      ((4)
+        (play-sound-file "snd/snd-eft/spark4.wav" 3)
+      )
+      ((5)
+        (play-sound-file "snd/snd-eft/spark5.wav" 3)
+      )
+      ((6)
+        (play-sound-file "snd/snd-eft/spark6.wav" 3)
+      )
+      ((7)
+        (play-sound-file "snd/snd-eft/zap1.wav" 3)
+      )
+      ((8)
+        (play-sound-file "snd/snd-eft/zap2.wav" 3)
+      )
+    )
+  (none)
+)
+
   (defstate active (jak3logo) ;looped from CDR, or virtual startup.
     :virtual #t
     :code (behavior ()
@@ -117,6 +197,22 @@
     )
   )
 
+  (defun spawn-jak3-spark ((vec vector))
+    (pick-random-spark-fx (rand-vu-int-range 1 8))
+    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+    (if (logtest? (-> *part-group-id-table* 1544 flags) (sp-group-flag sp13))
+              (part-tracker-spawn
+                part-tracker-subsampler
+                :to *active-pool*
+                :group (-> *part-group-id-table* 1544))
+              (part-tracker-spawn 
+                part-tracker 
+                :to *active-pool*
+                :group (-> *part-group-id-table* 1544))
+              )
+    (none)
+  )
+
   (defstate turn-on (jak3logo) ;turn the sign on
     :virtual #t
     :code (behavior ()
@@ -130,13 +226,13 @@
         (set! torch-flicker #t)
       )
       (when (rand-vu-percent? 0.1)
-        (launch-particles (-> *part-id-table* 9166) vec2)
+        (spawn-jak3-spark vec)
       )
       (when (rand-vu-percent? 0.23)
-        (launch-particles (-> *part-id-table* 9166) vec3)
+        (spawn-jak3-spark vec3)
       )
       (when (rand-vu-percent? 0.012)
-        (launch-particles (-> *part-id-table* 9166) vec4)
+        (spawn-jak3-spark vec4)
       )
       (set! (-> self wait-timer) 0)
       (set! (-> self wait-max) (rand-vu-int-range 4 18))
