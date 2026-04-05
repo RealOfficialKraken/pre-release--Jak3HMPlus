@@ -10,6 +10,7 @@
 ((volume               int)
 (paused??           symbol)
 (track              string)
+(volume-check-time time-frame)
 )
 (:state-methods 
 dead
@@ -63,6 +64,7 @@ playing
         (format #t "KV-1000 IN DYING STATE--STOPPING MUSIC~%")
         (when (not in-main-menu?)
             (play-main-music "ejfiseuf" (-> self volume))
+            (stop-main-music)
         )
     )
  :code 
@@ -98,91 +100,99 @@ playing
     )
  :code
     (behavior ()
-        (loop
-            (when (!= (the int (* (-> *setting-control* user-current sfx-volume) 100)) (-> self volume))
-                (set! (-> self volume) (the int (* (-> *setting-control* user-current sfx-volume) 100)))
-                (play-main-music "ejfiseuf" (-> self volume))
-                (cond
+        (when
+            (and
+                *target*
+                (not *scene-player*)
+                (= (paused?) #f)
+                (= (pause-allowed?) #t)
+            )
+            (loop
+                (when (time-elapsed? (-> self volume-check-time) (seconds 6.0))
+                (set! (-> self volume-check-time) (current-time))
+                (when (!= (the int (* (-> *setting-control* user-current sfx-volume) 100)) (-> self volume))
+                    (set! (-> self volume) (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+                    (play-main-music "ejfiseuf" (-> self volume))
+                    (stop-main-music)
+                    (cond
                     ((string= (-> self track) "combat")
-                        (play-main-music "snd/music/combat.wav" (-> self volume))
-                    )
+                        (play-main-music "snd/music/combat.wav" (-> self volume)))
                     ((string= (-> self track) "dark-world-theme")
-                        (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))
-                    )
+                        (play-main-music "snd/music/dark-world-theme.wav" (-> self volume)))
                     ((string= (-> self track) "alternate-darkworld")
-                        (play-main-music "snd/music/alternate-darkworld.wav" (-> self volume))
-                    )
+                        (play-main-music "snd/music/alternate-darkworld.wav" (-> self volume)))
                     ((string= (-> self track) "main-menu")
-                        (play-main-music "snd/music/main-menu.wav" (-> self volume))
-                    )
+                        (play-main-music "snd/music/main-menu.wav" (-> self volume)))
                     ((and
+                        (= weather-dark-mode #f)
+                        (= in-main-menu? #f)
+                        (= (paused?) #f)
+                        (= (pause-allowed?) #t)
+                        *target*)
+                        (play-main-music "ejfiseuf" (-> self volume))
+                        (stop-main-music)))))
+                (when 
+                    (and
+                        (or
+                            (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat)))
+                        )
+                        (not (string= (-> self track) "combat"))
+                    )
+                        (play-main-music "ejfiseuf" (-> self volume))
+                        (stop-main-music)
+                        (play-main-music "snd/music/combat.wav" (-> self volume))
+                        (set! (-> self track) "combat")
+                    )
+                (when
+                    (and
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'wascitya)
+                            (= (-> (level-get-target-inside *level*) name) 'wascityb)
+                        )
+                        (not (string= (-> self track) "alternate-darkworld"))
+                    )
+                    (play-main-music "ejfiseuf" (-> self volume))
+                    (stop-main-music)
+                    (play-main-music "snd/music/alternate-darkworld.wav" (-> self volume))
+                    (set! (-> self track) "alternate-darkworld")
+                )
+                (when 
+                    (and
+                        (and
+                            (!= (-> (level-get-target-inside *level*) name) 'wascitya)
+                            (!= (-> (level-get-target-inside *level*) name) 'wascityb)
+                        )
+                        (not (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat))))
+                        (and
+                            (string= (-> self track) "combat")
+                            (string= (-> self track) "alternate-darkworld")
+                        )
+                    )
+                        (play-main-music "ejfiseuf" (-> self volume))
+                        (stop-main-music)
+                        (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))
+                        (set! (-> self track) "dark-world-theme")
+                    )
+                (when
+                    (or
+                        (<= (-> *target* fact health) 0.0)
+                    )
+                    (and
                         (= weather-dark-mode #f)
                         (= in-main-menu? #f)
                         (= (paused?) #f)
                         (= (pause-allowed?) #t)
                         *target*
                     )
-                        (play-main-music "ejfiseuf" (-> self volume))
-                    )
-                )
-            )
-            (when 
-                (and
-                    (or
-                        (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat)))
-                    )
-                    (not (string= (-> self track) "combat"))
-                )
                     (play-main-music "ejfiseuf" (-> self volume))
-                    (play-main-music "snd/music/combat.wav" (-> self volume))
-                    (set! (-> self track) "combat")
+                    (stop-main-music)
+                    (go-virtual dead)
                 )
-            (when
-                (and
-                    (or
-                        (= (-> (level-get-target-inside *level*) name) 'wascitya)
-                        (= (-> (level-get-target-inside *level*) name) 'wascityb)
-                    )
-                    (not (string= (-> self track) "alternate-darkworld"))
+                (when *debug-segment*
+                    (format *stdcon* "kraken-volume~%vol: ~d~%track: ~s~%~%" (-> self volume) (-> self track))
                 )
-                (play-main-music "ejfiseuf" (-> self volume))
-                (play-main-music "snd/music/alternate-darkworld.wav" (-> self volume))
-                (set! (-> self track) "alternate-darkworld")
+                (suspend)
             )
-            (when 
-                (and
-                    (and
-                        (!= (-> (level-get-target-inside *level*) name) 'wascitya)
-                        (!= (-> (level-get-target-inside *level*) name) 'wascityb)
-                    )
-                    (not (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat))))
-                    (and
-                        (string= (-> self track) "combat")
-                        (string= (-> self track) "alternate-darkworld")
-                    )
-                )
-                    (play-main-music "ejfiseuf" (-> self volume))
-                    (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))
-                    (set! (-> self track) "dark-world-theme")
-                )
-            (when
-                (or
-                    (<= (-> *target* fact health) 0.0)
-                )
-                (and
-                    (= weather-dark-mode #f)
-                    (= in-main-menu? #f)
-                    (= (paused?) #f)
-                    (= (pause-allowed?) #t)
-                    *target*
-                )
-                (play-main-music "ejfiseuf" (-> self volume))
-                (go-virtual dead)
-            )
-            (when *debug-segment*
-                (format *stdcon* "kraken-volume~%vol: ~d~%track: ~s~%~%" (-> self volume) (-> self track))
-            )
-            (suspend)
         )
     )
 )
@@ -192,6 +202,7 @@ playing
     (set! (-> self volume) vol)
     (set! (-> self paused??) #f)
     (set! (-> self track) "none")
+    (set! (-> self volume-check-time) (the-as time-frame 0))
     (go (method-of-object self playing))
     (none)
 )

@@ -589,4 +589,5 @@
   "sewer-mood.o"
   "sew-laser-guard.o"
   "sew-laser-turret.o"
+  "rubble-get-out.o"
  ))

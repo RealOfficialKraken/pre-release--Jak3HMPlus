@@ -700,6 +700,6 @@
 
 (defun to-final-boss! ()
   (send-event *target* 'continue (get-continue-by-name *game-info* "desertb-dark-tower"))
-  (process-spawn final-boss-hm :name "final-boss-hm")
+  ;(process-spawn final-boss-hm :name "final-boss-hm")
   (none)
 )

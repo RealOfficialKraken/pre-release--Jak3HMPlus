@@ -1,0 +1,389 @@
+(in-package goal)
+
+;;name: rubble-get-out.gc
+
+(declare-type vin-head-call process-drawable)
+(define *vin-head* (the (pointer vin-head-call) #f))
+
+(defun-extern spawn-vin-head-process vector none)
+
+(deftype rubble-get-out (task-manager)
+    ((gen-i                 int)
+     (vin-i                 int)
+    )
+    (:state-methods
+        active
+        die
+    )
+)
+
+(defstate active (rubble-get-out)
+    :virtual #t
+    :enter (behavior ()
+    (let ((vin-pos (new 'static 'vector :x (meters 193.4697) :y (meters -5.6455) :z (meters 413.1944)))
+          (warp-pos (new 'static 'vector :x (meters 180.3547) :y (meters 16.0464) :z (meters 466.6306)))
+          (warp-deg 90)
+         )
+         (set! (-> self gen-i) 0)
+         (set! (-> self vin-i) 0)
+         (spawn-warp-gate warp-pos "warp-gate-overworld-default" warp-deg)
+         (spawn-vin-head-process vin-pos)
+         (camera-locked #t #f #t)
+    )
+    )
+    :code (behavior ()
+        (loop
+            (format *stdcon* "~%gen-i: ~d~%vin-i: ~d~%" (-> self gen-i) (-> self vin-i))
+            (when (<= (-> self gen-i) 6300)
+                (+! (-> self gen-i) 1)
+                (let ((cam-vec (new 'static 'vector :x (meters 194.7160) :y (meters 20.9955) :z (meters 373.0798)))
+                      (tpos (new 'static 'vector :x (meters 193.6055) :y (meters 21.6075) :z (meters 409.3540)))
+                     )
+                    (turn-to-scene-camera cam-vec tpos #t)
+                )
+                (when (and (>= (-> self gen-i) 120) (< (-> self gen-i) 125))
+                    (set! in-dialogue? #t)
+                    (set! log-sec 0)
+                    (set! log-id 529)
+                    (set! di-s "Bad news!")
+                    (set! di-s2 "") 
+                    (set! di-s3 "")
+                    (set! di-s4 "")
+                )
+                (when
+                    (and
+                        (= in-dialogue? #t)
+                        (= log-id 529)
+                        (cpad-pressed? 0 x)
+                    )
+                    (+! log-sec 1)
+                    (when (= log-sec 1)
+                        (set! di-s "It seems like <COLOR_RED>The Entity<COLOR_WHITE> made it impossible")
+                        (set! di-s2 "to pass through this level.") 
+                        (set! di-s3 "")
+                        (set! di-s4 "")
+                    )
+                    (when (= log-sec 2)
+                        (set! di-s "We have to go back...")
+                        (set! di-s2 "") 
+                        (set! di-s3 "")
+                        (set! di-s4 "")
+                    )
+                    (when (= log-sec 3)
+                        (set! di-s "I've spawned a warp gate here, use it to")
+                        (set! di-s2 "come back to the Spargus Vehicle room, and") 
+                        (set! di-s3 "meet me in the Dark Eco World.")
+                        (set! di-s4 "")
+                    )
+                    (when (= log-sec 4)
+                        (set! di-s "There's more to be done.")
+                        (set! di-s2 "") 
+                        (set! di-s3 "")
+                        (set! di-s4 "")
+                    )
+                    (when (= log-sec 5)
+                        (set! di-s "")
+                        (set! di-s2 "") 
+                        (set! di-s3 "")
+                        (set! di-s4 "")
+                        (set! in-dialogue? #f)
+                        (send-event (ppointer->process *vin-head*) 'go-die #t)
+                        (go-virtual die)
+                    )
+                )
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate die (rubble-get-out)
+    :virtual #t
+    :code (behavior ()
+        (task-node-close! (game-task-node palace-ruins-get-out) #t)
+        (camera-unlocked)
+        (process-release? *target*)
+        (format #t "rubble-get-out died~%")
+    )
+)
+
+#|
+
+(defskelgroup skel-vin-head vin-effect vin-effect-lod0-jg vin-effect-idle-ja
+              ((vin-effect-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 8)
+              :origin-joint-index 3
+              )
+
+(deftype vin-head-call (process-drawable)
+    ((pos                       vector :inline)
+     (should-die?                       symbol)
+    )
+    (:state-methods
+        come-in
+        bobbing
+        come-out
+        dead
+    )
+    (:methods
+        (vin-head-event-handler (_type_ process int symbol event-message-block) none)
+        (spawn-vin-head! (_type_) none)
+    )
+)
+
+(defbehavior vin-head-call-event-handler vin-head-call ((arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (vin-head-event-handler self arg0 arg1 arg2 arg3)
+  (none)
+  )
+
+(defmethod vin-head-event-handler ((this vin-head-call) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+    (case arg2
+        (('go-die!)
+            (set! (-> this should-die?) #t)
+        )
+    )
+    (none)
+)
+
+(defbehavior vin-head-call-init-by-other vin-head-call ((vec vector))
+    (vector-copy! (-> self pos) vec)
+    (set! (-> self should-die?) #f)
+    (go-virtual come-in)
+    (none)
+)
+
+(defun spawn-vin-head-process ((vec vector))
+    (set! *vin-head*
+        (process-spawn vin-head-call vec :name "vin-head-call")
+    )
+    (none)
+)
+
+(defstate come-in (vin-head-call)
+    :virtual #t
+    :code (behavior ()
+        ;;put head growth to actual size and the turning of said head towards jak
+    )
+)
+
+(defstate bobbing (vin-head-call)
+    :virtual #t
+    :code (behavior ()
+        ;;vin's head bobs here
+        (loop
+            (when (= (-> self should-die?) #t)
+                (go-virtual come-out)
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate come-out (vin-head-call)
+    :virtual #t
+    :code (behavior ()
+        ;;vin's head shrinks the exact opposite way that come-in works
+        ;;then, after his come-out anim:
+        (go-virtual dead)
+    )
+)
+
+(defstate dead (vin-head-call)
+    :virtual #t
+    :code (behavior ()
+        ;;cleanup process from process tree and die
+        (set! *vin-head* #f)
+        (deactivate)
+    )
+)|#
+
+
+(defskelgroup skel-vin-head vin-effect vin-effect-lod0-jg vin-effect-idle-ja
+  ((vin-effect-lod0-mg (meters 999999)))
+  :bounds (static-spherem 0 0 0 8)
+  :origin-joint-index 3
+)
+
+(deftype vin-head-call (process-drawable)
+  ((pos         vector     :inline)
+   (start-quat  quaternion :inline)
+   (target-quat quaternion :inline)
+   (should-die? symbol))
+  (:state-methods
+    come-in
+    bobbing
+    come-out
+    dead)
+  (:methods
+    (vin-head-event-handler (_type_ process int symbol event-message-block) none)
+    (spawn-vin-head! (_type_) none))
+)
+
+(defun vin-head-base-scale ()
+  12.0
+)
+
+(defun vin-head-root-pos! ((this vin-head-call) (y float))
+  (set! (-> this root trans x) (-> this pos x))
+  (set! (-> this root trans y) (+ y (meters -1.2)))
+  (set! (-> this root trans z) (-> this pos z))
+  (set! (-> this root trans w) 1.0)
+  (none)
+)
+
+(defun vin-head-face-camera! ((this vin-head-call) (out quaternion))
+  (let ((to-target (new-stack-vector0))
+        (from-pos  (new-stack-vector0)))
+
+    (vector-copy! from-pos (-> this root trans))
+
+    (if *camera-combiner*
+        (begin
+          (vector-copy! to-target (-> *camera-combiner* trans))
+          (+! (-> to-target y) (meters -24.0)))
+        (set-vector! to-target
+                     (-> from-pos x)
+                     (-> from-pos y)
+                     (+ (-> from-pos z) (meters 1.0))
+                     1.0))
+
+    (vector-! to-target to-target from-pos)
+
+    (when (< (vector-length to-target) (meters 0.001))
+      (set-vector! to-target 0.0 0.0 1.0 1.0))
+
+    (vector-normalize! to-target 1.0)
+    (quaternion-look-at! out to-target *up-vector*)
+    out)
+)
+
+(defun vin-head-update-scale! ((this vin-head-call) (s float))
+  (let ((real-scale (* (vin-head-base-scale) s)))
+    (set-vector! (-> this root scale) real-scale real-scale real-scale 1.0))
+  (none)
+)
+
+(defun vin-head-lerp-quat! ((out quaternion) (a quaternion) (b quaternion) (t float))
+  (set! (-> out x) (+ (* (-> a x) (- 1.0 t)) (* (-> b x) t)))
+  (set! (-> out y) (+ (* (-> a y) (- 1.0 t)) (* (-> b y) t)))
+  (set! (-> out z) (+ (* (-> a z) (- 1.0 t)) (* (-> b z) t)))
+  (set! (-> out w) (+ (* (-> a w) (- 1.0 t)) (* (-> b w) t)))
+  (quaternion-normalize! out)
+)
+
+(defbehavior vin-head-call-event-handler vin-head-call ((arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (vin-head-event-handler self arg0 arg1 arg2 arg3)
+  (none)
+)
+
+(defmethod vin-head-event-handler ((this vin-head-call) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (case arg2
+    (('go-die!)
+      (set! (-> this should-die?) #t)))
+  (none)
+)
+
+(defbehavior vin-head-call-init-by-other vin-head-call ((vec vector))
+  (set! (-> self root) (new 'process 'trsqv))
+  (vector-copy! (-> self pos) vec)
+  (vector-copy! (-> self root trans) vec)
+  (set! (-> self root trans w) 1.0)
+  (quaternion-identity! (-> self start-quat))
+  (quaternion-copy! (-> self root quat) (-> self start-quat))
+  (set-vector! (-> self root scale) 1.0 1.0 1.0 1.0)
+  (initialize-skeleton-by-name self "vin-head")
+  (vin-head-update-scale! self 0.0)
+  (set! (-> self should-die?) #f)
+  (go-virtual come-in)
+  (none)
+)
+
+(defun spawn-vin-head-process ((vec vector))
+  (set! *vin-head*
+    (process-spawn vin-head-call vec :name "vin-head-call"))
+  (none)
+)
+
+(defstate come-in (vin-head-call)
+  :virtual #t
+  :post ja-post
+  :event vin-head-call-event-handler
+  :enter (behavior ()
+    (set-time! (-> self state-time))
+    (vin-head-root-pos! self (-> self pos y))
+    (quaternion-identity! (-> self start-quat))
+    (quaternion-copy! (-> self root quat) (-> self start-quat))
+    (vin-head-face-camera! self (-> self target-quat))
+    (vin-head-update-scale! self 0.0))
+  :code (behavior ()
+    (loop
+      (let* ((dur (seconds 1.0))
+             (elapsed (- (current-time) (-> self state-time)))
+             (t (fmin 1.0 (/ (the float elapsed) (the float dur))))
+             (ease (* t t (- 3.0 (* 2.0 t))))
+             (y (+ (-> self pos y) (* (meters 3.0) ease))))
+        (vin-head-root-pos! self y)
+        (vin-head-update-scale! self ease)
+        (vin-head-lerp-quat! (-> self root quat) (-> self start-quat) (-> self target-quat) ease)
+        (when (>= t 1.0)
+          (go-virtual bobbing))
+        (suspend))))
+)
+
+(defstate bobbing (vin-head-call)
+  :virtual #t
+  :event vin-head-call-event-handler
+  :post ja-post
+  :enter (behavior ()
+    (set-time! (-> self state-time))
+    (vin-head-face-camera! self (-> self root quat))
+    (vin-head-update-scale! self 1.0)
+    (vin-head-root-pos! self (+ (-> self pos y) (meters 3.0))))
+  :code (behavior ()
+    (loop
+      (let* ((phase (* 6.2831855
+                       (/ (the float (- (current-time) (-> self state-time)))
+                          (the float (seconds 1.2)))))
+             (center-y (+ (-> self pos y) (meters 1.5)))
+             (amp (meters 1.5))
+             (bob-y (+ center-y (* (cos phase) amp))))
+        (vin-head-root-pos! self bob-y)
+        (vin-head-face-camera! self (-> self root quat))
+        (vin-head-update-scale! self 1.0)
+        (when (= (-> self should-die?) #t)
+          (go-virtual come-out))
+        (suspend))))
+)
+
+(defstate come-out (vin-head-call)
+  :virtual #t
+  :post ja-post
+  :event vin-head-call-event-handler
+  :enter (behavior ()
+    (set-time! (-> self state-time))
+    (vin-head-face-camera! self (-> self target-quat))
+    (quaternion-identity! (-> self start-quat)))
+  :code (behavior ()
+    (loop
+      (let* ((dur (seconds 1.0))
+             (elapsed (- (current-time) (-> self state-time)))
+             (t (fmin 1.0 (/ (the float elapsed) (the float dur))))
+             (ease (* t t (- 3.0 (* 2.0 t))))
+             (inv (- 1.0 ease))
+             (y (+ (-> self pos y) (* (meters 3.0) inv))))
+        (vin-head-root-pos! self y)
+        (vin-head-update-scale! self inv)
+        (vin-head-lerp-quat! (-> self root quat) (-> self target-quat) (-> self start-quat) ease)
+        (when (>= t 1.0)
+          (go-virtual dead))
+        (suspend))))
+)
+
+(defstate dead (vin-head-call)
+  :virtual #t
+  :event vin-head-call-event-handler
+  :code (behavior ()
+    (set! *vin-head* #f)
+    (kill-by-name "vin-head-call" *default-pool*)
+    (deactivate self))
+)

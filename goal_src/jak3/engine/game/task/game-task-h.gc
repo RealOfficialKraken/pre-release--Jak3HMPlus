@@ -476,6 +476,8 @@
   (palace-ruins-patrol-resolution)
   (palace-ruins-attack-introduction)
   (palace-ruins-attack-resolution)
+  (palace-ruins-get-out)
+  (palace-ruins-locked)
   (comb-wild-ride-introduction)
   (comb-wild-ride-resolution)
   (precursor-destroy-ship-introduction)

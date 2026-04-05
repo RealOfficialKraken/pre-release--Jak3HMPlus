@@ -3518,7 +3518,7 @@
   (format matt-str "<COLOR_YELLOW>BIG SHOUTOUT"
   )
   (+! meme-count 1)
-  (cond ((< meme-count 0) ;og is 40
+  (cond ((< meme-count 40) ;og is 40
     (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
     (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id hud-draw-hud-alpha))
     (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
@@ -3527,7 +3527,7 @@
     (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
     (clear matt-str)
     (clear *pc-encoded-matt-str*)
-    (format matt-str "<COLOR_YELLOW>To <COLOR_ORANGE>Mantis, <COLOR_CYAN>Smack Chin<COLOR_YELLOW>, <COLOR_PINK>Blarg<COLOR_YELLOW>, <COLOR_RED>MagicMask<COLOR_YELLOW>, <COLOR_RED>Zed<COLOR_YELLOW>, and <COLOR_ORANGE>Guitar(ofc)<COLOR_YELLOW>.~%This mod would be possible with all of you~%~%Frick you~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_WHITE>Continue"
+    (format matt-str "<COLOR_YELLOW>To <COLOR_ORANGE>Mantis, <COLOR_CYAN>Smack Chin<COLOR_YELLOW>, <COLOR_PINK>Blarg<COLOR_YELLOW>, <COLOR_RED>MagicMask<COLOR_YELLOW>, <COLOR_RED>Zed<COLOR_YELLOW>, and <COLOR_ORANGE>Guitar(ofc)<COLOR_YELLOW>.~%This mod would have been. Definitely.~%~%Frick you~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_WHITE>Continue"
   )
   )
   (else

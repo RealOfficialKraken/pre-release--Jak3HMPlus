@@ -112,7 +112,7 @@
                   (apply ,(lambda :behavior scene-player
                             ()
                             (if (-> self aborted?)
-                                (task-close! "comb-wild-ride-introduction")
+                                (task-close! "palace-ruins-attack-resolution")
                                 )
                             (none)
                             )
@@ -222,7 +222,7 @@
                   )
                 )
               :load-point "rubblec-fma"
-              :end-point "railb-start"
+              :end-point "rubblec-fma"
               :borrow '((stadiuma 0 lpattack special))
               :sfx-volume -1.0
               :ambient-volume -1.0
@@ -421,7 +421,7 @@
           )
         )
       (10000
-        (task-close! "comb-wild-ride-introduction")
+        (task-close! "palace-ruins-attack-resolution")
         (send-event
           "darkjak-highres"
           'trans-hook
@@ -641,7 +641,7 @@
         )
       )
     :load-point "rubblec-fma"
-    :end-point "railb-start"
+    :end-point "rubblec-fma"
     :borrow '((stadiuma 0 lpattack special))
     :sfx-volume -1.0
     :ambient-volume -1.0
