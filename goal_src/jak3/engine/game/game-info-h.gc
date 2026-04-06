@@ -679,7 +679,7 @@
 
   (defun-extern launch-disclaimer none)
   (define in-disclaimer? #f)
-  (define launch-disclaimer? #f)
+  (define launch-disclaimer? #t)
   (define-extern mod-version string)
   (define launch-mmenu-delay #f)
   (define lmmi 0)

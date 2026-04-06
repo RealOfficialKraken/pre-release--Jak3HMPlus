@@ -523,6 +523,7 @@ BUGS:
     (not *scene-player*)
     (= (paused?) #f)
     (= (pause-allowed?) #t))
+    (set! (-> *setting-control* user-current music-volume) 0.0)
   (cond
     ((= hmplus-intro-phase 0)
       (disable-hudmap)
@@ -6273,7 +6274,7 @@ BUGS:
                         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
                         (clear matt-str)
                         (clear *pc-encoded-matt-str*)
-                        (format matt-str "<COLOR_WHITE>HeroMode+ is v~s,~%which means that the mod is <COLOR_YELLOW>unfinished<COLOR_WHITE>.~%~%Furthermore, the <COLOR_ORANGE>Open<COLOR_YELLOW>GOAL<COLOR_WHITE> version is <COLOR_CYAN>below the beta release!~%<COLOR_WHITE>Expect bugs and slight changes to the Mod's gameplay elements~%~%That being said, the mod is still completely playable to 100%.~%You cannot play the game in Hero Mode yet.~%~%If you need to submit any bugs/suggestions, please leave them in the<COLOR_CYAN> JakMods.dev<COLOR_PINK> Discord<COLOR_WHITE>,~%<COLOR_YELLOW>in the 'jak3-heromode-plus' section.~%<COLOR_ORANGE>I will try to respond to everyone, but no guarantees.~%<COLOR_WHITE>Thank you in advance, for playing!~%~% Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%~%~%X<COLOR_WHITE> Continue"
+                        (format matt-str "<COLOR_WHITE>Welcome to HeroMode+ v~s,~%~%Let it be known that this mod is nothing like the Jak II HeroMode+ mod, ~%but something more.~%~%When creating the Jak II mod, I inteded Jak II to be ~%the holy grail in challenge and difficulty, while also making it feel like~%you're playing for the first time again.~%This mod is completely different from that goal.~%~%In this mod, ambition is at it's maximum.~%Missions are changed, some are completely replaced or taken out,~%and gameplay is overhauled.~%~%I cannot thank you all enough for playing this.~%Whenever I make something creative, most of it does not see the other~%end of a person playing it for their enjoyment.~%But this is different.~%So thank you, for giving me this opportunity to present such a~%huge passion project to you.~%~% Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%~%~%X<COLOR_WHITE> Continue"
                         mod-version
                         )
                         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
@@ -6308,7 +6309,7 @@ BUGS:
                 (set! lmmi 0)
                 (set! in-disclaimer? #f)
                 (set! disable-targbar #f)
-                (launch-mmenu)
+                (launch-pre-mmenu)
             )
         )
 
@@ -7810,6 +7811,7 @@ BUGS:
     (set! hmplus-intro-active? #t)
     (set! hmplus-intro-phase 0)
     (set! hmplus-intro-frame 0)
+    (set! (-> *setting-control* user-current music-volume) 0.0)
     (when *target*
       (send-event *target* 'draw #f)
       (send-event *target* 'continue

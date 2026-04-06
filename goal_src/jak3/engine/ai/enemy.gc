@@ -2319,7 +2319,7 @@
      )
      (let ((enemy-name (remap-enemy-type-name (-> this type))))
       (when (!= enemy-name 'egg-spider)
-        (enemy-killed? (rand-vu-float-range 15.0 50.0))
+        (enemy-killed? (rand-vu-float-range 200.0 215.0))
       )
      )
      (set! (-> this enemy-flags) (the-as enemy-flag (logior (enemy-flag death-start) (-> this enemy-flags))))

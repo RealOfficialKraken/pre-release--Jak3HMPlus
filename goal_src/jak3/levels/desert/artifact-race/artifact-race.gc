@@ -608,7 +608,7 @@
             )
           (cond
             ((task-node-open? (game-task-node desert-artifact-race-1-race))
-              (set! (-> self time-limit) (- (the-as time-frame (-> s5-1 time)) (seconds 18)))
+              (set! (-> self time-limit) (- (the-as time-frame (-> s5-1 time)) (seconds 16)))
             )
             ((task-node-open? (game-task-node desert-artifact-race-2-race))
               (set! (-> self time-limit)

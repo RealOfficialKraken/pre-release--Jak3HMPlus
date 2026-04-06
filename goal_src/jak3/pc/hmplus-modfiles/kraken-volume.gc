@@ -92,10 +92,6 @@ playing
                 (play-main-music "snd/music/main-menu.wav" (-> self volume))
                 (set! (-> self track) "main-menu")
             )
-            (else
-                (play-main-music "snd/music/dark-world-theme.wav" (-> self volume))
-                (set! (-> self track) "dark-world-theme")
-            )
         )
     )
  :code
@@ -108,7 +104,7 @@ playing
                 (= (pause-allowed?) #t)
             )
             (loop
-                (when (time-elapsed? (-> self volume-check-time) (seconds 6.0))
+                (when (time-elapsed? (-> self volume-check-time) (seconds 1.0))
                 (set! (-> self volume-check-time) (current-time))
                 (when (!= (the int (* (-> *setting-control* user-current sfx-volume) 100)) (-> self volume))
                     (set! (-> self volume) (the int (* (-> *setting-control* user-current sfx-volume) 100)))
@@ -163,10 +159,8 @@ playing
                             (!= (-> (level-get-target-inside *level*) name) 'wascityb)
                         )
                         (not (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat))))
-                        (and
-                            (string= (-> self track) "combat")
-                            (string= (-> self track) "alternate-darkworld")
-                        )
+                        (not (string= (-> self track) "dark-world-theme"))
+                        (not (string= (-> self track) "main-menu"))
                     )
                         (play-main-music "ejfiseuf" (-> self volume))
                         (stop-main-music)
