@@ -28,24 +28,24 @@ Starting from an easter egg found in Jak II's HeroMode+, and continued from the 
 Weapons are not obtained by regular means anymore. At the very start, you get the Scattergun and Blaster mods as usual, but all of the rest are either found via crates dropped by enemies, or by completing certain story missions/optional tasks. They can also be bought in the Black Market, mentioned further down.
 #### Super Gun Mods
 
-There are 3 extra mods for each colored gun, making a total of 12 super gun mods to obtain. All three can be activated at the same time for each color. These items are exceptionally rare and make your weapon completely overpowered.
+There are 3 extra mods for each colored gun, making a total of 12 super gun mods to obtain. All three can be activated at the same time for each color. For example, Big shot is a red gun mod, and only affect the 3 red guns. These items are exceptionally rare and make your weapon completely overpowered.
 
 #### Red
-- Big Shot
-- Commando Shot
-- Quad Shot
+- Big Shot: Shots are bigger and have more AOE
+- Commando Shot: Shoot out 3 blaster mod projectiles in a wide range
+- Quad Shot: Shots quadruple to fire out in all directions
 #### Yellow
-- Fireball
-- Silver Freeze
-- Grenade Shot
+- Catapult Fury: Every shot sends a fireball down to strike your enemy
+- Silver Freeze: Every shot freezes an enemy for 0.5 seconds
+- Critical Shot: Chance to crit enemies for absolute massive damage.
 #### Blue
-- Ammo Shark
-- Minigun Shot
-- Master Blaster
-#### Dark
-- Random Shot
-- Reaper
-- Multi-Burst
+- Ammo Shark: 33.33% chance to not consume ammo while firing
+- Minigun Shot: Fire a purple turret shot that does extra damage
+- Master Blaster: Chance for a purple turret shot to fire out from Jak in all directions
+#### Dark (NONE OF THESE WORK WITH THE NUKE, FOR OBVIOUS REASONS)
+- Random Shot: Shoot out a few random projectiles when firing
+- Reaper: Fire a purple rift that lobs grenades at all your foes
+- Multi-Burst: Shoot out more than one shot while only consuming one ammo.
 ## Wasteland Warp Room
 
 Inside of the vehicle selection room in the wasteland, you'll find several warp gates going to different places. 
