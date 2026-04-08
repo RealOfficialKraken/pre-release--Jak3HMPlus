@@ -110,18 +110,21 @@ Since Jak levels up and those containers gradually increase, the HP HUD on the b
 ## Damage Outputs
 
 The way the game handles damage now is different. Since Jak can have greatly increased HP, the damage outputs are also different based off of the enemy's level. Here are all the ways the game handles damage now:
-  #### Level-Based Damage
+#### Level-Based Damage
   
   Jak will take higher damage from enemies that are higher level than him, and receive less when Jak is higher than them. Enemies will one-hit Jak when they are 7 levels or above. The enemy HP Bar has a color indicated level, telling you how tough an enemy is.
-    #### Red (3 levels or above)
-    All outgoing damage towards enemies are halved. XP Gain is the most it could be, and doubled if the enemy is 7 levels above yours.
-    #### Yellow (2 levels between Jak's Hero Level)
-    All damage outputs are normal, and XP gain is reduced.
-    #### Green (3 or 4 levels below)
-    All outgoing damage is tripled and enemies are easy to kill. XP gain is severely reduced
-    #### White (5 levels and below)
-    All outgoing damage is quintupled and XP gain is extremely low.
-
+  #### Red (3 levels or above)
+  
+  All outgoing damage towards enemies are halved. XP Gain is the most it could be, and doubled if the enemy is 7 levels above yours.
+  #### Yellow (2 levels between Jak's Hero Level)
+  
+  All damage outputs are normal, and XP gain is reduced.  
+  #### Green (3 or 4 levels below)
+  
+  All outgoing damage is tripled and enemies are easy to kill. XP gain is severely reduced
+  #### White (5 levels and below)
+  
+  All outgoing damage is quintupled and XP gain is extremely low.
   #### Weapon-Based Damage
   
   Jak's weapon damage are scaled with his Guns Level. Purchasing the secret for upgrading a particular weapon will put more damage output on the gun. After level 25, weapon damage is also scaled off of Jak's Hero Level, and more damage is applied to his guns.
