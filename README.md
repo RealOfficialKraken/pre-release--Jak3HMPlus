@@ -76,7 +76,7 @@ Similar to Ratchet and Clank, there are a series of challenges with increasingly
 Mostly all missions have either been altered, redone, or completely replaced by custom missions. Most of these missions were altered or replaced because they did not give the gameplay of Jak and Daxter any justice (like the turret mission). All of these changes are done to make the game either more difficult (HeroMode+), or to be *difficult enough* so you can have room to level up your character.
 ## Loot Drop System
 
-Enemies have a chance to drop loot crates upon death. These crates vary from Tier 1-3.
+Enemies have a chance to drop loot crates upon death. If enemies are a certain level above Jak's Hero level, they are more likely to drop higher tier crates.
 
 #### Tier 1 (Urn)
 This drop is the most common, it carries mostly ammo and sometimes 1-3 metal head skull gems.
@@ -109,4 +109,19 @@ From the HeroMode+ Mod Menu, you can fast travel to some locations if you have t
 Since Jak levels up and those containers gradually increase, the HP HUD on the bottom left has been redone into 3 bars. Additionally, enemies also have a HUD when attacked, indicating their name, level, and current HP. Each enemy's health bar has drastically increased HP depending on their current level.
 ## Damage Outputs
 
-The way the game handles damage now is different. Since Jak can have greatly increased HP, the damage outputs are also different based off of the enemy's level. Receiving damage from enemies is the lowest when your Hero Level is 3 or more above the enemy's. Damage is increased from the enemy the higher the level it is from your Hero Level. When the enemy is 3 levels or more above yours, the enemy's level will appear red on the HP Bar. Finally, if the enemy's level is 7 levels or more above your Hero Level, the enemy's damage has the capacity to one-shot kill--so be careful treading into areas where this is the case!
+The way the game handles damage now is different. Since Jak can have greatly increased HP, the damage outputs are also different based off of the enemy's level. Here are all the ways the game handles damage now:
+  #### Level-Based Damage
+  
+  Jak will take higher damage from enemies that are higher level than him, and receive less when Jak is higher than them. Enemies will one-hit Jak when they are 7 levels or above. The enemy HP Bar has a color indicated level, telling you how tough an enemy is.
+    #### Red (3 levels or above)
+    All outgoing damage towards enemies are halved. XP Gain is the most it could be, and doubled if the enemy is 7 levels above yours.
+    #### Yellow (2 levels between Jak's Hero Level)
+    All damage outputs are normal, and XP gain is reduced.
+    #### Green (3 or 4 levels below)
+    All outgoing damage is tripled and enemies are easy to kill. XP gain is severely reduced
+    #### White (5 levels and below)
+    All outgoing damage is quintupled and XP gain is extremely low.
+
+  #### Weapon-Based Damage
+  
+  Jak's weapon damage are scaled with his Guns Level. Purchasing the secret for upgrading a particular weapon will put more damage output on the gun. After level 25, weapon damage is also scaled off of Jak's Hero Level, and more damage is applied to his guns.
