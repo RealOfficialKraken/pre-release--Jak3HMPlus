@@ -35,6 +35,14 @@
     (die-jak-fall)
     (kill-by-name (-> this name) *default-pool*)
   )
+  (when 
+    (or
+      (search-process-tree *active-pool* (lambda ((p process)) (string= (-> p name) "task-arrow-custom")))
+      (search-process-tree *active-pool* (lambda ((p process)) (string= (-> p name) "task-arrow-satellite")))
+    )
+    (kill-by-name "task-arrow-custom" *default-pool*)
+    (kill-by-name "task-arrow-satellite" *default-pool*)
+  )
   (none)
 )
 
@@ -42,6 +50,16 @@
   :virtual #t
   :code (behavior ()
     (loop
+      (when 
+        (or
+          (search-process-tree *active-pool* (lambda ((p process)) (string= (-> p name) "task-arrow-custom")))
+          (search-process-tree *active-pool* (lambda ((p process)) (string= (-> p name) "task-arrow-satellite")))
+          (search-process-tree *active-pool* (lambda ((p process)) (type? p hud-map)))
+        )
+        (kill-by-type hud-map *active-pool*)
+        (kill-by-name "task-arrow-custom" *default-pool*)
+        (kill-by-name "task-arrow-satellite" *default-pool*)
+      )
       (when (and
               weather-dark-mode
               (= (paused?) #f)
@@ -55,13 +73,6 @@
                 (vec-cam (new 'static 'vector :x (meters 3515) :y (meters 404) :z (meters 835) :w 1.0))
               )
               (turn-to-scene-camera vec-cam vec-tpos #t)
-              (when (or
-                      (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c)))
-                      (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow)))
-                    )
-                (kill-by-name "task-arrow-custom" *default-pool*)
-                (kill-by-name "task-arrow" *default-pool*)
-              )
           )
           (stop-main-music)
         )

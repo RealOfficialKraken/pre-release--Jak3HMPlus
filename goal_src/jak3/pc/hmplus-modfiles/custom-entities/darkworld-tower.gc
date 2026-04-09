@@ -17,6 +17,8 @@
     ()
 )
 
+(declare-type final-boss-hm process)
+
 (defstate active (dark-world-orb)
   :virtual #t
   :event dark-eco-orb-event-handler
