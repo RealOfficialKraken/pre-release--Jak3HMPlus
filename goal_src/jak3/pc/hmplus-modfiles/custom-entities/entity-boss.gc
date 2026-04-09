@@ -5,6 +5,8 @@
 (defun-extern quickspawn-eb vector (none))
 (declare-type entity-boss nav-enemy)
 
+;;MIDDLE OF TOP PLATFORM: (new 'static 'vector :x (meters 3496.7414) :y (meters 404.6769) :z (meters 880.2725) :w 1.0)
+
 (deftype final-boss-hm (process)
   ((general-i             int)
   )
@@ -12,6 +14,9 @@
     active
     idle
     dead
+  )
+  (:methods
+    (final-boss-hm-always (_type_) none)
   )
 )
 
@@ -21,11 +26,46 @@
   (none)
 )
 
+(defmethod final-boss-hm-always ((this final-boss-hm))
+  (when 
+    (and 
+      *target*
+      (< (-> *target* root trans y) (meters 390))
+    )
+    (die-jak-fall)
+    (kill-by-name (-> this name) *default-pool*)
+  )
+  (none)
+)
+
 (defstate active (final-boss-hm)
   :virtual #t
   :code (behavior ()
     (loop
-      (+! (-> self general-i) 1)
+      (when (and
+              weather-dark-mode
+              (= (paused?) #f)
+              (= (pause-allowed?) #t)
+              *target*
+              (not *scene-player*)
+            )
+        (+! (-> self general-i) 1)
+        (when (>= (-> self general-i) 10)
+          (let ((vec-tpos (new 'static 'vector :x (meters 3503) :y (meters 412) :z (meters 864) :w 1.0))
+                (vec-cam (new 'static 'vector :x (meters 3515) :y (meters 404) :z (meters 835) :w 1.0))
+              )
+              (turn-to-scene-camera vec-cam vec-tpos #t)
+              (when (or
+                      (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c)))
+                      (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow)))
+                    )
+                (kill-by-name "task-arrow-custom" *default-pool*)
+                (kill-by-name "task-arrow" *default-pool*)
+              )
+          )
+          (stop-main-music)
+        )
+      )
       (when (and 
               (= weather-dark-mode #f)
             )
@@ -33,14 +73,19 @@
       )
       (when 
         (and 
-          (>= (-> self general-i) 400)
+          (or
+            (>= (-> self general-i) 3000)
+            (cpad-pressed? 0 x)
+          )
+          (>= (-> self general-i) 80)
           (= (paused?) #f)
           (= (pause-allowed?) #t)
           *target*
           (not *scene-player*)
         )
-        (set-vector! (-> *target* control trans) (meters 3439.0092) (meters 123.4) (meters 953.2425) 1.0)
-        (send-event *camera* 'teleport-to-vector-start-string (new 'static 'vector :x (meters 3451.0512) :y (meters 128.2481) :z (meters 953.2425) :w 1.0))
+        (camera-unlocked)
+        (lightjak-get-off-part (target-pos 0))
+        (play-main-music "snd/music/final-boss.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
         (go-virtual idle)
       )
       (format *stdcon* "final-boss-hm in active~%general-i: ~d" (-> self general-i))
@@ -65,6 +110,7 @@
         (go-virtual active)
       )
       (format *stdcon* "final-boss-hm in idle")
+      (final-boss-hm-always self)
       (suspend)
     )
   )
@@ -700,6 +746,10 @@
 
 (defun to-final-boss! ()
   (send-event *target* 'continue (get-continue-by-name *game-info* "desertb-dark-tower"))
-  ;(process-spawn final-boss-hm :name "final-boss-hm")
+  (none)
+)
+
+(defun fb-task-spawn ()
+  (process-spawn final-boss-hm :name "final-boss-hm")
   (none)
 )

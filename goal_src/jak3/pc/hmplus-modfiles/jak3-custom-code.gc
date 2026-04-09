@@ -6348,7 +6348,7 @@ BUGS:
             )
             (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
         )
-        (let ((level-volcano (new 'static 'vector  :x (meters 2231.5979)  :y (meters 31.7789)  :z (meters 158.4346)  :w 1.0)))
+        (let ((level-volcano (new 'static 'vector :x (meters 2231.5979)  :y (meters 31.7789)  :z (meters 158.4346)  :w 1.0)))
             (task-arrow-custom level-volcano #t)
             (task-node-open! (game-task-node volcano-darkeco-introduction) #t)
         )
@@ -6401,7 +6401,7 @@ BUGS:
             )
             (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
         )
-        (let ((level-mine (new 'static 'vector  :x (meters 2299.0676)  :y (meters 32.5507)  :z (meters 158.4272)  :w 1.0)))
+        (let ((level-mine (new 'static 'vector :x (meters 2299.0676)  :y (meters 32.5507)  :z (meters 158.4272)  :w 1.0)))
             (task-arrow-custom level-mine #t)
             (when 
                 (or
@@ -6463,7 +6463,7 @@ BUGS:
             )
             (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
         )
-        (let ((level-factory (new 'static 'vector  :x (meters 2213.8623)  :y (meters 33.4158)  :z (meters 172.5839)  :w 1.0)))
+        (let ((level-factory (new 'static 'vector :x (meters 2213.8623)  :y (meters 33.4158)  :z (meters 172.5839)  :w 1.0)))
             (task-arrow-custom level-factory #t)
             (task-node-open! (game-task-node factory-assault-indax-1-introduction) #t)
         )
@@ -6513,7 +6513,7 @@ BUGS:
             )
             (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
         )
-        (let ((level-factory (new 'static 'vector  :x (meters 2213.8623)  :y (meters 33.4158)  :z (meters 172.5839)  :w 1.0)))
+        (let ((level-factory (new 'static 'vector :x (meters 2213.8623)  :y (meters 33.4158)  :z (meters 172.5839)  :w 1.0)))
             (task-arrow-custom level-factory #t)
             (task-node-open! (game-task-node factory-assault-resolution) #t)
         )
@@ -6547,6 +6547,36 @@ BUGS:
 
     (when
         (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
+            (= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 3)
+            (not weather-dark-mode)
+            (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
+        )
+        (let ((level-final-boss (new 'static 'vector :x (meters 2278.2116)  :y (meters 30.5446)  :z (meters 150.2463)  :w 1.0)))
+            (task-arrow-custom level-final-boss #t)
+            (kill-by-name "final-boss-hm" *active-pool*)
+        )
+    )
+
+    (when
+        (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
+            (= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 3)
+            weather-dark-mode
+            (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c)))
+        )
+        (kill-by-name "task-arrow-custom" *default-pool*)
+        (set! task-arrow-spawned? #f)
+    )
+
+    (when
+        (and
             *target*
             (not *scene-player*)
             (= (paused?) #f)
@@ -6568,7 +6598,6 @@ BUGS:
         )
             (send-event (ppointer->process *kv*) 'die #t)
         )
-
 (none)
 )
 
@@ -7882,7 +7911,7 @@ BUGS:
           manipy-init
           vec
           #f
-          (art-group-get-by-name *level* "skel-precursor-boss" (the (pointer level) #f))
+          (art-group-get-by-name *level* "skel-entity-boss-floater" (the (pointer level) #f))
           #f
           0
           #f
@@ -7901,6 +7930,22 @@ BUGS:
             )
       )
     (none)
+  )
+
+  (defun die-jak-fall ()
+    (send-event
+          *target*
+          'attack-invinc
+          #f
+          (static-attack-info :mask (vehicle-impulse-factor) ((id (new-attack-id))
+                                                              (damage 2.0)
+                                                              (vehicle-damage-factor 1.0)
+                                                              (vehicle-impulse-factor 1.0)
+                                                              (mode 'endlessfall)
+                                                              )
+                              )
+          )
+          (none)
   )
 
   (defun lightjak-get-off-part ((vec vector))

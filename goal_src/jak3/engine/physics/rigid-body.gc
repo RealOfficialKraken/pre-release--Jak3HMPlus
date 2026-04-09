@@ -5,6 +5,9 @@
 ;; name in dgo: rigid-body
 ;; dgos: GAME
 
+(define-extern get-penetrate-using-from-attack-event "Given an attack event to an enemy, return the penetrate that should be applied to the enemy"
+               (function process-drawable event-message-block penetrate))
+
 (deftype rigid-body-stack (structure)
   ((vec vector :inline)
    (mat matrix :inline)

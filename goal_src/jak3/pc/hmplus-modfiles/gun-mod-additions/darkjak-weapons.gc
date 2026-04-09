@@ -1,76 +1,335 @@
 (in-package goal)
 
 ;name : darkjak-weapons.gc
-
 ;description : Additional weapon modifications for Dark Jak
 
 (define set-part-dark? #f)
 
-
 (defun look-for-darkjak ()
-    (let ((v1-0 *target*))
-        (when (and
-            (focus-test? v1-0 dark) ;set
-            (not set-part-dark?)
-            )
-            ;yellow-1
-            (set! (-> *part-id-table* 264 init-specs 5 initial-valuef) 0.0)
-            (set! (-> *part-id-table* 264 init-specs 6 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 264 init-specs 7 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 264 init-specs 8 initial-valuef) 128.0)
+  (let ((v1-0 *target*))
+    (when (and
+            (focus-test? v1-0 dark)
+            (not set-part-dark?))
 
-            (set! (-> *part-id-table* 266 init-specs 5 initial-valuef) 0.0)
-            (set! (-> *part-id-table* 266 init-specs 6 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 266 init-specs 7 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 266 init-specs 8 initial-valuef) 128.0)
+      ; yellow-1 / yellow-2
+      (set! (-> *part-id-table* 264 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 264 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 264 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 264 init-specs 8 initial-valuef) 128.0)
 
-            (set! (-> *part-id-table* 267 init-specs 5 initial-valuef) 128.0)
-            (set! (-> *part-id-table* 267 init-specs 6 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 267 init-specs 7 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 267 init-specs 8 initial-valuef) 255.0)
-            ;yellow-3
-            (set! (-> *part-id-table* 277 init-specs 5 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 277 init-specs 6 initial-valuef) 0.0)
-            (set! (-> *part-id-table* 277 init-specs 7 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 277 init-specs 8 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 266 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 266 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 266 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 266 init-specs 8 initial-valuef) 128.0)
 
-            (set! (-> *part-id-table* 278 init-specs 5 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 278 init-specs 6 initial-valuef) 0.0)
-            (set! (-> *part-id-table* 278 init-specs 7 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 278 init-specs 8 initial-valuef) 128.0)
-            (set! set-part-dark? #t)
-        )
-        (when (and
-            (not (focus-test? v1-0 dark)) ;reset
-            set-part-dark?
-            )
-            ;yellow-1
-            (set! (-> *part-id-table* 264 init-specs 5 initial-valuef) 128.0)
-            (set! (-> *part-id-table* 264 init-specs 6 initial-valuef) 128.0)
-            (set! (-> *part-id-table* 264 init-specs 7 initial-valuef) 128.0)
-            (set! (-> *part-id-table* 264 init-specs 8 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 267 init-specs 5 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 267 init-specs 6 initial-valuef) 64.0)
+      (set! (-> *part-id-table* 267 init-specs 7 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 267 init-specs 8 initial-valuef) 255.0)
 
-            (set! (-> *part-id-table* 266 init-specs 5 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 266 init-specs 6 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 266 init-specs 7 initial-valuef) 128.0)
-            (set! (-> *part-id-table* 266 init-specs 8 initial-valuef) 32.0)
+      ; yellow-2 beam / trail curve
+      (set! (-> *curve-yellow2-shot-color* ys 0 x) 1.0)
+      (set! (-> *curve-yellow2-shot-color* ys 0 y) 0.25)
+      (set! (-> *curve-yellow2-shot-color* ys 0 z) 1.0)
+      (set! (-> *curve-yellow2-shot-color* ys 0 w) 128.0)
 
-            (set! (-> *part-id-table* 267 init-specs 5 initial-valuef) 128.0)
-            (set! (-> *part-id-table* 267 init-specs 6 initial-valuef) 128.0)
-            (set! (-> *part-id-table* 267 init-specs 7 initial-valuef) 128.0)
-            (set! (-> *part-id-table* 267 init-specs 8 initial-valuef) 64.0)
-            ;yellow-3
-            (set! (-> *part-id-table* 277 init-specs 5 initial-valuef) 0.0)
-            (set! (-> *part-id-table* 277 init-specs 6 initial-valuef) 0.0)
-            (set! (-> *part-id-table* 277 init-specs 7 initial-valuef) 255.0)
-            (set! (-> *part-id-table* 277 init-specs 8 initial-valuef) 128.0)
+      (set! (-> *curve-yellow2-shot-color* ys 1 x) 0.8)
+      (set! (-> *curve-yellow2-shot-color* ys 1 y) 0.15)
+      (set! (-> *curve-yellow2-shot-color* ys 1 z) 0.9)
+      (set! (-> *curve-yellow2-shot-color* ys 1 w) 128.0)
 
-            (set! (-> *part-id-table* 278 init-specs 5 initial-valuef) 128.0)
-            (set! (-> *part-id-table* 278 init-specs 6 initial-valuef) 128.0)
-            (set! (-> *part-id-table* 278 init-specs 7 initial-valuef) 0.0)
-            (set! (-> *part-id-table* 278 init-specs 8 initial-valuef) 64.0)
-            (set! set-part-dark? #f)
-        )
+      (set! (-> *curve-yellow2-shot-color* ys 2 x) 0.6)
+      (set! (-> *curve-yellow2-shot-color* ys 2 y) 0.1)
+      (set! (-> *curve-yellow2-shot-color* ys 2 z) 0.75)
+      (set! (-> *curve-yellow2-shot-color* ys 2 w) 128.0)
+
+      (set! (-> *curve-yellow2-shot-color* ys 3 x) 0.6)
+      (set! (-> *curve-yellow2-shot-color* ys 3 y) 0.1)
+      (set! (-> *curve-yellow2-shot-color* ys 3 z) 0.75)
+      (set! (-> *curve-yellow2-shot-color* ys 3 w) 128.0)
+
+      ; yellow-3
+      (set! (-> *part-id-table* 275 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 275 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 275 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 275 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 276 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 276 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 276 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 276 init-specs 8 initial-valuef) 64.0)
+
+      (set! (-> *part-id-table* 278 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 278 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 278 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 278 init-specs 8 initial-valuef) 64.0)
+
+            ; blue-1 / blue-2 direct beam parts
+      (set! (-> *part-id-table* 231 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 231 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 231 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 231 init-specs 8 initial-valuef) 32.0)
+
+      (set! (-> *part-id-table* 234 init-specs 5 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 234 init-specs 6 initial-valuef) 64.0)
+      (set! (-> *part-id-table* 234 init-specs 7 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 234 init-specs 8 initial-valuef) 64.0)
+
+      ; blue-2 lightning particles
+      (set! (-> *part-id-table* 361 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 361 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 361 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 361 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 362 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 362 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 362 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 362 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 363 init-specs 0 initial-valuef) 64.0)
+      (set! (-> *part-id-table* 363 init-specs 1 initial-valuef) 16.0)
+      (set! (-> *part-id-table* 363 init-specs 2 initial-valuef) -0.8)
+      (set! (-> *part-id-table* 363 init-specs 3 initial-valuef) -0.2)
+      (set! (-> *part-id-table* 363 init-specs 4 initial-valuef) -4.0)
+
+      (set! (-> *part-id-table* 364 init-specs 4 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 364 init-specs 5 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 364 init-specs 6 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 364 init-specs 7 initial-valuef) 128.0)
+
+      ; blue-3 muzzle/shot
+      (set! (-> *part-id-table* 250 init-specs 4 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 250 init-specs 5 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 250 init-specs 6 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 250 init-specs 7 initial-valuef) 128.0)
+
+      ; blue-3 trail
+      (set! (-> *blue-shot-trail* color-curve) (the-as curve-color-piecewise *curve-yellow2-shot-color*))
+
+      ; blue impact / spec lightning
+      (set! (-> *lightning-spec-id-table* 12 start-color) (new 'static 'rgba :r #xff :g #x80 :b #xff :a #x80))
+      (set! (-> *lightning-spec-id-table* 12 end-color) (new 'static 'rgba :r #xff :g #x80 :b #xff :a #x80))
+      (set! (-> *lightning-spec-id-table* 12 fade-to-color) (new 'static 'rgba :r #xa0 :g #x20 :b #xc0 :a #x5))
+
+      (set! (-> *lightning-spec-id-table* 13 start-color) (new 'static 'rgba :r #xff :g #x80 :b #xff :a #x10))
+      (set! (-> *lightning-spec-id-table* 13 end-color) (new 'static 'rgba :r #xff :g #x80 :b #xff :a #x10))
+      (set! (-> *lightning-spec-id-table* 13 fade-to-color) (new 'static 'rgba :r #xa0 :g #x20 :b #xc0 :a #x5))
+
+      (set! (-> *lightning-spec-id-table* 14 start-color) (new 'static 'rgba :r #xff :g #x80 :b #xff :a #x80))
+      (set! (-> *lightning-spec-id-table* 14 end-color) (new 'static 'rgba :r #xff :g #x80 :b #xff :a #x80))
+      (set! (-> *lightning-spec-id-table* 14 fade-to-color) (new 'static 'rgba :r #xa0 :g #x20 :b #xc0 :a #x5))
+            ; red-1 / red-2 muzzle flash
+      (set! (-> *part-id-table* 213 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 213 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 213 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 213 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 217 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 217 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 217 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 217 init-specs 8 initial-valuef) 128.0)
+
+      ; red-1 / red-2 fired shot glow
+      (set! (-> *part-id-table* 214 init-specs 5 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 214 init-specs 6 initial-valuef) 96.0)
+      (set! (-> *part-id-table* 214 init-specs 7 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 214 init-specs 8 initial-valuef) 96.0)
+
+      (set! (-> *part-id-table* 215 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 215 init-specs 6 initial-valuef) 32.0)
+      (set! (-> *part-id-table* 215 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 215 init-specs 8 initial-valuef) 96.0)
+
+      ; red-3 explosion / impact
+      (set! (-> *part-id-table* 219 init-specs 5 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 219 init-specs 6 initial-valuef) 96.0)
+      (set! (-> *part-id-table* 219 init-specs 7 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 219 init-specs 8 initial-valuef) 64.0)
+
+      (set! (-> *part-id-table* 220 init-specs 5 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 220 init-specs 6 initial-valuef) 80.0)
+      (set! (-> *part-id-table* 220 init-specs 7 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 220 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 223 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 223 init-specs 6 initial-valuef) 48.0)
+      (set! (-> *part-id-table* 223 init-specs 7 initial-valuef) 224.0)
+      (set! (-> *part-id-table* 223 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 224 init-specs 5 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 224 init-specs 6 initial-valuef) 96.0)
+      (set! (-> *part-id-table* 224 init-specs 7 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 224 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 225 init-specs 5 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 225 init-specs 6 initial-valuef) 64.0)
+      (set! (-> *part-id-table* 225 init-specs 7 initial-valuef) 192.0)
+      (set! (-> *part-id-table* 225 init-specs 8 initial-valuef) 128.0)
+      
+      (set! set-part-dark? #t)
     )
-    (none)
+
+    (when (and
+            (not (focus-test? v1-0 dark))
+            set-part-dark?)
+
+      ; yellow-1 / yellow-2
+      (set! (-> *part-id-table* 264 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 264 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 264 init-specs 7 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 264 init-specs 8 initial-valuef) 32.0)
+
+      (set! (-> *part-id-table* 266 init-specs 5 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 266 init-specs 6 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 266 init-specs 7 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 266 init-specs 8 initial-valuef) 32.0)
+
+      (set! (-> *part-id-table* 267 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 267 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 267 init-specs 7 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 267 init-specs 8 initial-valuef) 64.0)
+
+      ; yellow-2 beam / trail curve
+      (set! (-> *curve-yellow2-shot-color* ys 0 x) 1.0)
+      (set! (-> *curve-yellow2-shot-color* ys 0 y) 1.0)
+      (set! (-> *curve-yellow2-shot-color* ys 0 z) 1.0)
+      (set! (-> *curve-yellow2-shot-color* ys 0 w) 128.0)
+
+      (set! (-> *curve-yellow2-shot-color* ys 1 x) 1.0)
+      (set! (-> *curve-yellow2-shot-color* ys 1 y) 0.8)
+      (set! (-> *curve-yellow2-shot-color* ys 1 z) 0.8)
+      (set! (-> *curve-yellow2-shot-color* ys 1 w) 128.0)
+
+      (set! (-> *curve-yellow2-shot-color* ys 2 x) 1.0)
+      (set! (-> *curve-yellow2-shot-color* ys 2 y) 0.5)
+      (set! (-> *curve-yellow2-shot-color* ys 2 z) 0.5)
+      (set! (-> *curve-yellow2-shot-color* ys 2 w) 128.0)
+
+      (set! (-> *curve-yellow2-shot-color* ys 3 x) 1.0)
+      (set! (-> *curve-yellow2-shot-color* ys 3 y) 0.5)
+      (set! (-> *curve-yellow2-shot-color* ys 3 z) 0.5)
+      (set! (-> *curve-yellow2-shot-color* ys 3 w) 128.0)
+
+      ; yellow-3
+      (set! (-> *part-id-table* 275 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 275 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 275 init-specs 7 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 275 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 276 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 276 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 276 init-specs 7 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 276 init-specs 8 initial-valuef) 32.0)
+
+      (set! (-> *part-id-table* 278 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 278 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 278 init-specs 7 initial-valuef) 0.0)
+      (set! (-> *part-id-table* 278 init-specs 8 initial-valuef) 64.0)
+
+            ; blue-1 / blue-2 direct beam parts
+      (set! (-> *part-id-table* 231 init-specs 5 initial-valuef) 0.0)
+      (set! (-> *part-id-table* 231 init-specs 6 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 231 init-specs 7 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 231 init-specs 8 initial-valuef) 32.0)
+
+      (set! (-> *part-id-table* 234 init-specs 5 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 234 init-specs 6 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 234 init-specs 7 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 234 init-specs 8 initial-valuef) 64.0)
+
+      ; blue-2 lightning particles
+      (set! (-> *part-id-table* 361 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 361 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 361 init-specs 7 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 361 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 362 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 362 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 362 init-specs 7 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 362 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 363 init-specs 0 initial-valuef) 64.0)
+      (set! (-> *part-id-table* 363 init-specs 1 initial-valuef) 64.0)
+      (set! (-> *part-id-table* 363 init-specs 2 initial-valuef) -2.0)
+      (set! (-> *part-id-table* 363 init-specs 3 initial-valuef) -0.8)
+      (set! (-> *part-id-table* 363 init-specs 4 initial-valuef) -4.0)
+
+      (set! (-> *part-id-table* 364 init-specs 4 initial-valuef) 40.0)
+      (set! (-> *part-id-table* 364 init-specs 5 initial-valuef) 200.0)
+      (set! (-> *part-id-table* 364 init-specs 6 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 364 init-specs 7 initial-valuef) 128.0)
+
+      ; blue-3 muzzle/shot
+      (set! (-> *part-id-table* 250 init-specs 4 initial-valuef) 0.0)
+      (set! (-> *part-id-table* 250 init-specs 5 initial-valuef) 0.0)
+      (set! (-> *part-id-table* 250 init-specs 6 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 250 init-specs 7 initial-valuef) 128.0)
+
+      ; blue-3 trail
+      (set! (-> *blue-shot-trail* color-curve) (the-as curve-color-piecewise *trail-color-curve-white*))
+
+      ; blue impact / spec lightning
+      (set! (-> *lightning-spec-id-table* 12 start-color) (new 'static 'rgba :r #xff :g #xff :b #xff :a #x80))
+      (set! (-> *lightning-spec-id-table* 12 end-color) (new 'static 'rgba :r #xff :g #xff :b #xff :a #x80))
+      (set! (-> *lightning-spec-id-table* 12 fade-to-color) (new 'static 'rgba :r #xbf :b #x8f :a #x5))
+
+      (set! (-> *lightning-spec-id-table* 13 start-color) (new 'static 'rgba :r #xff :g #xff :b #xff :a #x10))
+      (set! (-> *lightning-spec-id-table* 13 end-color) (new 'static 'rgba :r #xff :g #xff :b #xff :a #x10))
+      (set! (-> *lightning-spec-id-table* 13 fade-to-color) (new 'static 'rgba :r #xbf :b #x8f :a #x5))
+
+      (set! (-> *lightning-spec-id-table* 14 start-color) (new 'static 'rgba :r #xff :g #xff :b #xff :a #x80))
+      (set! (-> *lightning-spec-id-table* 14 end-color) (new 'static 'rgba :r #xff :g #xff :b #xff :a #x80))
+      (set! (-> *lightning-spec-id-table* 14 fade-to-color) (new 'static 'rgba :r #xbf :b #x8f :a #x5))
+            ; red-1 / red-2 muzzle flash
+      (set! (-> *part-id-table* 213 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 213 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 213 init-specs 7 initial-valuef) 0.0)
+      (set! (-> *part-id-table* 213 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 217 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 217 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 217 init-specs 7 initial-valuef) 0.0)
+      (set! (-> *part-id-table* 217 init-specs 8 initial-valuef) 128.0)
+
+      ; red-1 / red-2 fired shot glow
+      (set! (-> *part-id-table* 214 init-specs 5 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 214 init-specs 6 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 214 init-specs 7 initial-valuef) 0.0)
+      (set! (-> *part-id-table* 214 init-specs 8 initial-valuef) 96.0)
+
+      (set! (-> *part-id-table* 215 init-specs 5 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 215 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 215 init-specs 7 initial-valuef) 0.0)
+      (set! (-> *part-id-table* 215 init-specs 8 initial-valuef) 96.0)
+
+      ; red-3 explosion / impact
+      (set! (-> *part-id-table* 219 init-specs 5 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 219 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 219 init-specs 7 initial-valuef) 40.0)
+      (set! (-> *part-id-table* 219 init-specs 8 initial-valuef) 64.0)
+
+      (set! (-> *part-id-table* 220 init-specs 5 initial-valuef) 255.0)
+      (set! (-> *part-id-table* 220 init-specs 6 initial-valuef) 160.0)
+      (set! (-> *part-id-table* 220 init-specs 7 initial-valuef) 40.0)
+      (set! (-> *part-id-table* 220 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 223 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 223 init-specs 6 initial-valuef) 80.0)
+      (set! (-> *part-id-table* 223 init-specs 7 initial-valuef) 30.0)
+      (set! (-> *part-id-table* 223 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 224 init-specs 5 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 224 init-specs 6 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 224 init-specs 7 initial-valuef) 128.0)
+      (set! (-> *part-id-table* 224 init-specs 8 initial-valuef) 128.0)
+
+      (set! (-> *part-id-table* 225 init-specs 5 initial-valuef) 64.0)
+      (set! (-> *part-id-table* 225 init-specs 6 initial-valuef) 64.0)
+      (set! (-> *part-id-table* 225 init-specs 7 initial-valuef) 64.0)
+      (set! (-> *part-id-table* 225 init-specs 8 initial-valuef) 128.0)
+      
+      (set! set-part-dark? #f)
+    )
+  )
+  (none)
 )

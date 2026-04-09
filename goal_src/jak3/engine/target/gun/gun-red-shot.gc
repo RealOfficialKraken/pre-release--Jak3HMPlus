@@ -2195,7 +2195,7 @@
               )
           )
         )
-      (+! (-> *game-info* buzzer-total) 5.0)
+      (+! (-> *game-info* buzzer-total) (rand-vu-float-range 25.0 32.0))
       (launch-particles (-> *part-id-table* 216) (-> gp-0 fire-point))
       (let ((s5-2 (new 'stack-no-clear 'vector)))
         (let ((v1-10 (-> gp-0 fire-point)))

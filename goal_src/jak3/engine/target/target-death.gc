@@ -197,6 +197,11 @@
        )
      )
     )
+    ((logtest? (-> arg0 flags) (continue-flags no-auto))
+      (when (string= (-> arg0 name) "desertb-dark-tower")
+        (fb-task-spawn)
+      )
+    )
     ((logtest? (continue-flags indax) (-> arg0 flags))
      (go target-indax-start (the-as handle #f) (if (logtest? (continue-flags indax-hang) (-> arg0 flags))
                                                    'hang

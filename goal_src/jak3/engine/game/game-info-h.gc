@@ -753,6 +753,37 @@
 
     (defun-extern init-enemy-bpbar none)
 
+    (defun-extern fb-task-spawn (none))
+
+    (defun hmplus-enemy-level-color ()
+  (cond
+    ((>= enemy-noto (+ notoriety-level 3))
+      'red)
+    ((and (< enemy-noto (+ notoriety-level 3))
+          (> enemy-noto (- notoriety-level 3)))
+      'yellow)
+    ((and (<= enemy-noto (- notoriety-level 3))
+          (> enemy-noto (- notoriety-level 7)))
+      'green)
+    (else
+      'white)))
+
+(defun hmplus-enemy-damage-mult ()
+  (case (hmplus-enemy-level-color)
+    (('red) 0.4)
+    (('yellow) 1.25)
+    (('green) 1.6)
+    (('white) 3.0)
+    (else 1.0)))
+
+(defun hmplus-enemy-xp-scale ()
+  (case (hmplus-enemy-level-color)
+    (('red) 1.0)
+    (('yellow) (/ 1.0 6.0))
+    (('green) (/ 1.0 8.0))
+    (('white) (/ 1.0 13.0))
+    (else 1.0)))
+
 
 ;; +++game-items
 (defenum game-items

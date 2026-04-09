@@ -14354,7 +14354,7 @@
                     (new 'static 'continue-point
                       :name "desertb-dark-tower"
                       :level 'desertb
-                      :flags (continue-flags no-auto race)
+                      :flags (continue-flags no-auto)
                       :trans (new 'static 'vector :x (meters 3551.7473) :y (meters 66.00) :z (meters 1049.7802) :w 1.0)
                       :camera-trans (new 'static 'vector :x 11695685.0 :y 142048.05 :z 2971192.5 :w 1.0)
                       :quat (new 'static 'vector4h :data (new 'static 'array int16 4 0 -28445 49 #x3f82))

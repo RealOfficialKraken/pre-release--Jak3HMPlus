@@ -16,6 +16,145 @@
     (define draw-levelup-int 0)
     (define xp-bar-spawned? #f)
 
+    (deftype level-up-process (process-drawable)
+        ((general-i             int))
+        (:state-methods
+            active
+            die
+        )
+    )
+
+    (defbehavior level-up-process-init-by-other level-up-process ((vec vector) (part? int))
+        (vector-copy! (-> self root trans) vec)
+        (set! (-> self general-i) 0)
+        (set! (-> self part) (create-launch-control (-> *part-group-id-table* part?) self))
+        (go-virtual active)
+    )
+
+    (defun spawn-level-up-process ((vec vector) (part? int))
+        (process-spawn level-up-process vec part? :name "level-up-process")
+    )
+
+    (defstate active (level-up-process)
+        :virtual #t
+        :code (behavior ()
+            (loop
+                (let ((vec (new-stack-vector0)))
+                    (set! (-> vec x) (-> (target-pos 0) x))
+                    (set! (-> vec y) (-> (target-pos 0) y))
+                    (+! (-> vec y) (meters 2.0))
+                    (set! (-> vec z) (-> (target-pos 0) z))
+                    (set! (-> vec w) 1.0)
+                    (vector-copy! (-> self root trans) vec)
+                )
+                (when (< (-> self general-i) 70)
+                    (+! (-> self general-i) 1)
+                )
+                (when (= (-> self general-i) 1)
+                    (spawn (-> self part) (-> self root trans))
+                )
+                (when (>= (-> self general-i) 70)
+                    (go-virtual die)
+                )
+                (suspend)
+            )
+        )
+    )
+
+    (defstate die (level-up-process)
+        :virtual #t
+        :code (behavior ()
+            (kill-by-name (-> self name) *default-pool*)
+            (deactivate self)
+        )
+    )
+
+    (defun xp-hero-level ()
+        (let ((vec (new-stack-vector0)))
+            (set! (-> vec x) (-> (target-pos 0) x))
+            (set! (-> vec y) (-> (target-pos 0) y))
+            (+! (-> vec y) (meters 2.0))
+            (set! (-> vec z) (-> (target-pos 0) z))
+            (set! (-> vec w) 1.0)
+            (cond
+                ((logtest? (-> *part-group-id-table* 165 flags) (sp-group-flag sp13))
+                    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+                    (part-tracker-spawn part-tracker-subsampler :to *active-pool* :group (-> *part-group-id-table* 165))
+                    )
+                (else
+                    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+                    (part-tracker-spawn part-tracker :to *active-pool* :group (-> *part-group-id-table* 165))
+                )
+            )
+            (cond
+                ((logtest? (-> *part-group-id-table* 170 flags) (sp-group-flag sp13))
+                    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+                    (part-tracker-spawn part-tracker-subsampler :to *active-pool* :group (-> *part-group-id-table* 170))
+                    )
+                (else
+                    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+                    (part-tracker-spawn part-tracker :to *active-pool* :group (-> *part-group-id-table* 170))
+                )
+            )
+        )
+        (play-sound-file "snd/level-up.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+        (none)
+    )
+
+    (defun xp-guns-level ()
+        (let ((vec (new-stack-vector0)))
+            (set! (-> vec x) (-> (target-pos 0) x))
+            (set! (-> vec y) (-> (target-pos 0) y))
+            (+! (-> vec y) (meters 2.0))
+            (set! (-> vec z) (-> (target-pos 0) z))
+            (set! (-> vec w) 1.0)
+            (cond
+                ((logtest? (-> *part-group-id-table* 159 flags) (sp-group-flag sp13))
+                    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+                    (part-tracker-spawn part-tracker-subsampler :to *active-pool* :group (-> *part-group-id-table* 159))
+                    )
+                (else
+                    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+                    (part-tracker-spawn part-tracker :to *active-pool* :group (-> *part-group-id-table* 159))
+                )
+            )
+            (cond
+                ((logtest? (-> *part-group-id-table* 171 flags) (sp-group-flag sp13))
+                    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+                    (part-tracker-spawn part-tracker-subsampler :to *active-pool* :group (-> *part-group-id-table* 171))
+                    )
+                (else
+                    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+                    (part-tracker-spawn part-tracker :to *active-pool* :group (-> *part-group-id-table* 171))
+                )
+            )
+        )
+        (play-sound-file "snd/level-up.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+        (none)
+    )
+
+    (defun xp-cars-level ()
+        (let ((vec (new-stack-vector0)))
+            (set! (-> vec x) (-> (target-pos 0) x))
+            (set! (-> vec y) (-> (target-pos 0) y))
+            (+! (-> vec y) (meters 2.0))
+            (set! (-> vec z) (-> (target-pos 0) z))
+            (set! (-> vec w) 1.0)
+            (cond
+                ((logtest? (-> *part-group-id-table* 155 flags) (sp-group-flag sp13))
+                    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+                    (part-tracker-spawn part-tracker-subsampler :to *active-pool* :group (-> *part-group-id-table* 155))
+                    )
+                (else
+                    (set! (-> *launch-matrix* trans quad) (-> vec quad))
+                    (part-tracker-spawn part-tracker :to *active-pool* :group (-> *part-group-id-table* 155))
+                )
+            )
+        )
+        (play-sound-file "snd/level-up.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+        (none)
+    )
+
     (defun-extern draw-targbar-hp (none))
     (defun-extern draw-targbar-dark (none))
     (defun-extern draw-targbar-light (none))
@@ -312,6 +451,7 @@
     )
     (auto-save-user)
     ;(levelup-glow-yellow)
+    (xp-hero-level)
     (none)
 )
 
@@ -331,8 +471,25 @@
         )
         (r3-hint)
     )
+    (send-event *target* 'get-pickup (pickup-type ammo-yellow) 9999.0)
+    (send-event *target* 'get-pickup (pickup-type ammo-red) 9999.0)
+    (if (or
+            (logtest? (-> *game-info* features) (game-feature gun-blue-1))
+            (logtest? (-> *game-info* features) (game-feature gun-blue-2))
+            (logtest? (-> *game-info* features) (game-feature gun-blue-3))
+        )
+        (send-event *target* 'get-pickup (pickup-type ammo-blue) 9999.0)
+    )
+    (if (or
+            (logtest? (-> *game-info* features) (game-feature gun-dark-1))
+            (logtest? (-> *game-info* features) (game-feature gun-dark-2))
+            (logtest? (-> *game-info* features) (game-feature gun-dark-3))
+        )
+        (send-event *target* 'get-pickup (pickup-type ammo-dark) 9999.0)
+    )
     (auto-save-user)
     ;(levelup-glow-red)
+    (xp-guns-level)
     (none)
 )
 
@@ -356,6 +513,7 @@
     )
     (auto-save-user)
     ;(levelup-glow-dark)
+    (xp-cars-level)
     (none)
 )
 
@@ -401,29 +559,31 @@
     (when (= in-arena-fight? #t)
         (set! xp-gain (/ xp-gain 1.6))
     )
+
     (let ((xp-gain2 (/ (* xp-gain enemy-noto) 1.5))
           (xp-gain3 (/ (* xp-gain enemy-noto) 4)))
 
         (when (> xp-gain2 2500.0)
             (set! xp-gain2 2500.0)
         )
-        (set! *xp-gain* (/ (* xp-gain enemy-noto) 1.5))
-        (cond 
-          ((<= notoriety-level (- enemy-noto 7))
-            (set! xp-gain2 (+ xp-gain2 (* xp-gain2 1.93)))
-            (+! (-> *game-info* karma) xp-gain2)
-          )
-          (else
-            (+! (-> *game-info* karma) xp-gain2)
-            (set! *xp-gain* xp-gain2)
-          )
+
+        ;; color-based xp scaling
+        (set! xp-gain2 (* xp-gain2 (hmplus-enemy-xp-scale)))
+
+        (when (> xp-gain2 2500.0)
+            (set! xp-gain2 2500.0)
         )
+
+        (set! *xp-gain* xp-gain2)
+        (+! (-> *game-info* karma) xp-gain2)
+
         (when (focus-test? *target* pilot)
             (when (> xp-gain3 2500.0)
                 (set! xp-gain3 2500.0)
             )
             (+! (-> *game-info* fuel) xp-gain3)
         )
+
         (set! xp-string "Enem~+7Vy~-7V Killed")
         (spawn-rep-text)
         (auto-save-delayed)
@@ -1863,9 +2023,9 @@
             (when ;ARENA FIGHT 2
                 (and
                     (task-node-open? (game-task-node arena-fight-2-fight))
-                    (!= enemy-noto notoriety-level)
+                    (!= enemy-noto 10)
                 )
-                (set! enemy-noto (+ notoriety-level 3))
+                (set! enemy-noto 10)
             )
             (when ;ARENA FIGHT 3
                 (and
@@ -2537,6 +2697,7 @@
             (= (paused?) #f)
             (focus-test? *target* pilot)
             (not (task-node-open? (game-task-node desert-glide-templetop)))
+            (not (task-node-open? (game-task-node desert-glide-resolution)))
             ) ;for the turbo meter, also referenced in wvehicle.gc and wvehicle-util.gc
             (let 
             (

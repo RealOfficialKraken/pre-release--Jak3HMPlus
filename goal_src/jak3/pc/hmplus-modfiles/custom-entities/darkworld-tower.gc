@@ -21,7 +21,10 @@
   :virtual #t
   :event dark-eco-orb-event-handler
   :enter (behavior ()
+    (if (search-process-tree *active-pool* (lambda ((p process)) (type? p final-boss-hm)))
+    (+! (-> self root trans y) (meters 9))
     (+! (-> self root trans y) (meters 7))
+    )
   )
   :exit (behavior ()
     (sound-stop (-> self shock-sound))
@@ -281,7 +284,7 @@
       (set! (-> v1-8 prim-core collide-with) (collide-spec jak enemy player-list tobot))
       (set! (-> v1-8 prim-core action) (collide-action solid rideable))
       (set! (-> v1-8 transform-index) 3)
-      (set-vector! (-> v1-8 local-sphere) 0.0 0.0 0.0 245760.0)
+      (set-vector! (-> v1-8 local-sphere) 0.0 0.0 0.0 491520.0)
       (set! (-> s5-0 total-prims) (the-as uint 1))
       (set! (-> s5-0 root-prim) v1-8)
       )
@@ -549,7 +552,7 @@
       (set! (-> v1-8 prim-core collide-with) (collide-spec jak player-list tobot))
       (set! (-> v1-8 prim-core action) (collide-action solid rideable))
       (set! (-> v1-8 transform-index) 3)
-      (set-vector! (-> v1-8 local-sphere) 0.0 0.0 0.0 245760.0)
+      (set-vector! (-> v1-8 local-sphere) 0.0 0.0 0.0 491520.0)
       (set! (-> s5-0 total-prims) (the-as uint 1))
       (set! (-> s5-0 root-prim) v1-8)
       )
@@ -586,19 +589,79 @@
   (none)
 )
 
+(deftype dark-tree-top (dark-tree)
+  ()
+)
+
+(defbehavior darkworld-tower-top-init-by-other darkworld-tower ((vec vector))
+  (stack-size-set! (-> self main-thread) 128)
+  (let ((scale-vec (new-stack-vector0)))
+    (let ((s5-0 (new 'process 'collide-shape-moving self (collide-list-enum usually-hit-by-player))))
+      (set! (-> s5-0 dynam) (copy *standard-dynamics* 'process))
+      (set! (-> s5-0 reaction) cshape-reaction-default)
+      (set! (-> s5-0 no-reaction)
+            (the-as (function collide-shape-moving collide-query vector vector object) nothing))
+      (let ((v1-8 (new 'process 'collide-shape-prim-mesh s5-0 (the-as uint 1) (the-as uint 0))))
+        (set! (-> v1-8 prim-core collide-as) (collide-spec crate camera-blocker))
+        (set! (-> v1-8 prim-core collide-with) (collide-spec jak enemy player-list tobot))
+        (set! (-> v1-8 prim-core action) (collide-action solid rideable))
+        (set! (-> v1-8 transform-index) 3)
+        (set-vector! (-> v1-8 local-sphere) 0.0 0.0 0.0 327680.0)
+        (set! (-> s5-0 total-prims) (the-as uint 1))
+        (set! (-> s5-0 root-prim) v1-8))
+      (set! (-> s5-0 nav-radius) (* 0.75 (-> s5-0 root-prim local-sphere w)))
+      (let ((v1-11 (-> s5-0 root-prim)))
+        (set! (-> s5-0 backup-collide-as) (-> v1-11 prim-core collide-as))
+        (set! (-> s5-0 backup-collide-with) (-> v1-11 prim-core collide-with)))
+      (set! (-> self root) s5-0))
+    (set! (-> self root trans quad) (-> vec quad))
+    (quaternion-identity! (-> self root quat))
+
+    ;; only slightly wider than normal
+    (set-vector! scale-vec 6.0 3.0 6.0 1.0)
+    (set! (-> self root scale quad) (-> scale-vec quad))
+
+    (initialize-skeleton
+      self
+      (the-as skeleton-group (art-group-get-by-name *level* "skel-darkworldtower" (the-as (pointer level) #f)))
+      (the-as pair 0))
+    (ja-no-eval :group! (-> self draw art-group data 2) :num! zero)
+    (transform-post)
+    (set! (-> self draw light-index) (the-as uint 10))
+    (go-virtual idle))
+  (none))
+
 (defstate generate (dark-tree)
   :virtual #t
   :code (behavior ()
     (loop
-      (cond
-        ((<= (-> self gen-i) (-> self amount))
-          (process-spawn darkworld-tower (-> self stored-target-vector) :name "darkworld-tower" *16k-dead-pool*)
-          (+! (-> self stored-target-vector y) (meters 47.2400))
-          (+! (-> self gen-i) 1)
-        )
-        (else 
-          (go-virtual idle)
-        )
+      (if (search-process-tree *active-pool* (lambda ((p process)) (type? p final-boss-hm)))
+        (cond
+          ((<= (-> self gen-i) (-> self amount))
+            (if (= (-> self gen-i) (-> self amount))
+                (process-spawn darkworld-tower
+                              :init darkworld-tower-top-init-by-other
+                              (-> self stored-target-vector)
+                              :name "darkworld-tower"
+                              *16k-dead-pool*)
+                (process-spawn darkworld-tower
+                              (-> self stored-target-vector)
+                              :name "darkworld-tower"
+                              *16k-dead-pool*))
+            (+! (-> self stored-target-vector y) (meters 47.2400))
+            (+! (-> self gen-i) 1))
+          (else
+            (go-virtual idle)))
+          (cond
+            ((<= (-> self gen-i) (-> self amount))
+              (process-spawn darkworld-tower (-> self stored-target-vector) :name "darkworld-tower" *16k-dead-pool*)
+              (+! (-> self stored-target-vector y) (meters 47.2400))
+              (+! (-> self gen-i) 1)
+            )
+            (else 
+              (go-virtual idle)
+            )
+          )
       )
       (suspend)
     )

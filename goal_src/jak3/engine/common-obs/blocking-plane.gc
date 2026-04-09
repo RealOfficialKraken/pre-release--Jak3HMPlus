@@ -26,6 +26,8 @@
               :texture-level 10
               )
 
+(declare-type wvehicle vehicle)
+
 (defstate idle (blocking-plane)
   :virtual #t
   :event (behavior ((proc process) (argc int) (message symbol) (block event-message-block))
