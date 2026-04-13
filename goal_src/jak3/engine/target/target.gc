@@ -3165,7 +3165,7 @@
                              (-> self game features)
                              )
                    (zero? (-> self darkjak latch-out-time))
-                   (>= (-> self game eco-pill-dark) (-> *FACT-bank* darkjak-bomb-min))
+                   (> (-> self game eco-pill-dark) 0.0)
                    )
               )
          (set! (-> self control unknown-sound-id00)

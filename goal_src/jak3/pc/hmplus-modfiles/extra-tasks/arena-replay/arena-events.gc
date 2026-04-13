@@ -258,12 +258,12 @@ dead
             (when (= (-> self tesla-fire-time) 220)
                 (set! (-> *part-id-table* 2280 init-specs 8 initial-valuef) 255.0) ;a
                 (set! (-> *part-id-table* 2281 init-specs 8 initial-valuef) 64.0) ;a
-                (set! (-> *part-id-table* 2280 init-specs 1 initial-valuef) 1600.0) ;scalex
-                (set! (-> *part-id-table* 2280 init-specs 2 initial-valuef) (meters 98)) ;scalex
+                (set! (-> *part-id-table* 2280 init-specs 1 initial-valuef) 800.0) ;scalex
+                (set! (-> *part-id-table* 2280 init-specs 2 initial-valuef) (meters 16)) ;scalex
                 (let ((gp-0 (new 'stack-no-clear 'explosion-init-params)))
                     (set! (-> gp-0 spawn-point quad) (-> self lightning-pos quad))
                     (quaternion-identity! (-> gp-0 spawn-quat))
-                    (set! (-> gp-0 radius) (meters 45))
+                    (set! (-> gp-0 radius) (meters 25))
                     ;(set! (-> gp-0 scale) 1.0)
                     (set! (-> gp-0 group) (-> *part-group-id-table* 585))
                     (set! (-> gp-0 collide-with)

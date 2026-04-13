@@ -404,6 +404,38 @@
 (defmethod update ((this was-squad-control))
   (set-sync-mask this)
   (set! (-> this nav-mesh) (find-nearest-nav-mesh (target-pos 0) (the-as float #x7f800000)))
+  (cond
+  ((or
+     (task-node-open? (game-task-node desert-rescue-introduction))
+     (task-node-open? (game-task-node desert-rescue-get-vehicle))
+     (task-node-open? (game-task-node desert-rescue-rescue))
+     (task-node-open? (game-task-node desert-rescue-dead-wlander-movie))
+     (task-node-open? (game-task-node desert-rescue-resolution))
+    )
+   (set! global-max-marauder-cars 30)
+   (set! (-> this target-count) 30)
+   )
+   ((or
+     (task-node-open? (game-task-node desert-oasis-defense-introduction))
+     (task-node-open? (game-task-node desert-oasis-defense-meeting))
+    )
+   (set! global-max-marauder-cars 0)
+   (set! (-> this target-count) 0)
+   )
+  (else
+    (let ((scaled-count 3))
+      (set! scaled-count
+            (the int
+              (fmin 30.0
+                    (fmax 3.0
+                          (+ 3.0
+                             (* (/ 27.0 59.0)
+                                (- (the float notoriety-level) 1.0)))))))
+      (set! global-max-marauder-cars scaled-count)
+      (set! (-> this target-count) scaled-count)
+      )
+    )
+  )
   (if (not (-> this nav-mesh))
       (set! (-> this nav-mesh) (get-nav-mesh (the-as actor-id #xa7d6)))
       )
@@ -494,7 +526,7 @@
           (cond
             ((and (< (-> this active-count) (-> this target-count))
                   (> (-> this reserve-count) 0)
-                  (< (-> this process-count) 30)
+                  (< (-> this process-count) global-max-marauder-cars)
                   (-> this nav-mesh)
                   (not (logtest? (-> this nav-mesh flags) (nav-mesh-flag water)))
                   (nav-mesh-method-11 (-> this nav-mesh) (-> v1-71 rvec))

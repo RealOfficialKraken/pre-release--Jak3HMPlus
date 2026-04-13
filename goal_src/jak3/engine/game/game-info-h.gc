@@ -114,6 +114,7 @@
     ((type-type? en-type flamer-lava) 'flamer-lava)
     ((type-type? en-type flamer-hover) 'flamer)
     ((type-type? en-type mantis) 'mantis)
+    ((type-type? en-type mantis-boss) 'mantis-boss)
     ((type-type? en-type spiky-frog) 'spiky-frog)
     ((type-type? en-type tomb-baby-spider) 'tomb-baby-spider)
     ((type-type? en-type dm-mine-spider) 'dm-spider)
@@ -753,10 +754,25 @@
 
     (defun-extern init-enemy-bpbar none)
 
+    (define light-eco-guard-shot #f)
+
     (defun-extern fb-task-spawn (none))
+
+    (declare-type light-eco-shot-process process)
+    (define *les-process* (the (pointer light-eco-shot-process) #f))
+
+    (declare-type entity-boss enemy)
+    (define *entity-boss* (the (pointer entity-boss) #f))
+
+    (defun-extern fb-die (none))
+    (defun-extern fb-win (none))
+
+    (define global-max-marauder-cars 3)
 
     (defun hmplus-enemy-level-color ()
   (cond
+    ((>= enemy-noto (+ notoriety-level 7))
+      'extra)
     ((>= enemy-noto (+ notoriety-level 3))
       'red)
     ((and (< enemy-noto (+ notoriety-level 3))
@@ -768,17 +784,27 @@
     (else
       'white)))
 
+(defun hmplus-enemy-level-diff ()
+  (- enemy-noto notoriety-level))
+
+(defun hmplus-enemy-scale-t ()
+  (let* ((diff (hmplus-enemy-level-diff))
+         ;; clamp to [-7, 7]
+         (clamped (fmax -7.0 (fmin 7.0 (the float diff)))))
+    ;; +7 => 0.0
+    ;;  0 => 0.5
+    ;; -7 => 1.0
+    (/ (- 7.0 clamped) 14.0)))
+
 (defun hmplus-enemy-damage-mult ()
-  (case (hmplus-enemy-level-color)
-    (('red) 0.4)
-    (('yellow) 1.25)
-    (('green) 1.6)
-    (('white) 3.0)
-    (else 1.0)))
+  (let ((t (hmplus-enemy-scale-t)))
+    ;; 0.3 -> 3.0 range
+    (+ 0.3 (* t 2.7))))
 
 (defun hmplus-enemy-xp-scale ()
   (case (hmplus-enemy-level-color)
-    (('red) 1.0)
+    (('extra) 1.0)
+    (('red) (/ 1.0 3.0))
     (('yellow) (/ 1.0 6.0))
     (('green) (/ 1.0 8.0))
     (('white) (/ 1.0 13.0))

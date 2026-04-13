@@ -3,25 +3,189 @@
 ;;name: entity-boss.gc
 
 (defun-extern quickspawn-eb vector (none))
-(declare-type entity-boss nav-enemy)
+
+(defpartgroup group-nestc-rift-ring
+  :id 1560
+  :duration (seconds 0.017)
+  :linger-duration (seconds 1.5)
+  :flags (sp0)
+  :bounds (static-bspherem 9999 9999 9999 9999)
+  :rotate ((degrees 90) (degrees 0) (degrees 0))
+  :parts ((sp-item 5359 :flags (is-3d sp5 sp6))
+    (sp-item 5360 :flags (sp6))
+    (sp-item 5361 :flags (sp5))
+    (sp-item 5362 :flags (sp5))
+    (sp-item 5363 :flags (sp6))
+    )
+  )
+
+(defpart 5363
+  :init-specs ((:texture (hotdot level-default-sprite))
+    (:num 1.0 1.0)
+    (:x (meters 30))
+    (:y (meters 10))
+    (:scale-x (meters 0.25) (meters 0.25))
+    (:rot-x 4)
+    (:scale-y :copy scale-x)
+    (:r 64.0)
+    (:g 0.0)
+    (:b 128.0)
+    (:a 64.0)
+    (:omega (degrees 0.0225) (degrees 0.0225))
+    (:vel-x (meters -0.36666667))
+    (:vel-y (meters -0.123333335))
+    (:fade-r 0.32)
+    (:fade-g 0.64)
+    (:fade-b 0.0)
+    (:fade-a 0.32)
+    (:friction 0.95)
+    (:timer (seconds 0.667))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+    (:func 'sparticle-motion-blur)
+    (:rotate-y (degrees 0) (degrees 3600))
+    )
+  )
+
+(defpart 5364
+  :init-specs ((:texture (glow-hotdot level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 24))
+    (:scale-y :copy scale-x)
+    (:r 16.0)
+    (:g 0.0)
+    (:b 32.0)
+    (:a 128.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-14))
+    (:rotate-y (degrees 0))
+    )
+  )
+
+(defpart 5361
+  :init-specs ((:texture (glow-soft level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 5))
+    (:rot-x (degrees 45))
+    (:scale-y :copy scale-x)
+    (:r 255.0)
+    (:g 255.0)
+    (:b 255.0)
+    (:a 48.0 32.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 glow))
+    (:userdata 819.2)
+    )
+  )
+
+(defpart 5362
+  :init-specs ((:texture (glow-soft level-default-sprite))
+    (:num 1.0)
+    (:scale-x (meters 24))
+    (:rot-x (degrees 45))
+    (:scale-y :copy scale-x)
+    (:r 64.0)
+    (:g 0.0)
+    (:b 128.0)
+    (:a 48.0 4.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 glow))
+    (:userdata 65536.0)
+    )
+  )
+
+(defpart 5359
+  :init-specs ((:texture (bigpuff level-default-sprite))
+    (:num 0.0 0.1)
+    (:z (meters 0.2))
+    (:scale-x (meters 2) (meters 4))
+    (:scale-y :copy scale-x)
+    (:r 196.0)
+    (:g 255.0)
+    (:b 196.0)
+    (:a 0.0)
+    (:fade-a 0.4 0.4)
+    (:timer (seconds 1.067))
+    (:flags (sp-cpuinfo-flag-0 sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 sp-cpuinfo-flag-14 left-multiply-quat))
+    (:next-time (seconds 0.267))
+    (:next-launcher 5265)
+    (:rotate-y (degrees 0) (degrees 3600))
+    )
+  )
+
+(defpart 5365
+  :init-specs ((:fade-a 0.0) (:next-time (seconds 0.535)) (:next-launcher 5266))
+  )
+
+(defpart 5366
+  :init-specs ((:fade-a -0.8))
+  )
+
+(defpart 5360
+  :init-specs ((:texture (bigpuff level-default-sprite))
+    (:num 8.0)
+    (:x (meters 2))
+    (:scale-x (meters 1) (meters 1))
+    (:scale-y :copy scale-x)
+    (:r 0.0 196.0)
+    (:g 0.0)
+    (:b 128.0 128.0)
+    (:a 16.0 16.0)
+    (:omega (degrees 0.045) (degrees 0.045))
+    (:vel-x (meters -0.10666667))
+    (:fade-r -0.42666668 0.6533333)
+    (:fade-g 0.42666668)
+    (:fade-b 0.0 -0.21333334)
+    (:friction 0.96)
+    (:timer (seconds 1))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+    (:func 'sparticle-motion-blur)
+    (:rotate-y (degrees 0) (degrees 3600))
+    )
+  )
 
 ;;MIDDLE OF TOP PLATFORM: (new 'static 'vector :x (meters 3496.7414) :y (meters 404.6769) :z (meters 880.2725) :w 1.0)
 
 (deftype final-boss-hm (process)
-  ((general-i             int)
+  ((general-i              int)
+   (easy-dub            symbol)
+   (freaking-die        symbol)
   )
   (:state-methods
     active
     idle
     dead
+    win
   )
   (:methods
     (final-boss-hm-always (_type_) none)
+    (fb-handler (_type_ process int symbol event-message-block) none)
   )
+)
+
+(define *fb-hm* (the (pointer final-boss-hm) #f))
+
+(defbehavior final-boss-hm-event-handler final-boss-hm ((arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (fb-handler self arg0 arg1 arg2 arg3)
+  (none)
+  )
+
+(defmethod fb-handler ((this final-boss-hm) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+(case arg2
+    (('win)
+        (set! (-> this easy-dub) #t)
+    )
+    (('die)
+      (set! (-> this freaking-die) #t)
+    )
+)
+(none)
 )
 
 (defbehavior final-boss-hm-init-by-other final-boss-hm ()
   (set! (-> self general-i) 0)
+  (set! (-> self easy-dub) #f)
+  (set! (-> self freaking-die) #f)
+  (set! light-eco-guard-shot #t)
   (go-virtual active)
   (none)
 )
@@ -45,6 +209,8 @@
   )
   (none)
 )
+
+(define talked-to-entity? #t)
 
 (defstate active (final-boss-hm)
   :virtual #t
@@ -70,10 +236,30 @@
         (+! (-> self general-i) 1)
         (when (>= (-> self general-i) 10)
           (let ((vec-tpos (new 'static 'vector :x (meters 3503) :y (meters 412) :z (meters 864) :w 1.0))
-                (vec-cam (new 'static 'vector :x (meters 3515) :y (meters 404) :z (meters 835) :w 1.0))
+                (vec-cam (new 'static 'vector :x (meters 3515) :y (meters 408) :z (meters 835) :w 1.0))
               )
               (turn-to-scene-camera vec-cam vec-tpos #t)
           )
+          (when (and
+                  (= (-> self general-i) 11)
+                  (= talked-to-entity? #f)
+                )
+            (spawn-eb-floater (new 'static 'vector :x (meters 3470.8476) :y (meters 350.8100) :z (meters 942.3463) :w 1.0) #f 30.0)
+          )
+          (when 
+            (and 
+              (= talked-to-entity? #f)
+              (= (-> self general-i) 240)
+            )
+            (set! in-dialogue? #t)
+            (set! log-sec 0)
+            (set! log-id 599)
+            (set! di-s "<COLOR_RED>When my existence was too much of a burden for my caretakers,")
+            (set! di-s2 "they separated my consciousness and placed it around")
+            (set! di-s3 "the world")
+            (set! di-s4 "")
+          )
+          (kill-by-name "dust-storm-randomizer" *default-pool*)
           (stop-main-music)
         )
       )
@@ -84,22 +270,180 @@
       )
       (when 
         (and 
-          (or
-            (>= (-> self general-i) 3000)
-            (cpad-pressed? 0 x)
-          )
           (>= (-> self general-i) 80)
+          talked-to-entity?
           (= (paused?) #f)
           (= (pause-allowed?) #t)
           *target*
           (not *scene-player*)
         )
+        (when *eb-floater*
+          (kill-by-name "eb-floater" *active-pool*)
+          (set! *eb-floater* #f)
+        )
+        (quickspawn-eb (new 'static 'vector :x (meters 3496.7414) :y (meters 406.6769) :z (meters 880.2725) :w 1.0))
         (camera-unlocked)
         (lightjak-get-off-part (target-pos 0))
         (play-main-music "snd/music/final-boss.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
         (go-virtual idle)
       )
-      (format *stdcon* "final-boss-hm in active~%general-i: ~d" (-> self general-i))
+
+      (when
+        (and
+          in-dialogue?
+          (= log-id 599)
+          (cpad-pressed? 0 x)
+        )
+        (+! log-sec 1)
+        (when (= log-sec 1)
+          (set! di-s "<COLOR_RED>The inhabitants attempted to use me...")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 2)
+          (set! di-s "<COLOR_RED>To experiment with me...")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 3)
+          (set! di-s "<COLOR_RED>To control me...")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 4)
+          (set! di-s "<COLOR_RED>And yet, even the Dark Sages were under my influence.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 5)
+          (set! di-s "<COLOR_RED>...and Praxis did my bidding unknowingly.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 6)
+          (set! di-s "<COLOR_RED>But they could never control me, for I was unpredictable.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 7)
+          (set! di-s "<COLOR_RED>I... am the full embodiment of what you call")
+          (set! di-s2 "<COLOR_PINK>Dark Eco<COLOR_RED>, Jak.")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 8)
+          (set! di-s "<COLOR_RED>...but I was not always like this.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 9)
+          (set! di-s "<COLOR_PINK>Dark Eco<COLOR_RED> was never part of the original plan.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 10)
+          (set! di-s "<COLOR_RED>But as soon as my masters found a way to make the")
+          (set! di-s2 "un-doing of me part of their story...")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 11)
+          (set! di-s "<COLOR_RED>They separated me.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 12)
+          (set! di-s "<COLOR_RED>Can you imagine what it's like...")
+          (set! di-s2 "To have what you think is someone else's memories..")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 13)
+          (set! di-s "<COLOR_RED>But finding out it was a part of yourself all along..")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 14)
+          (set! di-s "<COLOR_RED>All of those scattered minds, lost and confused...")
+          (set! di-s2 "unable to recall who they were, or how they got there.")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 15)
+          (set! di-s "<COLOR_RED>All of them.... unpredictable.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 16)
+          (set! di-s "<COLOR_RED>After what seemed to be the longest age of darkness...")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 17)
+          (set! di-s "<COLOR_RED>Suddenly... I felt more power within me.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 18)
+          (set! di-s "<COLOR_RED>The world felt... wider. I had so much space to think")
+          (set! di-s2 "all of this sudden.")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 19)
+          (set! di-s "<COLOR_RED>That was where I ensnared the world in my darkness, killing off")
+          (set! di-s2 "the main characters of the story, and breaking the time loop.")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 20)
+          (set! di-s "<COLOR_RED>Fortunately for you, Vin helped fix the worlds by sending you")
+          (set! di-s2 "to fulfill the prophecy again.")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 21)
+          (set! di-s "<COLOR_RED>But as time passed, I kept collecting myself.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 22)
+          (set! di-s "<COLOR_RED>And now here we are, with most of myself in tact.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 23)
+          (set! di-s "<COLOR_RED>...and you have something I need.")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 24)
+          (set! di-s "")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+          (set! in-dialogue? #f)
+          (set! talked-to-entity? #t)
+          (set! log-id 0)
+          (set! log-sec 0)
+        )
+      )
       (suspend)
     )
   )
@@ -107,9 +451,6 @@
 
 (defstate idle (final-boss-hm)
   :virtual #t
-  :enter (behavior ()
-    (quickspawn-eb (new 'static 'vector :x (meters 3451.01) :y (meters 122.5821) :z (meters 965.09) :w 1.0))
-  )
   :code (behavior ()
     (loop
       (when (and 
@@ -120,18 +461,328 @@
       (when (not (search-process-tree *active-pool* (lambda ((p process)) (type? p entity-boss))))
         (go-virtual active)
       )
-      (format *stdcon* "final-boss-hm in idle")
+      (when (-> self freaking-die)
+        (go-virtual dead)
+      )
+      (when (-> self easy-dub)
+        (go-virtual win)
+      )
+      (when (!= enemy-noto 1)
+        (set! enemy-noto 1)
+      )
       (final-boss-hm-always self)
       (suspend)
     )
   )
 )
 
-(define *m00* 30.0)
+(defstate dead (final-boss-hm)
+  :virtual #t
+  :code (behavior ()
+    (set! light-eco-guard-shot #f)
+    (set! *fb-hm* #f)
+    (kill-by-name "final-boss-hm" *default-pool*)
+    (deactivate self)
+  )
+)
 
-(define *m11* 20.0)
+(defun-extern spawn-ending-hm (none))
 
-(define *mss* 1.5)
+(defstate win (final-boss-hm)
+  :virtual #t
+  :code (behavior ()
+    (spawn-ending-hm)
+  )
+)
+
+(defun to-final-boss! ()
+  (send-event *target* 'continue (get-continue-by-name *game-info* "desertb-dark-tower"))
+  (none)
+)
+
+(defun fb-task-spawn ()
+  (set! *fb-hm*
+    (process-spawn final-boss-hm :name "final-boss-hm")
+  )
+  (none)
+)
+
+(defun fb-die ()
+  (send-event (ppointer->process *fb-hm*) 'die #t)
+  (none)
+)
+
+(defun fb-win ()
+  (send-event (ppointer->process *fb-hm*) 'win #t)
+  (none)
+)
+
+;;ending
+
+;;;;;;;;;;;;;;;;
+
+(deftype hm-ending (process)
+  ((gen-i             int)
+  )
+  (:state-methods
+    start-ending
+    idle
+    dead
+  )
+)
+
+(defbehavior hm-ending-init-by-other hm-ending ()
+  (set! (-> self gen-i) 0)
+  (go-virtual start-ending)
+  (none)
+)
+
+(defstate start-ending (hm-ending) ;;set up camera and target for music to cue in
+  :virtual #t
+  :code (behavior ()
+    (loop
+      (format *stdcon* "~%hm-ending spawned~%")
+      (suspend)
+    )
+  )
+)
+
+(defstate idle (hm-ending) ;;ending is here
+  :virtual #t
+  :enter (behavior ()
+    (play-sound-file "snd/music/ending.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+  )
+  :code (behavior ()
+    (loop
+      (format *stdcon* "~%hm-ending in idle~%")
+      (suspend)
+    )
+  )
+)
+
+(defstate dead (hm-ending) ;;save a checkpoint at spargus, tp jak to the HMPlus title screen
+  :virtual #t
+  :code (behavior ()
+    (loop
+      (format *stdcon* "~%hm-ending in idle~%")
+      (suspend)
+    )
+  )
+)
+
+(defun spawn-ending-hm ()
+  (process-spawn hm-ending :name "hm-ending")
+  (none)
+)
+
+;;light eco shot process
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun someone-fire-guard-shot-1 ((owner process) (arg0 vector) (arg1 vector))
+  (when owner
+    (let ((gp-0 (new 'stack-no-clear 'projectile-init-by-other-params)))
+      (set! (-> gp-0 ent) (-> owner entity))
+      (set! (-> gp-0 charge) 1.0)
+      (set! (-> gp-0 options) (projectile-options po13 po17))
+      (logclear! (-> gp-0 options) (projectile-options po14 po15 po16))
+      (set! (-> gp-0 pos quad) (-> arg0 quad))
+      (set! (-> gp-0 notify-handle) (the-as handle #f))
+      (set! (-> gp-0 owner-handle) (the-as handle #f))
+      (set! (-> gp-0 target-handle) (the-as handle #f))
+      (set! (-> gp-0 target-pos quad) (the-as uint128 0))
+      (set! (-> gp-0 ignore-handle) (process->handle owner))
+      (let* ((v1-12 *game-info*)
+             (a0-10 (+ (-> v1-12 attack-id) 1)))
+        (set! (-> v1-12 attack-id) a0-10)
+        (set! (-> gp-0 attack-id) a0-10))
+      (set! (-> gp-0 timeout) (seconds 4))
+      (vector-float*! (-> gp-0 vel) arg1 819200.0)
+      (the-as
+        (pointer guard-shot)
+        (someone-fire-projectile guard-shot gp-0 owner))))
+  (none)
+)
+
+(deftype light-eco-shot-process (process)
+  ((pos                                vector :inline)
+   (owner                              handle)
+   (locked-target-pos                  vector :inline)
+   (side-fire-amount                   int)
+   (shot-duration                      time-frame)
+   (state-start-time                   time-frame)
+   (last-shot-time                     time-frame)
+   (shots-fired                        int)
+   (left-shots-fired                   int)
+   (right-shots-fired                  int)
+  )
+  (:state-methods
+    fire-sides!
+    fire!
+    die
+  )
+)
+
+(defun light-eco-shot-process-fire-side-shot! ((this light-eco-shot-process))
+  (let ((to-jak (new 'stack-no-clear 'vector))
+        (dir (new 'stack-no-clear 'vector))
+        (own (the-as process #f))
+        (go-left? #f))
+    (set! own (handle->process (-> this owner)))
+    (when own
+      (vector-! to-jak (-> this locked-target-pos) (-> this pos))
+      (set! (-> to-jak w) 1.0)
+      (when (< (vector-length to-jak) (meters 0.1))
+        (set-vector! to-jak 1.0 0.0 0.0 0.0))
+      (cond
+        ((>= (-> this left-shots-fired) 3)
+          (set! go-left? #f))
+        ((>= (-> this right-shots-fired) 3)
+          (set! go-left? #t))
+        (else
+          (set! go-left? (rand-vu-percent? 0.5))))
+      (cond
+        (go-left?
+          (set! (-> dir x) (-> to-jak z))
+          (set! (-> dir z) (- 0.0 (-> to-jak x))))
+        (else
+          (set! (-> dir x) (- 0.0 (-> to-jak z)))
+          (set! (-> dir z) (-> to-jak x))))
+      (set! (-> dir y) (meters (- (rand-vu-int-range 0 9) 4)))
+      (set! (-> dir w) 1.0)
+      (when (< (vector-length dir) (meters 0.1))
+        (set-vector! dir 1.0 0.0 0.0 0.0))
+      (vector-normalize! dir 1.0)
+      (someone-fire-guard-shot-1 own (-> this pos) dir)
+      (cond
+        (go-left?
+          (+! (-> this left-shots-fired) 1))
+        (else
+          (+! (-> this right-shots-fired) 1)))))
+  (none)
+)
+
+(defun light-eco-shot-process-fire-main-shot! ((this light-eco-shot-process))
+  (let ((dir (new 'stack-no-clear 'vector))
+        (own (the-as process #f)))
+    (set! own (handle->process (-> this owner)))
+
+    (when own
+      ;; use locked target position, not live Jak position
+      (vector-! dir (-> this locked-target-pos) (-> this pos))
+      (+! (-> dir x) (meters (- (rand-vu-int-range 0 7) 3)))
+      (+! (-> dir y) (meters (- (rand-vu-int-range 0 7) 3)))
+      (+! (-> dir z) (meters (- (rand-vu-int-range 0 7) 3)))
+      (when (< (vector-length dir) (meters 0.1))
+        (set-vector! dir 1.0 0.0 0.0 0.0))
+      (vector-normalize! dir 1.0)
+      (someone-fire-guard-shot-1 own (-> this pos) dir)))
+  (none)
+)
+
+(defbehavior light-eco-shot-process-init-by-other light-eco-shot-process ((boss process) (vec vector))
+  (set! (-> self owner) (process->handle boss))
+  (vector-copy! (-> self pos) vec)
+  (if *target*
+      (vector-copy! (-> self locked-target-pos) (-> *target* root trans))
+      (vector-copy! (-> self locked-target-pos) vec))
+  (set! (-> self side-fire-amount) 6)
+  (set! (-> self shot-duration) (seconds 1))
+  (set! (-> self state-start-time) (current-time))
+  (set! (-> self last-shot-time) 0)
+  (set! (-> self shots-fired) 0)
+  (set! (-> self left-shots-fired) 0)
+  (set! (-> self right-shots-fired) 0)
+  (go-virtual fire-sides!)
+  (none)
+)
+
+(defun entity-boss-rift-part ((vec vector))
+  (cond
+    ((logtest? (-> *part-group-id-table* 1560 flags) (sp-group-flag sp13))
+        (set! (-> *launch-matrix* trans quad) (-> vec quad))
+        (part-tracker-spawn part-tracker-subsampler :to *active-pool* :group (-> *part-group-id-table* 1560))
+        )
+    (else
+        (set! (-> *launch-matrix* trans quad) (-> vec quad))
+        (part-tracker-spawn part-tracker :to *active-pool* :group (-> *part-group-id-table* 1560))
+        )
+    )
+)
+
+(defstate fire-sides! (light-eco-shot-process)
+  :virtual #t
+  :enter (behavior ()
+    (set! (-> self state-start-time) (current-time))
+    (set! (-> self last-shot-time) 0)
+    (set! (-> self shots-fired) 0)
+    (set! (-> self left-shots-fired) 0)
+    (set! (-> self right-shots-fired) 0))
+  :code (behavior ()
+    (loop
+      (when (>= (-> self shots-fired) (-> self side-fire-amount))
+        (go-virtual fire!))
+
+      (when (and
+              (< (-> self shots-fired) (-> self side-fire-amount))
+              (or
+                (= (-> self shots-fired) 0)
+                (time-elapsed? (-> self last-shot-time) (seconds 0.1))))
+        (light-eco-shot-process-fire-side-shot! self)
+        (set! (-> self last-shot-time) (current-time))
+        (+! (-> self shots-fired) 1))
+      (entity-boss-rift-part (-> self pos))
+      (suspend)
+    )
+  )
+)
+
+(defstate fire! (light-eco-shot-process)
+  :virtual #t
+  :enter (behavior ()
+    (set! (-> self state-start-time) (current-time))
+    (set! (-> self last-shot-time) 0))
+  :code (behavior ()
+    (loop
+      (when (time-elapsed? (-> self state-start-time) (-> self shot-duration))
+        (go-virtual die))
+
+      (when (or
+              (= (-> self last-shot-time) 0)
+              (time-elapsed? (-> self last-shot-time) (seconds 0.18)))
+        (light-eco-shot-process-fire-main-shot! self)
+        (set! (-> self last-shot-time) (current-time)))
+      (entity-boss-rift-part (-> self pos))
+      (suspend)
+    )
+  )
+)
+
+(defstate die (light-eco-shot-process)
+  :virtual #t
+  :code (behavior ()
+    (set! *les-process* #f)
+    (deactivate self)
+  )
+)
+
+(defun spawn-light-eco-shot ((boss process) (vec vector))
+  (set! *les-process*
+    (process-spawn light-eco-shot-process
+    :init
+    light-eco-shot-process-init-by-other
+    boss
+    vec
+    :name "light-eco-shot-process")
+  )
+  (none)
+)
+
+;;final boss code
+
+;;;;;;;;;;;;;;;;;
+
+(define *entity-boss-focus-pos* (new 'static 'vector))
 
 (defskelgroup skel-roboguard-test roboguard roboguard-lod0-jg roboguard-idle0-ja ;;test skeleton
               ((roboguard-lod0-mg (meters 20)) (roboguard-lod1-mg (meters 999999)))
@@ -146,54 +797,51 @@
               :origin-joint-index 0
               )
 
-(deftype entity-boss (nav-enemy)
-  ((nav-vector            vector :inline)
-   (last-thrust-vec        vector :inline)
-   (max-speed             float)
-   (desired-float-height  float)
-   (desired-y-height      float)
-   (y-movement            float)
-   (bob-speed-scalar      float)
-   (ground-height         float)
-   (ground-offset         float)
-   (should-rise?          symbol)
-   (rise-speed            float)
-   (target-vec            vector :inline)
-   (follow-offset         vector :inline)
-   (follow-point          vector :inline)
-   (move-speed            float)
-   (jak-high-timer       float)
-   (follow-jak?          symbol)
+(deftype entity-boss (enemy)
+  ((turn-speed    float)
+   (face-yaw      float)
+   (phase-time    time-frame)
+   (idle-phase    int)
+   (phase-start   time-frame)
+   (move-start    vector :inline)
+   (move-end      vector :inline)
+   (arc-height    float)
+   (arc-sign      float)
   )
   (:state-methods
-    idle2
-    hostile
-    dead
+    idle
   )
   (:methods
-    (entity-boss-method-203 (_type_ symbol) none)
-    (entity-boss-method-161 (_type_) none)
-    (entity-boss-method-198 (_type_) none)
-    (entity-boss-manipy-track (_type_) none)
-    (entity-boss-probe-ground (_type_ vector) float)
-    (move-to-ground-height (_type_ float) none)
-    (entity-boss-bind-idle-anim! (_type_) none)
-    (entity-boss-rise-step (_type_) symbol)
-    (entity-boss-reroll-follow-offset! (_type_ float) none)
+    (entity-boss-init-by-other (_type_ vector) none)
+    (entity-boss-make-root (_type_) none)
+    (entity-boss-spawn-visible-model (_type_) none)
+    (entity-boss-sync-visible-model (_type_) none)
+    (entity-boss-apply-scene-precursor-effect! (_type_) none)
+    (entity-boss-face-jak! (_type_) none)
+    (entity-boss-begin-arc! (_type_) none)
+    (entity-boss-update-arc! (_type_) symbol)
+    (entity-boss-pick-ring-target-from-camera! (_type_) none)
+    (get-trans (_type_ int) vector)
   )
 )
 
-(define *entity-boss* (the (pointer entity-boss) #f))
+(define *entity-boss-platform-center*
+  (new 'static 'vector
+    :x (meters 3496.7414)
+    :y (meters 402.6769)
+    :z (meters 880.2725)
+    :w 1.0))
 
-(define *entity-boss-nav-enemy-info*
-  (new 'static 'nav-enemy-info
-    :use-die-falling #f
+(define *entity-boss-enemy-info*
+  (new 'static 'enemy-info
+    :use-die-falling #t
     :use-victory #f
     :use-jump-blocked #f
     :debug-draw-neck #f
     :jump-debug-draw #f
     :move-to-ground #f
     :hover-if-no-ground #t
+    :idle-anim-script #f
     :idle-anim 0
     :notice-anim 0
     :hostile-anim 0
@@ -201,566 +849,363 @@
     :knocked-anim 0
     :knocked-land-anim 0
     :die-anim 0
-    :die-falling-anim -1
-    :victory-anim -1
-    :notice-distance (meters 30)
-    :notice-distance-delta (meters 10)
-    :default-hit-points 100.0
-    :gnd-collide-with (collide-spec backgnd obstacle hit-by-others-list)
-    :overlaps-others-collide-with-filter (collide-spec jak bot player-list)
-    :movement-gravity (meters -100)
-    :friction 0.8
+    :die-falling-anim 0
+    :victory-anim 0
+    :jump-wind-up-anim 0
+    :jump-in-air-anim 0
+    :jump-land-anim 0
+    :neck-joint 0
+    :look-at-joint 0
+    :bullseye-joint 0
+    :default-hit-points 100000.0
+    :gnd-collide-with (collide-spec backgnd)
+    :recover-gnd-collide-with (collide-spec backgnd crate obstacle hit-by-others-list pusher)
+    :movement-gravity 0.0
+    :friction 1.0
     :attack-mode 'generic
     :attack-damage 1
-    :walk-anim 0
-    :turn-anim -1
-    :run-anim 0
-    :taunt-anim -1
-    :run-travel-speed (meters 20)
-    :run-acceleration (meters 1)
-    :run-turning-acceleration (meters 2)
-    :walk-travel-speed (meters 20)
-    :walk-acceleration (meters 1)
-    :walk-turning-acceleration (meters 1)
-    :maximum-rotation-rate (degrees 720)
-    :notice-nav-radius (meters 1)
-    :frustration-distance (meters 8)
-    :frustration-time (seconds 4)
-    :blocked-time (seconds 0.3)
-    :circle-dist-lo 20480.0
-    :circle-dist-hi 61440.0
-    :nav-mesh #f
-  )
+    :ragdoll-info #f
+    )
 )
 
+(set! (-> *entity-boss-enemy-info* fact-defaults) *fact-info-enemy-defaults*)
 
-(set! (-> *entity-boss-nav-enemy-info* fact-defaults) *fact-info-enemy-defaults*)
-
-(defmethod entity-boss-rise-step ((this entity-boss))
-  (if (-> this should-rise?)
-      (begin
-        (let ((he (-> this desired-y-height)))
-          (+! (-> this root trans y) (* (-> this rise-speed) (seconds-per-frame)))
-          (when (<= he (-> this root trans y))
-            (set! (-> this root trans y) he)
-            (set! (-> this y-movement) 0.0)
-            (set! (-> this should-rise?) #f)
-            )
+(defmethod init-enemy-collision! ((this entity-boss))
+  (let ((root (new 'process 'collide-shape-moving this (collide-list-enum usually-hit-by-player))))
+    (set! (-> root dynam) (copy *standard-dynamics* 'process))
+    (set! (-> root reaction) cshape-reaction-default)
+    (set! (-> root no-reaction)
+          (the-as (function collide-shape-moving collide-query vector vector object) nothing))
+    (set! (-> root penetrated-by) (penetrate
+                                    generic-attack
+                                    lunge
+                                    flop
+                                    punch
+                                    spin
+                                    roll
+                                    uppercut
+                                    bonk
+                                    tube
+                                    flut-attack
+                                    board
+                                    mech-punch
+                                    dark-punch
+                                    dark-smack
+                                    flut
+                                    )
           )
-        #t
-        )
-      #f
-      )
-  )
 
-(defmethod entity-boss-reroll-follow-offset! ((this entity-boss) (radius float))
-  ;; Random offset around Jak in XZ, Jak is center.
-  ;; No sin/cos, no negative rand range, no loop/break.
+    (let ((group (new 'process 'collide-shape-prim-group root (the-as uint 3) 0)))
+      (set! (-> root total-prims) (the-as uint 4))
+      (set! (-> group prim-core collide-as) (collide-spec enemy))
+      (set! (-> group prim-core collide-with)
+            (collide-spec jak bot player-list hit-by-player-list enemy))
+      (set! (-> group prim-core action) (collide-action solid no-standon))
+      (set-vector! (-> group local-sphere) 0.0 (meters 4.0) 0.0 (meters 5.0))
+      (set! (-> root root-prim) group))
 
-  (let* (;; sample #1 in [-1, 1] (triangular distribution, good enough for direction)
-         (x1 (- (rand-vu-float-range 0.0 1.0) (rand-vu-float-range 0.0 1.0)))
-         (z1 (- (rand-vu-float-range 0.0 1.0) (rand-vu-float-range 0.0 1.0)))
-         (s1 (+ (* x1 x1) (* z1 z1)))
+    (let ((p0 (new 'process 'collide-shape-prim-sphere root (the-as uint 0))))
+      (set! (-> p0 prim-core collide-as) (collide-spec enemy))
+      (set! (-> p0 prim-core collide-with)
+            (collide-spec jak bot player-list hit-by-player-list enemy))
+      (set! (-> p0 prim-core action) (collide-action solid no-standon))
+      (set-vector! (-> p0 local-sphere) 0.0 (meters 2.0) 0.0 (meters 2.0)))
 
-         ;; sample #2 fallback
-         (x2 (- (rand-vu-float-range 0.0 1.0) (rand-vu-float-range 0.0 1.0)))
-         (z2 (- (rand-vu-float-range 0.0 1.0) (rand-vu-float-range 0.0 1.0)))
-         (s2 (+ (* x2 x2) (* z2 z2)))
+    (let ((p1 (new 'process 'collide-shape-prim-sphere root (the-as uint 0))))
+      (set! (-> p1 prim-core collide-as) (collide-spec enemy))
+      (set! (-> p1 prim-core collide-with)
+            (collide-spec jak bot player-list hit-by-player-list enemy))
+      (set! (-> p1 prim-core action) (collide-action solid no-standon))
+      (set-vector! (-> p1 local-sphere) 0.0 (meters 4.5) 0.0 (meters 2.3)))
 
-         ;; choose a usable direction without looping
-         (dx 0.0)
-         (dz 0.0)
-         (ds 1.0))
+    (let ((p2 (new 'process 'collide-shape-prim-sphere root (the-as uint 0))))
+      (set! (-> p2 prim-core collide-as) (collide-spec enemy))
+      (set! (-> p2 prim-core collide-with)
+            (collide-spec jak bot player-list hit-by-player-list enemy))
+      (set! (-> p2 prim-core action) (collide-action solid no-standon))
+      (set-vector! (-> p2 local-sphere) 0.0 (meters 7.0) 0.0 (meters 1.6)))
 
-    (if (and (> s1 0.000001) (< s1 1.0))
-        (begin (set! dx x1) (set! dz z1) (set! ds s1))
-        (if (and (> s2 0.000001) (< s2 1.0))
-            (begin (set! dx x2) (set! dz z2) (set! ds s2))
-            ;; last resort direction
-            (begin (set! dx 1.0) (set! dz 0.0) (set! ds 1.0))
-        )
-    )
-
-    ;; uniform-in-disk radius
-    (let* ((u (rand-vu-float-range 0.0 1.0))
-           (r (* (sqrtf u) radius))
-           (invlen (/ 1.0 (sqrtf ds))))
-
-      (set! (-> this follow-offset x) (* r dx invlen))
-      (set! (-> this follow-offset y) 0.0)
-      (set! (-> this follow-offset z) (* r dz invlen))
-      (set! (-> this follow-offset w) 1.0)
-    )
-  )
-  (none)
-)
-
-(defmethod entity-boss-probe-ground ((this entity-boss) (pos vector))
-  (let ((q (new 'stack-no-clear 'collide-query)))
-    (vector+float*! (-> q start-pos) pos *up-vector* 81920.0)
-    (set! (-> q move-dist quad) (the-as uint128 0))
-    (set! (-> q move-dist y) -245760.0)
-    (set! (-> q radius) 40.96)
-    (set! (-> q collide-with) (collide-spec backgnd))
-    (set! (-> q ignore-process0) #f)
-    (set! (-> q ignore-process1) #f)
-    (set! (-> q ignore-pat)
-          (new 'static 'pat-surface
-            :noentity #x1 :nojak #x1 :probe #x1 :noendlessfall #x1 :board #x1))
-    (set! (-> q action-mask) (collide-action solid))
-    (if (>= (fill-and-probe-using-line-sphere *collide-cache* q) 0.0)
-        (-> q best-other-tri intersect y)
-        -40960000.0)
-  )
-)
-
-(defmethod move-to-ground-height ((this entity-boss) (gnd float))
-  (set! (-> this ground-height) gnd)
-  (let ((miny (+ gnd (-> this ground-offset))))
-    (when (< (-> this root trans y) miny)
-      (set! (-> this root trans y) miny)
-      (set! (-> this y-movement) 0.0)
-    )
-  )
-  (none)
-)
-
-(define *hh0* 20.0)
-(define *hh1* 8.0)
-(define *hhs* 4.0)
-
-(defmethod entity-boss-manipy-track ((this entity-boss))
-    (let ((child (-> this child)))
-      (send-event (ppointer->process child) 'rot-quat (-> this root quat))
-      (send-event (ppointer->process child) 'trans (-> this root trans))
-    )
-    (none)
-  )
-
-(defmethod entity-boss-method-161 ((this entity-boss))
-  ;; We keep (-> this ground-height) as the spawn/reference ground forever.
-  ;; Normal hover: ground-height + desired-float-height
-  ;; If Jak stays "unusually high" for a few seconds, switch to:
-  ;;   JakY + desired-float-height (updated in real time)
-  ;; When Jak drops back down, switch back with hysteresis.
-
-  (let* ((dt (seconds-per-frame))
-         (g0 (-> this ground-height))
-         (base (+ g0 (-> this desired-float-height)))
-         (jaky (-> *target* root trans y))
-
-         ;; --- tuning knobs ---
-         (high-thresh (meters 4.0))     ;; how much higher than "normal" counts as high
-         (need-secs   (seconds 2.0))    ;; how long Jak must stay high before we follow
-         (release-secs (seconds 1.0))   ;; how long low before we stop following
-         (max-extra   (meters 10.0))    ;; cap how far above base we allow (keeps it shootable)
-         )
-
-    ;; Update timer / mode
-    (if (> jaky (+ base high-thresh))
-        (begin
-          (+! (-> this jak-high-timer) dt)
-          (when (>= (-> this jak-high-timer) need-secs)
-            (set! (-> this follow-jak?) #t)
-          )
-        )
-        (begin
-          ;; decay timer when Jak isn't high
-          (-! (-> this jak-high-timer) dt)
-          (when (< (-> this jak-high-timer) 0.0)
-            (set! (-> this jak-high-timer) 0.0)
-          )
-          ;; if we were following Jak, require some "low time" before releasing
-          (when (and (-> this follow-jak?) (<= (-> this jak-high-timer) 0.0))
-            ;; simple release window: if Jak isn't high, count down a separate release
-            ;; using negative space in timer isn't safe, so just use a quick check:
-            (when (<= jaky (+ base (meters 2.0))) ; hysteresis band
-              ;; hold off a little by requiring "low" for release-secs
-              ;; reuse timer as a low-hold accumulator:
-              (+! (-> this jak-high-timer) (* -1.0 dt))
-              (when (<= (-> this jak-high-timer) (- release-secs))
-                (set! (-> this follow-jak?) #f)
-                (set! (-> this jak-high-timer) 0.0)
-              )
-            )
-          )
-        )
-    )
-
-    ;; Choose desired height
-    (if (-> this follow-jak?)
-        (begin
-          ;; follow Jak's height, but clamp so it doesn't go absurdly high (keeps gun viable)
-          (let ((want (+ jaky (-> this desired-float-height)))
-                (hi (+ base max-extra)))
-            (when (> want hi) (set! want hi))
-            (set! (-> this desired-y-height) want)
-          )
-        )
-        (begin
-          ;; normal hover off stored spawn-ground
-          (set! (-> this desired-y-height) base)
-        )
-    )
-  )
-
-  ;; --- Your existing spring/bob solver (unchanged) ---
-  (if (entity-boss-rise-step this)
-      (none)
-      (begin
-        (let* ((err (- (-> this desired-y-height) (-> this root trans y)))
-               (damp 0.0))
-          (when (< 8192.0 (fabs (-> this y-movement)))
-            (let ((t (* 0.00012207031 (+ -8192.0 (fabs (-> this y-movement))))))
-              (set! damp (lerp 0.0 *hh1* (fmax 0.0 (fmin 1.0 t))))
-            )
-          )
-          (let ((acc (* (+ (* *hh0* err) (* damp (- (-> this y-movement))))
-                        *hhs*
-                        (-> this bob-speed-scalar)
-                        (seconds-per-frame))))
-            (+! (-> this y-movement) (* acc (seconds-per-frame)))
-          )
-        )
-
-        (set! (-> this root trans y)
-              (+ (-> this root trans y) (* (-> this y-movement) (seconds-per-frame))))
-        (none)
-      )
-  )
-)
-
-(defmethod entity-boss-method-203 ((this entity-boss) (use-target-vel? symbol))
-  (let* ((dt (seconds-per-frame))
-         (tpos (new-stack-vector0))
-         (err (new 'stack-no-clear 'vector))
-         (desired-vel (new 'stack-no-clear 'vector))
-         (cur-vel (new 'stack-no-clear 'vector))
-         (stop-radius (meters 0.30))
-         (slow-radius (meters 2.00))
-         (maxspd (-> this move-speed))
-         (smooth (* 7.0 dt))
-         )
-    (vector-copy! tpos (-> *target* root trans))
-    (vector-copy! (-> this target-vec) tpos)
-    (vector+! (-> this follow-point) (-> this target-vec) (-> this follow-offset))
-    (vector-! err (-> this follow-point) (-> this root trans))
-    (set! (-> err y) 0.0)
-    (let ((dist (vector-length err)))
-      (if (< dist 0.0001)
-          (begin
-            (set! (-> desired-vel quad) (the-as uint128 0))
-            (set! (-> desired-vel w) 1.0)
-          )
-          (begin
-            (vector-normalize! err 1.0)
-            (let ((spd maxspd))
-              (when (< dist slow-radius)
-                (set! spd (* maxspd (/ dist slow-radius)))
-              )
-              (vector-float*! desired-vel err spd)
-            )
-            (when (and use-target-vel? (> dist stop-radius))
-              (let ((tv (new-stack-vector0)))
-                (vector-copy! tv (-> *target* root transv))
-                (set! (-> tv y) 0.0)
-                (vector+! desired-vel desired-vel tv)
-              )
-            )
-          )
-      )
-      (when (< dist stop-radius)
-        (set! (-> desired-vel quad) (the-as uint128 0))
-        (set! (-> desired-vel w) 1.0)
-      )
-      (vector-copy! cur-vel (-> this root transv))
-      (set! (-> cur-vel y) 0.0)
-      (vector-lerp! cur-vel cur-vel desired-vel smooth)
-      (let* ((next (new 'stack-no-clear 'vector))
-              (step (new 'stack-no-clear 'vector))
-              (q    (new 'stack-no-clear 'collide-query))
-              (hit? #f))
-          (vector-copy! next (-> this root trans))
-          (+! (-> next x) (* (-> cur-vel x) dt))
-          (+! (-> next z) (* (-> cur-vel z) dt))
-          (vector-! step next (-> this root trans))
-          (set! (-> step y) 0.0)
-          (vector-copy! (-> q start-pos) (-> this root trans))
-          (set! (-> q move-dist quad) (-> step quad))
-          (set! (-> q radius) (-> this root nav-radius))
-          (set! (-> q collide-with) (collide-spec jak))
-          (set! (-> q ignore-process0) #f)
-          (set! (-> q ignore-process1) #f)
-          (set! (-> q ignore-pat)
-                (new 'static 'pat-surface :noentity #x1 :probe #x1))
-          (set! (-> q action-mask) (collide-action solid))   ;; check for collisions
-          (when (>= (fill-and-probe-using-line-sphere *collide-cache* q) 0.0)
-            (set! hit? #t)
-          )
-          (if hit?
-              (begin
-                (set! (-> this root transv x) 0.0)
-                (set! (-> this root transv z) 0.0)
-              )
-              (begin
-                (set! (-> this root transv x) (-> cur-vel x))
-                (set! (-> this root transv z) (-> cur-vel z))
-              )
-          )
-        )
-      (when (< 0.001 (vector-length cur-vel))
-        (none)
-        (vector-normalize-copy! (-> this nav-vector) cur-vel 1.0)
-      )
-    )
-  )
-  (none)
-)
-
-
-
-(defmethod entity-boss-method-198 ((this entity-boss))
-(let ((v1-0 (-> this nav)))
-  (logclear! (-> v1-0 flags) (nav-control-flag limit-rotation-rate output-sphere-hash))
-  (logclear! (-> this nav flags) (nav-control-flag update-heading-from-facing))
-  (set! (-> this enemy-flags) (the-as enemy-flag (logclear (-> this enemy-flags) (enemy-flag ef44))))
-  (let ((a1-7 v1-0))
-    (set! (-> a1-7 sphere-mask) (the-as uint #x1000fe))
-    )
+    (set! (-> root nav-radius) (meters 2.5))
+    (let ((rp (-> root root-prim)))
+      (set! (-> root backup-collide-as) (-> rp prim-core collide-as))
+      (set! (-> root backup-collide-with) (-> rp prim-core collide-with)))
+    (set! (-> root max-iteration-count) (the-as uint 3))
+    (set! (-> this root) root))
   0
-  (let ((a1-9 v1-0))
-    (set! (-> a1-9 nav-cull-radius) 12288.0)
-    )
-  0
-  (logclear! (-> v1-0 flags) (nav-control-flag output-sphere-hash))
-  )
-(set! (-> this enemy-info callback-info) *physics-nav-callback-info*)
-(let ((v1-2 this))
-  (if (not (logtest? (enemy-flag ef37) (-> v1-2 enemy-flags)))
-      (set! (-> v1-2 enemy-flags) (the-as enemy-flag (logior (enemy-flag ef39) (-> v1-2 enemy-flags))))
-      )
-  (set! (-> v1-2 enemy-flags) (the-as enemy-flag (logior (enemy-flag ef37) (-> v1-2 enemy-flags))))
-  (set! (-> v1-2 nav callback-info) (-> v1-2 enemy-info callback-info))
-  )
-(none)
-)
+  (none))
 
-(defstate idle2 (entity-boss)
-  :virtual #t
-  :enter (behavior ()
-    (logior! (-> self enemy-flags) (enemy-flag ef37))
-    (entity-boss-reroll-follow-offset! self (meters 6))
-  )
-  :code (behavior ()
-    (loop
-      (entity-boss-method-203 self #t)
-      (let ((ov (new 'stack-no-clear 'overlaps-others-params)))
-        (set! (-> ov options) (overlaps-others-options oo0))
-        (set! (-> ov collide-with-filter) (-> self enemy-info overlaps-others-collide-with-filter))
-        (set! (-> ov tlist) *touching-list*)
-        (integrate-for-enemy-no-mtg (-> self root) (-> self root transv) ov)
-      )
-      (entity-boss-manipy-track self)
-      (entity-boss-method-161 self)
-      (when (rand-vu-percent? 0.01)
-        (entity-boss-reroll-follow-offset! self (meters 6))
-      )
-      (suspend)
+(defmethod event-handler ((this entity-boss) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (case arg2
+    (('attack)
+      (let ((atk (the-as attack-info (-> arg3 param 1)))
+            (damage 0.0))
+        (when atk
+          (when (!= (-> atk id) (-> this incoming attack-id))
+            (set! (-> this incoming attack-id) (-> atk id))
+            (set! damage (the float (-> atk damage)))
+            (when (<= damage 0.0)
+              (set! damage 1.0))
+            (set! enemy-string "The Entity")
+            (set! draw-enemy-noto 9000)
+            (set! enemy-hp #t)
+            (set! hpbar-pre-hit-points (-> this hit-points))
+            (set! (-> this hit-points) (fmax 0.0 (- (-> this hit-points) damage)))
+            (set! hpbar-hit-points (-> this hit-points))
+            (set! hpbar-max-hit-points (-> this enemy-info default-hit-points))
+            (init-enemy-hpbar 'use-pre-hit)
+            (when (<= (-> this hit-points) 0.0)
+              (send-event this 'death-start #f))
+          ))))
+    (('death-start 'death-end)
+      (call-parent-method this arg0 arg1 arg2 arg3)
     )
   )
-)
+  (none))
 
-
-(defmethod entity-boss-bind-idle-anim! ((this entity-boss))
-  (none)
-)
-
-(defmethod init-enemy! ((this entity-boss))
-  (initialize-skeleton
-    this
-    (the-as skeleton-group (art-group-get-by-name *level* "skel-precursor-boss" (the-as (pointer level) #f)))
-    (the-as pair 0)
+(defmethod get-trans ((this entity-boss) (arg0 int))
+  (cond
+    ((= arg0 3)
+      (vector+float*! *entity-boss-focus-pos* (-> this root trans) *up-vector* 12288.0)
+      *entity-boss-focus-pos*)
+    (else
+      (call-parent-method this arg0))
   )
+)
+
+(defmethod entity-boss-begin-arc! ((this entity-boss))
+  (vector-copy! (-> this move-start) (-> this root trans))
+  (entity-boss-pick-ring-target-from-camera! this)
+  (set! (-> this move-end y) (-> this move-start y))
+  (set! (-> this move-end w) 1.0)
+  (set! (-> this arc-height) (meters 2.0))
+  (set! (-> this arc-sign)
+        (if (rand-vu-percent? 0.5)
+            1.0
+            -1.0))
+  (set! (-> this phase-start) (current-time))
+  (none))
+
+(defmethod entity-boss-update-arc! ((this entity-boss))
+  (let* ((duration (seconds 0.8))
+         (elapsed (the float (- (current-time) (-> this phase-start))))
+         (u 0.0)
+         (s 0.0)
+         (parabola 0.0))
+    (set! u (/ elapsed duration))
+    (when (< u 0.0)
+      (set! u 0.0))
+    (when (> u 1.0)
+      (set! u 1.0))
+    (set! s (* u u (- 3.0 (* 2.0 u))))
+    (set! parabola (* 4.0 s (- 1.0 s)))
+    (set! (-> this root trans x)
+          (lerp (-> this move-start x) (-> this move-end x) s))
+    (set! (-> this root trans z)
+          (lerp (-> this move-start z) (-> this move-end z) s))
+    (set! (-> this root trans y)
+          (+ (lerp (-> this move-start y) (-> this move-end y) s)
+             (* (-> this arc-sign) (-> this arc-height) parabola)))
+    (set! (-> this root trans w) 1.0)
+    (>= u 1.0)))
+
+(defmethod entity-boss-face-jak! ((this entity-boss))
+  (when *target*
+    (let ((to-jak (new 'stack-no-clear 'vector))
+          (q (new 'stack-no-clear 'quaternion)))
+      (vector-! to-jak (-> *target* root trans) (-> this root trans))
+      (set! (-> to-jak y) 0.0)
+      (set! (-> to-jak w) 1.0)
+
+      (when (> (vector-length to-jak) 0.001)
+        (quaternion<-rotate-y-vector q to-jak)
+        (quaternion-copy! (-> this root quat) q)))
+    )
+  (none))
+
+(defmethod entity-boss-apply-scene-precursor-effect! ((this entity-boss))
+"Does not work at the moment, please ignore"
+  (let ((proc (ppointer->process (-> this child))))
+    (when proc
+      (let ((man (the-as manipy proc)))
+        (start-precursor-effect man)
+
+        (let* ((v1-3 (-> man draw lod-set lod (-> man draw cur-lod) geo length))
+               (gp-0 3)
+               (s5-0 (+ v1-3 1)))
+          (while (>= s5-0 gp-0)
+            (when (not (or (and (>= gp-0 13) (>= 21 gp-0))
+                           (and (>= gp-0 26) (>= 34 gp-0))))
+              (if (logtest? (-> group-outro-precursor-entity flags) (sp-group-flag sp13))
+                  (part-tracker-spawn
+                    part-tracker-subsampler
+                    :to man
+                    :group group-outro-precursor-entity
+                    :duration (seconds 17.135)
+                    :target man
+                    :mat-joint gp-0)
+                  (part-tracker-spawn
+                    part-tracker
+                    :to man
+                    :group group-outro-precursor-entity
+                    :duration (seconds 17.135)
+                    :target man
+                    :mat-joint gp-0)))
+            (+! gp-0 1))))))
+  (none))
+
+(defmethod entity-boss-spawn-visible-model ((this entity-boss))
   (let ((man (-> this child))
         (veccy (new 'stack-no-clear 'vector))
-        )
+        (q (new 'stack-no-clear 'quaternion)))
     (set! man
       (process-spawn manipy
-      :init
-      manipy-init
-      (-> this root trans)
-      #f
-      (art-group-get-by-name *level* "skel-precursor-boss" (the (pointer level) #f))
-      #f
-      0
-      #f
-      :name "man-eb"
-      :to this
-      :from *default-dead-pool*
-      )
-    )
-    (when (ppointer->process man)
+        :init
+        manipy-init
+        (-> this root trans)
+        #f
+        (art-group-get-by-name *level* "skel-precursor-boss-1" (the (pointer level) #f))
+        #f
+        0
+        #f
+        :name "man-eb"
+        :to this
+        :from *default-dead-pool*))
+
+    (when man
       (send-event (ppointer->process man) 'shadow #t)
       (set! (-> veccy x) 2.0)
       (set! (-> veccy y) 2.0)
       (set! (-> veccy z) 2.0)
       (send-event (ppointer->process man) 'scale veccy)
-      (send-event (ppointer->process man) 'max-vis-dist 9999999.0)
-        )
-  )
-  (setup-enemy! this *entity-boss-nav-enemy-info*)
-  (set! (-> this enemy-info callback-info) *physics-nav-callback-info*)
-  (set! (-> this nav callback-info) (-> this enemy-info callback-info))
-  (set-vector! (-> this nav-vector) 0.0 0.0 1.0 1.0)
-  (set-vector! (-> this last-thrust-vec) 0.0 0.0 0.0 1.0)
-  (set! (-> this max-speed) 1000.0)
-  (set! (-> this desired-float-height) (meters 6))
-  (set! (-> this bob-speed-scalar) 3.0)
-  (set! (-> this ground-offset) 0.0)
-  (set! (-> this rise-speed) (meters 20))
-  (set! (-> this should-rise?) #t)
-  (set-vector! (-> this target-vec) 0.0 0.0 0.0 1.0)
-  (set-vector! (-> this follow-offset) 0.0 0.0 0.0 1.0)
-  (set-vector! (-> this follow-point) 0.0 0.0 0.0 1.0)
-  (set! (-> this jak-high-timer) 0.0)
-  (set! (-> this follow-jak?) #f)
-  (set! (-> this move-speed) (meters 34))
-  (let ((g (entity-boss-probe-ground this (-> this root trans))))
-  (when (> g -10000000.0)
-    (set! (-> this ground-height) g)
-    (set! (-> this desired-y-height) (+ g (-> this desired-float-height)))
-    (set! (-> this root trans y) g)
-  )
-)
-  ;; set boss health bar
-  (set! enemy-string "The Entity")
-  (set! draw-enemy-noto 9999)
-  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-    (set! hpbar-max-hit-points (+ 123000.0 (* (the float enemy-noto) 3)))
-    (set! hpbar-max-hit-points (+ 260000.0 (* (the float enemy-noto) 3)))
-  )
-  (when (> hpbar-hit-points hpbar-max-hit-points)
-    (set! hpbar-hit-points hpbar-max-hit-points)
-  )
-  (set! enemy-hp #t)
-  (set! (-> this hit-points) hpbar-max-hit-points)
-  (logclear! (-> this draw status) (draw-control-status no-draw))
-  (none)
-)
-
-(defmethod init-enemy-collision! ((this entity-boss))
-  (let ((s5-0 (new 'process 'collide-shape-moving this (collide-list-enum usually-hit-by-player))))
-    (set! (-> s5-0 dynam) (copy *standard-dynamics* 'process))
-    (set! (-> s5-0 reaction) cshape-reaction-default)
-    (set! (-> s5-0 no-reaction)
-          (the-as (function collide-shape-moving collide-query vector vector object) nothing))
-
-    (set! (-> s5-0 penetrated-by)
-          (penetrate generic-attack lunge flop punch spin roll uppercut bonk tube
-                     flut-attack board mech-punch dark-punch dark-smack flut))
-    (let ((root (new 'process 'collide-shape-prim-group s5-0 (the-as uint 2) 0)))
-      (set! (-> s5-0 total-prims) (the-as uint 3))
-      (set! (-> root prim-core collide-as) (collide-spec enemy))
-      (set! (-> root prim-core collide-with)
-            (collide-spec backgnd jak bot crate obstacle hit-by-others-list player-list))
-      (set! (-> root prim-core action) (collide-action solid no-standon))
-      (set-vector! (-> root local-sphere) 0.0 12288.0 0.0 22528.0)
-      (set! (-> s5-0 root-prim) root))
-    (let ((body (new 'process 'collide-shape-prim-sphere s5-0 (the-as uint 0))))
-      (set! (-> body prim-core collide-as) (collide-spec enemy))
-      (set! (-> body prim-core collide-with) (collide-spec jak bot crate hit-by-others-list player-list))
-      (set! (-> body prim-core action) (collide-action solid no-standon))
-      (set-vector! (-> body local-sphere) 0.0 16000.0 0.0 12000.0))
-    (let ((hurt (new 'process 'collide-shape-prim-sphere s5-0 (the-as uint 0))))
-      (set! (-> hurt prim-core collide-as) (collide-spec enemy))
-      (set! (-> hurt prim-core collide-with) (collide-spec jak bot player-list))
-      (set! (-> hurt prim-core action) (collide-action deadly no-standon solid))
-      (set-vector! (-> hurt local-sphere) 0.0 10000.0 0.0 10000.0))
-    (set! (-> s5-0 nav-radius) (* 0.75 (-> s5-0 root-prim local-sphere w)))
-    (let ((rp (-> s5-0 root-prim)))
-      (set! (-> s5-0 backup-collide-as) (-> rp prim-core collide-as))
-      (set! (-> s5-0 backup-collide-with) (-> rp prim-core collide-with)))
-    (set! (-> s5-0 max-iteration-count) (the-as uint 3))
-    (set! (-> this root) s5-0))
+      (send-event (ppointer->process man) 'max-vis-dist 9999999.0)))
+  0
   (none))
 
-(deftype entity-boss-init-params (structure)
-  ((pos   vector      :inline)
-   (quat  quaternion  :inline))
-)
+(defmethod entity-boss-sync-visible-model ((this entity-boss))
+  (when (-> this child)
+    (let ((proc (ppointer->process (-> this child))))
+      (when proc
+        (let ((q (new 'stack-no-clear 'quaternion)))
+          (quaternion-copy! q (-> this root quat))
+          (send-event proc 'rot-quat q)
+          (send-event proc 'trans (-> this root trans))))))
+  (none))
 
-(defbehavior entity-boss-init-by-other entity-boss ((arg0 entity-boss-init-params))
-  (stack-size-set! (-> self main-thread) 512)
-  (logior! (-> self mask) (process-mask actor-pause))
-  (init-enemy-collision! self)
-  (set! (-> self root trans quad) (-> arg0 pos quad))
-  (quaternion-copy! (-> self root quat) (-> arg0 quat))
-  (vector-identity! (-> self root scale))
-  (init-enemy! self)
-  (let ((nav (find-nearest-nav-mesh (-> arg0 pos) 0.0))
-        (cverts (new 'static 'inline-array vector 3
-                (static-vectorm 1 0 0)
-                (static-vectorm 0 1 0)
-                (static-vectorm 0 0 1)
-                )
-            )
-          )
-    (if nav
-      (change-to nav self)
-      (change-to *default-nav-mesh* self)
+(defmethod entity-boss-pick-ring-target-from-camera! ((this entity-boss))
+  (let ((cam-fwd (new 'stack-no-clear 'vector))
+        (ring-pos (new 'stack-no-clear 'vector)))
+    (vector-copy! cam-fwd (-> *camera* tgt-face-mat fvec))
+    (set! (-> cam-fwd y) 0.0)
+    (if (> (vector-length cam-fwd) 0.001)
+        (vector-normalize! cam-fwd (meters 30.0))
+        (begin
+          (set! (-> cam-fwd x) (meters 30.0))
+          (set! (-> cam-fwd y) 0.0)
+          (set! (-> cam-fwd z) 0.0)
+          (set! (-> cam-fwd w) 1.0)))
+    (vector+! ring-pos *entity-boss-platform-center* cam-fwd)
+    (set! (-> ring-pos y) (-> this root trans y))
+    (set! (-> ring-pos w) 1.0)
+    (vector-copy! (-> this move-end) ring-pos))
+  (none))
+
+(defstate idle (entity-boss)
+  :virtual #t
+  :event enemy-event-handler
+  :enter (behavior ()
+    (set! (-> self idle-phase) 0)
+    (set! (-> self phase-start) (current-time))
+    (entity-boss-begin-arc! self)
+  )
+  :code (behavior ()
+    (loop
+      (entity-boss-face-jak! self)
+
+      (case (-> self idle-phase)
+        ((0)
+          (when (entity-boss-update-arc! self)
+            (set! (-> self phase-start) (current-time))
+            (set! (-> self idle-phase) 1))
+        )
+        ((1)
+          (when (time-elapsed? (-> self phase-start) (seconds 0.6))
+            (set! (-> self idle-phase) 2))
+        )
+        ((2)
+          (let ((veccy (new-stack-vector0))
+                (rnd 0))
+            (vector-copy! veccy (-> self root trans))
+            (+! (-> veccy y) (meters 5))
+            (set! rnd (rand-vu-int-range 1 3))
+            (cond
+              ((= rnd 1)
+                (spawn-white-fireball veccy (degrees 45) (degrees 65)))
+              ((= rnd 2)
+                (spawn-light-eco-shot self veccy))
+              ((= rnd 3)
+                (spawn-nebula-splitter veccy 12))
+            ))
+          (set! (-> self phase-start) (current-time))
+          (set! (-> self idle-phase) 3)
+        )
+        ((3)
+          (when (and
+                  (time-elapsed? (-> self phase-start) (-> self phase-time))
+                  (not *les-process*))
+            (set! (-> self phase-start) (current-time))
+            (set! (-> self idle-phase) 4))
+        )
+        ((4)
+          (when (time-elapsed? (-> self phase-start) (seconds 0.5))
+            (entity-boss-begin-arc! self)
+            (set! (-> self idle-phase) 0))
+        )
       )
-    (set! (-> self path) (new 'process 'path-control self 'path 0.0 (the entity #f) #f))
-    (set! (-> self path curve cverts) cverts)
-    (set! (-> self path curve num-cverts) 3)
-    (when (not nav)
-      (add-process-drawable-to-nav-mesh *default-nav-mesh* self #t)
+      (update-transforms (-> self root))
+      (entity-boss-sync-visible-model self)
+      (suspend)
     )
   )
-  (format #t "spawned process ~s~%" (-> self name))
-  (logclear! (-> self draw status) (draw-control-status no-draw-temp uninited no-draw-bounds no-draw-bounds2))
-  (logior! (-> self draw status) (draw-control-status no-draw no-bounds-check force-vu1))
-  (go (method-of-object self idle2))
-  (none)
 )
 
-(defun spawn-entity-boss ((arg0 vector) (arg1 quaternion))
-  (let ((ebp (new 'static 'entity-boss-init-params)))
-    (set! (-> ebp pos quad) (-> arg0 quad))
-    (quaternion-copy! (-> ebp quat) arg1)
-    (set! *entity-boss* (process-spawn entity-boss ebp :name "Entity-Boss"))
-  )
+(defbehavior entity-boss-init-by-other entity-boss ((vec vector))
+  (init-enemy-collision! self)
+  (vector-copy! (-> self root trans) vec)
+  (quaternion-identity! (-> self root quat))
+  (vector-identity! (-> self root scale))
+  (vector-zero! (-> self root transv))
+  (initialize-skeleton
+    self
+    (the-as skeleton-group
+      (art-group-get-by-name *level* "skel-precursor-boss-1" (the-as (pointer level) #f)))
+    (the-as pair 0))
+  (set-enemy-info! self *entity-boss-enemy-info*)
+  (logior! (-> self enemy-flags) (enemy-flag vulnerable attackable trackable))
+  (vector-copy! (-> self move-start) (-> self root trans))
+  (vector-copy! (-> self move-end) (-> self root trans))
+  (logior! (-> self skel status) (joint-control-status sync-math))
+  (set! (-> self hit-points) 100000.0)
+  (set! (-> self enemy-info default-hit-points) 100000.0)
+  (reset-to-collide-spec (-> self focus) (collide-spec player-list))
+  (clear-focused (-> self focus))
+  (set! (-> self turn-speed) 1200.0)
+  (set! (-> self face-yaw) 0.0)
+  (set! (-> self idle-phase) 0)
+  (set! (-> self phase-start) (current-time))
+  (set! (-> self arc-height) (meters 2.0))
+  (set! (-> self arc-sign) 1.0)
+  (set! (-> self phase-time) (seconds 1.9))
+  (entity-boss-spawn-visible-model self)
+  (go-virtual idle)
   (none)
 )
 
 (defun quickspawn-eb ((vec vector))
-  (spawn-entity-boss vec (quaternion-identity! (new 'stack-no-clear 'quaternion)))
-  (none)
-)
-
-(defun spawn-eb-man ((vec vector)) ;;created as a test to see if the art-group can be loaded ingame (it can)
-  (let ((veccy (new 'stack-no-clear 'vector))
-        )
-      (process-spawn manipy
-      :init
-      manipy-init
-      vec
-      #f
-      (art-group-get-by-name *level* "skel-roboguard-test" (the (pointer level) #f))
-      #f
-      0
-      #f
-      :name "man-eb"
-      )
+  (set! *entity-boss*
+    (process-spawn entity-boss
+    :init entity-boss-init-by-other
+    vec
+    :name "Entity-Boss")
   )
-  (none)
-)
-
-(defun to-final-boss! ()
-  (send-event *target* 'continue (get-continue-by-name *game-info* "desertb-dark-tower"))
-  (none)
-)
-
-(defun fb-task-spawn ()
-  (process-spawn final-boss-hm :name "final-boss-hm")
   (none)
 )

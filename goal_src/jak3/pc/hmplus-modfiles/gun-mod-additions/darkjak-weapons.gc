@@ -118,27 +118,6 @@
       (set! (-> *lightning-spec-id-table* 14 start-color) (new 'static 'rgba :r #xff :g #x80 :b #xff :a #x80))
       (set! (-> *lightning-spec-id-table* 14 end-color) (new 'static 'rgba :r #xff :g #x80 :b #xff :a #x80))
       (set! (-> *lightning-spec-id-table* 14 fade-to-color) (new 'static 'rgba :r #xa0 :g #x20 :b #xc0 :a #x5))
-            ; red-1 / red-2 muzzle flash
-      (set! (-> *part-id-table* 213 init-specs 5 initial-valuef) 160.0)
-      (set! (-> *part-id-table* 213 init-specs 6 initial-valuef) 32.0)
-      (set! (-> *part-id-table* 213 init-specs 7 initial-valuef) 192.0)
-      (set! (-> *part-id-table* 213 init-specs 8 initial-valuef) 128.0)
-
-      (set! (-> *part-id-table* 217 init-specs 5 initial-valuef) 160.0)
-      (set! (-> *part-id-table* 217 init-specs 6 initial-valuef) 32.0)
-      (set! (-> *part-id-table* 217 init-specs 7 initial-valuef) 192.0)
-      (set! (-> *part-id-table* 217 init-specs 8 initial-valuef) 128.0)
-
-      ; red-1 / red-2 fired shot glow
-      (set! (-> *part-id-table* 214 init-specs 5 initial-valuef) 192.0)
-      (set! (-> *part-id-table* 214 init-specs 6 initial-valuef) 96.0)
-      (set! (-> *part-id-table* 214 init-specs 7 initial-valuef) 255.0)
-      (set! (-> *part-id-table* 214 init-specs 8 initial-valuef) 96.0)
-
-      (set! (-> *part-id-table* 215 init-specs 5 initial-valuef) 160.0)
-      (set! (-> *part-id-table* 215 init-specs 6 initial-valuef) 32.0)
-      (set! (-> *part-id-table* 215 init-specs 7 initial-valuef) 192.0)
-      (set! (-> *part-id-table* 215 init-specs 8 initial-valuef) 96.0)
 
       ; red-3 explosion / impact
       (set! (-> *part-id-table* 219 init-specs 5 initial-valuef) 192.0)
@@ -280,27 +259,6 @@
       (set! (-> *lightning-spec-id-table* 14 start-color) (new 'static 'rgba :r #xff :g #xff :b #xff :a #x80))
       (set! (-> *lightning-spec-id-table* 14 end-color) (new 'static 'rgba :r #xff :g #xff :b #xff :a #x80))
       (set! (-> *lightning-spec-id-table* 14 fade-to-color) (new 'static 'rgba :r #xbf :b #x8f :a #x5))
-            ; red-1 / red-2 muzzle flash
-      (set! (-> *part-id-table* 213 init-specs 5 initial-valuef) 128.0)
-      (set! (-> *part-id-table* 213 init-specs 6 initial-valuef) 128.0)
-      (set! (-> *part-id-table* 213 init-specs 7 initial-valuef) 0.0)
-      (set! (-> *part-id-table* 213 init-specs 8 initial-valuef) 128.0)
-
-      (set! (-> *part-id-table* 217 init-specs 5 initial-valuef) 128.0)
-      (set! (-> *part-id-table* 217 init-specs 6 initial-valuef) 128.0)
-      (set! (-> *part-id-table* 217 init-specs 7 initial-valuef) 0.0)
-      (set! (-> *part-id-table* 217 init-specs 8 initial-valuef) 128.0)
-
-      ; red-1 / red-2 fired shot glow
-      (set! (-> *part-id-table* 214 init-specs 5 initial-valuef) 255.0)
-      (set! (-> *part-id-table* 214 init-specs 6 initial-valuef) 255.0)
-      (set! (-> *part-id-table* 214 init-specs 7 initial-valuef) 0.0)
-      (set! (-> *part-id-table* 214 init-specs 8 initial-valuef) 96.0)
-
-      (set! (-> *part-id-table* 215 init-specs 5 initial-valuef) 255.0)
-      (set! (-> *part-id-table* 215 init-specs 6 initial-valuef) 128.0)
-      (set! (-> *part-id-table* 215 init-specs 7 initial-valuef) 0.0)
-      (set! (-> *part-id-table* 215 init-specs 8 initial-valuef) 96.0)
 
       ; red-3 explosion / impact
       (set! (-> *part-id-table* 219 init-specs 5 initial-valuef) 255.0)

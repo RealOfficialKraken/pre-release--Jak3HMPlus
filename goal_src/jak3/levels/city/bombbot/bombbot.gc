@@ -927,7 +927,7 @@
     :notice-distance (meters 20)
     :notice-distance-delta (meters 10)
     :proximity-notice-distance (meters 20)
-    :default-hit-points 2500.0
+    :default-hit-points 800.0
     :gnd-collide-with (collide-spec backgnd obstacle hit-by-others-list)
     :movement-gravity (meters -100)
     :friction 0.8
@@ -1697,7 +1697,7 @@
     (('touched 'touch 'attack)
     (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
                 (set! hpbar-max-hit-points 12500.0)
-                (set! hpbar-max-hit-points 4000.0)
+                (set! hpbar-max-hit-points 800.0)
               )
               (when (> hpbar-hit-points hpbar-max-hit-points)
                 (set! hpbar-hit-points hpbar-max-hit-points)
@@ -3252,11 +3252,11 @@
   0
   (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
     (set! (-> this hit-points) 5000.0)
-    (set! (-> this hit-points) 2500.0)
+    (set! (-> this hit-points) 800.0)
     )
   (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
     (set! (-> this max-hit-points) 5000.0)
-    (set! (-> this max-hit-points) 2500.0)
+    (set! (-> this max-hit-points) 800.0)
   )
   0
   (none)
@@ -3483,8 +3483,8 @@
   (set! (-> this shoot-duration) 1.0)
   (set! (-> this draw light-index) (the-as uint 10))
   (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-    (set! (-> this hit-points) 5000.0)
-    (set! (-> this hit-points) 2500.0)
+    (set! (-> this hit-points) 12500.0)
+    (set! (-> this hit-points) 800.0)
     )
   (let ((v1-19 (-> this nav state))
         (a0-13 (-> this root trans))
@@ -3495,8 +3495,8 @@
     )
   0
   (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-    (set! (-> this max-hit-points) 5000.0)
-    (set! (-> this max-hit-points) 2500.0)
+    (set! (-> this max-hit-points) 12500.0)
+    (set! (-> this max-hit-points) 800.0)
   )
   (go (method-of-object this hostile))
   )

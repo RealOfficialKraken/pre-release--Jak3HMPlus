@@ -359,6 +359,7 @@
       (let ((enemy-hit (as-type arg0 enemy)))
       (when (and enemy-hit
                 (>= notoriety-level 60)
+                (!= (remap-enemy-type-name (-> arg0 type)) 'entity-boss)
                 (rand-vu-percent? 0.06))
         (toggle-freeze-2 arg1)))
       (set! sv-96

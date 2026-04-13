@@ -139,7 +139,6 @@
                         (let ((i-i (-> self general-i)))
                             (when (= i-i 1200)
                                 (set! in-ctyinda-anchor? #t)
-                                (set! enemy-noto (rand-vu-int-range 42 61))
                             )
                             (when (= i-i 1190)
                                 (when (= white-mode #f)
@@ -242,6 +241,7 @@
                     (<= (vector-vector-distance (-> self spawn-pos) (target-pos 0)) 3600000.0)
                     (= in-desert-game-task? #f)
                   )
+                    (set! enemy-noto (+ notoriety-level 3))
                     (print "~%~%|||||||||||||BATTLE STARTED|||||||||||||~%~%")
                     (set! onfoot-battle? #t)
                     (set! anchor-float-time (-> *time-of-day-context* time))
@@ -309,7 +309,6 @@
                                     1.0
                                     )
                                     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                    (set! enemy-noto 54)
                     (format *stdebug* "~%tm-ctyinda-anchor battle started")
                     (go-virtual start-battle)
             )
@@ -462,8 +461,8 @@
                 ;put explosion and damage-sphere here
                 (set! (-> *part-id-table* 2280 init-specs 8 initial-valuef) 255.0) ;a
                 (set! (-> *part-id-table* 2281 init-specs 8 initial-valuef) 64.0) ;a
-                (set! (-> *part-id-table* 2280 init-specs 1 initial-valuef) 1600.0) ;scalex
-                (set! (-> *part-id-table* 2280 init-specs 2 initial-valuef) (meters 98)) ;scalex
+                (set! (-> *part-id-table* 2280 init-specs 1 initial-valuef) 800.0) ;scalex
+                (set! (-> *part-id-table* 2280 init-specs 2 initial-valuef) (meters 16)) ;scalex
                 (let ((gp-0 (new 'stack-no-clear 'explosion-init-params)))
                     (set! (-> gp-0 spawn-point quad) (-> self lightning-pos quad))
                     (quaternion-identity! (-> gp-0 spawn-quat))

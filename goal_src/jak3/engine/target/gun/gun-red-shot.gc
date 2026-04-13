@@ -278,7 +278,7 @@
                                   (cond
                                     ((>= notoriety-level 25)
                                       (let ((dmg 0.0))
-                                        (set! dmg (+ (* (/ (* (the float guns-level) 18.85) 3.0) 2.0) (/ notoriety-level 1.2)))
+                                        (set! dmg (+ (* (/ (* (the float guns-level) 26.85) 3.0) 2.0) (/ notoriety-level 1.8)))
                                         (when (focus-test? *target* dark)
                                           (set! dmg (* 1.5 dmg))
                                           (send-event *target* 'get-pickup (pickup-type eco-pill-dark) -5.0)
@@ -301,7 +301,7 @@
                                     )
                                     (else
                                       (let ((dmg 0.0))
-                                        (set! dmg (+ (* (/ (the float guns-level) 18.85) 3.0) 2.0))
+                                        (set! dmg (+ (* (/ (the float guns-level) 26.85) 3.0) 2.0))
                                         (when (focus-test? *target* dark)
                                           (set! dmg (* 1.5 dmg))
                                           (send-event *target* 'get-pickup (pickup-type eco-pill-dark) -5.0)
@@ -360,24 +360,10 @@
                         (f1-6 (-> this blast-radius))
                         )
                     (if (>= (* f1-6 f1-6) f0-12)
-                        (send-event
-                          s3-1
-                          'attack
-                          #f
-                          (static-attack-info :mask (vehicle-impulse-factor) ((id (-> this attack-id))
-                                                                              (damage (+ (+ (/ (* (the float guns-level) 1.85) 2.0) 12.0) (/ notoriety-level 1.2)))
-                                                                              (vehicle-damage-factor 3.0)
-                                                                              (vehicle-impulse-factor 1.0)
-                                                                              (mode 'explode)
-                                                                              (attacker-velocity s5-2)
-                                                                              (penetrate-using (penetrate explode))
-                                                                              )
-                                              )
-                          )
                           (cond
                               ((>= notoriety-level 25)
                               (let ((dmg 0.0))
-                                (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 2.0) 12.0) (/ notoriety-level 1.2)))
+                                (set! dmg (+ (+ (/ (* (the float guns-level) 26.85) 2.0) 12.0) (/ notoriety-level 1.8)))
                                 (when (focus-test? *target* dark)
                                   (set! dmg (* 1.5 dmg))
                                   (send-event *target* 'get-pickup (pickup-type eco-pill-dark) -2.0)
@@ -400,7 +386,7 @@
                             )
                             (else
                               (let ((dmg 0.0))
-                              (set! dmg (+ (+ (/ (the float guns-level) 1.85) 2.0) 12.0))
+                              (set! dmg (+ (+ (/ (the float guns-level) 26.85) 2.0) 12.0))
                               (when (focus-test? *target* dark)
                                 (set! dmg (* 1.5 dmg))
                                 (send-event *target* 'get-pickup (pickup-type eco-pill-dark) -2.0)
@@ -2027,7 +2013,7 @@
       (cond
         ((>= notoriety-level 25)
           (let ((dmg 0.0))
-                (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 2.0) 2.0) (/ notoriety-level 1.2)))
+                (set! dmg (+ (+ (/ (* (the float guns-level) 26.85) 2.0) 2.0) (/ notoriety-level 1.8)))
                 (when (focus-test? *target* dark)
                   (set! dmg (* 1.5 dmg))
                   (send-event *target* 'get-pickup (pickup-type eco-pill-dark) -2.0)
@@ -2037,7 +2023,7 @@
         )
         (else
           (let ((dmg 0.0))
-                (set! dmg (+ (+ (/ (the float guns-level) 1.85) 2.0) 2.0))
+                (set! dmg (+ (+ (/ (the float guns-level) 26.85) 2.0) 2.0))
                 (when (focus-test? *target* dark)
                   (set! dmg (* 1.5 dmg))
                   (send-event *target* 'get-pickup (pickup-type eco-pill-dark) -2.0)
@@ -2072,8 +2058,9 @@
   :event (behavior ((proc process) (argc int) (message symbol) (block event-message-block))
     (case message
       (('touched)
+       (cond ((>= notoriety-level 25)
        (let ((dmg 0.0))
-                (set! dmg (+ (/ (* (the float guns-level) 1.85) 2.0) 2.0))
+                (set! dmg (+ (+ (/ (* (the float guns-level) 26.85) 2.0) 2.0) (/ notoriety-level 1.8)))
                 (when (focus-test? *target* dark)
                   (set! dmg (* 1.5 dmg))
                 )
@@ -2093,6 +2080,31 @@
           #t
           )
         )
+       )
+        (else
+          (let ((dmg 0.0))
+                  (set! dmg (+ (/ (* (the float guns-level) 26.85) 2.0) 2.0))
+                  (when (focus-test? *target* dark)
+                    (set! dmg (* 1.5 dmg))
+                  )
+          (when (send-event
+                  proc
+                  'attack
+                  (-> block param 0)
+                  (static-attack-info :mask (vehicle-impulse-factor) ((id (-> self attack-id))
+                                                                      (damage dmg)
+                                                                      (vehicle-damage-factor 1.0)
+                                                                      (vehicle-impulse-factor 1.0)
+                                                                      (mode 'explode)
+                                                                      )
+                                      )
+                  )
+            (+! (-> *game-info* shots-hit 1) 1.0)
+            #t
+            )
+          )
+        )
+       )
        )
       )
     )

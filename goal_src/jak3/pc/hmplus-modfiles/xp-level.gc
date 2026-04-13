@@ -1476,6 +1476,7 @@
                 (not mainmenu-camera)
                 (not disable-targbar)
                 (not hmplus-intro-active?)
+                (not in-dialogue?)
                 (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
                 (not (task-node-open? (game-task-node city-blow-tower-resolution)))
             )
@@ -2023,16 +2024,16 @@
             (when ;ARENA FIGHT 2
                 (and
                     (task-node-open? (game-task-node arena-fight-2-fight))
-                    (!= enemy-noto 10)
+                    (!= enemy-noto 6)
                 )
-                (set! enemy-noto 10)
+                (set! enemy-noto 6)
             )
             (when ;ARENA FIGHT 3
                 (and
                     (task-node-open? (game-task-node arena-fight-3-fight))
-                    (!= enemy-noto (+ notoriety-level 10))
+                    (!= enemy-noto 16)
                 )
-                (set! enemy-noto (+ notoriety-level 10))
+                (set! enemy-noto 16)
             )
             (when ;DESERT
                 (and
@@ -2080,9 +2081,9 @@
                     (task-node-closed? (game-task-node desert-oasis-defense-meeting))
                     (not (task-node-closed? (game-task-node desert-oasis-defense-resolution)))
                     (= (-> (level-get-target-inside *level*) name) 'desert)
-                    (!= enemy-noto 20)
+                    (!= enemy-noto 19)
                 )
-                    (set! enemy-noto 20)
+                    (set! enemy-noto 19)
                     )
             (when ;VOLCANO MISSION
                 (and
@@ -2092,9 +2093,9 @@
                         (= (-> (level-get-target-inside *level*) name) 'volcanox)
                     )
                     (not (task-node-closed? (game-task-node volcano-darkeco-resolution)))
-                    (!= enemy-noto 11)
+                    (!= enemy-noto 6)
                 )
-                (set! enemy-noto 11)
+                (set! enemy-noto 6)
             )
             (when ;VOLCANO BACKTRACK LEVEL
                 (and
@@ -2105,11 +2106,11 @@
                     )
                     (task-node-closed? (game-task-node volcano-darkeco-resolution))
                     (or 
-                        (< enemy-noto 14)
-                        (> enemy-noto 20)
+                        (< enemy-noto 10)
+                        (> enemy-noto 16)
                     )
                 )
-                (set! enemy-noto (rand-vu-int-range 14 20))
+                (set! enemy-noto (rand-vu-int-range 10 16))
             )
             (cond ((not (task-node-closed? (game-task-node factory-boss-resolution)))
                 (when ;TEMPLEA

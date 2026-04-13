@@ -279,7 +279,7 @@
   (set! (-> this exploded?) #f)
   (set! (-> this attack-mode) 'eco-yellow)
   (set! (-> this explode-rad) 12288.0)
-  (set! (-> this damage) 8.0)
+  (set! (-> this damage) 3.0)
   (set! (-> this max-speed) 135168.0)
   (set! (-> this max-hits) 1)
   (set! (-> this update-velocity) light-eco-fireball-no-velocity)

@@ -303,7 +303,7 @@
           )
          )
        )
-     (when (or (<= (-> this hit-points) 0.0)(< enemy-noto 100))
+     (when (or (<= (-> this hit-points) 0.0)(< enemy-noto (+ notoriety-level 7)))
           (go (method-of-object this knocked))
          )
      )

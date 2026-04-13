@@ -302,6 +302,146 @@
     )
   )
 
+(defun hmplus-set-guard-shot-projectile-particle-colors! ()
+  (cond
+      (light-eco-guard-shot
+        ;; 850 - beam
+        (set! (-> *part-id-table* 850 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 850 init-specs 6 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 850 init-specs 7 initial-valuef) 255.0)
+
+        ;; 851 - glow-soft
+        (set! (-> *part-id-table* 851 init-specs 4 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 851 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 851 init-specs 6 initial-valuef) 255.0)
+
+        ;; 852 - small glow
+        (set! (-> *part-id-table* 852 init-specs 4 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 852 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 852 init-specs 6 initial-valuef) 255.0)
+
+        ;; 853 - radial gradient
+        (set! (-> *part-id-table* 853 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 853 init-specs 6 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 853 init-specs 7 initial-valuef) 255.0)
+
+        ;; 854 - muzzleflash/beam draw part
+        (set! (-> *part-id-table* 854 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 854 init-specs 6 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 854 init-specs 7 initial-valuef) 255.0)
+
+        ;; 855 - glow
+        (set! (-> *part-id-table* 855 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 855 init-specs 6 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 855 init-specs 7 initial-valuef) 255.0)
+
+        ;; keep fade behavior from fighting the white look
+        (set! (-> *part-id-table* 855 init-specs 11 initial-valuef) 0.0)
+        )
+      (else
+        ;; 850 - beam
+        (set! (-> *part-id-table* 850 init-specs 5 initial-valuef) 128.0)
+        (set! (-> *part-id-table* 850 init-specs 6 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 850 init-specs 7 initial-valuef) 0.0)
+
+        ;; 851 - glow-soft
+        (set! (-> *part-id-table* 851 init-specs 4 initial-valuef) 128.0)
+        (set! (-> *part-id-table* 851 init-specs 5 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 851 init-specs 6 initial-valuef) 0.0)
+
+        ;; 852 - small glow
+        (set! (-> *part-id-table* 852 init-specs 4 initial-valuef) 128.0)
+        (set! (-> *part-id-table* 852 init-specs 5 initial-valuef) 128.0)
+        (set! (-> *part-id-table* 852 init-specs 6 initial-valuef) 128.0)
+
+        ;; 853 - radial gradient
+        (set! (-> *part-id-table* 853 init-specs 5 initial-valuef) 192.0)
+        (set! (-> *part-id-table* 853 init-specs 6 initial-valuef) 64.0)
+        (set! (-> *part-id-table* 853 init-specs 7 initial-valuef) 0.0)
+
+        ;; 854 - muzzleflash/beam draw part
+        (set! (-> *part-id-table* 854 init-specs 5 initial-valuef) 128.0)
+        (set! (-> *part-id-table* 854 init-specs 6 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 854 init-specs 7 initial-valuef) 0.0)
+
+        ;; 855 - glow
+        (set! (-> *part-id-table* 855 init-specs 5 initial-valuef) 128.0)
+        (set! (-> *part-id-table* 855 init-specs 6 initial-valuef) 128.0)
+        (set! (-> *part-id-table* 855 init-specs 7 initial-valuef) 0.0)
+
+        ;; restore original fade-g
+        (set! (-> *part-id-table* 855 init-specs 11 initial-valuef) -3.6571429)
+        )
+      )
+  (none)
+)
+
+(defun hmplus-set-guard-shot-impact-particle-colors! ()
+  (cond  
+    (light-eco-guard-shot
+        ;; 856 - white core
+        (set! (-> *part-id-table* 856 init-specs 4 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 856 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 856 init-specs 6 initial-valuef) 255.0)
+
+        ;; 857 - ring
+        (set! (-> *part-id-table* 857 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 857 init-specs 6 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 857 init-specs 7 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 857 init-specs 12 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 857 init-specs 13 initial-valuef) 0.0)
+
+        ;; 858 - explosion nebula
+        (set! (-> *part-id-table* 858 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 858 init-specs 6 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 858 init-specs 7 initial-valuef) 255.0)
+
+        ;; 859 - puff
+        (set! (-> *part-id-table* 859 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 859 init-specs 6 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 859 init-specs 7 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 859 init-specs 13 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 859 init-specs 14 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 859 init-specs 15 initial-valuef) 0.0)
+
+        ;; 860 / 861 followup launchers
+        (set! (-> *part-id-table* 860 init-specs 4 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 861 init-specs 4 initial-valuef) 0.0)
+      )
+      (else
+        ;; 856 - white core
+        (set! (-> *part-id-table* 856 init-specs 4 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 856 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 856 init-specs 6 initial-valuef) 255.0)
+
+        ;; 857 - ring
+        (set! (-> *part-id-table* 857 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 857 init-specs 6 initial-valuef) 128.0)
+        (set! (-> *part-id-table* 857 init-specs 7 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 857 init-specs 12 initial-valuef) -2.1333334)
+        (set! (-> *part-id-table* 857 init-specs 13 initial-valuef) -2.1333334)
+
+        ;; 858 - explosion nebula
+        (set! (-> *part-id-table* 858 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 858 init-specs 6 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 858 init-specs 7 initial-valuef) 0.0)
+
+        ;; 859 - puff
+        (set! (-> *part-id-table* 859 init-specs 5 initial-valuef) 255.0)
+        (set! (-> *part-id-table* 859 init-specs 6 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 859 init-specs 7 initial-valuef) 0.0)
+        (set! (-> *part-id-table* 859 init-specs 13 initial-valuef) -0.30476192)
+        (set! (-> *part-id-table* 859 init-specs 14 initial-valuef) 0.15238096)
+        (set! (-> *part-id-table* 859 init-specs 15 initial-valuef) 0.30476192)
+
+        ;; 860 / 861 followup launchers
+        (set! (-> *part-id-table* 860 init-specs 4 initial-valuef) -0.53333336)
+        (set! (-> *part-id-table* 861 init-specs 4 initial-valuef) -6.4)
+        )
+      )
+  (none)
+)
+
 (deftype guard-shot (projectile)
   ((hit-actor?  symbol)
    (tail-pos    vector  :inline)
@@ -319,60 +459,55 @@
   )
 
 (defmethod projectile-method-24 ((this guard-shot))
+  (hmplus-set-guard-shot-projectile-particle-colors!)
   (draw-beam (-> *part-id-table* 854) (-> this tail-pos) (-> this starting-dir) #f)
   (let* ((a0-3 (vector-normalize-copy! (new 'stack-no-clear 'vector) (-> this starting-dir) 2048.0))
          (v1-2 (vector+! (new 'stack-no-clear 'vector) (-> this tail-pos) a0-3))
          (t9-2 sp-launch-particles-var)
          (a0-4 *sp-particle-system-2d*)
          (a1-4 (-> *part-id-table* 855))
-         (a2-2 *launch-matrix*)
-         )
+         (a2-2 *launch-matrix*))
     (vector-copy! (-> a2-2 trans) v1-2)
-    (t9-2 a0-4 a1-4 a2-2 (the-as sparticle-launch-state #f) (the-as sparticle-launch-control #f) 1.0)
-    )
+    (t9-2 a0-4 a1-4 a2-2 (the-as sparticle-launch-state #f) (the-as sparticle-launch-control #f) 1.0))
   0
   (none)
-  )
+)
 
 (defmethod projectile-method-25 ((this guard-shot))
+  (hmplus-set-guard-shot-projectile-particle-colors!)
   (let* ((gp-0 (-> this root trans))
          (a1-0 (-> this tail-pos))
          (s5-1 (vector-! (new 'stack-no-clear 'vector) gp-0 a1-0))
-         (f30-0 (vector-length s5-1))
-         )
+         (f30-0 (vector-length s5-1)))
     (let ((s4-1 (vector+*! (new 'stack-no-clear 'vector) a1-0 s5-1 0.8)))
       (let ((f28-0 (-> *part-id-table* 850 init-specs 4 initial-valuef)))
         (set! (-> *part-id-table* 850 init-specs 4 initial-valuef) (vector-length s5-1))
         (draw-beam (-> *part-id-table* 850) a1-0 s5-1 #f)
-        (set! (-> *part-id-table* 850 init-specs 4 initial-valuef) f28-0)
-        )
+        (set! (-> *part-id-table* 850 init-specs 4 initial-valuef) f28-0))
       (vector-normalize! s5-1 1.0)
       (launch-particles (-> *part-id-table* 851) s4-1)
-      (launch-particles (-> *part-id-table* 852) s4-1)
-      )
+      (launch-particles (-> *part-id-table* 852) s4-1))
     (let ((s4-2 (new 'stack-no-clear 'matrix))
           (f26-0 (/ f30-0 (meters 9)))
           (f30-1 (-> *part-id-table* 853 init-specs 3 initial-valuef))
-          (f28-1 (-> *part-id-table* 853 init-specs 4 initial-valuef))
-          )
+          (f28-1 (-> *part-id-table* 853 init-specs 4 initial-valuef)))
       (forward-up->inv-matrix s4-2 s5-1 *up-vector*)
       (vector-copy! (-> s4-2 trans) gp-0)
       (set! (-> *part-id-table* 853 init-specs 3 initial-valuef) (* f26-0 f30-1))
       (set! (-> *part-id-table* 853 init-specs 4 initial-valuef) (* f26-0 f28-1))
       (launch-particles (-> *part-id-table* 853) s4-2 :origin-is-matrix #t)
       (set! (-> *part-id-table* 853 init-specs 3 initial-valuef) f30-1)
-      (set! (-> *part-id-table* 853 init-specs 4 initial-valuef) f28-1)
-      )
+      (set! (-> *part-id-table* 853 init-specs 4 initial-valuef) f28-1))
     )
   0
   (none)
-  )
+)
 
 (defmethod projectile-method-26 ((this guard-shot))
+  (hmplus-set-guard-shot-impact-particle-colors!)
   (let* ((s5-0 (-> this root))
          (a0-3 (vector-normalize! (vector-! (new 'stack-no-clear 'vector) (-> this tail-pos) (-> s5-0 trans)) 2048.0))
-         (v1-1 (new 'stack-no-clear 'vector))
-         )
+         (v1-1 (new 'stack-no-clear 'vector)))
     (vector-copy! v1-1 (-> s5-0 trans))
     (vector+! v1-1 v1-1 a0-3)
     (cond
@@ -380,27 +515,19 @@
        (cond
          ((logtest? (-> group-guard-shot-hit-object flags) (sp-group-flag sp13))
           (vector-copy! (-> *launch-matrix* trans) v1-1)
-          (part-tracker-spawn part-tracker-subsampler :to *entity-pool* :group group-guard-shot-hit-object)
-          )
+          (part-tracker-spawn part-tracker-subsampler :to *entity-pool* :group group-guard-shot-hit-object))
          (else
-           (vector-copy! (-> *launch-matrix* trans) v1-1)
-           (part-tracker-spawn part-tracker :to *entity-pool* :group group-guard-shot-hit-object)
-           )
-         )
-       )
+          (vector-copy! (-> *launch-matrix* trans) v1-1)
+          (part-tracker-spawn part-tracker :to *entity-pool* :group group-guard-shot-hit-object))))
       ((logtest? (-> group-guard-shot-hit flags) (sp-group-flag sp13))
        (vector-copy! (-> *launch-matrix* trans) v1-1)
-       (part-tracker-spawn part-tracker-subsampler :to *entity-pool* :group group-guard-shot-hit)
-       )
+       (part-tracker-spawn part-tracker-subsampler :to *entity-pool* :group group-guard-shot-hit))
       (else
-        (vector-copy! (-> *launch-matrix* trans) v1-1)
-        (part-tracker-spawn part-tracker :to *entity-pool* :group group-guard-shot-hit)
-        )
-      )
-    )
+       (vector-copy! (-> *launch-matrix* trans) v1-1)
+       (part-tracker-spawn part-tracker :to *entity-pool* :group group-guard-shot-hit))))
   0
   (none)
-  )
+)
 
 (defmethod play-impact-sound ((this guard-shot) (arg0 projectile-options))
   (let ((v1-0 arg0))

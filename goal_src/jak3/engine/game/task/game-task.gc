@@ -5142,7 +5142,7 @@
             :parent-node (new 'static 'array game-task-node 4
               ;(game-task-node desert-vin-quest-resolution)
               ;(game-task-node volcano-darkeco-resolution)
-              (game-task-node none)
+              (game-task-node desert-final-boss-resolution)
               (game-task-node none)
               (game-task-node none)
               (game-task-node none)

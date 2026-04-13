@@ -10,7 +10,7 @@
 (declare-type entity-boss-floater process-drawable)
 (define *eb-floater* (the (pointer entity-boss-floater) #f))
 
-(defun-extern spawn-eb-floater vector symbol none)
+(defun-extern spawn-eb-floater vector symbol float none)
 
 (defun play-story-log-1 ()
     (set! in-dialogue? #t)
@@ -119,7 +119,7 @@
             (set! vin-objective4 "<COLOR_YELLOW>")
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "~S(x10) Research in The Entity~%~%~S(x35) Receive Mass Inverter~%~%~S(x25) Receive Peacemaker~%~%~S(x40) Receive Random Weapon~%~%~S(x100) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+            (format matt-str "~S(x10) Research in The Entity~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x30) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
             vinw1
             vinw2
             vinw3
@@ -142,7 +142,7 @@
             (set! vin-objective4 "<COLOR_YELLOW>")
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "~S(x15) Talk to Vin (OR) Research in The Entity~%~%~S(x35) Receive Mass Inverter~%~%~S(x25) Receive Peacemaker~%~%~S(x40) Receive Random Weapon~%~%~S(x100) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+            (format matt-str "~S(x15) Talk to Vin (OR) Research in The Entity~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x30) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
             vinw1
             vinw2
             vinw3
@@ -161,7 +161,7 @@
         (else
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "~S(Talk) <COLOR_WHITE>To Vin~%~%~S(x35) Receive Mass Inverter~%~%~S(x25) Receive Peacemaker~%~%~S(x40) Receive Random Weapon~%~%~S(x100) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+            (format matt-str "~S(Talk) <COLOR_WHITE>To Vin~%~%~S(x35) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x30) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
             vinw1
             vinw2
             vinw3
@@ -455,20 +455,20 @@
                         )
                     )
                 )
-                ((and (cpad-pressed? 0 x) (= vin-select 1) (>= vin-crystals 35) (not (logtest? (-> *game-info* features) (game-feature gun-dark-2))))
-                    (-! (-> *game-info* civilians-killed) 35.0)
+                ((and (cpad-pressed? 0 x) (= vin-select 1) (>= vin-crystals 15) (not (logtest? (-> *game-info* features) (game-feature gun-dark-2))))
+                    (-! (-> *game-info* civilians-killed) 15.0)
                     (give-weapon! "dark-2" 1)
                 )
-                ((and (cpad-pressed? 0 x) (= vin-select 2) (>= vin-crystals 25) (not (logtest? (-> *game-info* features) (game-feature gun-dark-1))))
-                    (-! (-> *game-info* civilians-killed) 25.0)
+                ((and (cpad-pressed? 0 x) (= vin-select 2) (>= vin-crystals 10) (not (logtest? (-> *game-info* features) (game-feature gun-dark-1))))
+                    (-! (-> *game-info* civilians-killed) 10.0)
                     (give-weapon! "dark-1" 1)
                 )
-                ((and (cpad-pressed? 0 x) (= vin-select 3) (>= vin-crystals 40))
-                    (-! (-> *game-info* civilians-killed) 40.0)
+                ((and (cpad-pressed? 0 x) (= vin-select 3) (>= vin-crystals 10))
+                    (-! (-> *game-info* civilians-killed) 20.0)
                     (give-random-weapon)
                 )
-                ((and (cpad-pressed? 0 x) (= vin-select 4) (>= vin-crystals 15))
-                    (-! (-> *game-info* civilians-killed) 100.0)
+                ((and (cpad-pressed? 0 x) (= vin-select 4) (>= vin-crystals 30))
+                    (-! (-> *game-info* civilians-killed) 30.0)
                     (drop-gun-mod! (target-pos 0))
                     (close-vin-shop!)
                 )
@@ -536,7 +536,7 @@
         )
         (when (= log-sec 3)
               (set! di-s "Since then, I've used my technical ability to expand")
-              (set! di-s2 "my concious and cast a figment model to help you")
+              (set! di-s2 "my conscious and cast a figment model to help you")
               (set! di-s3 "see me better.")
               (set! di-s4 "")
         )
@@ -547,7 +547,7 @@
               (set! di-s4 "")
         )
         (when (= log-sec 5)
-              (set! di-s "But it's also SUPER FUN!")
+              (set! di-s "But it's also SUPER GREAT!")
               (set! di-s2 "I have no fear of my existence anymore!")
               (set! di-s3 "")
               (set! di-s4 "")
@@ -568,7 +568,7 @@
               (set! dialogue-choice #t)
               (set! choice-max 1)
               (set! di-c1 "Who is The Entity?")
-              (set! di-c2 "Why did you have to leave me here before?")
+              (set! di-c2 "Why did you close me in this world with The Entity?")
               (set! di-c3 "")
               (set! di-c4 "")
         )
@@ -647,12 +647,12 @@
         (+! log-sec 1)
         (when (= log-sec 1)
               (set! di-s "<COLOR_RED>The Entity<COLOR_WHITE>...")
-              (set! di-s2 "As far as I know, he is just like me")
+              (set! di-s2 "As far as I know, he is... a sentient AI.")
               (set! di-s3 "")
               (set! di-s4 "")
         )
         (when (= log-sec 2)
-              (set! di-s "An AI created before the dawn of this world..")
+              (set! di-s "..Created before the world was here..")
               (set! di-s2 "")
               (set! di-s3 "")
               (set! di-s4 "")
@@ -705,7 +705,7 @@
               (set! dialogue-choice #t)
               (set! choice-given? #t)
               (set! di-c1 "When I picked up that last crystal, he contacted me.")
-              (set! di-c2 "Why did you have to leave me here to rot?")
+              (set! di-c2 "Why did you close me in this world with The Entity?")
               (set! di-c3 "")
               (set! di-c4 "")
         )
@@ -1291,8 +1291,8 @@
     (when (and (= in-dialogue? #t) (= log-id 1753) (cpad-pressed? 0 x))
         (+! log-sec 1)
         (when (= log-sec 1)
-              (set! di-s "I'm... not sure how I know about all of this...")
-              (set! di-s2 "")
+              (set! di-s "uhh..")
+              (set! di-s2 "...why did I say that?")
               (set! di-s3 "")
               (set! di-s4 "")
         )
@@ -1376,13 +1376,13 @@
     (when (and (= in-dialogue? #t) (= log-id 1355) (cpad-pressed? 0 x))
         (+! log-sec 1)
         (when (= log-sec 1)
-            (set! di-s "I swear, I'm not all coy and secretly playing as <COLOR_RED>The Entity<COLOR_WHITE>.")
+            (set! di-s "I swear, I'm not trying to be all coy..")
             (set! di-s2 "<COLOR_WHITE>All of my actions have been for good.")
-            (set! di-s3 "")
+            (set! di-s3 "It..")
             (set! di-s4 "")
         )
         (when (= log-sec 2)
-            (set! di-s "It kind of does sound suspicious...")
+            (set! di-s "...It does kind of sound suspicious.")
             (set! di-s2 "But <COLOR_YELLOW>seriously<COLOR_WHITE>, you have to trust me on this.")
             (set! di-s3 "I'm here for the powers of good")
             (set! di-s4 "")
@@ -1734,7 +1734,7 @@
               (set! di-s3 "")
               (set! di-s4 "")
               (let ((vec (new 'static 'vector :x (meters 2265.2287) :y (meters 34.2360) :z (meters 147.3039) :w 1.0)))
-                (spawn-eb-floater vec #t)
+                (spawn-eb-floater vec #t 5.0)
               )
         )
         (when (= log-sec 5)
@@ -1950,7 +1950,7 @@
   (none)
 )
 
-(defbehavior entity-boss-floater-init-by-other entity-boss-floater ((vec vector) (pre-int? symbol))
+(defbehavior entity-boss-floater-init-by-other entity-boss-floater ((vec vector) (pre-int? symbol) (size-eb float))
   (set! (-> self root) (new 'process 'trsqv))
   (vector-copy! (-> self pos) vec)
   (vector-copy! (-> self start-pos) vec)
@@ -1958,7 +1958,7 @@
   (set! (-> self float-hold?) #f)
   (set! (-> self root trans w) 1.0)
   (quaternion-identity! (-> self root quat))
-  (set-vector! (-> self root scale) 5.0 5.0 5.0 1.0)
+  (set-vector! (-> self root scale) size-eb size-eb size-eb 1.0)
   (initialize-skeleton-by-name self "entity-boss-floater")
   (set! (-> self should-die?) #f)
   (set! (-> self float-y) (-> self start-pos y))
@@ -1968,10 +1968,30 @@
   (none)
 )
 
-(defun spawn-eb-floater ((vec vector) (pre-int? symbol))
+(defun spawn-eb-floater ((vec vector) (pre-int? symbol) (size-eb float))
   (set! *eb-floater*
-    (process-spawn entity-boss-floater vec pre-int? :name "eb-floater"))
+    (process-spawn entity-boss-floater vec pre-int? size-eb :name "eb-floater"))
   (none)
+)
+
+(defun eb-floater-face-camera-y! ((this entity-boss-floater))
+  (let ((to-target (new-stack-vector0))
+        (from-pos  (new-stack-vector0)))
+    (vector-copy! from-pos (-> this root trans))
+    (if *camera-combiner*
+        (vector-copy! to-target (-> *camera-combiner* trans))
+        (set-vector! to-target
+                     (-> from-pos x)
+                     (-> from-pos y)
+                     (+ (-> from-pos z) (meters 1.0))
+                     1.0))
+    (vector-! to-target to-target from-pos)
+    (set! (-> to-target y) 0.0)
+    (when (< (vector-length to-target) (meters 0.001))
+      (set-vector! to-target 0.0 0.0 1.0 1.0))
+    (vector-normalize! to-target 1.0)
+    (quaternion-look-at! (-> this root quat) to-target *up-vector*)
+    (none))
 )
 
 (defstate floating-up (entity-boss-floater)
@@ -1983,6 +2003,7 @@
     (-! (-> self pos y) (meters 30.0))
     (vector-copy! (-> self root trans) (-> self pos))
     (set! (-> self root trans w) 1.0))
+    (eb-floater-face-camera-y! self)
   :code (behavior ()
     (loop
       (let* ((dur (seconds 16.0))
@@ -1999,6 +2020,7 @@
           (set! (-> self root trans y) (-> self start-pos y))
           (set! (-> self root trans z) (-> self start-pos z))
           (set! (-> self root trans w) 1.0)
+          (eb-floater-face-camera-y! self)
           (set! (-> self float-y) (-> self start-pos y))
           (go-virtual floating))
         (suspend))))
@@ -2013,6 +2035,7 @@
     (set! (-> self root trans y) (-> self start-pos y))
     (set! (-> self root trans z) (-> self start-pos z))
     (set! (-> self root trans w) 1.0))
+    (eb-floater-face-camera-y! self)
   :code (behavior ()
     (loop
       (let* ((dur (seconds 5.0))
@@ -2028,6 +2051,7 @@
         (set! (-> self root trans y) y)
         (set! (-> self root trans z) (-> self start-pos z))
         (set! (-> self root trans w) 1.0)
+        (eb-floater-face-camera-y! self)
         (when (= (-> self should-die?) #t)
           (go-virtual flash-out-and-die))
         (suspend))))

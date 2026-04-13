@@ -162,6 +162,11 @@ dead
 (define temple-bspawner #f)
 
 (define volcanoa-vbspawner (new 'static 'vector :x (meters 25.9791) :y (meters 10.2647) :z (meters -207.1895) :w 1.0))
+(define volcanob-vbspawner (new 'static 'vector :x (meters -36.1477) :y (meters 2.7164) :z (meters -150.4988) :w 1.0))
+(define volcanoc-vbspawner (new 'static 'vector :x (meters 19.2585) :y (meters 2.3082) :z (meters -117.9825) :w 1.0))
+(define volcanod-vbspawner (new 'static 'vector :x (meters 32.3693) :y (meters 2.2762) :z (meters -134.5016) :w 1.0))
+(define volcanoe-vbspawner (new 'static 'vector :x (meters -27.3337) :y (meters 2.2078) :z (meters -209.6804) :w 1.0))
+
 (define volcanoa-bspawner #f)
 
 (define minea-vbspawner-3 (new 'static 'vector :x (meters -69.3484) :y (meters 84.9264) :z (meters -108.0594) :w 1.0))
@@ -255,6 +260,10 @@ dead
                 (= volcanoa-bspawner #f)
             )
             (init-respawner! volcanoa-vbspawner mantis-boss "Mantis Boss" 1460)
+            (init-respawner! volcanob-vbspawner mantis "mantis-c" 1460)
+            (init-respawner! volcanoc-vbspawner mantis "mantis-c" 1460)
+            (init-respawner! volcanod-vbspawner mantis "mantis-c" 1460)
+            (init-respawner! volcanoe-vbspawner mantis "mantis-c" 1460)
             (set! volcanoa-bspawner #t)
             )
             ((and

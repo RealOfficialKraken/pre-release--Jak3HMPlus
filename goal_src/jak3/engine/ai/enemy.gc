@@ -1756,7 +1756,7 @@
             (send-event (ppointer->process (-> this parent)) 'child-hit)
             (when (and
                     (not (type? self bipedal-boss))
-                    (not (type? self mantis-boss))
+                    (not (string= (-> this name) "Mantis Boss-1"))
                     (not (type? self neo-grenadier-boss))
                     (not (string= (-> this name) "Bipedal-Boss"))
                     (not (string= (-> this name) "toad-boss"))
@@ -1765,6 +1765,7 @@
                     (not (string= (-> this name) "Skull Snapper"))
                     (not (string= (-> this name) "entity-boss"))
                     (!= (remap-enemy-type-name (-> this type)) 'bombbot)
+                    (!= (remap-enemy-type-name (-> this type)) 'mantis-boss)
                   )
               (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
                 (set! hpbar-max-hit-points (+ (* 14.0 (-> self enemy-info default-hit-points)) (* (the float enemy-noto) 3)))
@@ -2187,16 +2188,19 @@
           )
          )
        )
-     (when (or ;hack to make enemy immune to knockback
-          (not (string= (-> this name) "goredrinker"))
-          (not (string= (-> this name) "Black Harbinger"))
-          (not (string= (-> this name) "roboguard-giant"))
-          (< enemy-noto 100)
-          (<= (-> this hit-points) 0.0)
-          (!= (remap-enemy-type-name (-> this type)) 'bipedal-boss)
-         )
-     (go (method-of-object this knocked))
-     )
+     (when (and 
+              (or ;hack to make enemy immune to knockback
+                (<= (-> this hit-points) 0.0)
+                (< enemy-noto (+ notoriety-level 7))
+              )
+              (!= (remap-enemy-type-name (-> this type)) 'bipedal-boss)
+              (not (string= (-> this name) "goredrinker"))
+              (not (string= (-> this name) "Black Harbinger"))
+              (not (string= (-> this name) "roboguard-giant"))
+              (!= (remap-enemy-type-name (-> this type)) 'mantis-boss)
+          )
+          (go (method-of-object this knocked))
+        )
      )
     ((= msg 'hit)
      (logclear! (-> this mask) (process-mask actor-pause))
@@ -2318,7 +2322,10 @@
     )
      )
      (let ((enemy-name (remap-enemy-type-name (-> this type))))
-      (when (!= enemy-name 'egg-spider)
+      (when (and
+              (!= enemy-name 'egg-spider)
+              (!= enemy-name 'mantis-boss)
+            )
         (enemy-killed? (rand-vu-float-range 200.0 215.0))
       )
      )
@@ -2344,7 +2351,7 @@
       (when (and
                 (rand-vu-percent? 0.08)
                 (not (type? self bipedal-boss))
-                (not (type? self mantis-boss))
+                (!= enemy-name 'mantis-boss)
                 (not (type? self neo-grenadier-boss))
                 (!= enemy-name 'egg-spider)
               )
@@ -2501,9 +2508,6 @@
   )
 
 (defmethod apply-incoming-hitpoint-mods ((this enemy) (arg0 float))
-  "Modify the hitpoints from an incoming attack.
-   Keeps enemy alive for a bit while being shot with a blue gun.
-   This looks cool because you can shoot them many times."
   (let* ((scaled-dmg (* arg0 (hmplus-enemy-damage-mult)))
          (f0-1 (fmax 0.0 (fmin scaled-dmg (-> this hit-points)))))
     (cond
