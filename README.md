@@ -48,7 +48,7 @@ There are 3 extra mods for each colored gun, making a total of 12 super gun mods
 - Multi-Burst: Shoot out more than one shot while only consuming one ammo.
 ## Wasteland Warp Room
 
-Inside of the vehicle selection room in the wasteland, you'll find several warp gates going to different places. 
+Inside of the vehicle selection room in the wasteland, you'll find several warp gates going to different places. Because of the fast traveling system mentioned below, some of these warp gates can be accessed while the mission is active--but will restart the mission entirely.
 
 ![Warp Room Image](goal_src/jak3/pc/hmplus-modfiles/screenshots/warp-room.png)
 ![Dark Tower Image](goal_src/jak3/pc/hmplus-modfiles/screenshots/dark-tower.png)
@@ -59,13 +59,13 @@ One of these goes to the Dark Eco Realm, a desolate world filled with high-level
 ![HMPlus Logo](goal_src/jak3/pc/hmplus-modfiles/screenshots/dark-volcano.png)
 
 #### Dark Volcano
-The first area you cannot backtrack to after completing it's mission, the volcano area can be accessed to level off of the enemies there. Their levels range from 11-18 each time you traverse through the warp gate. There are two mini-bosses found here. One of them being General Gouge, a bigger mantis that hops around and cannot be knocked back. The other is named Steamroller, which is a giant spiky frog that rolls around.
+The first area you can access after completing it's mission, the volcano area is a good place to farm for XP without going too crazy on the enemy count. Their levels range from 11-18 each time you traverse through the warp gate. There are two mini-bosses found here. One of them being General Gouge, a bigger mantis that hops around and cannot be knocked back. The other is named Steamroller, which is a giant spiky frog that rolls around.
 
 #### Dark Eco Mine
-The second area you cannot backtrack to after completing it's mission, the eco mine can be accessed through the warp room to farm off of enemies. You can also replay the precursor robot bossfight for extra rewards and XP, but be warned: It has several new attacks and is much more difficult than the first precursor robot.
+The second area you can access after completing it's mission, the eco mine is a good place to farm for loot. You can also replay the precursor robot bossfight for extra rewards and XP, but be warned: It has several new attacks and is much more difficult than the first precursor robot.
 
 #### Dark War Factory
-The third area you cannot backtrack to, but can access it through the warp gate. At the moment, the boss in this area is not replayable (nor do I plan to make it replayable, either). There are several enemies to farm off of here, as they are all leveled towards the 60-80 region. There's also an area where you can go out and explore the outer war factory on foot, but there aren't any enemies around.
+The third area you can access after completing it's mission, the war factory is a perfect place to farm high level enemies. Errol is gone, so the boss cannot be replayed. Their levels range from 60-80. There's also an area where you can go out and explore the outer war factory on foot, but there aren't any enemies around.
 ## Replayable Arenas
 
 Similar to Ratchet and Clank, there are a series of challenges with increasingly better rewards as they get more and more difficult. All three arenas can be replayed to an infinite time. Additionally, there is also a new arena called THE DEATH DOME, which is all three arenas at the same time. There's a timer indicating how much time has passed, and how many marauders have been killed. When the timer reaches 3 Minutes and 25 Seconds, Arena Events will occur, which starts a random event that affects the whole arena. As time goes by, the Marauders will increasingly gain levels infinitely.
