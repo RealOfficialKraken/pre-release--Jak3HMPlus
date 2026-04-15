@@ -145,6 +145,7 @@
   )
 
 ;;MIDDLE OF TOP PLATFORM: (new 'static 'vector :x (meters 3496.7414) :y (meters 404.6769) :z (meters 880.2725) :w 1.0)
+(define entity-boss-killed? #f)
 
 (deftype final-boss-hm (process)
   ((general-i              int)
@@ -155,6 +156,9 @@
     active
     idle
     dead
+    dormant
+    talking-phase
+    second-dialogue
     win
   )
   (:methods
@@ -163,7 +167,7 @@
   )
 )
 
-(define *fb-hm* (the (pointer final-boss-hm) #f))
+(declare-type entity-boss-dying process)
 
 (defbehavior final-boss-hm-event-handler final-boss-hm ((arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
   (fb-handler self arg0 arg1 arg2 arg3)
@@ -459,7 +463,11 @@
             )
         (toggle-dark-mode)
       )
-      (when (not (search-process-tree *active-pool* (lambda ((p process)) (type? p entity-boss))))
+      (when (and
+                (not (search-process-tree *active-pool* (lambda ((p process)) (type? p entity-boss))))
+                (not (search-process-tree *active-pool* (lambda ((p process)) (type? p entity-boss-dying))))
+                (= entity-boss-killed? #f)
+            )
         (go-virtual active)
       )
       (when (-> self freaking-die)
@@ -472,6 +480,95 @@
         (set! enemy-noto 1)
       )
       (final-boss-hm-always self)
+      (suspend)
+    )
+  )
+)
+
+(defstate dormant (final-boss-hm)
+  :virtual #t
+  :enter (behavior ()
+    (set! (-> self general-i) 0)
+    (process-grab? *target* #f)
+  )
+  :code (behavior ()
+    (loop
+      (+! (-> self general-i) 1)
+      (when (= (-> self general-i) 960)
+        (set! in-dialogue? #t)
+        (set! log-sec 0)
+        (set! log-id 6999)
+        (set! di-s "<COLOR_WHITE>Jak! You finally did it!")
+        (set! di-s2 "<COLOR_WHITE>You beat him!")
+        (set! di-s3 "")
+        (set! di-s4 "")
+      )
+      (when
+        (and
+          (= in-dialogue? #t)
+          (= log-id 6999)
+          (cpad-pressed? 0 x)
+        )
+        (+! log-sec 1)
+        (when (= log-sec 1)
+          (set! di-s "<COLOR_WHITE>Now we can finally return everything to normal!")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 2)
+          ;;entity appears here
+          (set! di-s "<COLOR_WHITE>...")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 3)
+          (set! di-s "<COLOR_RED>I expected to fool you, Jak")
+          (set! di-s2 "<COLOR_RED>But Vin?")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 4)
+          (set! di-s "<COLOR_WHITE>OH GOD!")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 5)
+          (set! di-s "<COLOR_RED>Say good-bye to your life, Vin")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 5)
+          ;;screen turns white here
+          (set! di-s "<COLOR_RED>ALL OF YOUR POWER IS MINE!")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 6)
+          (set! di-s "")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+          (set! in-dialogue? #f)
+          (set! log-id 0)
+          (set! log-sec 0)
+          (go-virtual talking-phase)
+        )
+      )
+      (suspend)
+    )
+  )
+)
+
+(defstate talking-phase (final-boss-hm)
+  :virtual #t
+  :code (behavior ()
+    (loop
+      (format *stdcon* "ENTITY BOSS TALKING-PHASE~%")
       (suspend)
     )
   )
@@ -669,7 +766,6 @@
     (set! own (handle->process (-> this owner)))
 
     (when own
-      ;; use locked target position, not live Jak position
       (vector-! dir (-> this locked-target-pos) (-> this pos))
       (+! (-> dir x) (meters (- (rand-vu-int-range 0 7) 3)))
       (+! (-> dir y) (meters (- (rand-vu-int-range 0 7) 3)))
@@ -780,24 +876,152 @@
 )
 
 (deftype entity-boss-dying (process)
-  ()
+  ((pos            vector :inline)
+   (start-pos      vector :inline)
+   (going-to-pos     vector :inline)
+   (phase-start    time-frame)
+   (phase          int)
+   (manipy-handle  handle))
   (:state-methods
     eb-dying
-    vin-call
-  )
+    vin-call)
+)
+
+(defun entity-boss-dying-sync-model ((this entity-boss-dying))
+  (let ((proc (handle->process (-> this manipy-handle))))
+    (when proc
+      (send-event proc 'trans (-> this pos))))
+  (none)
+)
+
+(defun entity-boss-dying-spawn-model ((this entity-boss-dying))
+  (let ((man (process-spawn manipy
+               :init
+               manipy-init
+               (-> this pos)
+               #f
+               (art-group-get-by-name *level* "skel-precursor-boss-1" (the (pointer level) #f))
+               #f
+               0
+               #f
+               :name "entity-boss-dying-man"
+               :to this
+               :from *default-dead-pool*))
+        (veccy (new 'stack-no-clear 'vector)))
+    (when man
+      (set! (-> this manipy-handle) (process->handle (ppointer->process man)))
+      (send-event (ppointer->process man) 'shadow #t)
+      (set! (-> veccy x) 2.0)
+      (set! (-> veccy y) 2.0)
+      (set! (-> veccy z) 2.0)
+      (send-event (ppointer->process man) 'scale veccy)
+      (send-event (ppointer->process man) 'max-vis-dist 9999999.0)))
+  (none)
 )
 
 (defbehavior entity-boss-dying-init-by-other entity-boss-dying ()
+  (set! (-> self phase) 0)
+  (set! (-> self manipy-handle) (the-as handle #f))
+
+  (set! (-> self start-pos x) (meters 3496.7414))
+  (set! (-> self start-pos y) (meters 404.6769))
+  (set! (-> self start-pos z) (meters 880.2725))
+  (set! (-> self start-pos w) 1.0)
+
+  (set! (-> self going-to-pos x) (meters 3448.4660))
+  (set! (-> self going-to-pos y) (meters 407.9349))
+  (set! (-> self going-to-pos z) (meters 935.3346))
+  (set! (-> self going-to-pos w) 1.0)
+
+  (vector-copy! (-> self pos) (-> self start-pos))
+  (set! (-> self phase-start) (current-time))
+
+  (entity-boss-dying-spawn-model self)
+  (entity-boss-dying-sync-model self)
+  (stop-main-music)
+
   (go-virtual eb-dying)
   (none)
 )
 
 (defstate eb-dying (entity-boss-dying)
   :virtual #t
+  :enter (behavior ()
+    (play-main-music "snd/final-boss-win.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+  )
   :code (behavior ()
     (loop
-      ;;entity boss appears at (new 'static 'vector :x (meters 3496.7414) :y (meters 404.6769) :z (meters 880.2725) :w 1.0)
-      ;;he does 2 sideways figure-8's 
+      (case (-> self phase)
+        ((0)
+          (let* ((duration (seconds 4.0))
+                 (elapsed (the float (- (current-time) (-> self phase-start))))
+                 (u (/ elapsed duration))
+                 (base-x (-> self start-pos x))
+                 (base-y (-> self start-pos y))
+                 (base-z (-> self start-pos z))
+                 (amp-x (meters 18.0))
+                 (amp-z (meters 9.0))
+                 (t 0.0))
+            (when (< u 0.0)
+              (set! u 0.0))
+            (when (> u 1.0)
+              (set! u 1.0))
+            (set! t (* u 4.0 6.2831855))
+            (set! (-> self pos x)
+                  (+ base-x (* amp-x (sin t))))
+            (set! (-> self pos y) base-y)
+            (set! (-> self pos z)
+                  (+ base-z (* amp-z (sin t) (cos t))))
+            (set! (-> self pos w) 1.0)
+            (when (>= u 1.0)
+              (vector-copy! (-> self start-pos) (-> self pos))
+              (set! (-> self phase-start) (current-time))
+              (set! (-> self phase) 1)))
+        )
+        ((1)
+          (let* ((duration (seconds 2.0))
+                 (elapsed (the float (- (current-time) (-> self phase-start))))
+                 (u (/ elapsed duration))
+                 (s 0.0))
+            (when (< u 0.0)
+              (set! u 0.0))
+            (when (> u 1.0)
+              (set! u 1.0))
+            (set! s (* u u (- 3.0 (* 2.0 u))))
+            (set! (-> self pos x)
+                  (lerp (-> self start-pos x) (-> self going-to-pos x) s))
+            (set! (-> self pos y)
+                  (lerp (-> self start-pos y) (-> self going-to-pos y) s))
+            (set! (-> self pos z)
+                  (lerp (-> self start-pos z) (-> self going-to-pos z) s))
+            (set! (-> self pos w) 1.0)
+            (when (>= u 1.0)
+              (vector-copy! (-> self pos) (-> self going-to-pos))
+              (set! (-> self phase-start) (current-time))
+              (set! (-> self phase) 2)))
+        )
+        ((2)
+          (vector-copy! (-> self pos) (-> self going-to-pos))
+          (when (time-elapsed? (-> self phase-start) (seconds 2.0))
+            (set! (-> self phase) 3)))     
+        ((3)
+          (set! (-> *launch-matrix* trans quad) (-> self pos quad))
+          (cond
+            ((logtest? (-> *part-group-id-table* 585 flags) (sp-group-flag sp13))
+             (part-tracker-spawn
+               part-tracker-subsampler
+               :to *active-pool*
+               :group (-> *part-group-id-table* 585)))
+            (else
+             (part-tracker-spawn
+               part-tracker
+               :to *active-pool*
+               :group (-> *part-group-id-table* 585))))
+          (set! (-> self phase) 4))
+        ((4)
+          (deactivate self))
+      )
+      (entity-boss-dying-sync-model self)
       (suspend)
     )
   )
@@ -823,25 +1047,27 @@
               )
 
 (deftype entity-boss (enemy)
-  ((turn-speed    float)
-   (face-yaw      float)
-   (phase-time    time-frame)
-   (idle-phase    int)
-   (phase-start   time-frame)
-   (move-start    vector :inline)
-   (move-end      vector :inline)
-   (arc-height    float)
-   (arc-sign      float)
-   (fight-start-time time-frame)
-   (transition-phase int)
-   (floor-spike-start-time time-frame)
-   (last-floor-spike-time  time-frame)
+  ((turn-speed                       float)
+   (face-yaw                         float)
+   (phase-time                       time-frame)
+   (idle-phase                       int)
+   (phase-start                      time-frame)
+   (move-start                       vector :inline)
+   (move-end                         vector :inline)
+   (arc-height                       float)
+   (arc-sign                         float)
+   (fight-start-time                 time-frame)
+   (transition-phase                 int)
+   (floor-spike-start-time           time-frame)
+   (last-floor-spike-time            time-frame)
+   (should-die?                      symbol)
   )
   (:state-methods
     idle
     transition-to-floor-dodge
     floor-dodge-minigame
     return-from-floor-dodge
+    die!
   )
   (:methods
     (entity-boss-init-by-other (_type_ vector) none)
@@ -990,6 +1216,7 @@
           ))))
     (('death-start 'death-end)
       (call-parent-method this arg0 arg1 arg2 arg3)
+      (set! (-> this should-die?) #t)
     )
   )
   (none))
@@ -1227,6 +1454,9 @@
         )
         (update-transforms (-> self root))
         (entity-boss-sync-visible-model self))
+        (when (-> self should-die?)
+          (go-virtual die!)
+        )
       (suspend)
     )
   )
@@ -1319,6 +1549,9 @@
         )
       )
       (update-transforms (-> self root))
+      (when (-> self should-die?)
+          (go-virtual die!)
+        )
       (entity-boss-sync-visible-model self)
       (suspend)
     )
@@ -1345,29 +1578,68 @@
         (entity-boss-face-jak! self)
         (vector-copy! floor-vec (-> self root trans))
         (+! (-> floor-vec y) (meters 1.8))
-        (cond
-          ((not (time-elapsed? (-> self floor-spike-start-time) (seconds 25.0)))
-            (when (or
-                    (= (-> self last-floor-spike-time) 0)
-                    (time-elapsed? (-> self last-floor-spike-time) (seconds 3.0)))
-              (spawn-floor-spikelight floor-vec (seconds 1.0) 0.0 3)
-              (set! (-> self last-floor-spike-time) (current-time)))
+        (let ((hp-ratio 1.0))
+          (when (> (-> self enemy-info default-hit-points) 0.0)
+            (set! hp-ratio (/ (-> self hit-points)
+                              (-> self enemy-info default-hit-points))))
+          (when (< hp-ratio 0.0) 
+            (set! hp-ratio 0.0)
           )
-          ((not (time-elapsed? (-> self floor-spike-start-time) (seconds 26.0)))
+          (when (> hp-ratio 1.0) 
+            (set! hp-ratio 1.0)
           )
-          (else
-            (when (time-elapsed? (-> self last-floor-spike-time) (seconds 1.3))
-              (spawn-floor-spikelight
-                floor-vec
-                (seconds 1.0)
-                (rand-vu-float-range -50.0 50.0)
-                4)
-              (set! (-> self last-floor-spike-time) (current-time)))
+          (cond
+            ((> hp-ratio 0.85)
+              (cond
+                ((not (time-elapsed? (-> self floor-spike-start-time) (seconds 25.0)))
+                  (when (or
+                          (= (-> self last-floor-spike-time) 0)
+                          (time-elapsed? (-> self last-floor-spike-time) (seconds 3.0)))
+                    (spawn-floor-spikelight floor-vec (seconds 1.0) 0.0 3)
+                    (set! (-> self last-floor-spike-time) (current-time))))
+                
+                ((not (time-elapsed? (-> self floor-spike-start-time) (seconds 26.0)))
+                )
+                
+                (else
+                  (when (time-elapsed? (-> self last-floor-spike-time) (seconds 1.3))
+                    (spawn-floor-spikelight
+                      floor-vec
+                      (seconds 1.0)
+                      (rand-vu-float-range -50.0 50.0)
+                      4)
+                    (set! (-> self last-floor-spike-time) (current-time))))
+              )
+            )
+            ((and (<= hp-ratio 0.85) (> hp-ratio 0.25))
+              (when (or
+                      (= (-> self last-floor-spike-time) 0)
+                      (time-elapsed? (-> self last-floor-spike-time) (seconds 1.3)))
+                (spawn-floor-spikelight
+                  floor-vec
+                  (seconds 0.6)
+                  (rand-vu-float-range -50.0 50.0)
+                  4)
+                (set! (-> self last-floor-spike-time) (current-time)))
+            )
+            (else
+              (when (or
+                      (= (-> self last-floor-spike-time) 0)
+                      (time-elapsed? (-> self last-floor-spike-time) (seconds 1.3)))
+                (spawn-floor-spikelight
+                  floor-vec
+                  (seconds 0.4)
+                  (rand-vu-float-range -70.0 70.0)
+                  4)
+                (set! (-> self last-floor-spike-time) (current-time)))
+            )
           )
         )
         (when (time-elapsed? (-> self fight-start-time) (seconds 53))
           (go-virtual return-from-floor-dodge))
-
+        (when (-> self should-die?)
+          (go-virtual die!)
+        )
         (update-transforms (-> self root))
         (entity-boss-sync-visible-model self)
       )
@@ -1407,9 +1679,23 @@
           (set! (-> self root trans y) (meters 406.6769))
           (go-virtual idle)))
       (update-transforms (-> self root))
+      (when (-> self should-die?)
+          (go-virtual die!)
+        )
       (entity-boss-sync-visible-model self)
       (suspend)
     )
+  )
+)
+
+(defstate die! (entity-boss)
+  :virtual #t
+  :code (behavior ()
+    (process-spawn entity-boss-dying :name "entity-boss-dying")
+    (lightjak-get-off-part (-> self root trans))
+    (kill-by-name "entity-boss" *default-pool*)
+    (set! entity-boss-killed? #t)
+    (deactivate self)
   )
 )
 
@@ -1444,6 +1730,7 @@
   (set! (-> self phase-time) (seconds 1.9))
   (set! (-> self fight-start-time) (current-time))
   (set! (-> self transition-phase) 0)
+  (set! (-> self should-die?) #f)
   (entity-boss-spawn-visible-model self)
   (go-virtual idle)
   (none)

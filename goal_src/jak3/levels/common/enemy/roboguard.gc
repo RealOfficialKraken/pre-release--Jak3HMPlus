@@ -1385,6 +1385,13 @@
   "Commmon handler for events."
   (case arg2
     (('hit 'hit-knocked)
+     (when (and
+             (= (-> this incoming knocked-type) (knocked-type vehicle))
+             (not (or
+                    (task-node-open? (game-task-node factory-assault-get-vehicle))
+                    (task-node-open? (game-task-node factory-assault-broke-ultimate-fence)))))
+       (return #t))
+
      (logclear! (-> this mask) (process-mask actor-pause))
      (logclear! (-> this focus-status) (focus-status dangerous))
      (logclear! (-> this enemy-flags) (enemy-flag use-notice-distance))
@@ -1401,22 +1408,28 @@
      (freeze-hit-begin)
      (cond
        ((or (= (-> this hit-points) 0.0)
-            (and (>= 1.0 (-> this hit-points)) (= (-> this incoming knocked-type) (knocked-type blue-shot)))
-            )
+            (and (>= 1.0 (-> this hit-points))
+                 (= (-> this incoming knocked-type) (knocked-type blue-shot))))
         (on-dying this)
         (go (method-of-object this explode))
         )
        (else
-         (when (or (<= (-> this hit-points) 0.0)(< enemy-noto (+ notoriety-level 7)))
-          (go (method-of-object this knocked))
-         )
+         (when (or (<= (-> this hit-points) 0.0)
+                   (< enemy-noto (+ notoriety-level 7)))
+           (go (method-of-object this knocked))
+           )
          )
        )
      #t
      )
+
     (('impact-impulse)
      (let ((v1-38 (the-as object (-> arg3 param 0))))
-       (when (< 4096.0 (-> (the-as rigid-body-impact v1-38) impulse))
+       (when (and
+               (< 4096.0 (-> (the-as rigid-body-impact v1-38) impulse))
+               (or
+                 (task-node-open? (game-task-node factory-assault-get-vehicle))
+                 (task-node-open? (game-task-node factory-assault-broke-ultimate-fence))))
          (logior! (-> this root penetrated-by) (penetrate vehicle))
          (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 255 (seconds 0.1))
          (set! (-> this hit-points) 0.0)
@@ -1566,10 +1579,11 @@
            )
          (send-event arg0 'lawsuit (-> this root trans))
          (go (method-of-object this explode))
-         #t
          )
        )
+     #t
      )
+
     (else
       ((method-of-type nav-enemy event-handler) this arg0 arg1 arg2 arg3)
       )

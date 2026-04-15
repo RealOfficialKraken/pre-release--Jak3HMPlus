@@ -38,6 +38,85 @@
   (process-spawn floor-spikelight vec time? speed amt :name "floor-spikelight")
   (none))
 
+  (defun add-retail-flat-triangle ((enable symbol) (bucket bucket-id) (p0 vector) (p1 vector) (p2 vector) (color rgba))
+  "Draw a shaded triangle using the retail/global DMA buffer."
+  (local-vars (sv-160 vector) (sv-176 vector))
+  (set! sv-160 p0)
+  (set! sv-176 p1)
+  (let ((s0-0 p2)
+        (s3-0 color))
+    (if (not (or enable *display-capture-mode*))
+        (return #f))
+    (let ((s5-0 (new 'stack 'vector4w-3))
+          (s4-0 (new 'stack 'vector4w-3))
+          (a1-3 (new 'stack-no-clear 'vector))
+          (s2-0 (new 'stack-no-clear 'vector))
+          (s1-0 (new 'stack-no-clear 'vector)))
+      (vector-copy! a1-3 sv-160)
+      (vector-copy! s2-0 sv-176)
+      (vector-copy! s1-0 s0-0)
+      (set! (-> a1-3 w) 1.0)
+      (set! (-> s2-0 w) 1.0)
+      (set! (-> s1-0 w) 1.0)
+      (when (and (transform-point-qword! (-> s5-0 vector 0) a1-3)
+                 (transform-point-qword! (-> s5-0 vector 1) s2-0)
+                 (transform-point-qword! (-> s5-0 vector 2) s1-0))
+        (with-dma-buffer-add-bucket ((v1-17 (-> *display* frames (-> *display* on-screen) global-buf))
+                                     bucket)
+          (let ((a0-12 (-> v1-17 base)))
+            (let* ((a1-6 v1-17)
+                   (a3-1 (the-as dma-packet (-> a1-6 base))))
+              (set! (-> a3-1 dma) (new 'static 'dma-tag :id (dma-tag-id cnt)))
+              (set! (-> a3-1 vif0) (new 'static 'vif-tag))
+              (set! (-> a3-1 vif1) (new 'static 'vif-tag :cmd (vif-cmd direct) :msk #x1))
+              (set! (-> a1-6 base) (the-as pointer (&+ a3-1 16))))
+            (let* ((a1-7 v1-17)
+                   (a3-3 (the-as gs-gif-tag (-> a1-7 base))))
+              (set! (-> a3-3 tag)
+                    (new 'static 'gif-tag64
+                      :nloop #x1
+                      :eop #x1
+                      :pre #x1
+                      :prim (new 'static 'gs-prim :prim (gs-prim-type tri) :iip #x1 :abe #x1)
+                      :nreg #x6))
+              (set! (-> a3-3 regs)
+                    (new 'static 'gif-tag-regs
+                      :regs0 (gif-reg-id rgbaq)
+                      :regs1 (gif-reg-id xyzf2)
+                      :regs2 (gif-reg-id rgbaq)
+                      :regs3 (gif-reg-id xyzf2)
+                      :regs4 (gif-reg-id rgbaq)
+                      :regs5 (gif-reg-id xyzf2)))
+              (set! (-> a1-7 base) (the-as pointer (&+ a3-3 16))))
+            (set! (-> s4-0 vector 0 x) (the-as int (-> s3-0 r)))
+            (set! (-> s4-0 vector 0 y) (the-as int (-> s3-0 g)))
+            (set! (-> s4-0 vector 0 z) (the-as int (-> s3-0 b)))
+            (set! (-> s4-0 vector 0 w) (the-as int (-> s3-0 a)))
+            (+! (-> s5-0 vector 0 z) -8192)
+            (+! (-> s5-0 vector 1 z) -8192)
+            (+! (-> s5-0 vector 2 z) -8192)
+            (let* ((a1-21 v1-17)
+                   (a3-5 (the-as (inline-array vector) (-> a1-21 base))))
+              (set! (-> a3-5 0 quad) (-> s4-0 vector 0 quad))
+              (set! (-> a3-5 1 quad) (-> s5-0 vector 0 quad))
+              (set! (-> a3-5 2 quad) (-> s4-0 vector 0 quad))
+              (set! (-> a3-5 3 quad) (-> s5-0 vector 1 quad))
+              (set! (-> a3-5 4 quad) (-> s4-0 vector 0 quad))
+              (set! (-> a3-5 5 quad) (-> s5-0 vector 2 quad))
+              (set! (-> a1-21 base) (the-as pointer (-> a3-5 6))))
+            (let ((a1-25 (/ (+ (- -16 (the-as int a0-12))
+                               (the-as int (-> v1-17 base)))
+                            16)))
+              (cond
+                ((nonzero? a1-25)
+                 (logior! (-> (the-as (pointer uint64) a0-12) 0)
+                          (the-as uint (new 'static 'dma-tag :qwc a1-25)))
+                 (logior! (-> (the-as (pointer uint64) a0-12) 1)
+                          (the-as uint (shl (shr (shl a1-25 48) 48) 32))))
+                (else
+                 (set! (-> v1-17 base) a0-12)))))))))
+  #f)
+
 (defun floor-spikelight-color ((this floor-spikelight))
   (cond
     ((-> this is-firing?)
@@ -191,9 +270,9 @@
         (+ (-> center z) z1)
         1.0)
 
-      (add-debug-flat-triangle
+      (add-retail-flat-triangle
         #t
-        (bucket-id generic-sprite-1)
+        (bucket-id debug)
         center
         p0
         p1
@@ -286,17 +365,17 @@
               (+ (-> center z) (* (sin a1) r1))
               1.0)
 
-            (add-debug-flat-triangle
+            (add-retail-flat-triangle
               #t
-              (bucket-id generic-sprite-1)
+              (bucket-id debug)
               p00
               p01
               p10
               col)
 
-            (add-debug-flat-triangle
+            (add-retail-flat-triangle
               #t
-              (bucket-id generic-sprite-1)
+              (bucket-id debug)
               p10
               p01
               p11

@@ -4397,6 +4397,7 @@ BUGS:
                 (= (pause-allowed?) #t)
                 (task-node-closed? (game-task-node desert-vin-quest-resolution))
                 (!= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                (not *fb-hm*)
                 (not *rage-ghost*)
             )
                 ;(spawn-rage-ghost) ;;fix this crash -- A dependency/file might not be loaded
@@ -8175,6 +8176,7 @@ BUGS:
     (set! *les-process* #f)
     (kill-by-name "floor-spikelight" *active-pool*)
     (set! *floor-spikelight* #f)
+    (kill-by-name "entity-boss-dying" *active-pool*)
     (when (ppointer->process *weather-flux*)
         (send-event (ppointer->process *weather-flux*) 'die #t)
     )

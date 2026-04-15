@@ -758,6 +758,8 @@
 
     (defun-extern fb-task-spawn (none))
 
+    (declare-type final-boss-hm process)
+    (define *fb-hm* (the (pointer final-boss-hm) #f))
     (declare-type light-eco-shot-process process)
     (define *les-process* (the (pointer light-eco-shot-process) #f))
     (declare-type floor-spikelight process)
