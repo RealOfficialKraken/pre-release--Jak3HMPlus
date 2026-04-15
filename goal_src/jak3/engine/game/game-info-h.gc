@@ -760,6 +760,8 @@
 
     (declare-type light-eco-shot-process process)
     (define *les-process* (the (pointer light-eco-shot-process) #f))
+    (declare-type floor-spikelight process)
+    (define *floor-spikelight* (the (pointer floor-spikelight) #f))
 
     (declare-type entity-boss enemy)
     (define *entity-boss* (the (pointer entity-boss) #f))

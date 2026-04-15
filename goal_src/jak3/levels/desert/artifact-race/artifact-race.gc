@@ -374,7 +374,7 @@
        )
      )
     ((= arg0 (+ (-> this max-count) -1))
-     (set! (-> *was-squad-control* target-count) 40)
+     (set! (-> *was-squad-control* target-count) 20)
      (talker-spawn-func (-> *artifact-race-speech-list* 24) *entity-pool* (target-pos 0) (the-as region #f))
      )
     ((and (= arg0 (+ (-> this max-count) -2)) (< (rand-vu) 0.5))

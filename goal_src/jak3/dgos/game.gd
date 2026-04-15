@@ -590,4 +590,5 @@
   "sew-laser-guard.o"
   "sew-laser-turret.o"
   "rubble-get-out.o"
+  "floor-spikelight.o"
  ))

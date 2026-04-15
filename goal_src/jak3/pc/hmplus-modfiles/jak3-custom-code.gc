@@ -8173,6 +8173,8 @@ BUGS:
     (kill-by-name "eb-floater" *active-pool*)
     (kill-by-name "light-eco-shot-process" *active-pool*)
     (set! *les-process* #f)
+    (kill-by-name "floor-spikelight" *active-pool*)
+    (set! *floor-spikelight* #f)
     (when (ppointer->process *weather-flux*)
         (send-event (ppointer->process *weather-flux*) 'die #t)
     )

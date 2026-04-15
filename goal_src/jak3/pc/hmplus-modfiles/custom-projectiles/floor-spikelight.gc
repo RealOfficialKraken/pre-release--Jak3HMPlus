@@ -1,0 +1,347 @@
+(in-package goal)
+
+;;name: floor-spikelight.gc
+
+(deftype floor-spikelight (process)
+  ((pos                           vector :inline)
+   (time-to-spike                 time-frame)
+   (spin-speed                    float)
+   (start-time                    time-frame)
+   (fire-start-time               time-frame)
+   (frozen-spin-angle             float)
+   (ray-amt                       int)
+   (is-firing?                    symbol)
+   (did-damage?                   symbol)
+   (start-angle                   float)
+   (circle-prim                   prim-strip))
+  (:state-methods
+    warning
+    spike!
+    dead))
+
+(defbehavior floor-spikelight-init-by-other floor-spikelight ((vec vector) (time? time-frame) (speed float) (amt int))
+  (vector-copy! (-> self pos) vec)
+  (set! (-> self time-to-spike) time?)
+  (set! (-> self spin-speed) speed)
+  (set! (-> self start-time) (current-time))
+  (set! (-> self fire-start-time) (current-time))
+  (set! (-> self frozen-spin-angle) 0.0)
+  (set! (-> self ray-amt) amt)
+  (set! (-> self is-firing?) #f)
+  (set! (-> self did-damage?) #f)
+  (set! (-> self start-angle) (rand-vu-float-range 0.0 65536.0))
+  (go-virtual warning)
+  (none))
+
+(defun spawn-floor-spikelight ((vec vector) (time? time-frame) (speed float) (amt int))
+  (kill-by-name "floor-spikelight" *default-pool*)
+  (process-spawn floor-spikelight vec time? speed amt :name "floor-spikelight")
+  (none))
+
+(defun floor-spikelight-color ((this floor-spikelight))
+  (cond
+    ((-> this is-firing?)
+     (the-as rgba
+       (logior
+         #x00FF00FF
+         (shl #x80 24))))
+    (else
+      (the-as rgba
+        (logior
+          #x000000FF
+          (shl #x1A 24))))))
+
+(defun floor-spikelight-spin-angle ((this floor-spikelight))
+  (cond
+    ((-> this is-firing?)
+     (-> this frozen-spin-angle))
+    (else
+      (+ (-> this start-angle)
+        (* (the float (- (current-time) (-> this start-time)))
+            (-> this spin-speed)))))
+)
+
+(defun floor-spikelight-cross2 ((ax float) (az float) (bx float) (bz float))
+  (- (* ax bz) (* az bx)))
+
+(defun floor-spikelight-jak-in-damage-zone? ((this floor-spikelight))
+  (let* ((amt (-> this ray-amt))
+         (circle-radius (meters 9.0))
+         (outer-radius (* circle-radius 11.0))
+         (spin-ang (floor-spikelight-spin-angle this))
+         (angle-step (/ 65536.0 (the float amt)))
+         (ray-angle-width (/ angle-step 3.0))
+         (ray-half-angle (/ ray-angle-width 2.0))
+         (jak-pos (new 'stack-no-clear 'vector))
+         (dx 0.0)
+         (dz 0.0)
+         (dist-xz-sq 0.0)
+         (floor-y 0.0)
+         (jak-y 0.0)
+         (ang-center 0.0)
+         (ang-min 0.0)
+         (ang-max 0.0)
+         (minx 0.0)
+         (minz 0.0)
+         (maxx 0.0)
+         (maxz 0.0)
+         (inside #f))
+
+    (vector-copy! jak-pos (-> *target* root trans))
+
+    (set! floor-y (-> this pos y))
+    (set! jak-y (-> jak-pos y))
+
+    (cond
+    ((< jak-y (- floor-y (meters 9.0))) #f)
+    ((> jak-y (+ floor-y (meters 30.0))) #f)
+      (else
+        (set! dx (- (-> jak-pos x) (-> this pos x)))
+        (set! dz (- (-> jak-pos z) (-> this pos z)))
+        (set! dist-xz-sq (+ (* dx dx) (* dz dz)))
+
+        ;; inside the center circle draw
+        (cond
+          ((<= dist-xz-sq (* circle-radius circle-radius))
+            #t)
+
+          ;; outside all draws entirely
+          ((> dist-xz-sq (* outer-radius outer-radius))
+            #f)
+
+          ;; if no rays, then only the circle can damage
+          ((<= amt 0)
+            #f)
+
+          ;; test against the ray wedge draws
+          (else
+            (dotimes (i amt)
+              (unless inside
+                (set! ang-center (+ spin-ang (* angle-step (the float i))))
+                (set! ang-min (- ang-center ray-half-angle))
+                (set! ang-max (+ ang-center ray-half-angle))
+
+                (set! minx (cos ang-min))
+                (set! minz (sin ang-min))
+                (set! maxx (cos ang-max))
+                (set! maxz (sin ang-max))
+
+                (when (and (>= (floor-spikelight-cross2 minx minz dx dz) 0.0)
+                           (>= (floor-spikelight-cross2 dx dz maxx maxz) 0.0))
+                  (set! inside #t))))
+            inside))))))
+
+(defun floor-spikelight-damage-jak ((this floor-spikelight))
+  (when (and (not (-> this did-damage?))
+             (floor-spikelight-jak-in-damage-zone? this)
+             *target*)
+    (let ((atk (new 'stack 'attack-info)))
+      (set! (-> this did-damage?) #t)
+
+      (set! (-> atk id) (new-attack-id))
+      (set! (-> atk mode) 'damage)
+      (set! (-> atk mask) (attack-mask mode id))
+      (logior! (-> atk mask) (attack-mask damage))
+      (set! (-> atk damage) 2.0)
+      (set! (-> atk vehicle-damage-factor) 1.0)
+      (set! (-> atk vehicle-impulse-factor) 1.0)
+
+      (send-event *target* 'attack (new 'stack-no-clear 'event-message-block) atk)))
+
+  (none))
+
+(defun floor-spikelight-draw-circle ((this floor-spikelight))
+  (let* ((segments 40)
+         (radius (meters 9.0))
+         (spin-ang (floor-spikelight-spin-angle this))
+         (angle-step (/ 65536.0 (the float segments)))
+         (center (new 'stack-no-clear 'vector))
+         (p0 (new 'stack-no-clear 'vector))
+         (p1 (new 'stack-no-clear 'vector))
+         (col (floor-spikelight-color this))
+         (ang0 0.0)
+         (ang1 0.0)
+         (x0 0.0)
+         (z0 0.0)
+         (x1 0.0)
+         (z1 0.0))
+
+    (vector-copy! center (-> this pos))
+    (+! (-> center y) (meters 0.03))
+    (set! (-> center w) 1.0)
+
+    (dotimes (i segments)
+      (set! ang0 (+ spin-ang (* angle-step (the float i))))
+      (set! ang1 (+ spin-ang (* angle-step (the float (+ i 1)))))
+
+      (set! x0 (* radius (cos ang0)))
+      (set! z0 (* radius (sin ang0)))
+      (set! x1 (* radius (cos ang1)))
+      (set! z1 (* radius (sin ang1)))
+
+      (set-vector! p0
+        (+ (-> center x) x0)
+        (-> center y)
+        (+ (-> center z) z0)
+        1.0)
+
+      (set-vector! p1
+        (+ (-> center x) x1)
+        (-> center y)
+        (+ (-> center z) z1)
+        1.0)
+
+      (add-debug-flat-triangle
+        #t
+        (bucket-id generic-sprite-1)
+        center
+        p0
+        p1
+        col))
+    (none)))
+
+(defun floor-spikelight-draw-rays ((this floor-spikelight))
+  (let* ((amt (-> this ray-amt))
+         (circle-radius (meters 9.0))
+         (outer-radius (* circle-radius 11.0))
+         (spin-ang (floor-spikelight-spin-angle this))
+         (angle-step (/ 65536.0 (the float amt)))
+         (ray-angle-width (/ angle-step 3.0))
+         (ray-half-angle (/ ray-angle-width 2.0))
+         (radial-steps 24)
+         (angular-steps 12)
+         (center (new 'stack-no-clear 'vector))
+         (p00 (new 'stack-no-clear 'vector))
+         (p01 (new 'stack-no-clear 'vector))
+         (p10 (new 'stack-no-clear 'vector))
+         (p11 (new 'stack-no-clear 'vector))
+         (col (floor-spikelight-color this))
+         (ang-center 0.0)
+         (ang-min 0.0)
+         (ang-max 0.0)
+         (a0 0.0)
+         (a1 0.0)
+         (r0 0.0)
+         (r1 0.0)
+         (ta0 0.0)
+         (ta1 0.0)
+         (tr0 0.0)
+         (tr1 0.0))
+
+    (when (> amt 0)
+      (vector-copy! center (-> this pos))
+      (+! (-> center y) (meters 0.03))
+      (set! (-> center w) 1.0)
+
+      (dotimes (i amt)
+        (set! ang-center (+ spin-ang (* angle-step (the float i))))
+        (set! ang-min (- ang-center ray-half-angle))
+        (set! ang-max (+ ang-center ray-half-angle))
+
+        (dotimes (ri radial-steps)
+          (cond
+            ((= radial-steps 1)
+             (set! tr0 0.0)
+             (set! tr1 1.0))
+            (else
+              (set! tr0 (/ (the float ri) (the float radial-steps)))
+              (set! tr1 (/ (the float (+ ri 1)) (the float radial-steps)))))
+
+          (set! r0 (lerp circle-radius outer-radius tr0))
+          (set! r1 (lerp circle-radius outer-radius tr1))
+
+          (dotimes (ai angular-steps)
+            (cond
+              ((= angular-steps 1)
+               (set! ta0 0.0)
+               (set! ta1 1.0))
+              (else
+                (set! ta0 (/ (the float ai) (the float angular-steps)))
+                (set! ta1 (/ (the float (+ ai 1)) (the float angular-steps)))))
+
+            (set! a0 (lerp ang-min ang-max ta0))
+            (set! a1 (lerp ang-min ang-max ta1))
+
+            (set-vector! p00
+              (+ (-> center x) (* (cos a0) r0))
+              (-> center y)
+              (+ (-> center z) (* (sin a0) r0))
+              1.0)
+
+            (set-vector! p01
+              (+ (-> center x) (* (cos a1) r0))
+              (-> center y)
+              (+ (-> center z) (* (sin a1) r0))
+              1.0)
+
+            (set-vector! p10
+              (+ (-> center x) (* (cos a0) r1))
+              (-> center y)
+              (+ (-> center z) (* (sin a0) r1))
+              1.0)
+
+            (set-vector! p11
+              (+ (-> center x) (* (cos a1) r1))
+              (-> center y)
+              (+ (-> center z) (* (sin a1) r1))
+              1.0)
+
+            (add-debug-flat-triangle
+              #t
+              (bucket-id generic-sprite-1)
+              p00
+              p01
+              p10
+              col)
+
+            (add-debug-flat-triangle
+              #t
+              (bucket-id generic-sprite-1)
+              p10
+              p01
+              p11
+              col)))))
+    )
+  (none))
+
+(defstate warning (floor-spikelight)
+  :virtual #t
+  :code (behavior ()
+    (loop
+      (floor-spikelight-draw-circle self)
+      (floor-spikelight-draw-rays self)
+
+      (when (>= (- (current-time) (-> self start-time))
+                (-> self time-to-spike))
+        (set! (-> self frozen-spin-angle)
+            (+ (-> self start-angle)
+                (* (the float (- (current-time) (-> self start-time)))
+                    (-> self spin-speed))))
+        (set! (-> self is-firing?) #t)
+        (set! (-> self did-damage?) #f)
+        (set! (-> self fire-start-time) (current-time))
+        (go-virtual spike!))
+
+      (suspend))))
+
+(defstate spike! (floor-spikelight)
+  :virtual #t
+  :enter (behavior ()
+    (play-sound-file "snd/floor-spike-fire.wav" 70)
+  )
+  :code (behavior ()
+    (loop
+      (floor-spikelight-draw-circle self)
+      (floor-spikelight-draw-rays self)
+      (floor-spikelight-damage-jak self)
+
+      (when (>= (- (current-time) (-> self fire-start-time))
+                (the time-frame 5))
+        (go-virtual dead))
+
+      (suspend))))
+
+(defstate dead (floor-spikelight)
+  :virtual #t
+  :code (behavior ()
+    (deactivate self)))

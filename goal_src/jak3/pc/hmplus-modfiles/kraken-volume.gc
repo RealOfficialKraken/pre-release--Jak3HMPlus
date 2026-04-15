@@ -64,6 +64,7 @@ playing
         (format #t "KV-1000 IN DYING STATE--STOPPING MUSIC~%")
         (when (not in-main-menu?)
             (play-main-music "ejfiseuf" (-> self volume))
+            (kill-by-name (-> self name) *default-pool*)
             (stop-main-music)
         )
     )
@@ -73,10 +74,9 @@ playing
                 (and
                     (= weather-dark-mode #f)
                     (= in-main-menu? #f)
-                    (= (paused?) #f)
-                    (= (pause-allowed?) #t)
                     *target*
                 )
+                (kill-by-name (-> self name) *default-pool*)
                 (process-deactivate)
             )
     )
@@ -104,6 +104,13 @@ playing
                 (= (pause-allowed?) #t)
             )
             (loop
+                (when 
+                    (and
+                        *target*
+                        (<= (-> *target* fact health) 0.0)
+                    )
+                    (go-virtual dead)
+                )
                 (when (time-elapsed? (-> self volume-check-time) (seconds 1.0))
                 (set! (-> self volume-check-time) (current-time))
                 (when (!= (the int (* (-> *setting-control* user-current sfx-volume) 100)) (-> self volume))
