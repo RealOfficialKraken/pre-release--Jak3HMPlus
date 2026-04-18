@@ -3194,7 +3194,7 @@
         (hud-timer-handler self)
         )
     (if (and *debug-segment* (not *editable*))
-        (format *stdebug* "task-manager ~A alive~%" (-> self node-info name))
+        (format *stdebug* "" (-> self node-info name))
         )
     (task-manager-method-26 self)
     )

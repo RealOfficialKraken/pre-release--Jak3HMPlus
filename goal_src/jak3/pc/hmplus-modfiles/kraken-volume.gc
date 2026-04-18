@@ -189,9 +189,6 @@ playing
                     (stop-main-music)
                     (go-virtual dead)
                 )
-                (when *debug-segment*
-                    (format *stdcon* "kraken-volume~%vol: ~d~%track: ~s~%~%" (-> self volume) (-> self track))
-                )
                 (suspend)
             )
         )

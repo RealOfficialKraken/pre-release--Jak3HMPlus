@@ -758,6 +758,10 @@
 
     (defun-extern fb-task-spawn (none))
 
+    (define disable-darkworld-in-mainmenu #f)
+
+    (declare-type entity-boss-dying process)
+
     (declare-type final-boss-hm process)
     (define *fb-hm* (the (pointer final-boss-hm) #f))
     (declare-type light-eco-shot-process process)

@@ -1,0 +1,205 @@
+(in-package goal)
+
+;; file-name: silver-freeze.gc
+
+(deftype silver-freeze-proc (process)
+  ((victim              handle)
+   (end-time            time-frame)
+   (old-gravity-y       float)
+   (old-gravity-max     float)
+   (old-gravity-length  float)
+   (old-clock           clock)
+   (freeze-clock        clock))
+  (:state-methods
+    active)
+  )
+
+(defbehavior silver-freeze-proc-init-by-other silver-freeze-proc ((victim process))
+  (set! (-> self victim) (process->handle victim))
+  (set! (-> self end-time) (+ (current-time) (seconds 2)))
+  (set! (-> self old-gravity-y) 0.0)
+  (set! (-> self old-gravity-max) 0.0)
+  (set! (-> self old-gravity-length) 0.0)
+  (set! (-> self old-clock) (the-as clock #f))
+  (set! (-> self freeze-clock) (the-as clock #f))
+  (go-virtual active)
+  (none))
+
+(defun silver-freeze-kill-procs ((victim process))
+  (when victim
+    (let ((p (-> *active-pool* child)))
+      (while p
+        (let ((next-p (-> p 0 brother)))
+          (when (and (type? (ppointer->process p) silver-freeze-proc)
+                     (= (-> (the-as silver-freeze-proc (ppointer->process p)) victim)
+                        (process->handle victim)))
+            (deactivate (the-as silver-freeze-proc (ppointer->process p))))
+          (set! p next-p)))))
+  (none))
+
+(defun silver-freeze-acquire-clock ((self silver-freeze-proc) (victim process))
+  (when (and victim (< (-> victim clock index) 12))
+    (dotimes (i 10)
+      (when (zero? (-> *display* clock (+ i 12) ref-count))
+        (set! (-> self freeze-clock) (-> *display* clock (+ i 12)))
+        (set! (-> self old-clock) (-> victim clock))
+        (copy! (-> self freeze-clock) (-> victim clock))
+        (+! (-> victim clock ref-count) -1)
+        (+! (-> self freeze-clock ref-count) 1)
+        (set! (-> victim clock) (-> self freeze-clock))
+        (update-rates! (-> self freeze-clock) 0.0)
+        (goto done))))
+  (label done)
+  (none))
+
+(defun silver-freeze-release-clock ((self silver-freeze-proc) (victim process))
+  (when (and victim (-> self freeze-clock) (-> self old-clock))
+    (+! (-> (the-as clock (-> victim clock)) ref-count) -1)
+    (+! (-> self old-clock ref-count) 1)
+    (set! (-> victim clock) (-> self old-clock)))
+  (when (-> self freeze-clock)
+    (set! (-> self freeze-clock ref-count) 0)
+    (update-rates! (-> self freeze-clock) 1.0))
+  (set! (-> self freeze-clock) (the-as clock #f))
+  (set! (-> self old-clock) (the-as clock #f))
+  (none))
+
+(defun silver-freeze-apply-color ((victim process))
+  (if (not (type? victim rage-ghost))
+      (let ((pd (the-as process-drawable victim)))
+        (when (and pd (nonzero? (-> pd draw)))
+          (set! (-> pd draw color-mult quad) (the-as uint128 0))
+          (set! (-> pd draw color-mult x) 0.35)
+          (set! (-> pd draw color-mult y) 1.0)
+          (set! (-> pd draw color-mult z) 1.0)
+          (set! (-> pd draw color-mult w) 1.0)
+
+          (set! (-> pd draw color-emissive quad) (the-as uint128 0))
+          (set! (-> pd draw color-emissive x) 0.0)
+          (set! (-> pd draw color-emissive y) 0.12)
+          (set! (-> pd draw color-emissive z) 0.12)
+          (set! (-> pd draw color-emissive w) 1.0))))
+  (none))
+
+(defun silver-freeze-clear-color ((victim process))
+  (if (not (type? victim rage-ghost))
+      (let ((pd (the-as process-drawable victim)))
+        (when (and pd (nonzero? (-> pd draw)))
+          (set! (-> pd draw color-mult quad) (the-as uint128 0))
+          (set! (-> pd draw color-mult x) 1.0)
+          (set! (-> pd draw color-mult y) 1.0)
+          (set! (-> pd draw color-mult z) 1.0)
+          (set! (-> pd draw color-mult w) 1.0)
+
+          (set! (-> pd draw color-emissive quad) (the-as uint128 0))
+          (set! (-> pd draw color-emissive x) 0.0)
+          (set! (-> pd draw color-emissive y) 0.0)
+          (set! (-> pd draw color-emissive z) 0.0)
+          (set! (-> pd draw color-emissive w) 0.0))))
+  (none))
+
+(defun silver-freeze-hit ((victim process))
+  (when victim
+    (cond
+      ((type? victim rage-ghost)
+       (none))
+      (else
+        (silver-freeze-kill-procs victim)
+        (process-spawn
+          silver-freeze-proc
+          :init silver-freeze-proc-init-by-other
+          victim
+          :name "silver-freeze-proc"
+          :to *active-pool*))))
+  (none))
+
+(defstate active (silver-freeze-proc)
+  :virtual #t
+  :event (behavior ((proc process) (argc int) (message symbol) (block event-message-block))
+    #f)
+
+  :enter (behavior ()
+    (let ((victim (handle->process (-> self victim))))
+      (cond
+        ((not victim)
+         (deactivate self))
+
+        ((or (focus-test? (the-as process-focusable victim) dead inactive)
+             (and (-> victim next-state)
+                  (let ((st (-> victim next-state name)))
+                    (or (= st 'die)
+                        (= st 'dying)
+                        (= st 'die-falling)
+                        (= st 'die-fast)
+                        (= st 'burnt-husk)))))
+         (deactivate self))
+
+        (else
+          (silver-freeze-apply-color victim)
+          (silver-freeze-acquire-clock self victim)
+
+          (let ((pd (the-as process-drawable victim)))
+            (when pd
+              (let ((cm (if (type? (-> pd root) collide-shape-moving)
+                            (the-as collide-shape-moving (-> pd root)))))
+                (when cm
+                  (set! (-> cm transv quad) (the-as uint128 0))
+                  (set! (-> self old-gravity-y) (-> cm dynam gravity y))
+                  (set! (-> self old-gravity-max) (-> cm dynam gravity-max))
+                  (set! (-> self old-gravity-length) (-> cm dynam gravity-length))
+                  (set! (-> cm dynam gravity y) 0.0)
+                  (set! (-> cm dynam gravity-max) 0.0)
+                  (set! (-> cm dynam gravity-length) 0.0)))))))))
+
+  :exit (behavior ()
+    (let ((victim (handle->process (-> self victim))))
+      (when victim
+        (silver-freeze-release-clock self victim)
+
+        (let ((pd (the-as process-drawable victim)))
+          (when pd
+            (let ((cm (if (type? (-> pd root) collide-shape-moving)
+                          (the-as collide-shape-moving (-> pd root)))))
+              (when cm
+                (set! (-> cm dynam gravity y) (-> self old-gravity-y))
+                (set! (-> cm dynam gravity-max) (-> self old-gravity-max))
+                (set! (-> cm dynam gravity-length) (-> self old-gravity-length))
+                (set! (-> cm transv quad) (the-as uint128 0))))))
+
+        (silver-freeze-clear-color victim))))
+
+  :code (behavior ()
+    (until #f
+      (let ((victim (handle->process (-> self victim))))
+        (cond
+          ((not victim)
+           (deactivate self))
+
+          ((or (focus-test? (the-as process-focusable victim) dead inactive)
+               (and (-> victim next-state)
+                    (let ((st (-> victim next-state name)))
+                      (or (= st 'die)
+                          (= st 'dying)
+                          (= st 'die-falling)
+                          (= st 'die-fast)
+                          (= st 'burnt-husk)))))
+           (deactivate self))
+
+          (else
+            (silver-freeze-apply-color victim)
+            (silver-freeze-acquire-clock self victim)
+
+            (let ((pd (the-as process-drawable victim)))
+              (when pd
+                (let ((cm (if (type? (-> pd root) collide-shape-moving)
+                              (the-as collide-shape-moving (-> pd root)))))
+                  (when cm
+                    (set! (-> cm transv quad) (the-as uint128 0))
+                    (set! (-> cm dynam gravity y) 0.0)
+                    (set! (-> cm dynam gravity-max) 0.0)
+                    (set! (-> cm dynam gravity-length) 0.0)))))
+
+            (when (>= (current-time) (-> self end-time))
+              (deactivate self)))))
+      (suspend))
+    #f))

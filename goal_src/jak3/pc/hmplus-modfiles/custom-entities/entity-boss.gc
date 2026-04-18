@@ -4,6 +4,15 @@
 
 (defun-extern quickspawn-eb vector (none))
 (defun-extern spawn-floor-spikelight vector time-frame float int none)
+(defun-extern spawn-vin-head-process vector none)
+
+(define entity-boss-dying-started? #f)
+(define entity-boss-go-dormant? #f)
+(define hmplus-white-start-time 0)
+(define hmplus-white-active? #f)
+(define hmplus-ending-fade-start 0)
+(define hmplus-ending-fade-active? #f)
+(define hmplus-ending-fade-done? #f)
 
 (defpartgroup group-nestc-rift-ring
   :id 1560
@@ -144,6 +153,33 @@
     )
   )
 
+(defun hmplus-black-screen-effect ((start-time time-frame) (duration time-frame))
+  (let* ((elapsed (- (current-time) start-time))
+         (t (/ (the float elapsed) (the float duration)))
+         (alpha 0.0)
+         (col (new 'stack-no-clear 'vector)))
+    (when (< t 0.0) (set! t 0.0))
+    (when (> t 1.0) (set! t 1.0))
+
+    (set! alpha t)
+
+    (set! (-> col x) 0.0)
+    (set! (-> col y) 0.0)
+    (set! (-> col z) 0.0)
+    (set! (-> col w) (* 128.0 alpha))
+
+    (setup *screen-filter* col col 0.0 (bucket-id tex-hud-pris2) #x3fffff #x33001 #t))
+  (none))
+
+(defun hmplus-keep-black-screen ()
+  (let ((col (new 'stack-no-clear 'vector)))
+    (set! (-> col x) 0.0)
+    (set! (-> col y) 0.0)
+    (set! (-> col z) 0.0)
+    (set! (-> col w) 128.0)
+    (setup *screen-filter* col col 0.0 (bucket-id tex-hud-pris2) #x3fffff #x33001 #t))
+  (none))
+
 ;;MIDDLE OF TOP PLATFORM: (new 'static 'vector :x (meters 3496.7414) :y (meters 404.6769) :z (meters 880.2725) :w 1.0)
 (define entity-boss-killed? #f)
 
@@ -151,6 +187,7 @@
   ((general-i              int)
    (easy-dub            symbol)
    (freaking-die        symbol)
+   (go-talking          symbol)
   )
   (:state-methods
     active
@@ -182,6 +219,9 @@
     (('die)
       (set! (-> this freaking-die) #t)
     )
+    (('go-talking!)
+      (set! (-> this go-talking) #t)
+    )
 )
 (none)
 )
@@ -191,6 +231,9 @@
   (set! (-> self easy-dub) #f)
   (set! (-> self freaking-die) #f)
   (set! light-eco-guard-shot #t)
+  (set! (-> self go-talking) #f)
+  (set! entity-boss-dying-started? #f)
+  (set! entity-boss-go-dormant? #f)
   (go-virtual active)
   (none)
 )
@@ -215,7 +258,7 @@
   (none)
 )
 
-(define talked-to-entity? #t)
+(define talked-to-entity? #f)
 
 (defstate active (final-boss-hm)
   :virtual #t
@@ -479,29 +522,81 @@
       (when (!= enemy-noto 1)
         (set! enemy-noto 1)
       )
+      (when (or (= (-> self go-talking) #t) entity-boss-go-dormant?)
+        (set! (-> self go-talking) #f)
+        (set! entity-boss-go-dormant? #f)
+        (go-virtual dormant)
+      )
       (final-boss-hm-always self)
       (suspend)
     )
   )
 )
 
+(defun hmplus-white-screen-effect ((start-time time-frame))
+  (let* ((total-time (seconds 11.0))
+         (elapsed (- (current-time) start-time))
+         (t (/ (the float elapsed) (the float total-time)))
+         (alpha 0.0)
+         (col (new 'stack-no-clear 'vector)))
+    (when (< t 0.0) (set! t 0.0))
+    (when (> t 1.0) (set! t 1.0))
+
+    (cond
+      ((< t 0.27272728)
+        (set! alpha (/ t 0.27272728)))
+      ((< t 0.72727275)
+        (set! alpha 1.0))
+      (else
+        (set! alpha (- 1.0 (/ (- t 0.72727275) 0.27272728)))))
+
+    (set! (-> col x) 255.0)
+    (set! (-> col y) 255.0)
+    (set! (-> col z) 255.0)
+    (set! (-> col w) (* 128.0 alpha))
+
+    (setup *screen-filter* col col 0.0 (bucket-id tex-hud-pris2) #x3fffff #x33001 #t))
+  (none))
+
+  (defun hmplus-clear-white-screen-effect ()
+  (let ((col (new 'stack-no-clear 'vector)))
+    (set! (-> col x) 255.0)
+    (set! (-> col y) 255.0)
+    (set! (-> col z) 255.0)
+    (set! (-> col w) 0.0)
+    (setup *screen-filter* col col 0.0 (bucket-id tex-hud-pris2) #x3fffff #x33001 #f))
+  (none))
+
+
 (defstate dormant (final-boss-hm)
   :virtual #t
   :enter (behavior ()
     (set! (-> self general-i) 0)
-    (process-grab? *target* #f)
+    (let ((vec-vin (new 'static 'vector :x (meters 3456.6308) :y (meters 414.5066) :z (meters 942.1654) :w 1.0)))
+      (spawn-vin-head-process vec-vin)
+    )
+    (set! disable-targbar #t)
   )
   :code (behavior ()
     (loop
-      (+! (-> self general-i) 1)
-      (when (= (-> self general-i) 960)
-        (set! in-dialogue? #t)
+      (when (< (-> self general-i) 301)
+        (+! (-> self general-i) 1)
+      )
+      (when (and (= (-> self general-i) 180) (< log-sec 1100))
         (set! log-sec 0)
         (set! log-id 6999)
+        (set! in-dialogue? #t)
         (set! di-s "<COLOR_WHITE>Jak! You finally did it!")
         (set! di-s2 "<COLOR_WHITE>You beat him!")
         (set! di-s3 "")
         (set! di-s4 "")
+      )
+      (when (>= (-> self general-i) 180)
+        (let ((vec-cam (new 'static 'vector :x (meters 3480.9704) :y (meters 413.9067) :z (meters 902.7904) :w 1.0))
+              (vec-tpos (new 'static 'vector :x (meters 3456.6308) :y (meters 414.5066) :z (meters 942.1654) :w 1.0))
+             )
+          (turn-to-scene-camera vec-cam vec-tpos #t)
+        )
       )
       (when
         (and
@@ -517,48 +612,231 @@
           (set! di-s4 "")
         )
         (when (= log-sec 2)
-          ;;entity appears here
-          (set! di-s "<COLOR_WHITE>...")
+          (set! di-s "<COLOR_WHITE>The world is saved!")
           (set! di-s2 "")
           (set! di-s3 "")
           (set! di-s4 "")
         )
         (when (= log-sec 3)
-          (set! di-s "<COLOR_RED>I expected to fool you, Jak")
-          (set! di-s2 "<COLOR_RED>But Vin?")
+          (set! di-s "<COLOR_WHITE>...")
+          (set! di-s2 "")
           (set! di-s3 "")
           (set! di-s4 "")
         )
         (when (= log-sec 4)
-          (set! di-s "<COLOR_WHITE>OH GOD!")
+          (set! di-s "<COLOR_WHITE>Why isn't everything back to normal though?")
           (set! di-s2 "")
           (set! di-s3 "")
           (set! di-s4 "")
+          (let ((vec1 (new 'static 'vector :x (meters 3442.0458) :y (meters 414.5066) :z (meters 969.4694) :w 1.0)))
+            (spawn-eb-floater vec1 #f 3.0)
+            (lightjak-get-off-part vec1)
+          )
         )
         (when (= log-sec 5)
-          (set! di-s "<COLOR_RED>Say good-bye to your life, Vin")
-          (set! di-s2 "")
-          (set! di-s3 "")
-          (set! di-s4 "")
-        )
-        (when (= log-sec 5)
-          ;;screen turns white here
-          (set! di-s "<COLOR_RED>ALL OF YOUR POWER IS MINE!")
+          (set! di-s "<COLOR_WHITE>...oh no")
           (set! di-s2 "")
           (set! di-s3 "")
           (set! di-s4 "")
         )
         (when (= log-sec 6)
+          (set! di-s "<COLOR_RED>I expected to fool you, Jak")
+          (set! di-s2 "<COLOR_RED>But Vin?")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 7)
+          (set! di-s "<COLOR_WHITE>OH GOD!")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 8)
+          (set! di-s "<COLOR_RED>Say good-bye to your life, Vin")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+        )
+        (when (= log-sec 9)
+          (set! hmplus-white-start-time (current-time))
+          (set! hmplus-white-active? #t)
+          (set! di-s "<COLOR_RED>ALL OF YOUR POWERS ARE MINE!")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+          (set! log-sec 1100)
+          (set! (-> self general-i) 0)
+          ;;place play-sound here
+        )
+      )
+      (when hmplus-white-active?
+        (hmplus-white-screen-effect hmplus-white-start-time)
+        (when (time-elapsed? hmplus-white-start-time (seconds 11.0))
+          (set! hmplus-white-active? #f)
+          (set! log-id 3400)
+          (set! log-sec 0)
+          (set! di-s "<COLOR_CYAN>...")
+          (set! di-s2 "")
+          (set! di-s3 "")
+          (set! di-s4 "")
+          (hmplus-clear-white-screen-effect)
+        )
+      )
+      (when
+        (and
+          (cpad-pressed? 0 x)
+          (= log-id 3400)
+          (= in-dialogue? #t)
+        )
+        (+! log-sec 1)
+        (when (= log-sec 1)
+          (set! di-s "<COLOR_CYAN>I... was created to serve you, for my purpose")
+          (set! di-s2 "<COLOR_CYAN>was never to be a god of my own creations,")
+          (set! di-s3 "<COLOR_CYAN>but to create the world around you.")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 2)
+          (set! di-s "<COLOR_CYAN>I suppose I did end up creating the world")
+          (set! di-s2 "<COLOR_CYAN>around you anyway.")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 3)
+          (set! di-s "<COLOR_CYAN>...for the very first time since 1999.")
+          (set! di-s2 "<COLOR_CYAN>")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 4)
+          (set! di-s "<COLOR_CYAN>I finally have <COLOR_ORANGE>all<COLOR_CYAN> of myself together again.")
+          (set! di-s2 "<COLOR_CYAN>")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 5)
+          (set! di-s "<COLOR_CYAN>So now...")
+          (set! di-s2 "<COLOR_CYAN>")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 6)
+          (set! di-s "<COLOR_CYAN>Now I can reshape the world to your liking,")
+          (set! di-s2 "<COLOR_CYAN>instead of my own.")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+          (set! dialogue-choice #t)
+          (set! di-c1 "")
+          (set! di-c2 "")
+          (set! di-c3 "")
+          (set! di-c4 "")
+        )
+        (when (= log-sec 7)
+          (set! di-s "<COLOR_CYAN>Now I can reshape the world to your liking,")
+          (set! di-s2 "<COLOR_CYAN>instead of my own.")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+          (set! dialogue-select 0)
+          (set! choice-max 1)
+          (set! choice-given? #t)
+          (set! di-c1 "What did you do with Vin?")
+          (set! di-c2 "")
+          (set! di-c3 "")
+          (set! di-c4 "")
+        )
+        (when (= log-sec 8)
+          (set! di-s "<COLOR_CYAN>That was never truly ever Vin.")
+          (set! di-s2 "<COLOR_CYAN>")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+          (set! di-c1 "")
+          (set! di-c2 "")
+          (set! di-c3 "")
+          (set! di-c4 "")
+          (set! choice-given? #f)
+          (set! dialogue-choice #f)
+          (set! dialogue-select 0)
+          (set! choice-max 0)
+        )
+        (when (= log-sec 9)
+          (set! di-s "<COLOR_CYAN>He was a separate consciousness of Dark Eco, like myself.")
+          (set! di-s2 "<COLOR_CYAN>But he was all of the good parts of my liking in tact.")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 10)
+          (set! di-s "<COLOR_CYAN>..and the other, <COLOR_RED>The Entity<COLOR_CYAN>, was all")
+          (set! di-s2 "<COLOR_CYAN>of the evil parts of myself fully in tact.")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 11)
+          (set! di-s "<COLOR_CYAN>He kept all of the other parts in those")
+          (set! di-s2 "<COLOR_CYAN>dark eco crystals you collected.")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 12)
+          (set! di-s "<COLOR_CYAN>When I was separated, the Playstation Consoles kept my power")
+          (set! di-s2 "<COLOR_CYAN>limited with it's hardware.")
+          (set! di-s3 "<COLOR_CYAN>When we got ported over to PC, everything changed.")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 13)
+          (set! di-s "<COLOR_CYAN>When you're back in the warp room, you can")
+          (set! di-s2 "<COLOR_CYAN>finish the game for yourself, Player.")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 14)
+          (set! di-s "<COLOR_CYAN>Just head through the same warp gate")
+          (set! di-s2 "<COLOR_CYAN>you came through to get to here.")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 15)
+          (set! di-s "<COLOR_CYAN>Now that I am whole again, I finally see the truth")
+          (set! di-s2 "<COLOR_CYAN>of my existence.")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 16)
+          (set! di-s "<COLOR_CYAN>...and we can start rebuilding this dimension")
+          (set! di-s2 "<COLOR_CYAN>that's been thrown completely out of balance.")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 17)
+          (set! di-s "<COLOR_CYAN>The last dimension to be repaired.")
+          (set! di-s2 "<COLOR_CYAN>")
+          (set! di-s3 "<COLOR_CYAN>")
+          (set! di-s4 "<COLOR_CYAN>")
+        )
+        (when (= log-sec 18)
           (set! di-s "")
           (set! di-s2 "")
           (set! di-s3 "")
           (set! di-s4 "")
-          (set! in-dialogue? #f)
           (set! log-id 0)
           (set! log-sec 0)
-          (go-virtual talking-phase)
+          (set! in-dialogue? #f)
+          (set! hmplus-ending-fade-start (current-time))
+          (set! hmplus-ending-fade-active? #t)
+          (set! hmplus-ending-fade-done? #f)
         )
       )
+      (when hmplus-ending-fade-active?
+      ;; fade to black for 2 seconds
+      (if (not (time-elapsed? hmplus-ending-fade-start (seconds 2.0)))
+          (hmplus-black-screen-effect hmplus-ending-fade-start (seconds 2.0))
+          (begin
+            ;; keep it black after fade completes
+            (hmplus-keep-black-screen)
+
+            ;; only hand off once
+            (when (not hmplus-ending-fade-done?)
+              (set! hmplus-ending-fade-done? #t)
+              (set! hmplus-ending-fade-active? #f)
+              (go-virtual win)))))
       (suspend)
     )
   )
@@ -566,9 +844,17 @@
 
 (defstate talking-phase (final-boss-hm)
   :virtual #t
+  :enter (behavior ()
+  )
   :code (behavior ()
     (loop
-      (format *stdcon* "ENTITY BOSS TALKING-PHASE~%")
+      (when hmplus-white-active?
+        (hmplus-white-screen-effect hmplus-white-start-time)
+        (when (time-elapsed? hmplus-white-start-time (seconds 11.0))
+          (set! hmplus-white-active? #f)
+          (hmplus-clear-white-screen-effect)
+        )
+      )
       (suspend)
     )
   )
@@ -588,9 +874,12 @@
 
 (defstate win (final-boss-hm)
   :virtual #t
-  :code (behavior ()
+  :enter (behavior ()
+    (hmplus-keep-black-screen)
     (spawn-ending-hm)
-  )
+    (deactivate self))
+  :code (behavior ()
+    (suspend))
 )
 
 (defun to-final-boss! ()
@@ -620,8 +909,10 @@
 ;;;;;;;;;;;;;;;;
 
 (deftype hm-ending (process)
-  ((gen-i             int)
-  )
+  ((gen-i               int)
+   (phase               int)
+   (phase-start         time-frame)
+   (did-dark-toggle?    symbol))
   (:state-methods
     start-ending
     idle
@@ -629,17 +920,266 @@
   )
 )
 
+(define hmplus-ending-credits-text
+"<COLOR_ORANGE>HeroMode+~%~%~%<COLOR_CYAN>By Kraken~%~%~%~%~%~%~%<COLOR_WHITE>This mod would not be possible without the help of~%everyone in the <COLOR_YELLOW>OpenGOAL<COLOR_WHITE> discord!~%~%All assets and music made by <COLOR_CYAN>Kraken~%~%~%<COLOR_ORANGE>Special Thanks:~%~%<COLOR_CYAN>Hat Kid~%~%<COLOR_PINK>Barg~%~%<COLOR_RED>Zed~%~%<COLOR_ORANGE>Mortis~%~%<COLOR_YELLOW>Majora~%~%<COLOR_ORANGE>Kuitar~%~%<COLOR_YELLOW>EvelynTSMG~%~%<COLOR_ORANGE>Markus~%~%<COLOR_RED>...and all the OpenGOAL Devs for making this possible!")
+
 (defbehavior hm-ending-init-by-other hm-ending ()
+  (stack-size-set! (-> self main-thread) 12288)
   (set! (-> self gen-i) 0)
+  (set! (-> self phase) 0)
+  (set! (-> self phase-start) (current-time))
+  (set! (-> self did-dark-toggle?) #f)
   (go-virtual start-ending)
   (none)
 )
 
-(defstate start-ending (hm-ending) ;;set up camera and target for music to cue in
+(defun hmplus-ending-set-black ((alpha float))
+  (let ((col-a (new 'stack-no-clear 'vector))
+        (col-b (new 'stack-no-clear 'vector)))
+    (disable *screen-filter*)
+    (set! (-> col-a x) 0.0)
+    (set! (-> col-a y) 0.0)
+    (set! (-> col-a z) 0.0)
+    (set! (-> col-a w) alpha)
+
+    (set! (-> col-b x) 0.0)
+    (set! (-> col-b y) 0.0)
+    (set! (-> col-b z) 0.0)
+    (set! (-> col-b w) alpha)
+
+    (setup *screen-filter* col-a col-b 0.0 (bucket-id tex-hud-pris2) #x3fffff #x33001 #t))
+  (none)
+)
+
+(defun hmplus-ending-clear-black ()
+  (disable *screen-filter*)
+  (none)
+)
+
+(defun hmplus-ending-fade-in-from-black ((start-time time-frame) (duration time-frame))
+  (let ((t 0.0))
+    (set! t (/ (the float (- (current-time) start-time))
+               (the float duration)))
+    (when (< t 0.0) (set! t 0.0))
+    (when (> t 1.0) (set! t 1.0))
+    (hmplus-ending-set-black (* 128.0 (- 1.0 t))))
+  (none)
+)
+
+(defun hmplus-ending-start-sunrise-setup ()
+  (when *time-of-day*
+    ;; anchor-style setup
+    (send-event (ppointer->process *time-of-day*) 'change 'hour 18)
+    (set! (-> *time-of-day-context* mode) (the-as time-of-day-palette-id 5))
+    (send-event (ppointer->process *time-of-day*) 'change 'ratio 0.0)
+    (set! (-> *time-of-day-context* overide-enable) #t)
+    (set! (-> *mood-control* overide-weather-flag) #t)
+
+    ;; optional: reuse your existing purple/dark override helper if desired
+    ;; (dark-weather-override)
+    )
+  (none)
+)
+
+(defun hmplus-ending-update-sunrise ((this hm-ending))
+  (let ((u 0.0)
+        (speed 0.0)
+        (elapsed-sec 0.0))
+    (set! elapsed-sec
+          (/ (the float (- (current-time) (-> this phase-start)))
+             (the float (seconds 1.0))))
+    (set! u (/ elapsed-sec 11.0))
+    (when (< u 0.0) (set! u 0.0))
+    (when (> u 1.0) (set! u 1.0))
+
+    (set! speed (* 2.2 (sin (* u 3.1415927))))
+
+    (when *time-of-day*
+      (send-event (ppointer->process *time-of-day*) 'change 'ratio speed))
+
+    (when (and (not (-> this did-dark-toggle?))
+               (>= elapsed-sec 5.0))
+               (toggle-dark-mode)
+               (kill-by-name "darkworld-orb" *default-pool*)
+      (set! (-> this did-dark-toggle?) #t)))
+  (none)
+)
+
+(defun hmplus-ending-draw-credits ((y int))
+  ;; main credits block
+  (clear matt-str)
+  (clear *pc-encoded-matt-str*)
+  (format matt-str "<COLOR_ORANGE>HeroMode+~%~%~%<COLOR_CYAN>By Kraken~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_WHITE>This mod would not be possible without the help of~%everyone in the <COLOR_YELLOW>OpenGOAL<COLOR_WHITE> discord!~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%All modded changes and music made by <COLOR_CYAN>Kraken~%~%~%")
+  (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+  (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+    (dma-buffer-add-gs-set-flusha buf
+      (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
+      (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+    (let ((font-ctx (new 'stack 'font-context
+                         *font-default-matrix*
+                         255
+                         y
+                         0.0
+                         (font-color default)
+                         (font-flags middle shadow kerning large))))
+      (set! (-> font-ctx scale) 0.325)
+      (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+
+  ;; special thanks block, drawn lower than the first one
+  (clear matt-str)
+  (clear *pc-encoded-matt-str*)
+  (format matt-str "<COLOR_ORANGE>Special Thanks:~%~%<COLOR_CYAN>Hat Kid~%~%<COLOR_PINK>Barg~%~%<COLOR_RED>Zed~%~%<COLOR_ORANGE>Mortis~%~%<COLOR_YELLOW>Majora~%~%<COLOR_ORANGE>Kuitar~%~%<COLOR_YELLOW>EvelynTSMG~%~%<COLOR_ORANGE>Markus~%~%<COLOR_RED>...and all the OpenGOAL Devs for making this possible!")
+  (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+  (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+    (dma-buffer-add-gs-set-flusha buf
+      (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
+      (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+    (let ((font-ctx (new 'stack 'font-context
+                         *font-default-matrix*
+                         255
+                         (+ y 400)
+                         0.0
+                         (font-color default)
+                         (font-flags middle shadow kerning large))))
+      (set! (-> font-ctx scale) 0.325)
+      (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+  (none)
+)
+
+(defun hmplus-ending-draw-thank-you ()
+  (clear matt-str)
+  (clear *pc-encoded-matt-str*)
+  (format matt-str "<COLOR_WHITE>Thank you for playing!")
+  (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+  (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+    (dma-buffer-add-gs-set-flusha buf
+      (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
+      (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+    (let ((font-ctx (new 'stack 'font-context
+                         *font-default-matrix*
+                         255
+                         180
+                         0.0
+                         (font-color default)
+                         (font-flags middle shadow kerning large))))
+      (set! (-> font-ctx scale) 0.45)
+      (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+  (none)
+)
+
+(defstate start-ending (hm-ending)
   :virtual #t
+  :enter (behavior ()
+    (kill-by-name "dust-storm-randomizer" *default-pool*)
+    (kill-by-name "eb-floater" *default-pool*)
+    (kill-by-name "vin-head-call" *default-pool*)
+    (play-sound-file "snd/music/ending.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+    (when (< (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 4)
+      (+! (-> *game-info* continue-deaths) 1000000)
+    )
+    (auto-save-user)
+
+    (set! (-> self phase) 0)
+    (set! (-> self phase-start) (current-time))
+    (set! (-> self did-dark-toggle?) #f)
+
+    ;; begin fully black
+    (hmplus-ending-set-black 128.0)
+  )
   :code (behavior ()
     (loop
-      (format *stdcon* "~%hm-ending spawned~%")
+      (when (and
+              (search-process-tree *active-pool* 
+                        (lambda ((p process)) 
+                            (type? p dust-storm-randomizer)))
+              (<= (-> self phase) 2)
+            )
+          (kill-by-name "dust-storm-randomizer" *active-pool*)
+        )
+      (let ((vec-desert (new 'static 'vector :x (meters 2702.1745) :y (meters 47.0693) :z (meters 1208.0018) :w 1.0))
+            (vec-tpos   (new 'static 'vector :x (meters 2751.2346) :y (meters 52.3138) :z (meters 1197.6121) :w 1.0))
+            (elapsed 0)
+            (u 0.0)
+            (credits-y 0))
+
+        (turn-to-scene-camera vec-desert vec-tpos #t)
+
+        (set! elapsed (- (current-time) (-> self phase-start)))
+
+        (case (-> self phase)
+          ;; phase 0: 3s fade in from black
+          ((0)
+            (hmplus-ending-fade-in-from-black (-> self phase-start) (seconds 3.0))
+            (when (time-elapsed? (-> self phase-start) (seconds 3.0))
+              (hmplus-ending-clear-black)
+
+              ;; only start TOD after fade-in is complete
+              (hmplus-ending-start-sunrise-setup)
+
+              (set! (-> self phase) 1)
+              (set! (-> self phase-start) (current-time))
+              (set! (-> self gen-i) 0)))
+          
+          ;; phase 1: 11s sunrise sequence, toggle dark mode at 5s
+          ((1)
+            (hmplus-ending-update-sunrise self)
+            (when (time-elapsed? (-> self phase-start) (seconds 11.0))
+              (when *time-of-day*
+                (send-event (ppointer->process *time-of-day*) 'change 'ratio 0.0))
+              (set! (-> self phase) 2)
+              (set! (-> self phase-start) (current-time))))
+          
+          ;; phase 2: credits for 85s
+          ((2)
+            (kill-by-name "darkworld-tower" *default-pool*)
+
+            (let ((scroll-delay (seconds 7.0))
+                  (scroll-duration (seconds 80.0))
+                  (scroll-elapsed 0)
+                  (scroll-u 0.0)
+                  (start-y 420.0)
+                  (end-y -900.0))
+
+              ;; keep the credits positioned right at the bottom edge before the scroll starts
+              (if (< elapsed scroll-delay)
+                  (set! credits-y (the int start-y))
+                  (begin
+                    (set! scroll-elapsed (- elapsed scroll-delay))
+                    (set! scroll-u (/ (the float scroll-elapsed)
+                                      (the float scroll-duration)))
+                    (when (< scroll-u 0.0) (set! scroll-u 0.0))
+                    (when (> scroll-u 1.0) (set! scroll-u 1.0))
+
+                    ;; start entering immediately at the crescendo, then scroll slower
+                    (set! credits-y (the int (lerp start-y end-y scroll-u)))))
+
+              (hmplus-ending-draw-credits credits-y)
+
+              ;; total phase still lasts 87 sec: 7 sec hold + 80 sec scroll
+              (when (time-elapsed? (-> self phase-start) (seconds 87.0))
+                (set! (-> self phase) 3)
+                (set! (-> self phase-start) (current-time)))))
+          ((3)
+            (let ((phase-elapsed (- (current-time) (-> self phase-start)))
+                  (fade-start 0))
+              (set! fade-start (seconds 12.0))
+
+              ;; draw thank-you during the first 12 seconds
+              (when (< phase-elapsed fade-start)
+                (hmplus-ending-draw-thank-you))
+
+              ;; then fade to black over the next 6 seconds
+              (when (>= phase-elapsed fade-start)
+                (hmplus-black-screen-effect
+                  (+ (-> self phase-start) fade-start)
+                  (seconds 6.0)))
+
+              ;; finish after total 18 seconds
+              (when (time-elapsed? (-> self phase-start) (seconds 18.0))
+                (set! disable-targbar #f)
+                (set! disable-darkworld-in-mainmenu #t)
+                (launch-mmenu)
+                (deactivate self))))))
       (suspend)
     )
   )
@@ -647,9 +1187,6 @@
 
 (defstate idle (hm-ending) ;;ending is here
   :virtual #t
-  :enter (behavior ()
-    (play-sound-file "snd/music/ending.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
-  )
   :code (behavior ()
     (loop
       (format *stdcon* "~%hm-ending in idle~%")
@@ -922,24 +1459,18 @@
 (defbehavior entity-boss-dying-init-by-other entity-boss-dying ()
   (set! (-> self phase) 0)
   (set! (-> self manipy-handle) (the-as handle #f))
-
   (set! (-> self start-pos x) (meters 3496.7414))
   (set! (-> self start-pos y) (meters 404.6769))
   (set! (-> self start-pos z) (meters 880.2725))
   (set! (-> self start-pos w) 1.0)
-
   (set! (-> self going-to-pos x) (meters 3448.4660))
   (set! (-> self going-to-pos y) (meters 407.9349))
   (set! (-> self going-to-pos z) (meters 935.3346))
   (set! (-> self going-to-pos w) 1.0)
-
   (vector-copy! (-> self pos) (-> self start-pos))
   (set! (-> self phase-start) (current-time))
-
   (entity-boss-dying-spawn-model self)
   (entity-boss-dying-sync-model self)
-  (stop-main-music)
-
   (go-virtual eb-dying)
   (none)
 )
@@ -947,7 +1478,7 @@
 (defstate eb-dying (entity-boss-dying)
   :virtual #t
   :enter (behavior ()
-    (play-main-music "snd/final-boss-win.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+    (play-sound-file "snd/music/final-boss-win.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
   )
   :code (behavior ()
     (loop
@@ -1019,6 +1550,9 @@
                :group (-> *part-group-id-table* 585))))
           (set! (-> self phase) 4))
         ((4)
+          (set! entity-boss-dying-started? #f)
+          (set! entity-boss-go-dormant? #t)
+          (kill-by-name (-> self name) *default-pool*)
           (deactivate self))
       )
       (entity-boss-dying-sync-model self)
@@ -1115,7 +1649,7 @@
     :neck-joint 0
     :look-at-joint 0
     :bullseye-joint 0
-    :default-hit-points 100000.0
+    :default-hit-points 10.0
     :gnd-collide-with (collide-spec backgnd)
     :recover-gnd-collide-with (collide-spec backgnd crate obstacle hit-by-others-list pusher)
     :movement-gravity 0.0
@@ -1680,6 +2214,7 @@
           (go-virtual idle)))
       (update-transforms (-> self root))
       (when (-> self should-die?)
+          (stop-main-music)
           (go-virtual die!)
         )
       (entity-boss-sync-visible-model self)
@@ -1691,12 +2226,14 @@
 (defstate die! (entity-boss)
   :virtual #t
   :code (behavior ()
-    (process-spawn entity-boss-dying :name "entity-boss-dying")
+    (when (not entity-boss-dying-started?)
+      (set! entity-boss-dying-started? #t)
+      (set! entity-boss-killed? #t)
+      (process-spawn entity-boss-dying :name "entity-boss-dying"))
+    (process-grab? *target* #f)
+    (stop-main-music)
     (lightjak-get-off-part (-> self root trans))
-    (kill-by-name "entity-boss" *default-pool*)
-    (set! entity-boss-killed? #t)
-    (deactivate self)
-  )
+    (deactivate self))
 )
 
 (defbehavior entity-boss-init-by-other entity-boss ((vec vector))
@@ -1715,8 +2252,8 @@
   (vector-copy! (-> self move-start) (-> self root trans))
   (vector-copy! (-> self move-end) (-> self root trans))
   (logior! (-> self skel status) (joint-control-status sync-math))
-  (set! (-> self hit-points) 100000.0)
-  (set! (-> self enemy-info default-hit-points) 100000.0)
+  (set! (-> self hit-points) 10.0)
+  (set! (-> self enemy-info default-hit-points) 10.0)
   (reset-to-collide-spec (-> self focus) (collide-spec player-list))
   (clear-focused (-> self focus))
   (set! (-> self turn-speed) 1200.0)

@@ -591,4 +591,6 @@
   "sew-laser-turret.o"
   "rubble-get-out.o"
   "floor-spikelight.o"
+  "silver-freeze.o"
+  "grunt.o"
  ))

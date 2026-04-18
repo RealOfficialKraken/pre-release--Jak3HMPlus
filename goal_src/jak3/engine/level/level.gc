@@ -3675,7 +3675,7 @@
                    (!= (-> v1-104 display?) 'special)
                    (nonzero? (-> v1-104 bsp cam-outside-bsp))
                    )
-              (format *stdcon* "~3Loutside of bsp ~S~%~0L" (-> v1-104 name))
+              (format *stdcon* "" (-> v1-104 name))
               )
           )
         )

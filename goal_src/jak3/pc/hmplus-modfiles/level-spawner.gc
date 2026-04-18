@@ -342,10 +342,6 @@ dead
             (init-respawner! ctyinda-kbspawner-2 roboguard "roboguard" 600)
             (init-respawner! ctyinda-kbspawner-3 roboguard "roboguard" 600)
             (init-respawner! ctyinda-kbspawner-4 roboguard "roboguard" 600)
-            (init-respawner! ctyinda-kbspawner-5 roboguard "roboguard" 600)
-            (init-respawner! ctyinda-kbspawner-6 roboguard "roboguard" 600)
-            (init-respawner! ctyinda-kbspawner-7 roboguard "roboguard" 600)
-            (init-respawner! ctyinda-kbspawner-8 roboguard "roboguard" 600)
             (set! ctyinda-bspawner #t)
             )
             ((and

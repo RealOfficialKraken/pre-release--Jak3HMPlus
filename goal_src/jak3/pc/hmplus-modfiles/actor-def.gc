@@ -2755,3 +2755,160 @@
   :bounds (static-bspherem 0 0 0 4)
   :parts ((sp-item 4854 :fade-after (meters 100) :flags (sp6)) (sp-item 4853 :fade-after (meters 100) :flags (sp6)))
   )
+
+  ;;yellow-rain-fireball
+
+(deftype yellow-rain-fireball (projectile)
+  ((trail-proc handle))
+  )
+
+(defmethod projectile-method-40 ((this yellow-rain-fireball))
+  256
+  )
+
+(defmethod setup-collision! ((this yellow-rain-fireball))
+  (let ((s5-0 (new 'process 'collide-shape-moving this (collide-list-enum hit-by-player))))
+    (set! (-> s5-0 dynam) (copy *standard-dynamics* 'process))
+    (set! (-> s5-0 reaction) cshape-reaction-projectile)
+    (set! (-> s5-0 no-reaction)
+          (the-as (function collide-shape-moving collide-query vector vector object) nothing))
+    (let ((v1-6 (new 'process 'collide-shape-prim-sphere s5-0 (the-as uint 0))))
+      (set! (-> v1-6 prim-core collide-as) (collide-spec projectile))
+      (set! (-> v1-6 prim-core collide-with)
+            (collide-spec backgnd crate civilian enemy obstacle vehicle-sphere hit-by-others-list pusher))
+      (set! (-> v1-6 prim-core action) (collide-action solid))
+      (set-vector! (-> v1-6 local-sphere) 0.0 0.0 0.0 (meters 3.0))
+      (set! (-> s5-0 total-prims) (the-as uint 1))
+      (set! (-> s5-0 root-prim) v1-6))
+    (set! (-> s5-0 nav-radius) (* 0.75 (-> s5-0 root-prim local-sphere w)))
+    (let ((v1-9 (-> s5-0 root-prim)))
+      (set! (-> s5-0 backup-collide-as) (-> v1-9 prim-core collide-as))
+      (set! (-> s5-0 backup-collide-with) (-> v1-9 prim-core collide-with)))
+    (set! (-> s5-0 max-iteration-count) (the-as uint 2))
+    (set! (-> s5-0 event-self) 'touched)
+    (set! (-> this root) s5-0))
+  (set! (-> this root pat-ignore-mask)
+        (new 'static 'pat-surface :noentity #x1 :nojak #x1 :probe #x1 :noproj #x1 :noendlessfall #x1 :board #x1))
+  0
+  (none)
+  )
+
+(defmethod init-proj-settings! ((this yellow-rain-fireball))
+  (set! (-> this attack-mode) 'eco-yellow)
+  (set! (-> this max-speed) 9999999.0)
+  (set! (-> this update-velocity) #f)
+  (set! (-> this move) projectile-move-fill-line-sphere)
+  (set! (-> this stop-speed) 0.0)
+  (set! (-> this trail-proc) (the-as handle #f))
+
+  ;; straight down, no arc
+  (set! (-> this root dynam gravity y) 0.0)
+  (set! (-> this root dynam gravity-length) 0.0)
+  (set! (-> this root dynam gravity-max) 0.0)
+
+  ;; same flying visual
+  (set! (-> this part) (create-launch-control (-> *part-group-id-table* 450) this))
+  (none)
+  )
+
+(defmethod projectile-method-25 ((this yellow-rain-fireball))
+  (when (nonzero? (-> this part))
+    (spawn (-> this part) (-> this root trans)))
+
+  (when (zero? (-> this trail-proc))
+    (set! (-> this trail-proc)
+          (process->handle
+            (if (logtest? (-> *part-group-id-table* 451 flags) (sp-group-flag sp13))
+                (part-tracker-spawn
+                  part-tracker-subsampler
+                  :to this
+                  :group (-> *part-group-id-table* 451)
+                  :duration (seconds 2))
+                (part-tracker-spawn
+                  part-tracker
+                  :to this
+                  :group (-> *part-group-id-table* 451)
+                  :duration (seconds 2))))))
+  0
+  (none)
+  )
+
+(defmethod projectile-method-26 ((this yellow-rain-fireball))
+  ;; same impact group as catapult shot
+  (cond
+    ((logtest? (-> *part-group-id-table* 452 flags) (sp-group-flag sp13))
+      (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
+      (part-tracker-spawn
+        part-tracker-subsampler
+        :to *entity-pool*
+        :group (-> *part-group-id-table* 452)))
+    (else
+      (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
+      (part-tracker-spawn
+        part-tracker
+        :to *entity-pool*
+        :group (-> *part-group-id-table* 452))))
+
+  (when (handle->process (-> this trail-proc))
+    (send-event (handle->process (-> this trail-proc)) 'die))
+
+  0
+  (none)
+  )
+
+(defmethod projectile-method-39 ((this yellow-rain-fireball))
+  ;; FORCE impact immediately when it touches anything relevant
+  (when (or (logtest? (-> this root status) (collide-status touch-surface))
+            (logtest? (-> this root status) (collide-status touch-actor)))
+    (go (method-of-object this impact)))
+  (none)
+  )
+
+(defmethod play-impact-sound ((this yellow-rain-fireball) (arg0 projectile-options))
+  (cond
+    ((= arg0 (projectile-options po0))
+      (sound-play "yellow-shot-std" :id (-> this sound-id) :position (-> this root trans)))
+    ((= arg0 (projectile-options po1))
+      )
+    (else
+      ))
+  (none)
+  )
+
+(defun spawn-yellow-rain-fireball ((vec vector))
+  (let ((gp-0 (new 'stack-no-clear 'projectile-init-by-other-params))
+        (spawn-pos (new 'stack-no-clear 'vector))
+        (down-vel (new 'stack-no-clear 'vector)))
+
+    (set! (-> spawn-pos quad) (-> vec quad))
+    (+! (-> spawn-pos y) (meters 50))
+    (set! (-> spawn-pos w) 1.0)
+
+    ;; REALLY fast straight down
+    (set-vector! down-vel 0.0 (meters -450.0) 0.0 1.0)
+
+    (set! (-> gp-0 ent) (-> *target* entity))
+    (set! (-> gp-0 charge) 1.0)
+    (set! (-> gp-0 options) (projectile-options))
+    (logior! (-> gp-0 options) (projectile-options po14))
+    (set! (-> gp-0 pos quad) (-> spawn-pos quad))
+    (set! (-> gp-0 vel quad) (-> down-vel quad))
+    (set! (-> gp-0 target-pos quad) (the-as uint128 0))
+    (set! (-> gp-0 target-handle) (the-as handle #f))
+    (set! (-> gp-0 notify-handle) (the-as handle #f))
+    (set! (-> gp-0 owner-handle) (process->handle *target*))
+    (set! (-> gp-0 ignore-handle) (process->handle #f))
+
+    (let* ((v1-0 *game-info*)
+           (a0-0 (+ (-> v1-0 attack-id) 1)))
+      (set! (-> v1-0 attack-id) a0-0)
+      (set! (-> gp-0 attack-id) a0-0))
+
+    (set! (-> gp-0 timeout) (seconds 2))
+    (set! (-> gp-0 damage) (+ 2.0 (* guns-level 3)))
+    (set! (-> gp-0 vehicle-damage-factor) 1.0)
+    (set! (-> gp-0 vehicle-impulse-factor) 1.0)
+
+    (spawn-projectile yellow-rain-fireball gp-0 *entity-pool* *default-dead-pool*)
+    (none))
+)

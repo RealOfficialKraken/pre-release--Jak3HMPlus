@@ -24,7 +24,7 @@ BUGS:
 
 
 ;;MOD VERSION
-(define mod-version "0.8.8")
+(define mod-version "0.9.0")
 ;;
 
 (defun-extern freeze-enemies-in-menu! (none))
@@ -36,6 +36,8 @@ BUGS:
 (defun-extern pick-random-anchor none)
 (defun-extern spawn-rage-ghost none)
 (defun-extern boss-leaper! vector none)
+(define hmplus-intro-fade-start (seconds 0.0))
+(define hmplus-intro-fading? #f)
 
 (define in-picture-mode? #f)
 
@@ -59,6 +61,21 @@ BUGS:
         )
     )
     (none)
+)
+
+(defun hmplus-black-fade ((start-time time-frame))
+  (let ((t 0.0)
+        (col (new 'stack-no-clear 'vector)))
+    (set! t (/ (the float (- (current-time) start-time))
+               (the float (seconds 0.4))))
+    (when (< t 0.0) (set! t 0.0))
+    (when (> t 1.0) (set! t 1.0))
+    (set! (-> col x) 0.0)
+    (set! (-> col y) 0.0)
+    (set! (-> col z) 0.0)
+    (set! (-> col w) (* 128.0 t))
+    (setup *screen-filter* col col 0.0 (bucket-id tex-hud-pris2) #x3fffff #x33001 #t))
+  (none)
 )
 
 (define warp-s1 "???")
@@ -648,9 +665,17 @@ BUGS:
               (set! (-> font-ctx scale) text-scale)
               (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))))
       (+! hmplus-intro-frame 1)
-      (when (>= hmplus-intro-frame 470)
+        (when (and (not hmplus-intro-fading?) (>= hmplus-intro-frame 446))
+        (set! hmplus-intro-fading? #t)
+        (set! hmplus-intro-fade-start (current-time)))
+
+        (when hmplus-intro-fading?
+        (hmplus-black-fade hmplus-intro-fade-start))
+
+        (when (>= hmplus-intro-frame 470)
         (set! hmplus-intro-phase 2)
-        (set! hmplus-intro-frame 0)))
+        (set! hmplus-intro-frame 0)
+        (set! hmplus-intro-fading? #f)))
     ((= hmplus-intro-phase 2)
       (camera-unlocked)
       (send-event *target* 'draw #t)
@@ -2818,7 +2843,7 @@ BUGS:
     )
     (cond
         ((>= notoriety-level 60)
-            (set! skill-noto-string4 "<COLOR_GREEN>Melee attacks can make time slow down for a second")
+            (set! skill-noto-string4 "<COLOR_GREEN>Melee attacks can increment up Light Eco")
         )
         (else
             (set! skill-noto-string4 "<COLOR_RED>LOCKED")
@@ -4399,8 +4424,12 @@ BUGS:
                 (!= (-> (level-get-target-inside *level*) name) 'wasdoors)
                 (not *fb-hm*)
                 (not *rage-ghost*)
+                (not in-satbattle?)
+                (not (search-process-tree *active-pool* (lambda ((p process)) (type? p entity-boss))))
+                (not (search-process-tree *active-pool* (lambda ((p process)) (type? p entity-boss-dying))))
+                (not in-menu?)
             )
-                ;(spawn-rage-ghost) ;;fix this crash -- A dependency/file might not be loaded
+                (spawn-rage-ghost)
             )
 
         (when
@@ -4474,24 +4503,42 @@ BUGS:
                 (turn-to-scene-camera camera-loc tpos #t)
                 (when (= spawned-logo? #f)
                     (disable-hudmap)
-                    (spawn-dark-world-forest)
-                    (set! *jak3logo* (process-spawn jak3logo :name "jak3logo-flicker" *active-pool*))
-                    (spawn-dust-storm)
-                    (set! in-main-menu? #t)
-                    (start-menu-music!)
+                    (when (not disable-darkworld-in-mainmenu)
+                        (spawn-dark-world-forest)
+                        (set! *jak3logo* (process-spawn jak3logo :name "jak3logo-flicker" *active-pool*))
+                        (spawn-dust-storm)
+                        (set! in-main-menu? #t)
+                        (start-menu-music!)
+                    )
                 )
                 )
             )
-        (clear matt-str)
-        (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_PINK>Press Start"
+        (cond
+            (disable-darkworld-in-mainmenu
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "<COLOR_ORANGE>Press Start"
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 335 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                (set! (-> font-ctx scale) 0.825)
+                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            )
+            (else
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "<COLOR_PINK>Press Start"
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 335 0.0 (font-color default) (font-flags middle shadow kerning large))))
+                (set! (-> font-ctx scale) 0.825)
+                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            )
         )
-        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 335 0.0 (font-color default) (font-flags middle shadow kerning large))))
-        (set! (-> font-ctx scale) 0.825)
-        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
         (format matt-str "<COLOR_GREEN>v~s"
@@ -4774,7 +4821,9 @@ BUGS:
                 (let ((vec (new-stack-vector0))
                         )
                     (set-vector! vec (meters 2263.7312) (meters -8.7659) (meters 184.4911) 1.0)
-                    (spawn-vin-circle vec)
+                    (when (< (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 3)
+                        (spawn-vin-circle vec)
+                    )
                     )
                 )
 
@@ -6026,25 +6075,13 @@ BUGS:
 
     (when (= gun-weapon-roll #t)
         (let* (
-          (item-pool 3)
+          (item-pool 7)
           (rnd (rand-vu-int-range 1 item-pool))
         )
         (+! gun-wri 1)
         (when (task-node-open? (game-task-node wascity-kleeverquest-bruteboss))
             (task-node-close! (game-task-node wascity-kleeverquest-bruteboss-res) #t)
             (r3-hint)
-        )
-        (when (>= notoriety-level 10)
-            (set! item-pool 4)
-        )
-        (when (>= notoriety-level 20)
-            (set! item-pool 5)
-        )
-        (when (>= notoriety-level 30)
-            (set! item-pool 6)
-        )
-        (when (>= notoriety-level 40)
-            (set! item-pool 7)
         )
         (when (task-node-closed? (game-task-node arena-fight-1-resolution))
             (format #t "[ Weapon-Roll ] Rolled a ~d!" item-pool)
@@ -6569,6 +6606,36 @@ BUGS:
             *target*
             (not *scene-player*)
             (= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 3)
+            weather-dark-mode
+            (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c)))
+        )
+        (kill-by-name "task-arrow-custom" *default-pool*)
+        (set! task-arrow-spawned? #f)
+    )
+
+    (when
+        (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
+            (= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 4)
+            (not weather-dark-mode)
+            (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
+        )
+        (let ((level-comb-ride (new 'static 'vector :x (meters 2278.2116)  :y (meters 30.5446)  :z (meters 150.2463)  :w 1.0)))
+            (task-arrow-custom level-comb-ride #t)
+            (fb-die)
+        )
+    )
+
+    (when
+        (and
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
+            (not *scene-player*)
+            (= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 4)
             weather-dark-mode
             (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c)))
         )
@@ -7779,6 +7846,7 @@ BUGS:
               (the-as sound-id #f)
               :name "freeze-control"
               :to *target*))))
+  (send-event *target* 'get-pickup (pickup-type eco-pill-light) 10.0)
   (set! *hmplus-hit-freeze-end-time* (+ (current-time) (seconds 6.0))))
     (none)
   )
@@ -7855,12 +7923,21 @@ BUGS:
     (stop 'game)
     (start 'game (get-current-continue-forced *game-info*))
     (set! (-> *game-info* mode) 'play)
-    (send-event (ppointer->process *time-of-day*) 'change 'hour 19)
-    (set! (-> *time-of-day-context* mode) (the-as time-of-day-palette-id 5))
+    (send-event (ppointer->process *time-of-day*) 'change 'hour 8)
     (send-event (ppointer->process *time-of-day*) 'change 'ratio 0.0)
-    (set! (-> *time-of-day-context* overide-enable) #t)
-    (set! (-> *mood-control* overide-weather-flag) #t)
-    (dark-weather-override)
+    (setup *screen-filter*
+        (new 'static 'vector :x 0.0 :y 0.0 :z 0.0 :w 0.0)
+        (new 'static 'vector :x 0.0 :y 0.0 :z 0.0 :w 0.0)
+        0.0
+        (bucket-id tex-hud-pris2)
+        #x3fffff #x33001 #f)
+    (when (= disable-darkworld-in-mainmenu #f)
+        (send-event (ppointer->process *time-of-day*) 'change 'hour 19)
+        (set! (-> *time-of-day-context* mode) (the-as time-of-day-palette-id 5))
+        (set! (-> *time-of-day-context* overide-enable) #t)
+        (set! (-> *mood-control* overide-weather-flag) #t)
+        (dark-weather-override)
+    )
     (when (!= globalrandi 0)
         (set! globalrandi 0)
     )
@@ -8163,6 +8240,7 @@ BUGS:
     (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
     (kill-by-name "arena-event-1" *active-pool*)
     (kill-by-name "darkworld-tower" *active-pool*)
+    (kill-by-name "darkworld-orb" *default-pool*)
     (kill-by-name "jak3logo" *active-pool*)
     (kill-by-name "jak3logo-flicker" *active-pool*)
     (kill-by-name "Entity-Boss" *active-pool*)

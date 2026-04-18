@@ -8,6 +8,8 @@
 ;; DECOMP BEGINS
 
 (define-extern someone-fire-projectile (function type projectile-init-by-other-params process-tree none))
+(define-extern spawn-yellow-rain-fireball (function vector none))
+(defun-extern silver-freeze-hit process none)
 
 (deftype gun-yellow-shot (projectile)
   ((hit-actor?         symbol)
@@ -114,6 +116,14 @@
    )
   )
 
+(defmethod projectile-method-26 ((this gun-yellow-shot-2))
+  (when (= gunmod-fireball #t)
+    (spawn-yellow-rain-fireball (-> this hit-pos)))
+
+  (call-parent-method this)
+  0
+  (none)
+)
 
 ;; WARN: Return type mismatch (pointer process) vs (pointer gun-yellow-shot-3).
 (defmethod spawn-shot ((this gun-yellow-3-saucer) (arg0 vector))
@@ -1160,52 +1170,57 @@
     )
   )
 
+(declare-type nav-enemy enemy)
+(declare-type citizen nav-enemy)
+(declare-type citizen-enemy citizen)
+(declare-type civilian citizen)
+
 (defmethod deal-damage! ((this gun-yellow-shot) (arg0 process) (arg1 event-message-block))
   (if (and (logtest? (process-mask guard) (-> arg0 mask))
-           (not (-> *setting-control* user-current gun-target-guards?))
-           )
-      (set! (-> this damage) 0.0)
-      )
+           (not (-> *setting-control* user-current gun-target-guards?)))
+      (set! (-> this damage) 0.0))
+
   (let ((t9-0 (method-of-type projectile deal-damage!)))
     (when (t9-0 this arg0 arg1)
       (+! (-> *game-info* shots-hit 0) 1.0)
       (set! (-> this hit-actor?) #t)
-      #t
-      )
-    )
-  )
+
+      ;; Silver Freeze on successful Yellow-1 hit
+      (when (= gunmod-freeze #t)
+        (when (or
+                (type? arg0 enemy)
+                (type? arg0 nav-enemy)
+                (type? arg0 citizen)
+                (type? arg0 citizen-enemy)
+                (type? arg0 civilian)
+              )
+          (silver-freeze-hit arg0)))
+
+      #t)))
 
 (defmethod projectile-method-26 ((this gun-yellow-shot))
+  (when (= gunmod-fireball #t)
+    (spawn-yellow-rain-fireball (-> this root trans)))
+
   (let ((v1-8
           (cond
             ((-> this hit-actor?)
              (cond
                ((logtest? (-> *part-group-id-table* 102 flags) (sp-group-flag sp13))
                 (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
-                (part-tracker-spawn part-tracker-subsampler :to *entity-pool* :group (-> *part-group-id-table* 102))
-                )
+                (part-tracker-spawn part-tracker-subsampler :to *entity-pool* :group (-> *part-group-id-table* 102)))
                (else
-                 (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
-                 (part-tracker-spawn part-tracker :to *entity-pool* :group (-> *part-group-id-table* 102))
-                 )
-               )
-             )
+                (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
+                (part-tracker-spawn part-tracker :to *entity-pool* :group (-> *part-group-id-table* 102)))))
             ((logtest? (-> *part-group-id-table* 101 flags) (sp-group-flag sp13))
              (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
-             (part-tracker-spawn part-tracker-subsampler :to *entity-pool* :group (-> *part-group-id-table* 101))
-             )
+             (part-tracker-spawn part-tracker-subsampler :to *entity-pool* :group (-> *part-group-id-table* 101)))
             (else
-              (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
-              (part-tracker-spawn part-tracker :to *entity-pool* :group (-> *part-group-id-table* 101))
-              )
-            )
-          )
-        )
-    (send-event (ppointer->process v1-8) 'clock this)
-    )
+             (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
+             (part-tracker-spawn part-tracker :to *entity-pool* :group (-> *part-group-id-table* 101))))))
+    (send-event (ppointer->process v1-8) 'clock this))
   0
-  (none)
-  )
+  (none))
 
 ;; WARN: Return type mismatch sound-id vs none.
 (defmethod play-impact-sound ((this gun-yellow-shot) (arg0 projectile-options))
@@ -1316,6 +1331,7 @@
 )
 
 (defun gun-yellow-shot-move ((arg0 gun-yellow-shot))
+  (print "moving")
   (projectile-move-fill-line-sphere arg0)
   (let ((s5-0 (-> arg0 root)))
     (let ((s4-0 (new 'stack-no-clear 'vector)))
@@ -1323,53 +1339,41 @@
       (let ((f0-0 (vector-length s4-0)))
         (when (< 65536.0 f0-0)
           (vector-normalize! s4-0 65536.0)
-          (vector+! (-> arg0 tail-pos) (-> s5-0 trans) s4-0)
-          )
-        )
-      )
-    (when (logtest? (-> s5-0 status) (collide-status touch-surface))
-      (when (= gunmod-fireball #t)
-          (let ((vec-above (new-stack-vector0)))
-            (set! (-> vec-above x) (-> arg0 tail-pos x))
-            (set! (-> vec-above y) (-> arg0 tail-pos y))
-            (set! (-> vec-above z) (-> arg0 tail-pos z))
-            (set! (-> vec-above w) 109.0)
-            (+! (-> vec-above y) (meters 25))
-            (spawn-target-fireball jak-catapult-shot vec-above (-> arg0 tail-pos) (meters 10))
-          )
-        )
-      (when (= gunmod-nukeonly #t)
-        (let ((rnd (+ 0.16 (/ notoriety-level 100)))
-              )
-              (when (> rnd 0.75)
-                (set! rnd 0.75)
-              )
-              (when (rand-vu-percent? rnd)
-                (yellow-bi-shot! (-> arg0 root trans) (-> arg0 hit-pos))
-              )
-        )
-      )
-      (if (logtest? (-> arg0 root status) (collide-status touch-actor))
-          (set! (-> arg0 hit-actor?) #t)
-          )
-      (let ((v1-14 (vector-normalize! (vector-! (new 'stack-no-clear 'vector) (-> arg0 tail-pos) (-> s5-0 trans)) 2048.0))
-            (a1-5 (-> arg0 hit-pos))
-            )
+          (vector+! (-> arg0 tail-pos) (-> s5-0 trans) s4-0))))
+
+    (when (or (logtest? (-> s5-0 status) (collide-status touch-actor))
+              (logtest? (-> s5-0 status) (collide-status touch-surface)))
+
+      (if (logtest? (-> s5-0 status) (collide-status touch-actor))
+          (set! (-> arg0 hit-actor?) #t))
+
+      (let ((v1-14 (vector-normalize!
+                     (vector-! (new 'stack-no-clear 'vector) (-> arg0 tail-pos) (-> s5-0 trans))
+                     2048.0))
+            (a1-5 (-> arg0 hit-pos)))
         (set! (-> a1-5 quad) (-> s5-0 trans quad))
         (vector+! a1-5 a1-5 v1-14)
-        (move-to-point! (-> arg0 root) a1-5)
-        )
+        (move-to-point! (-> arg0 root) a1-5))
+      (print "made-vector")
+      ;; fireball on BOTH actor and surface impact
+      (when (= gunmod-fireball #t)
+        (print "impact")
+        (spawn-yellow-rain-fireball (-> arg0 hit-pos)))
+
+      (when (= gunmod-nukeonly #t)
+        (let ((rnd (+ 0.16 (/ notoriety-level 100))))
+          (when (> rnd 0.75)
+            (set! rnd 0.75))
+          (when (rand-vu-percent? rnd)
+            (yellow-bi-shot! (-> arg0 root trans) (-> arg0 hit-pos)))))
+
       (cond
         ((and (= gunmod-freeze #t) (= freeze-happening? #f))
-          (gun-freeze (-> s5-0 trans) (-> arg0 tail-pos))
-        )
-      )
-      (go (method-of-object arg0 impact))
-      )
-    )
+         (gun-freeze (-> s5-0 trans) (-> arg0 tail-pos))))
+
+      (go (method-of-object arg0 impact))))
   0
-  (none)
-  )
+  (none))
 
 (define *last-hit-deflect-target-handle* (the-as (pointer process) #f))
 
@@ -2199,6 +2203,9 @@
   )
 
 (defmethod projectile-method-26 ((this gun-yellow-shot-3))
+  (when (= gunmod-fireball #t)
+    (spawn-yellow-rain-fireball (-> this root trans)))
+
   (let ((v1-8
           (cond
             ((-> this hit-actor?)
@@ -2208,9 +2215,9 @@
                 (part-tracker-spawn part-tracker-subsampler :to *entity-pool* :group (-> *part-group-id-table* 99))
                 )
                (else
-                 (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
-                 (part-tracker-spawn part-tracker :to *entity-pool* :group (-> *part-group-id-table* 99))
-                 )
+                (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
+                (part-tracker-spawn part-tracker :to *entity-pool* :group (-> *part-group-id-table* 99))
+                )
                )
              )
             ((logtest? (-> *part-group-id-table* 98 flags) (sp-group-flag sp13))
@@ -2218,9 +2225,9 @@
              (part-tracker-spawn part-tracker-subsampler :to *entity-pool* :group (-> *part-group-id-table* 98))
              )
             (else
-              (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
-              (part-tracker-spawn part-tracker :to *entity-pool* :group (-> *part-group-id-table* 98))
-              )
+             (set! (-> *launch-matrix* trans quad) (-> this root trans quad))
+             (part-tracker-spawn part-tracker :to *entity-pool* :group (-> *part-group-id-table* 98))
+             )
             )
           )
         )
@@ -2228,7 +2235,7 @@
     )
   0
   (none)
-  )
+)
 
 (defun someone-fire-yellow-3 ((arg0 vector) (arg1 vector) (arg2 vector))
     (let ((gp-0 (-> *target* gun)))

@@ -3117,3 +3117,53 @@
   (call-parent-method this)
   (none)
   )
+
+(deftype freeze-control-free (process)
+  ((clock-pos      float)
+   (freeze-screen  handle)
+   (sound-id       sound-id)
+   (tick-time      time-frame)
+   (abort?         symbol)
+   (freeze-id      sound-id))
+  (:state-methods
+    idle
+  )
+)
+
+(defstate idle (freeze-control-free)
+  :virtual #t
+  :event (behavior ((proc process) (argc int) (message symbol) (block event-message-block))
+    (case message
+      (('die)
+       (let ((v0-0 (-> block param 0)))
+         (set! (-> self abort?) (the-as symbol v0-0))
+         v0-0))))
+  :enter (behavior ()
+    (set-setting! 'music-volume 'rel 0.5 0)
+    (set-setting! 'sfx-volume 'rel 0.9 0)
+    (set-setting! 'ambient-volume 'rel 0.9 0)
+    (set-action!
+      *gui-control*
+      (gui-action play)
+      (-> self sound-id)
+      (gui-channel none)
+      (gui-action none)
+      (the-as string #f)
+      (the-as (function gui-connection symbol) #f)
+      (the-as process #f)))
+  :exit (behavior ()
+    (update-rates! (-> *display* entity-clock) 1.0)
+    (update-rates! (-> *display* bg-clock) 1.0)
+    (update-rates! (-> *display* part-clock) 1.0)
+    (update-rates! (-> *display* target-clock) 1.0)
+    (send-event (handle->process (-> self freeze-screen)) 'untrigger #t)
+
+    (set-action!
+      *gui-control*
+      (gui-action stop)
+      (-> self sound-id)
+      (gui-channel none)
+      (gui-action none)
+      (the-as string #f)
+      (the-as (function gui-connection symbol) #f)
+      (the-as process #f))))
