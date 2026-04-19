@@ -1665,6 +1665,9 @@
   :virtual #t
   :enter (behavior ()
     (sound-play "robo-explode")
+    (set! global-parent-mask (-> self mask))
+    (set! global-root-trans (-> self root trans))
+    (enemy-killed? (rand-vu-float-range 200.0 215.0))
     (let ((v1-2 (-> self root root-prim)))
       (set! (-> v1-2 prim-core collide-as) (collide-spec))
       (set! (-> v1-2 prim-core collide-with) (collide-spec))

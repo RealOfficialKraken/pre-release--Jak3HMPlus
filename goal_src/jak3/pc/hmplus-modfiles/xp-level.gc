@@ -1105,131 +1105,6 @@
 
             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;HPBAR;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-        #|(when (= enemy-hp #t)
-            (+! hpi 1)
-                (let (
-                    (color-string "<COLOR_WHITE>Lv. ") ;color tags for levels
-                    )
-                    (when (and  
-                                (<= enemy-noto (+ notoriety-level 3))
-                                (> enemy-noto (- notoriety-level 3))
-                                (not (string= color-string "<COLOR_YELLOW>Lv. "))
-                            )
-                                (set! color-string "<COLOR_YELLOW>Lv. ")
-                            )
-                            (when (and  
-                                (>= enemy-noto (+ notoriety-level 3))
-                                (not (string= color-string "<COLOR_RED>Lv. "))
-                            )
-                                (set! color-string "<COLOR_RED>Lv. ")
-                            )
-                            (when (and  
-                                (<= enemy-noto (- notoriety-level 3))
-                                (> enemy-noto (- notoriety-level 7))
-                                (not (string= color-string "<COLOR_GREEN>Lv. "))
-                            )
-                                (set! color-string "<COLOR_GREEN>Lv. ")
-                            )
-                            (when (and  
-                                (< enemy-noto (- notoriety-level 7))
-                                (not (string= color-string "<COLOR_TRANSPARENT>Lv. "))
-                            )
-                                (set! color-string "<COLOR_TRANSPARENT>Lv. ")
-                            )
-                (when 
-                (and
-                    *target*
-                    (not *scene-player*)
-                    (= (paused?) #f)
-                    (= in-menu? #f)
-                )
-                (let ((health-pos 0))
-                    (when (= hud-timer-on? #f)
-                        (set! health-pos 10)
-                    )
-                    (when (or (= hud-timer-on? #t) (= r3-noto #t))
-                        (set! health-pos 80)
-                    )
-                    (when
-                        (and 
-                            (= weather-dark-mode #f)
-                            (= onfoot-battle? #f)
-                        )
-                        (clear matt-str)
-                        (clear *pc-encoded-matt-str*)
-                        (format matt-str "~s~%~%<COLOR_WHITE>~s~d"
-                        enemy-string
-                        color-string
-                        draw-enemy-noto
-                        )
-                        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-                        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-                        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-                        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
-                        (set! (-> font-ctx scale) 0.325)
-                        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
-                    )
-                    (when (or
-                            (= weather-dark-mode #t)
-                            (= onfoot-battle? #t)
-                          )
-                        (clear matt-str)
-                        (clear *pc-encoded-matt-str*)
-                        (format matt-str "~s~%~%<COLOR_WHITE>~s<COLOR_RED>??"
-                        enemy-string
-                        color-string
-                        )
-                        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-                        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-                        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-                        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
-                        (set! (-> font-ctx scale) 0.325)
-                        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
-                    )
-                )
-                (let (
-                            (level-cap hpbar-max-hit-points)
-                            (arg1 hpbar-hit-points)
-                            )
-                                (when (!= enemy-hp-percent (/ arg1 level-cap))
-                                    (set! enemy-hp-percent (/ arg1 level-cap))
-                                )
-                                (when (< level-cap arg1)
-                                    (set! arg1 0.0)
-                                )
-                            )
-                (let 
-                    (
-                        (x 100)
-                        (y 21)
-                        (progress enemy-hp-percent) ;enemy-hp-percent
-                        (arg3 (new 'static 'rgba 
-                            :r 255
-                            :g 0
-                            :b 0
-                            :a #x40
-                            )
-                            )
-                    )
-                        (when (or (= hud-timer-on? #t) (= r3-noto #t))
-                            (set! y 90)
-                        )
-                        (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                            (bucket-id particles)
-                                            )
-                    (draw-sprite2d-xy s2-0 x y 310 8 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-                    (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 310.0 progress)) 6 arg3 #x3fffff)
-                    )
-
-                    )
-            )
-                (when (= hpi 400)
-                    (set! hpi 0)
-                    (set! enemy-hp #f)
-                )
-            )
-        )|#
-
         ;NEW HP BAR:
         (when (= enemy-hp #t)
   (+! hpi 1)
@@ -2201,16 +2076,10 @@
                 )
                 (when
                     (and
-                        (!= enemy-noto 32)
-                        (!= enemy-noto 33)
-                        (!= enemy-noto 34)
-                        (!= enemy-noto 35)
-                        (!= enemy-noto 36)
-                        (!= enemy-noto 37)
-                        (!= enemy-noto 38)
+                        (!= enemy-noto (+ notoriety-level 2))
                         (task-node-closed? (game-task-node mine-boss-resolution))
                     )
-                    (set! enemy-noto (rand-vu-int-range 32 38))
+                    (set! enemy-noto (+ notoriety-level 2))
                 )
             )
             (when ;CTYGENB
@@ -2264,31 +2133,31 @@
                 (set! enemy-noto (rand-vu-int-range 19 20))
             )
             ((task-node-open? (game-task-node city-port-assault-resolution))
-                (set! enemy-noto 40)
+                (set! enemy-noto (- notoriety-level 5))
             )
             )
             (when ;ctyinda
                 (and
                     (= (-> (level-get-target-inside *level*) name) 'ctyinda)
-                    (!= enemy-noto 38)
-                    (!= enemy-noto 39)
-                    (!= enemy-noto 40)
-                    (!= enemy-noto 41)
+                    (not (task-node-open? (game-task-node city-destroy-grid-resolution)))
+                    (!= enemy-noto 28)
                 )
-                (set! enemy-noto (rand-vu-int-range 38 41))
+                (set! enemy-noto 28)
+            )
+            (when ;ctyinda
+                (and
+                    (= (-> (level-get-target-inside *level*) name) 'ctyinda)
+                    (task-node-open? (game-task-node city-destroy-grid-resolution))
+                    (= enemy-noto notoriety-level)
+                )
+                (set! enemy-noto notoriety-level)
             )
             (when ;ctyindb
                 (and
                     (= (-> (level-get-target-inside *level*) name) 'ctyindb)
-                    (!= enemy-noto 39)
-                    (!= enemy-noto 40)
-                    (!= enemy-noto 41)
-                    (!= enemy-noto 42)
-                    (!= enemy-noto 43)
-                    (!= enemy-noto 44)
-                    (!= enemy-noto 45)
+                    (!= enemy-noto 33)
                 )
-                (set! enemy-noto (rand-vu-int-range 39 45))
+                (set! enemy-noto 33)
             )
             (when ;ctysluma
                 (and
@@ -2332,9 +2201,9 @@
                     (= (-> (level-get-target-inside *level*) name) 'mhcitya)
                     (= (-> (level-get-target-inside *level*) name) 'mhcityb)
                 )
-                (!= enemy-noto 25)
+                (!= enemy-noto notoriety-level)
              )
-                (set! enemy-noto 25)
+                (set! enemy-noto notoriety-level)
             )
             )
             (when ;ltowera+ltowerb
@@ -2404,25 +2273,16 @@
                         (= (-> (level-get-target-inside *level*) name) 'lfacrm1)
                     )
                     (not (= (-> (level-get-target-inside *level*) name) 'factoryd))
-                    (!= enemy-noto 72)
-                    (!= enemy-noto 73)
-                    (!= enemy-noto 74)
-                    (!= enemy-noto 75)
-                    (!= enemy-noto 76)
-                    (!= enemy-noto 77)
-                    (!= enemy-noto 78)
-                    (!= enemy-noto 79)
-                    (!= enemy-noto 80)
-                    (!= enemy-noto 81)
+                    (!= enemy-noto 45)
                 )
-                (set! enemy-noto (rand-vu-int-range 72 81))
+                (set! enemy-noto 45)
             )
             (when ;factory-boss
                 (and
                     (= (-> (level-get-target-inside *level*) name) 'factoryd)
-                    (!= enemy-noto 100)
+                    (!= enemy-noto 50)
                 )
-                (set! enemy-noto 100)
+                (set! enemy-noto 50)
             )
             (when 
             (and 

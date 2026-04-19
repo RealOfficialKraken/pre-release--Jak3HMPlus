@@ -5,8 +5,8 @@
 
 (define set-part-dark? #f)
 
-(defun look-for-darkjak ()
-  (let ((v1-0 *target*))
+(defun look-for-darkjak () ;;this function does nothing because it sucks and it's unreliable and crashes.
+  #|(let ((v1-0 *target*))
     (when (and
             (focus-test? v1-0 dark)
             (not set-part-dark?))
@@ -288,6 +288,6 @@
       
       (set! set-part-dark? #f)
     )
-  )
+  )|#
   (none)
 )

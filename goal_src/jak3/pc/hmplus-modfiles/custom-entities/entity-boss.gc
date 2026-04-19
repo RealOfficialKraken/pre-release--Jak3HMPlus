@@ -1,4 +1,7 @@
-(in-package goal)
+
+(defun-extern spawn-eb-floater vector symbol float none)
+(defun-extern spawn-white-fireball vector float float none)
+(defun-extern spawn-nebula-splitter vector int none)
 
 ;;name: entity-boss.gc
 

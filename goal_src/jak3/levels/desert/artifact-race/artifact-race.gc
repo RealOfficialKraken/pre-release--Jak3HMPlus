@@ -613,7 +613,7 @@
             ((task-node-open? (game-task-node desert-artifact-race-2-race))
               (set! (-> self time-limit)
                     (max (seconds 9)
-                        (- (the-as time-frame (-> s5-1 time)) (seconds 14))))
+                        (- (the-as time-frame (-> s5-1 time)) (seconds 11))))
             )
           )
           )

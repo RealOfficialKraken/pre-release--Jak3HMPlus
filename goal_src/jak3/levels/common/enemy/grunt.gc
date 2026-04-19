@@ -1949,7 +1949,34 @@
   )
 
  (deftype rage-ghost (grunt)
-  ()
+  ((next-rage-time time-frame)
+  )
+  )
+
+  (defun hmplus-rage-sound ((this rage-ghost))
+  (let ((t (current-time)))
+    (when (>= t (-> this next-rage-time))
+      (set! (-> this next-rage-time) (+ t (seconds 6)))
+
+      (let ((rnd (rand-vu-int-range 0 2)))
+        (case rnd
+          ((0)
+            (play-sound-file "snd/snd-eft/rage-1.wav"
+              (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+          )
+          ((1)
+            (play-sound-file "snd/snd-eft/rage-2.wav"
+              (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+          )
+          ((2)
+            (play-sound-file "snd/snd-eft/rage-3.wav"
+              (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+          )
+        )
+      )
+    )
+  )
+  (none)
   )
 
   (defstate hostile (rage-ghost)
@@ -1960,7 +1987,12 @@
           (t9-0)
           )
       )
-    (spawn (-> self part) (-> self root trans))
+      (hmplus-rage-sound self)
+    (let ((vec (new-stack-vector0)))
+      (vector-copy! vec (-> self root trans))
+      (+! (-> vec y) (meters 4))
+      (spawn (-> self part) vec)
+    )
     (when (>= (vector-vector-distance (-> self root trans) (target-pos 0)) (meters 90))
       (silver-freeze-kill-procs self)
       (kill-by-name (-> self name) *default-pool*)
@@ -2154,7 +2186,7 @@
   (vector-identity! (-> self root scale))
   (init-enemy! self)
   (logior! (-> self draw status) (draw-control-status no-draw))
-  (set! (-> self part) (create-launch-control (-> *part-group-id-table* 158) self))
+  (set! (-> self part) (create-launch-control (-> *part-group-id-table* 1888) self))
   (let ((nav (find-nearest-nav-mesh vec 0.0))
         (cverts (new 'static 'inline-array vector 3
                   (static-vectorm 1 0 0)

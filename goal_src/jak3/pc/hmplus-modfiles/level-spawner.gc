@@ -325,34 +325,6 @@ dead
                 (set! mhcitya-bspawner #f)
             )
             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CTYINDA AREAS;;;;;;;;;;;;;;;;;;;;
-            ((and
-                (task-node-closed? (game-task-node city-destroy-darkeco-resolution))
-                (or
-                    (= (-> (level-get-target-inside *level*) name) 'ctyinda)
-                    (= (-> (level-get-target-inside *level*) name) 'ctyindb)
-                )
-                (not (task-node-open? (game-task-node city-blow-barricade-resolution)))
-                (not (task-node-open? (game-task-node city-blow-tower-introduction)))
-                (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
-                (not (task-node-open? (game-task-node city-blow-tower-resolution)))
-                (= ctyinda-bspawner #f)
-            )
-            (init-respawner! ctyinda-vbspawner-8 roboguard "roboguard" 600)
-            (init-respawner! ctyinda-kbspawner-2 roboguard "roboguard" 600)
-            (init-respawner! ctyinda-kbspawner-3 roboguard "roboguard" 600)
-            (init-respawner! ctyinda-kbspawner-4 roboguard "roboguard" 600)
-            (set! ctyinda-bspawner #t)
-            )
-            ((and
-                (!= (-> (level-get-target-inside *level*) name) 'ctyinda)
-                (!= (-> (level-get-target-inside *level*) name) 'ctyindb)
-                (> (vector-vector-distance (target-pos 0) ctyinda-vbspawner-1) 2800000.0)
-                (= ctyinda-bspawner #t)
-            )
-                (set! ctyinda-bspawner #f)
-            )
-            ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;CTYINDB AREAS;;;;;;;;;;;;;;;;;;;;
             ((and
                 (task-node-closed? (game-task-node city-destroy-darkeco-resolution))
@@ -366,9 +338,6 @@ dead
                 )
                 (= ctyindb-bspawner #f)
             )
-            (init-respawner! ctyindb-vbspawner-1 roboguard "roboguard" 600)
-            (init-respawner! ctyindb-vbspawner-2 roboguard "roboguard" 600)
-            (init-respawner! ctyindb-vbspawner-3 roboguard "roboguard" 600)
             (init-respawner! ctyindb-vbspawner-4 roboguard-giant "roboguard-giant" 600)
             (set! ctyindb-bspawner #t)
             )
@@ -390,6 +359,9 @@ dead
                 (not (task-node-open? (game-task-node city-blow-tower-introduction)))
                 (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
                 (not (task-node-open? (game-task-node city-blow-tower-resolution)))
+                (not (task-node-open? (game-task-node city-port-assault-introduction)))
+                (not (task-node-open? (game-task-node city-port-assault-force-load-borrows)))
+                (not (task-node-open? (game-task-node city-port-assault-resolution)))
                 (= ctyport-bspawner #f)
             )
             (init-respawner! ctyport-vbspawner-1 roboguard "roboguard" 600)

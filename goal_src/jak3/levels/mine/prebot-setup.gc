@@ -330,6 +330,8 @@
    (ammo                 prebot-ammo-tracker  20 :inline)
    (hit-points           float)
    (incoming-attack-id   uint32)
+   (manual-ammo-crate        handle)
+   (manual-ammo-crate-timer  time-frame)
    )
   (:state-methods
     beaten
@@ -1101,9 +1103,9 @@
     (set! (-> this ammo v1-104 birth-next-time) #f)
     )
   (if (task-node-open? (game-task-node mine-boss-resolution))
-          (set! (-> this hit-points) (+ 600.0 (* enemy-noto 10)))
-          (set! (-> this hit-points) (* (+ 600.0 (* enemy-noto 10)) (/ (the float enemy-noto) 3)))
-        )
+    (set! (-> this hit-points) (+ 600.0 (* enemy-noto 10)))
+    (set! (-> this hit-points) (* (+ 200.0 (* enemy-noto 3)) (/ (the float enemy-noto) 3)))
+  )
   (if (= in-mine-level? #f)
     (set! enemy-noto 20)
     (set! enemy-noto (rand-vu-int-range 25 35))

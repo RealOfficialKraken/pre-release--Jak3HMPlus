@@ -1611,7 +1611,7 @@
     (if (and (= (-> self count-alive) (-> self count-max)) (-> self can-rid))
         (send-event (handle->process (-> self can-rid)) 'die-fast)
         )
-    (when (and (< (-> self count-alive) (-> self count-max))
+        (when (and (< (-> self count-alive) (-> self count-max))
                *target*
                (not (-> *setting-control* user-current nuke-active?))
                )
@@ -1712,6 +1712,10 @@
   (set! (-> this count-max)
         (res-lump-value (-> this entity) 'max-count int :default (the-as uint128 30) :time -1000000000.0)
         )
+
+  (when (task-node-open? (game-task-node nest-hunt-fight))
+    (set! (-> this count-max) 3)
+    )
   (set! (-> this max-spawn-size) (res-lump-float (-> this entity) 'max-size :default 2.0))
   (set! *egg-spider-always-trackable?*
         (if (zero? (res-lump-value (-> this entity) 'always-trackable? uint128 :time -1000000000.0))

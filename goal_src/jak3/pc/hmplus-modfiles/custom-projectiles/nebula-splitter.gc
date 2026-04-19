@@ -6,14 +6,14 @@
   :id 1830
   :flags (sp0)
   :bounds (static-bspherem 0 0 0 10)
-  :parts ((sp-item 6771 :fade-after (meters 100) :period (seconds 0.167) :length (seconds 0.035))
-    (sp-item 6772 :fade-after (meters 100) :period (seconds 0.167) :length (seconds 0.035))
-    (sp-item 6773 :fade-after (meters 100) :period (seconds 0.167) :length (seconds 0.035))
-    (sp-item 6774 :fade-after (meters 100) :period (seconds 0.017) :length (seconds 0.035))
+  :parts ((sp-item 6115 :fade-after (meters 100) :period (seconds 0.167) :length (seconds 0.035))
+    (sp-item 6114 :fade-after (meters 100) :period (seconds 0.167) :length (seconds 0.035))
+    (sp-item 6113 :fade-after (meters 100) :period (seconds 0.167) :length (seconds 0.035))
+    (sp-item 6112 :fade-after (meters 100) :period (seconds 0.017) :length (seconds 0.035))
     )
   )
 
-  (defpart 6774
+  (defpart 6112
   :init-specs ((:texture (laser-hit level-default-sprite))
     (:num 1.0)
     (:scale-x (meters 1.2) (meters 0.6))
@@ -42,7 +42,7 @@
     )
   )
 
-(defpart 6771
+(defpart 6115
   :init-specs ((:texture (starflash level-default-sprite))
     (:num 1.0)
     (:scale-x (meters 1))
@@ -58,7 +58,7 @@
     )
   )
 
-(defpart 6772
+(defpart 6114
   :init-specs ((:texture (starflash level-default-sprite))
     (:num 1.0)
     (:scale-x (meters 1))
@@ -74,7 +74,7 @@
     )
   )
 
-(defpart 6773
+(defpart 6113
   :init-specs ((:texture (laser-hit level-default-sprite))
     (:num 1.0)
     (:scale-x (meters 0.5))

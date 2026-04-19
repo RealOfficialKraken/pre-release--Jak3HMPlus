@@ -73,6 +73,7 @@
 (define-extern prebot-small-eco-creature type)
 (define-extern medium-eco-creature type)
 (define-extern large-eco-creature type)
+(define-extern prebot type)
 (declare-type rage-ghost process-focusable)
 (define *rage-ghost* (the (pointer rage-ghost) #f))
 (declare-type leaper-boss process-focusable)
@@ -143,6 +144,7 @@
     ((type-type? en-type prebot-small-eco-creature) 'eco-creature-small)
     ((type-type? en-type medium-eco-creature) 'eco-creature-medium)
     ((type-type? en-type large-eco-creature) 'eco-creature-large)
+    ((type-type? en-type prebot) 'prebot)
     (else (-> en-type symbol)))
   )
 
@@ -757,6 +759,10 @@
     (define light-eco-guard-shot #f)
 
     (defun-extern fb-task-spawn (none))
+
+    (declare-type entity-boss-floater process-drawable)
+    (define *eb-floater* (the (pointer entity-boss-floater) #f))
+
 
     (define disable-darkworld-in-mainmenu #f)
 

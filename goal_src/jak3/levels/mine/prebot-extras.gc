@@ -555,6 +555,10 @@
    )
   )
 
+(defbehavior prebot-shockwave-speed prebot-shockwave ()
+  (if (task-node-closed? (game-task-node mine-boss-resolution))
+      1.6
+      1.0))
 
 (defstate idle (prebot-shockwave)
   :virtual #t
@@ -580,7 +584,7 @@
       )
     )
   :trans (behavior ()
-    (ja :num! (seek!))
+    (ja :num! (seek! max (prebot-shockwave-speed)))
     (if (ja-done? 0)
         (deactivate self)
         )

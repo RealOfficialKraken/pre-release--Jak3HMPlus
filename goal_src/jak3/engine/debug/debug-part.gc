@@ -645,6 +645,19 @@
   :init-specs ((:r 64.0) (:g 64.0) (:fade-r -1.0) (:fade-g -1.0) (:fade-a -2.0))
   )
 
+(defpartgroup group-eco-red-bigblob-only
+  :id 1888
+  :bounds (static-bspherem 0 0 0 1)
+  :parts ((sp-item 571 :flags (sp3) :binding 567)
+    (sp-item 567 :flags (sp2 sp3))
+    (sp-item 567 :flags (sp2 sp3))
+    (sp-item 567 :flags (sp2 sp3))
+    (sp-item 567 :flags (sp2 sp3))
+    (sp-item 567 :flags (sp2 sp3))
+    (sp-item 567 :flags (sp2 sp3))
+    )
+  )
+
 (defpartgroup group-eco-red
   :id 158
   :bounds (static-bspherem 0 0 0 1)
@@ -671,7 +684,7 @@
   :init-specs ((:texture (hotdot level-default-sprite))
     (:num 1.0)
     (:x (meters 4))
-    (:scale-x (meters 0.01))
+    (:scale-x (meters 0.02)) ;; was 0.01
     (:scale-y :copy scale-x)
     (:timer (seconds -0.005))
     (:flags (sp-cpuinfo-flag-3 sp-cpuinfo-flag-14))
@@ -682,9 +695,9 @@
 (defpart 567
   :init-specs ((:texture (bigpuff level-default-sprite))
     (:num 6.0)
-    (:y (meters 0) (meters 16))
+    (:y (meters 9))
     (:z (meters 0.15) (meters 0.2))
-    (:scale-x (meters 2) (meters 2))
+    (:scale-x (meters 6) (meters 6))
     (:rot-z (degrees 0) (degrees 360))
     (:scale-y :copy scale-x)
     (:r 128.0 128.0)

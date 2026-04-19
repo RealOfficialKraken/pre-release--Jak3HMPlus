@@ -1686,7 +1686,7 @@
        )
      )
     (('explode)
-    (enemy-killed? (rand-vu-float-range 350.0 450.0))
+    (enemy-killed? (rand-vu-float-range 450.0 650.0))
      (if (not (and (-> this next-state) (= (-> this next-state name) 'explode)))
          (go (method-of-object this explode))
          )

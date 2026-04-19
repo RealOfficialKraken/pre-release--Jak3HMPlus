@@ -14,7 +14,6 @@
    )
   )
 
-
 (define *stronghold-inside-point* (new 'static 'vector :x 6253938.5 :y 99123.2 :z 12145754.0 :w 1.0))
 
 (define *stronghold-vehicle-stop-point* (new 'static 'vector :x 6413203.5 :y 103606.27 :z 12111851.0 :w 1.0))
@@ -93,6 +92,11 @@
     (desert-chase-ambush-manager-method-35 (_type_ int) none)
     )
   )
+
+(defbehavior desert-chase-player-outside-stronghold? desert-chase-ambush-manager ()
+  (let ((f0-0 504320.0))
+    (> (vector-vector-distance *stronghold-inside-point* (target-pos 0)) f0-0)))
+
 
 
 ;; WARN: Found some very strange gotos. Check result carefully, this is not well tested.
@@ -289,6 +293,26 @@
         )
       )
     )
+  :enter (behavior ()
+    (send-event *target* 'get-pickup (pickup-type ammo-yellow) 9999.0)
+    (send-event *target* 'get-pickup (pickup-type ammo-red) 9999.0)
+    (if (or
+            (logtest? (-> *game-info* features) (game-feature gun-blue-1))
+            (logtest? (-> *game-info* features) (game-feature gun-blue-2))
+            (logtest? (-> *game-info* features) (game-feature gun-blue-3))
+        )
+        (send-event *target* 'get-pickup (pickup-type ammo-blue) 9999.0)
+    )
+    (if (or
+            (logtest? (-> *game-info* features) (game-feature gun-dark-1))
+            (logtest? (-> *game-info* features) (game-feature gun-dark-2))
+            (logtest? (-> *game-info* features) (game-feature gun-dark-3))
+        )
+        (send-event *target* 'get-pickup (pickup-type ammo-dark) 9999.0)
+    )
+    (send-event *target* 'get-pickup (pickup-type eco-pill-dark) 100.0)
+    (send-event *target* 'get-pickup (pickup-type eco-pill-light) 100.0)
+  )
   :code (behavior ()
     ;; og:preserve-this
     (local-vars (v1-6 object))
@@ -358,6 +382,10 @@
     (set! (-> *game-info* counter) (the float (- (+ (-> self marauder-count) 120) (-> self total-spawned))))
     (suspend-for (seconds 3))
     (until (and (>= (-> self total-spawned) (the-as uint 120)) (zero? (-> self marauder-count)))
+    (when (and
+              (task-node-open? (game-task-node desert-chase-marauders-ambush))
+              (desert-chase-player-outside-stronghold?))
+        (task-node-open! (game-task-node desert-chase-marauders-introduction) #t))
       (when (>= (+ (current-time) (seconds -0.5)) (-> self check-timer))
         (let* ((gp-5 (length *stronghold-marauder-start*))
                (s4-0 (rand-vu-int-count gp-5))
@@ -543,7 +571,7 @@
               (+! (-> this marauder-count) 1)
               (+! (-> s5-0 length) -1)
               (+! (-> this total-spawned) 1)
-              (when (rand-vu-percent? 0.25)
+              (when (and (rand-vu-percent? 0.01) (< enemy-noto (+ notoriety-level 10)))
                 (+! enemy-noto 1)
               )
               (add-icon! *minimap* (the-as marauder s2-2) (the-as uint 117) (the-as int #f) (the-as vector #t) 0)

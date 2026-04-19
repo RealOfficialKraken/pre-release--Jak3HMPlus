@@ -431,6 +431,387 @@ BUGS:
 
 (define hmplus-intro-fx-started? #f)
 
+(defun hmplus-has-colored-weapon? ((color symbol))
+  (case color
+    (('yellow)
+      (or
+        (logtest? (-> *game-info* features) (game-feature gun-yellow-1))
+        (logtest? (-> *game-info* features) (game-feature gun-yellow-2))
+        (logtest? (-> *game-info* features) (game-feature gun-yellow-3))))
+    (('red)
+      (or
+        (logtest? (-> *game-info* features) (game-feature gun-red-1))
+        (logtest? (-> *game-info* features) (game-feature gun-red-2))
+        (logtest? (-> *game-info* features) (game-feature gun-red-3))))
+    (('blue)
+      (or
+        (logtest? (-> *game-info* features) (game-feature gun-blue-1))
+        (logtest? (-> *game-info* features) (game-feature gun-blue-2))
+        (logtest? (-> *game-info* features) (game-feature gun-blue-3))))
+    (('dark)
+      (or
+        (logtest? (-> *game-info* features) (game-feature gun-dark-1))
+        (logtest? (-> *game-info* features) (game-feature gun-dark-2))
+        (logtest? (-> *game-info* features) (game-feature gun-dark-3))))
+    (else #f))
+)
+
+(defun hmplus-preferred-gunmod-count ()
+  (let ((count 0))
+    ;; red
+    (when (and (hmplus-has-colored-weapon? 'red)
+               (not (task-node-closed? (game-task-node modr-bigshot))))
+      (+! count 1))
+    (when (and (hmplus-has-colored-weapon? 'red)
+               (not (task-node-closed? (game-task-node modr-missles))))
+      (+! count 1))
+    (when (and (hmplus-has-colored-weapon? 'red)
+               (not (task-node-closed? (game-task-node modr-shield))))
+      (+! count 1))
+
+    ;; yellow
+    (when (and (hmplus-has-colored-weapon? 'yellow)
+               (not (task-node-closed? (game-task-node mody-fireball))))
+      (+! count 1))
+    (when (and (hmplus-has-colored-weapon? 'yellow)
+               (not (task-node-closed? (game-task-node mody-nukeonly))))
+      (+! count 1))
+    (when (and (hmplus-has-colored-weapon? 'yellow)
+               (not (task-node-closed? (game-task-node mody-freeze))))
+      (+! count 1))
+
+    ;; blue
+    (when (and (hmplus-has-colored-weapon? 'blue)
+               (not (task-node-closed? (game-task-node modb-airstrike))))
+      (+! count 1))
+    (when (and (hmplus-has-colored-weapon? 'blue)
+               (not (task-node-closed? (game-task-node modb-ammo))))
+      (+! count 1))
+    (when (and (hmplus-has-colored-weapon? 'blue)
+               (not (task-node-closed? (game-task-node modb-disperser))))
+      (+! count 1))
+
+    ;; dark
+    (when (and (hmplus-has-colored-weapon? 'dark)
+               (not (task-node-closed? (game-task-node modd-reaper))))
+      (+! count 1))
+    (when (and (hmplus-has-colored-weapon? 'dark)
+               (not (task-node-closed? (game-task-node modd-morpher))))
+      (+! count 1))
+    (when (and (hmplus-has-colored-weapon? 'dark)
+               (not (task-node-closed? (game-task-node modd-random))))
+      (+! count 1))
+
+    count)
+)
+
+(defun hmplus-fallback-gunmod-count ()
+  (let ((count 0))
+    (when (not (task-node-closed? (game-task-node modr-bigshot)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node modr-missles)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node modr-shield)))
+      (+! count 1))
+
+    (when (not (task-node-closed? (game-task-node mody-fireball)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node mody-nukeonly)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node mody-freeze)))
+      (+! count 1))
+
+    (when (not (task-node-closed? (game-task-node modb-airstrike)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node modb-ammo)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node modb-disperser)))
+      (+! count 1))
+
+    (when (not (task-node-closed? (game-task-node modd-reaper)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node modd-morpher)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node modd-random)))
+      (+! count 1))
+
+    count)
+)
+
+(defun hmplus-close-nth-preferred-gunmod! ((idx int))
+  (let ((i 0)
+        (done #f))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'red)
+               (not (task-node-closed? (game-task-node modr-bigshot))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modr-bigshot) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'red)
+               (not (task-node-closed? (game-task-node modr-missles))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modr-missles) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'red)
+               (not (task-node-closed? (game-task-node modr-shield))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modr-shield) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'yellow)
+               (not (task-node-closed? (game-task-node mody-fireball))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node mody-fireball) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'yellow)
+               (not (task-node-closed? (game-task-node mody-nukeonly))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node mody-nukeonly) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'yellow)
+               (not (task-node-closed? (game-task-node mody-freeze))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node mody-freeze) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'blue)
+               (not (task-node-closed? (game-task-node modb-airstrike))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modb-airstrike) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'blue)
+               (not (task-node-closed? (game-task-node modb-ammo))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modb-ammo) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'blue)
+               (not (task-node-closed? (game-task-node modb-disperser))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modb-disperser) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'dark)
+               (not (task-node-closed? (game-task-node modd-reaper))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modd-reaper) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'dark)
+               (not (task-node-closed? (game-task-node modd-morpher))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modd-morpher) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done)
+               (hmplus-has-colored-weapon? 'dark)
+               (not (task-node-closed? (game-task-node modd-random))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modd-random) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (none))
+)
+
+(defun hmplus-close-nth-fallback-gunmod! ((idx int))
+  (let ((i 0)
+        (done #f))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node modr-bigshot))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modr-bigshot) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node modr-missles))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modr-missles) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node modr-shield))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modr-shield) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node mody-fireball))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node mody-fireball) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node mody-nukeonly))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node mody-nukeonly) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node mody-freeze))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node mody-freeze) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node modb-airstrike))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modb-airstrike) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node modb-ammo))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modb-ammo) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node modb-disperser))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modb-disperser) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node modd-reaper))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modd-reaper) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node modd-morpher))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modd-morpher) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node modd-random))))
+      (cond
+        ((= i idx)
+          (task-node-close! (game-task-node modd-random) #t)
+          (set! drop-gun-mod #f)
+          (set! done #t))
+        (else
+          (+! i 1))))
+
+    (none))
+)
+
+(defun hmplus-roll-valid-gun-mod! ()
+  (let ((preferred-count (hmplus-preferred-gunmod-count))
+        (fallback-count 0)
+        (pick 0))
+    (cond
+      ((> preferred-count 0)
+        (set! pick (rand-vu-int-count preferred-count))
+        (hmplus-close-nth-preferred-gunmod! pick))
+      (else
+        (set! fallback-count (hmplus-fallback-gunmod-count))
+        (if (> fallback-count 0)
+            (begin
+              (set! pick (rand-vu-int-count fallback-count))
+              (hmplus-close-nth-fallback-gunmod! pick))
+            (begin
+              (set! drop-gun-mod #f)
+              (blank-hint! "Congrats!" "You already have all Super Gun Mods!" 340 600))))))
+  (none)
+)
+
 (defun runs-jak3-every-frame () ;;START RUNNING EVERY FRAME
 (when ;autosave-delayed
     (and
@@ -5560,6 +5941,7 @@ BUGS:
                     (camera-unlocked)
                     (set! in-dialogue? #f)
                     (set! pause-menu-blocked? #f)
+                    (blank-hint! "<COLOR_ORANGE>You can spend the crystals" "<COLOR_ORANGE>in <COLOR_PINK>Vin's Black Market" 340 700)
                     (lightjak-get-off-part (target-pos 0))
                     (kill-by-name "man-eb" *default-pool*)
                 )
@@ -5882,80 +6264,7 @@ BUGS:
             (= (pause-allowed?) #t)
             (= drop-gun-mod #t)
         )
-        (let ((rnd (rand-vu-int-range 1 12)))
-            (when (= rnd 1)
-                (when (not (task-node-closed? (game-task-node modr-bigshot)))
-                    (task-node-close! (game-task-node modr-bigshot) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 2)
-                (when (not (task-node-closed? (game-task-node modr-missles)))
-                    (task-node-close! (game-task-node modr-missles) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 3)
-                (when (not (task-node-closed? (game-task-node modr-shield)))
-                    (task-node-close! (game-task-node modr-shield) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 4)
-                (when (not (task-node-closed? (game-task-node mody-fireball)))
-                    (task-node-close! (game-task-node mody-fireball) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 5)
-                (when (not (task-node-closed? (game-task-node mody-nukeonly)))
-                    (task-node-close! (game-task-node mody-nukeonly) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 6)
-                (when (not (task-node-closed? (game-task-node mody-freeze)))
-                    (task-node-close! (game-task-node mody-freeze) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 7)
-                (when (not (task-node-closed? (game-task-node modb-airstrike)))
-                    (task-node-close! (game-task-node modb-airstrike) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 8)
-                (when (not (task-node-closed? (game-task-node modb-ammo)))
-                    (task-node-close! (game-task-node modb-ammo) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 9)
-                (when (not (task-node-closed? (game-task-node modb-disperser)))
-                    (task-node-close! (game-task-node modb-disperser) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 10)
-                (when (not (task-node-closed? (game-task-node modd-reaper)))
-                    (task-node-close! (game-task-node modd-reaper) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 11)
-                (when (not (task-node-closed? (game-task-node modd-morpher)))
-                    (task-node-close! (game-task-node modd-morpher) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-            (when (= rnd 12)
-                (when (not (task-node-closed? (game-task-node modd-random)))
-                    (task-node-close! (game-task-node modd-random) #t)
-                    (set! drop-gun-mod #f)
-                )
-            )
-        )
+        (hmplus-roll-valid-gun-mod!)
     )
 
     (when
@@ -8220,6 +8529,7 @@ BUGS:
     (set! obj-i 0)
     (none)
 )
+
 
 (defun runs-on-blackout ()
     (kill-by-name "Fallen Satellite" *default-pool*)

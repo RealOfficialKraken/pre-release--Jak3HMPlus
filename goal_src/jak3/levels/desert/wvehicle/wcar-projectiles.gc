@@ -586,12 +586,21 @@
   (none)
   )
 
-;; WARN: Return type mismatch sound-id vs none.
 (defmethod init-proj-settings! ((this v-marauder-shot))
   (let ((t9-0 (method-of-type guard-shot init-proj-settings!)))
     (t9-0 this)
     )
-  (set! (-> this damage) (fmin 8.0 (fmax 0.5 (+ 2.0 (* 0.2 (the float (- enemy-noto cars-level)))))))
+  (set! (-> this damage)
+        (cond
+          ((>= enemy-noto (+ notoriety-level 7))
+           (fmin 8.0
+                 (fmax 0.5
+                       (+ 2.0 (* 0.2 (the float (- enemy-noto cars-level)))))))
+          ((>= enemy-noto (- notoriety-level 4))
+           2.0)
+          (else
+           0.2)
+          ))
   (set! (-> this vehicle-damage-factor) 0.333)
   (set! (-> this vehicle-impulse-factor) 0.25)
   (set! (-> this timeout) (seconds 1.25))
@@ -601,7 +610,17 @@
 
 (defmethod deal-damage! ((this v-marauder-shot) (arg0 process) (arg1 event-message-block))
   (when ((method-of-type guard-shot deal-damage!) this arg0 arg1)
-    (set! (-> this damage) (fmin 8.0 (fmax 0.5 (+ 2.0 (* 0.2 (the float (- enemy-noto cars-level)))))))
+    (set! (-> this damage)
+          (cond
+            ((>= enemy-noto (+ notoriety-level 7))
+             (fmin 8.0
+                   (fmax 0.5
+                         (+ 2.0 (* 0.2 (the float (- enemy-noto cars-level)))))))
+            ((>= enemy-noto (- notoriety-level 4))
+             2.0)
+            (else
+             0.2)
+            ))
     (if (logtest? (process-mask vehicle) (-> arg0 mask))
         (sound-play "inter-riccos")
         )

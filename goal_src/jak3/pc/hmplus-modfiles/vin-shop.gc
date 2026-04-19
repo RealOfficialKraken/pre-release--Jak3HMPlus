@@ -7,9 +7,6 @@
 (define vin-objective3 "")
 (define vin-objective4 "")
 
-(declare-type entity-boss-floater process-drawable)
-(define *eb-floater* (the (pointer entity-boss-floater) #f))
-
 (defun-extern spawn-eb-floater vector symbol float none)
 
 (defun play-story-log-1 ()
@@ -119,7 +116,7 @@
             (set! vin-objective4 "<COLOR_YELLOW>")
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "~S(x10) Research in The Entity~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x30) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+            (format matt-str "~S(x10) Research in The Entity~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x20) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
             vinw1
             vinw2
             vinw3
@@ -142,7 +139,7 @@
             (set! vin-objective4 "<COLOR_YELLOW>")
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "~S(x15) Talk to Vin (OR) Research in The Entity~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x30) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+            (format matt-str "~S(x15) Talk to Vin (OR) Research in The Entity~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x20) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
             vinw1
             vinw2
             vinw3
@@ -161,7 +158,7 @@
         (else
             (clear matt-str)
             (clear *pc-encoded-matt-str*)
-            (format matt-str "~S(Talk) <COLOR_WHITE>To Vin~%~%~S(x35) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x30) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+            (format matt-str "~S(Talk) <COLOR_WHITE>To Vin~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x20) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
             vinw1
             vinw2
             vinw3
@@ -464,11 +461,11 @@
                     (give-weapon! "dark-1" 1)
                 )
                 ((and (cpad-pressed? 0 x) (= vin-select 3) (>= vin-crystals 10))
-                    (-! (-> *game-info* civilians-killed) 20.0)
+                    (-! (-> *game-info* civilians-killed) 10.0)
                     (give-random-weapon)
                 )
-                ((and (cpad-pressed? 0 x) (= vin-select 4) (>= vin-crystals 30))
-                    (-! (-> *game-info* civilians-killed) 30.0)
+                ((and (cpad-pressed? 0 x) (= vin-select 4) (>= vin-crystals 20))
+                    (-! (-> *game-info* civilians-killed) 20.0)
                     (drop-gun-mod! (target-pos 0))
                     (close-vin-shop!)
                 )
@@ -1502,8 +1499,8 @@
         (when (= log-sec 4)
             (set! di-s "It would make sense that they would be carrying")
             (set! di-s2 "tons of those crystals, too.")
-            (set! di-s3 "")
-            (set! di-s4 "")
+            (set! di-s3 "We need <COLOR_PINK>20 more.")
+            (set! di-s4 "Those will be the last.")
         )
         (when (= log-sec 5)
               (set! dialogue-select 0)

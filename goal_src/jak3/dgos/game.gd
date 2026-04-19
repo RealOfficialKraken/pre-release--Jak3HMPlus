@@ -580,7 +580,6 @@
   "mhcity-obs2.o"
   "destroy-dark-eco.o"
   "darkworld-tower.o"
-  "tp-fb.o"
   "darkjak-weapons.o"
   "forest-survive.o"
   "nebula-splitter.o"

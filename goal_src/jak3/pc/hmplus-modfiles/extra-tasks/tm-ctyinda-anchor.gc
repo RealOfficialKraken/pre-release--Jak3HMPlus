@@ -640,7 +640,7 @@
                 (set! in-ctyinda-anchor? #f)
                 (set! *force-stop-pilot* #f)
                 (task-node-open! (game-task-node ctyinda-anchor-introduction) #t)
-                (group-drop! (-> self reward-box) 0.34 0.12)
+                (group-drop! (-> self reward-box) 0.0 1.0)
                 (set! anchor-cdr 0)
                 (set! anchor-cooldown #t)
                 (go-virtual dead)

@@ -12,7 +12,7 @@ The parameters for spawning it should only have to be set in the "active" state
 Finally, the tasks get opened again after dying, or the process goes dead
 |#
 
-(defpart 9163
+(defpart 6170
   :init-specs ((:texture (pal-lightning level-default-sprite))
     (:birth-func 'birth-func-set-quat)
     (:num 1.0)
@@ -27,7 +27,7 @@ Finally, the tasks get opened again after dying, or the process goes dead
     )
   )
 
-  (defpart 9164
+  (defpart 6171
   :init-specs ((:texture (pal-lightning-red level-default-sprite))
     (:birth-func 'birth-func-set-quat)
     (:num 1.0)
@@ -42,7 +42,7 @@ Finally, the tasks get opened again after dying, or the process goes dead
     )
   )
 
-(defpart 9165
+(defpart 6172
   :init-specs ((:texture (radial-gradient-yellow level-default-sprite))
     (:num 1.0)
     (:scale-x (meters 15))
@@ -60,7 +60,7 @@ Finally, the tasks get opened again after dying, or the process goes dead
     )
   )
 
-(defpart 9166
+(defpart 6173
   :init-specs ((:texture (starflash level-default-sprite))
     (:num 1.0)
     (:scale-x (meters 3) (meters 1))
@@ -507,10 +507,10 @@ Finally, the tasks get opened again after dying, or the process goes dead
             (let ((gp-0 (-> self spawn-pos)))
             (let ((a2-2 (new 'stack-no-clear 'vector)))
             (vector-! a2-2 (-> self lightning-pos) gp-0)
-            (set! (-> *part-id-table* 9164 init-specs 4 initial-valuef) (vector-length a2-2))
-            (draw-beam (-> *part-id-table* 9164) gp-0 a2-2 #f)
+            (set! (-> *part-id-table* 6171 init-specs 4 initial-valuef) (vector-length a2-2))
+            (draw-beam (-> *part-id-table* 6171) gp-0 a2-2 #f)
             )
-            (launch-particles (-> *part-id-table* 9166) (-> self lightning-pos))
+            (launch-particles (-> *part-id-table* 6173) (-> self lightning-pos))
             (let ((s5-1 (vector-normalize! (vector-! (new 'stack-no-clear 'vector) (-> self lightning-pos) gp-0) 1.0)))
                 (let ((s4-0 (new 'stack-no-clear 'vector)))
                     (if *target*
@@ -710,7 +710,7 @@ Finally, the tasks get opened again after dying, or the process goes dead
                 (set! in-desertf-anchor? #f)
                 (set! *force-stop-pilot* #f)
                 (task-node-open! (game-task-node desertf-anchor-introduction) #t)
-                (group-drop! (-> self reward-box) 0.34 0.12)
+                (group-drop! (-> self reward-box) 0.0 1.0)
                 (set! anchor-cdr 0)
                 (set! anchor-cooldown #t)
                 (go-virtual dead)
