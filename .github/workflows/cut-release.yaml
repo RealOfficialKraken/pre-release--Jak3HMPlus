@@ -34,7 +34,7 @@ on:
       jak3:
         description: 'Supports Jak 3?'
         required: true
-        default: 'false'
+        default: 'true'
         type: boolean
       jakx:
         description: 'Supports Jak X?'
