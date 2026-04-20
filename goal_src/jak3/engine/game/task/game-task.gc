@@ -1695,7 +1695,7 @@
               :on-complete #f
               :on-fail #f
               )
-            :borrow '((desert-game alias desert copy desboss2 special))
+            :borrow '()
             :open? (lambda ()
               (dotimes (gp-0 (-> *level* length))
                 (let ((v1-3 (-> *level* level gp-0)))
@@ -1730,7 +1730,7 @@
               )
             :on-open #f
             :manager #f
-            :borrow '((desert-game alias desert copy desboss2 special))
+            :borrow '()
             :open? #f
             :on-close #f
             :reset #f

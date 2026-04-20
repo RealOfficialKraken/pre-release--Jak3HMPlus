@@ -19,6 +19,123 @@
     spike!
     dead))
 
+(define *floor-spike-lightning-width*
+  (new 'static 'curve2d-fast
+    :xs (new 'static 'vector :y -1.0 :z -2.0 :w -3.0)
+    :ys (new 'static 'vector :x 0.5 :y 4.5 :z 5.5 :w 6.5)
+    :one-over-x-deltas (new 'static 'vector :x 4.0 :y 1.0 :z 1.0 :w 1.0)))
+
+(define *floor-spike-lightning-appearance*
+  (new 'static 'lightning-appearance))
+
+(set! (-> *floor-spike-lightning-appearance* base-alpha) 0.5)
+(set! (-> *floor-spike-lightning-appearance* tex-id) (the-as uint #x403a00))
+(set! (-> *floor-spike-lightning-appearance* blend-mode) (the-as uint 1))
+
+(set! (-> *floor-spike-lightning-appearance* alpha-1-curve) *curve-unity*)
+(set! (-> *floor-spike-lightning-appearance* alpha-1-mode) (the-as uint 3))
+(set! (-> *floor-spike-lightning-appearance* alpha-1-repeat-dist) (meters 750))
+
+(set! (-> *floor-spike-lightning-appearance* alpha-2-curve) #f)
+(set! (-> *floor-spike-lightning-appearance* alpha-2-mode) (the-as uint 3))
+(set! (-> *floor-spike-lightning-appearance* alpha-2-repeat-dist) (meters 750))
+
+(set! (-> *floor-spike-lightning-appearance* width-curve) *floor-spike-lightning-width*)
+(set! (-> *floor-spike-lightning-appearance* width-mode) (the-as uint 2))
+(set! (-> *floor-spike-lightning-appearance* width-repeat-dist) 4096.0)
+
+(set! (-> *floor-spike-lightning-appearance* uv-repeat-dist) (meters 750))
+
+;; keep the orb-style string regeneration
+(set! (-> *floor-spike-lightning-appearance* regenerate-time-start) (seconds 0.167))
+(set! (-> *floor-spike-lightning-appearance* regenerate-time-end) (seconds 0.25))
+
+;; thinner than orb so it fits your floor rays
+(set! (-> *floor-spike-lightning-appearance* width-range-start) 1536.0)
+(set! (-> *floor-spike-lightning-appearance* width-range-end) 2560.0)
+
+;; THIS is the no-linger part
+(set! (-> *floor-spike-lightning-appearance* fade-time) (seconds 0.1))
+
+(set! (-> *floor-spike-lightning-appearance* uv-shift?) #f)
+(set! (-> *floor-spike-lightning-appearance* uv-shift-speed) (seconds 0.1))
+(set! (-> *floor-spike-lightning-appearance* use-sprite-bucket?) #t)
+(set! (-> *floor-spike-lightning-appearance* use-accurate-interp?) #t)
+
+(defun floor-spikelight-spin-angle ((this floor-spikelight))
+  (cond
+    ((-> this is-firing?)
+     (-> this frozen-spin-angle))
+    (else
+      (+ (-> this start-angle)
+        (* (the float (- (current-time) (-> this start-time)))
+            (-> this spin-speed)))))
+)
+
+(defun floor-spikelight-random-ray-strike-pos ((this floor-spikelight) (ray-idx int) (out vector))
+  (let* ((amt (-> this ray-amt))
+         (circle-radius (meters 9.0))
+         (outer-radius (* circle-radius 11.0))
+         (spin-ang (floor-spikelight-spin-angle this))
+         (angle-step (/ 65536.0 (the float amt)))
+         (ray-angle-width (/ angle-step 3.0))
+         (ray-half-angle (/ ray-angle-width 2.0))
+         (ang-center 0.0)
+         (ang 0.0)
+         (dist 0.0))
+
+    (set! ang-center (+ spin-ang (* angle-step (the float ray-idx))))
+
+    ;; pick a random angle inside the wedge
+    (set! ang (+ ang-center
+                 (rand-vu-float-range (- ray-half-angle) ray-half-angle)))
+
+    ;; exclude the inner circle, stay on the rays only
+    (set! dist (rand-vu-float-range
+                 (+ circle-radius (meters 0.5))
+                 outer-radius))
+
+    (set! (-> out x) (+ (-> this pos x) (* (cos ang) dist)))
+    (set! (-> out y) (-> this pos y))
+    (set! (-> out z) (+ (-> this pos z) (* (sin ang) dist)))
+    (set! (-> out w) 1.0))
+  (none))
+
+(defun floor-spikelight-spawn-one-lightning ((strike-pos vector))
+  (let ((params (new 'stack-no-clear 'lightning-tracker-init-params))
+        (top-ang 0.0)
+        (top-dist 0.0))
+
+    (set! (-> params appearance) *floor-spike-lightning-appearance*)
+    (set! (-> params start-pt quad) (-> strike-pos quad))
+
+    ;; still slant it in from above so it isn't perfectly vertical
+    (set! top-ang (rand-vu-float-range 0.0 65536.0))
+    (set! top-dist (rand-vu-float-range (meters 8.0) (meters 20.0)))
+
+    (set! (-> params end-pt x) (+ (-> strike-pos x) (* (cos top-ang) top-dist)))
+    (set! (-> params end-pt y) (+ (-> strike-pos y) (meters 50.0)))
+    (set! (-> params end-pt z) (+ (-> strike-pos z) (* (sin top-ang) top-dist)))
+    (set! (-> params end-pt w) 1.0)
+
+    ;; this is what makes it stringy like orb
+    (set! (-> params lifetime) (seconds 0.03))
+    (set! (-> params num-inner-points) 6)
+    (set! (-> params inner-random-offset-size) 4096.0)
+    (set! (-> params random-offset-size-start) 4096.0)
+
+    (create-lightning-tracker-new params))
+  (none))
+
+(defun floor-spikelight-spawn-ray-lightning ((this floor-spikelight))
+  (let ((strike-pos (new 'stack-no-clear 'vector)))
+    (dotimes (ray-i (-> this ray-amt))
+      (let ((casts (rand-vu-int-range 7 12)))
+        (dotimes (j casts)
+          (floor-spikelight-random-ray-strike-pos this ray-i strike-pos)
+          (floor-spikelight-spawn-one-lightning strike-pos)))))
+  (none))
+
 (defbehavior floor-spikelight-init-by-other floor-spikelight ((vec vector) (time? time-frame) (speed float) (amt int))
   (vector-copy! (-> self pos) vec)
   (set! (-> self time-to-spike) time?)
@@ -130,15 +247,6 @@
           #x000000FF
           (shl #x1A 24))))))
 
-(defun floor-spikelight-spin-angle ((this floor-spikelight))
-  (cond
-    ((-> this is-firing?)
-     (-> this frozen-spin-angle))
-    (else
-      (+ (-> this start-angle)
-        (* (the float (- (current-time) (-> this start-time)))
-            (-> this spin-speed)))))
-)
 
 (defun floor-spikelight-cross2 ((ax float) (az float) (bx float) (bz float))
   (- (* ax bz) (* az bx)))
@@ -407,6 +515,11 @@
   :virtual #t
   :enter (behavior ()
     (play-sound-file "snd/floor-spike-fire.wav" 70)
+    (floor-spikelight-spawn-ray-lightning self)
+    (when (and *target*
+               (<= (vector-vector-distance (target-pos 0) (-> self pos))
+                   (meters 90.0)))
+      (activate! *camera-smush-control* 1024.0 18 90 1.0 0.85 (-> *display* camera-clock)))
   )
   :code (behavior ()
     (loop

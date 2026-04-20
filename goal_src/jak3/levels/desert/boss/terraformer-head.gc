@@ -1305,7 +1305,7 @@
                                        :action (terraformer-head-cmd-action start-laser)
                                        :suck 1.0
                                        :random 1.0
-                                       :num 1.0
+                                       :num 0.0
                                        )
                                      (new 'static 'terraformer-head-command
                                        :action (terraformer-head-cmd-action wait)
@@ -1508,13 +1508,13 @@
                                        :action (terraformer-head-cmd-action start-laser)
                                        :suck 1.0
                                        :random 1.0
-                                       :num 1.0
+                                       :num 0.0
                                        )
                                      (new 'static 'terraformer-head-command
                                        :action (terraformer-head-cmd-action wait)
                                        :suck 1.0
                                        :random 1.0
-                                       :num 5.0
+                                       :num 0.0
                                        )
                                      (new 'static 'terraformer-head-command
                                        :action (terraformer-head-cmd-action cmd2)
@@ -1653,7 +1653,7 @@
                                        :action (terraformer-head-cmd-action start-laser)
                                        :suck 1.0
                                        :random 1.0
-                                       :num 1.0
+                                       :num 0.0
                                        )
                                      (new 'static 'terraformer-head-command :suck 1.0 :random 1.0 :num 1.0)
                                      (new 'static 'terraformer-head-command
@@ -1894,25 +1894,6 @@
               (s4-0 (new 'stack-no-clear 'enemy-init-by-other-params))
               )
           (when (terraformer-head-get-spawn-point gp-0 (-> s5-0 dest))
-            (when (rand-vu-percent? 0.15)
-              (let (
-                    (vec1 (new 'static 'vector :x (meters 2426.90) :y (meters 107.97) :z (meters 573.5328) :w 1.0))
-                    (vec2 (new 'static 'vector :x (meters 2455.77) :y (meters 107.98) :z (meters 559.3142) :w 1.0))
-                    (vec3 (new 'static 'vector :x (meters 2454.25) :y (meters 107.98) :z (meters 585.1451) :w 1.0))
-                    (vec4 (new 'static 'vector :x (meters 2431.60) :y (meters 107.97) :z (meters 568.7309) :w 1.0))
-                  )
-                (spawn-dark-boss vec1 "Bipedal-Boss")
-                (when (rand-vu-percent? 0.25)
-                  (spawn-dark-boss vec2 "Bipedal-Boss")
-                )
-                (when (rand-vu-percent? 0.25)
-                  (spawn-dark-boss vec3 "Bipedal-Boss")
-                )
-                (when (rand-vu-percent? 0.25)
-                  (spawn-dark-boss vec4 "Bipedal-Boss")
-                )
-              )
-            )
             (set! (-> s5-0 flags) (terraformer-head-critter-tracker-flag))
             (vector-copy! (-> s4-0 trans) gp-0)
             (quaternion-copy! (-> s4-0 quat) (-> self root quat))
@@ -2320,7 +2301,7 @@
     (logior! (-> self skel status) (joint-control-status sync-math))
     (set-time! (-> self state-time))
     (let ((v1-7 (new 'stack-no-clear 'vector)))
-      (set! (-> v1-7 quad) (-> self initial-position quad))
+      (vector-copy! v1-7 (-> self initial-position))
       (+! (-> v1-7 x) 204800.0)
       (+! (-> v1-7 y) -223232.0)
       (set! (-> self position-seeker target quad) (-> v1-7 quad))
@@ -2490,7 +2471,7 @@
     (let ((v1-2 (ja-group)))
       (cond
         ((and v1-2 (= v1-2 terraformer-head-slam-middle-ja))
-         (ja :num! (seek!))
+         (ja :num! (seek! max 5.0))
          (ja :chan 1 :num! (chan 0))
          (ja :chan 2 :num! (chan 0))
          (let ((f0-5 (ja-aframe-num 0)))
@@ -2628,10 +2609,6 @@
   :trans (behavior ()
     (cond
       ((= (-> self hit-points) 0.0)
-       ;; og:preserve-this
-       (#when PC_PORT
-         (set! (-> *autosplit-info-jak3* errol-dead?) 1)
-        )
        (let ((a1-0 (new 'stack-no-clear 'event-message-block)))
          (set! (-> a1-0 from) (process->ppointer self))
          (set! (-> a1-0 num-params) 0)
@@ -2656,15 +2633,14 @@
        (terraformer-head-send-group-event 0 'retract)
        )
       ((and (>= 0.25 (-> self hit-points)) (< (-> self stage) (the-as uint 2)))
-       (set! (-> self stage) (the-as uint 2))
-       (set! (-> self num-attacks) 2)
-       (go-virtual slam)
-       )
+        (set! (-> self stage) (the-as uint 2))
+        (set! (-> self num-attacks) 10)
+        (go-virtual slam))
+
       ((and (>= 0.75 (-> self hit-points)) (< (-> self stage) (the-as uint 1)))
-       (set! (-> self stage) (the-as uint 1))
-       (set! (-> self num-attacks) 1)
-       (go-virtual slam)
-       )
+        (set! (-> self stage) (the-as uint 1))
+        (set! (-> self num-attacks) 1)
+        (go-virtual slam))
       (else
         (go-virtual run-script)
         )

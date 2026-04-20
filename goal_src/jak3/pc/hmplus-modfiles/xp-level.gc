@@ -1396,418 +1396,171 @@
 
         ;level based enemy-levels in HERO MODE
 
+                ;level based enemy-levels in HERO MODE
+
         (when (and
                 (not level-override)
                 (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
               )
             (when
-            (and 
-                (task-node-closed? (game-task-node arena-training-1-introduction))
-                (= weather-dark-mode #t)
-            )
-            (when ;DARK-WORLD
-                (and
-                    (!= enemy-noto (+ notoriety-level 156))
+                (and 
+                    (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                    (task-node-closed? (game-task-node arena-training-1-introduction))
+                    (= weather-dark-mode #t)
                 )
-                (set! enemy-noto (+ notoriety-level 156))
-            )
-        )
-
-        (when 
-            (and 
-                (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-                (= weather-dark-mode #f)
-            )
-            (when ;WASDOORS
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'wasdoors)
-                    (!= enemy-noto 81)
-                )
-                (set! enemy-noto 81)
-            )
-            (when ;WASCITYA
-                (and
-                    (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
-                    (= (-> (level-get-target-inside *level*) name) 'wascitya)
-                    (!= enemy-noto 81)
-                )
-                (set! enemy-noto 81)
-            )
-            (when ;WASCITYB
-                (and
-                    (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
-                    (= (-> (level-get-target-inside *level*) name) 'wascityb)
-                    (not (task-node-open? (game-task-node wascity-pre-game-battle)))
-                    (!= enemy-noto 91)
-                )
-                (set! enemy-noto 91)
-            )
-            (cond
-                ;ARENA FIGHT 1
-                ((and
-                    (task-node-open? (game-task-node arena-fight-1-fight))
-                    (!= enemy-noto 1)
-                )
-                (set! enemy-noto 72)
-            )
-            ;ARENA FIGHT 2
-            ((and
-                    (task-node-open? (game-task-node arena-fight-2-fight))
-                    (!= enemy-noto notoriety-level)
-                )
-                (set! enemy-noto (+ notoriety-level 72))
-            )
-            ;ARENA FIGHT 3
-            ((and
-                (task-node-open? (game-task-node arena-fight-3-fight))
-                (!= enemy-noto (+ notoriety-level 10))
-                )
-                (set! enemy-noto (+ notoriety-level 120))
-            )
-            )
-            (when ;DESERT
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'desert)
-                    (= in-satbattle? #f)
-                    (!= enemy-noto notoriety-level)
-                    (= start-was-uprising #f)
-                    (not (task-node-open? (game-task-node desert-jump-mission-protect-doors)))
-                )
-                (when (>= notoriety-level 3)
-                    (set! enemy-noto (+ notoriety-level 5))
-                    (set! start-was-uprising #t)
-                    (set! wasi 0)
-                )
-                (when (< notoriety-level 3)
-                    (set! enemy-noto notoriety-level)
-                )
-                ;(set! cdr-satbattle #t)
-                ;(set! cdr-i (rand-vu-int-range 2400 14000))
-            )
-            (when ;NESTA-B
-                (and
-                    (or 
-                        (= (-> (level-get-target-inside *level*) name) 'nsta)
-                        (= (-> (level-get-target-inside *level*) name) 'nstb)
-                    )
-                    (!= enemy-noto 145)
-                )
-                (set! enemy-noto 145)
-            )
-            (when
-                (and
-                    (task-node-closed? (game-task-node desert-oasis-defense-meeting))
-                    (not (task-node-closed? (game-task-node desert-oasis-defense-resolution)))
-                    (= (-> (level-get-target-inside *level*) name) 'desert)
-                    (!= enemy-noto 140)
-                )
-                    (set! enemy-noto 140)
-                    )
-            (when ;VOLCANO MISSION
-                (and
-                    (or 
-                        (= (-> (level-get-target-inside *level*) name) 'volcanoa)
-                        (= (-> (level-get-target-inside *level*) name) 'volcanob)
-                        (= (-> (level-get-target-inside *level*) name) 'volcanox)
-                    )
-                    (not (task-node-closed? (game-task-node volcano-darkeco-resolution)))
-                    (!= enemy-noto 164)
-                )
-                (set! enemy-noto 164)
-            )
-            (when ;VOLCANO BACKTRACK LEVEL
-                (and
-                    (or 
-                        (= (-> (level-get-target-inside *level*) name) 'volcanoa)
-                        (= (-> (level-get-target-inside *level*) name) 'volcanob)
-                        (= (-> (level-get-target-inside *level*) name) 'volcanox)
-                    )
-                    (task-node-closed? (game-task-node volcano-darkeco-resolution))
-                    (or 
-                        (< enemy-noto 252)
-                        (> enemy-noto 252)
-                    )
-                )
-                (set! enemy-noto (rand-vu-int-range 14 20))
-            )
-            (when ;TEMPLEA
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'templea)
-                    (!= enemy-noto 171)
-                )
-                (set! enemy-noto 171)
-            )
-            (when ;TEMPLEB
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'templeb)
-                    (!= enemy-noto 210)
-                )
-                (set! enemy-noto 210)
-            )
-            (when ;TEMPLED
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'templeb)
-                    (!= enemy-noto 300)
-                )
-                (set! enemy-noto 300)
-            )
-            (when ;COMBABX
-                (and
-                    (or 
-                        (= (-> (level-get-target-inside *level*) name) 'comba)
-                        (= (-> (level-get-target-inside *level*) name) 'combb)
-                        (= (-> (level-get-target-inside *level*) name) 'combx)
-                    )
+                (when ;DARK-WORLD
                     (and
-                        (!= enemy-noto 15)
-                        (!= enemy-noto 16)
-                        (!= enemy-noto 17)
-                        (!= enemy-noto 18)
+                        (!= enemy-noto (+ notoriety-level 64))
                     )
-                )
-                (set! enemy-noto (rand-vu-int-range 15 18))
-            )
-            (when ;MINE
-                (and
-                    (or 
-                        (= (-> (level-get-target-inside *level*) name) 'minea)
-                        (= (-> (level-get-target-inside *level*) name) 'mineb)
-                        (= (-> (level-get-target-inside *level*) name) 'minec)
-                    )
-                )
-                (when
-                    (and
-                        (!= enemy-noto 151)
-                        (!= enemy-noto 152)
-                        (!= enemy-noto 153)
-                        (!= enemy-noto 154)
-                        (not (task-node-closed? (game-task-node mine-boss-resolution)))
-                    )
-                    (set! enemy-noto (rand-vu-int-range 151 154))
-                )
-                (when
-                    (and
-                        (!= enemy-noto 240)
-                        (!= enemy-noto 241)
-                        (!= enemy-noto 242)
-                        (!= enemy-noto 243)
-                        (!= enemy-noto 244)
-                        (!= enemy-noto 245)
-                        (!= enemy-noto 246)
-                        (task-node-closed? (game-task-node mine-boss-resolution))
-                    )
-                    (set! enemy-noto (rand-vu-int-range 240 246))
-                )
-            )
-            (when ;CTYGENB
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'ctygenb)
-                    (!= enemy-noto 159)
-                )
-                (set! enemy-noto 159)
-            )
-            (when ;SEW1
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'sewa)
-                    (or
-                        (task-node-open? (game-task-node sewer-kg-met-introduction))
-                        (task-node-open? (game-task-node sewer-kg-met-button0-pressed))
-                        (task-node-open? (game-task-node sewer-kg-met-button1-pressed))
-                        (task-node-open? (game-task-node sewer-kg-met-resolution))
-                    )
-                    (!= enemy-noto 161)
-                    (!= enemy-noto 162)
-                )
-                (set! enemy-noto (rand-vu-int-range 161 162))
-            )
-            (when ;SEW2
-                (and
-                    (task-node-open? (game-task-node sewer-hum-kg-switch-off))
-                    (or
-                        (= (-> (level-get-target-inside *level*) name) 'sewb)
-                        (= (-> (level-get-target-inside *level*) name) 'sewc)
-                        (= (-> (level-get-target-inside *level*) name) 'sewd)
-                    )
-                    (!= enemy-noto 210)
-                )
-                (set! enemy-noto 210)
-            )
-            (cond ;ctyport
-                ((and
-                    (not (task-node-open? (game-task-node city-port-assault-resolution)))
-                    (= (-> (level-get-target-inside *level*) name) 'ctyport)
-                    (!= enemy-noto 204)
-                    (!= enemy-noto 205)
-                )
-                (set! enemy-noto (rand-vu-int-range 204 205))
-            )
-            ((task-node-open? (game-task-node city-port-assault-resolution))
-                (set! enemy-noto 210)
-            )
-            )
-            (when ;ctyinda
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'ctyinda)
-                    (!= enemy-noto 211)
-                    (!= enemy-noto 212)
-                    (!= enemy-noto 213)
-                    (!= enemy-noto 214)
-                )
-                (set! enemy-noto (rand-vu-int-range 211 214))
-            )
-            (when ;ctyindb
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'ctyindb)
-                    (!= enemy-noto 216)
-                    (!= enemy-noto 217)
-                    (!= enemy-noto 218)
-                    (!= enemy-noto 219)
-                    (!= enemy-noto 220)
-                    (!= enemy-noto 221)
-                    (!= enemy-noto 222)
-                )
-                (set! enemy-noto (rand-vu-int-range 216 222))
-            )
-            (when ;ctysluma
-                (and
-                    (or
-                        (= (-> (level-get-target-inside *level*) name) 'ctysluma)
-                        (= (-> (level-get-target-inside *level*) name) 'ctyslumb)
-                        (= (-> (level-get-target-inside *level*) name) 'ctyslumc)
-                    )
-                    (!= enemy-noto 223)
-                    (!= enemy-noto 224)
-                    (!= enemy-noto 225)
-                    (!= enemy-noto 226)
-                    (!= enemy-noto 227)
-                    (!= enemy-noto 228)
-                )
-                (set! enemy-noto (rand-vu-int-range 223 228))
-            )
-            (when ;mhcitya+mhcityb
-                (and
-                    (or
-                        (= (-> (level-get-target-inside *level*) name) 'mhcitya)
-                        (= (-> (level-get-target-inside *level*) name) 'mhcityb)
-                    )
-                    (!= enemy-noto 289)
-                    (!= enemy-noto 290)
-                    (!= enemy-noto 291)
-                    (!= enemy-noto 292)
-                    (!= enemy-noto 293)
-                    (!= enemy-noto 294)
-                    (!= enemy-noto 295)
-                    (!= enemy-noto 296)
-                    (!= enemy-noto 297)
-                    (!= enemy-noto 298)
-                )
-                (set! enemy-noto (rand-vu-int-range 289 298))
-            )
-            (when ;ltowera+ltowerb
-                (and
-                    (or
-                        (= (-> (level-get-target-inside *level*) name) 'ltowera)
-                        (= (-> (level-get-target-inside *level*) name) 'ltowerb)
-                        (= (-> (level-get-target-inside *level*) name) 'towera)
-                        (= (-> (level-get-target-inside *level*) name) 'towerb)
-                    )
-                    (!= enemy-noto 289)
-                    (!= enemy-noto 290)
-                    (!= enemy-noto 291)
-                    (!= enemy-noto 292)
-                    (!= enemy-noto 293)
-                    (!= enemy-noto 294)
-                    (!= enemy-noto 295)
-                    (!= enemy-noto 296)
-                    (!= enemy-noto 297)
-                    (!= enemy-noto 298)
-                )
-                (set! enemy-noto (rand-vu-int-range 289 298))
-            )
-
-            (when ;factory
-                (and
-                    (or
-                        (= (-> (level-get-target-inside *level*) name) 'factorya)
-                        (= (-> (level-get-target-inside *level*) name) 'factoryb)
-                        (= (-> (level-get-target-inside *level*) name) 'lfacrm1)
-                    )
-                    (not (= (-> (level-get-target-inside *level*) name) 'factoryd))
-                    (!= enemy-noto 311)
-                    (!= enemy-noto 312)
-                    (!= enemy-noto 313)
-                    (!= enemy-noto 314)
-                    (!= enemy-noto 315)
-                    (!= enemy-noto 316)
-                    (!= enemy-noto 317)
-                    (!= enemy-noto 318)
-                    (!= enemy-noto 319)
-                    (!= enemy-noto 320)
-                )
-                (set! enemy-noto (rand-vu-int-range 311 320))
-            )
-            (when ;factory-boss
-                (and
-                    (= (-> (level-get-target-inside *level*) name) 'factoryd)
-                    (!= enemy-noto 1000)
-                )
-                (set! enemy-noto 1000)
-            )
-
-            (when 
-            (and 
-                (= start-was-uprising #t)
-                (= (-> (level-get-target-inside *level*) name) 'desert)
-                *target*
-                (not *scene-player*)
-                (= (paused?) #f)
-                (= (pause-allowed?) #t)
-            )
-                (+! wasi 1)
-                (when (= wasi 3000)
-                    (+! enemy-noto 1)
-                    (set! wasi 0)
+                    (set! enemy-noto (+ notoriety-level 64))
                 )
             )
 
             (when 
-                (and
-                    (!= (-> (level-get-target-inside *level*) name) 'desert)
-                    (not (task-node-open? (game-task-node arena-replay-1-fight)))
-                    (= start-was-uprising #t)
+                (and 
+                    (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                    (= weather-dark-mode #f)
                 )
+                (when ;WASDOORS
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                        (!= enemy-noto 50)
+                    )
+                    (set! enemy-noto 50)
+                )
+                (when
+                    (not in-arena-fight?)
+                    (when (not (task-node-closed? (game-task-node arena-fight-2-resolution)))
+                        (when ;WASCITYA
+                            (and
+                                (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
+                                (= (-> (level-get-target-inside *level*) name) 'wascitya)
+                                (!= enemy-noto 50)
+                            )
+                            (set! enemy-noto 50)
+                        )
+                        (when ;WASCITYB
+                            (and
+                                (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
+                                (= (-> (level-get-target-inside *level*) name) 'wascityb)
+                                (not (task-node-open? (game-task-node wascity-pre-game-battle)))
+                                (!= enemy-noto 51)
+                            )
+                            (set! enemy-noto 51)
+                        )
+                    )
+                    (when (task-node-closed? (game-task-node arena-fight-2-resolution))
+                        (when ;WASCITYA
+                            (and
+                                (= (-> (level-get-target-inside *level*) name) 'wascitya)
+                                (or
+                                    (< enemy-noto 50)
+                                    (> enemy-noto 60)
+                                )
+                            )
+                            (set! enemy-noto (rand-vu-int-range 50 60))
+                        )
+                        (when ;WASCITYB
+                            (and
+                                (= (-> (level-get-target-inside *level*) name) 'wascityb)
+                                (not (task-node-open? (game-task-node wascity-pre-game-battle)))
+                                (or
+                                    (< enemy-noto 56)
+                                    (> enemy-noto 66)
+                                )
+                            )
+                            (set! enemy-noto (rand-vu-int-range 56 66))
+                        )
+                    )
+                )
+
+                (when ;ARENA FIGHT 1
+                    (and
+                        (task-node-open? (game-task-node arena-fight-1-fight))
+                        (!= enemy-noto 50)
+                    )
+                    (set! enemy-noto 50)
+                )
+                (when ;ARENA FIGHT 2
+                    (and
+                        (task-node-open? (game-task-node arena-fight-2-fight))
+                        (!= enemy-noto 55)
+                    )
+                    (set! enemy-noto 55)
+                )
+                (when ;ARENA FIGHT 3
+                    (and
+                        (task-node-open? (game-task-node arena-fight-3-fight))
+                        (!= enemy-noto 65)
+                    )
+                    (set! enemy-noto 65)
+                )
+                (when ;DESERT
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'desert)
+                        (not (task-node-open? (game-task-node desert-jump-mission-protect-doors)))
+                        (= in-satbattle? #f)
+                        (!= enemy-noto notoriety-level)
+                        (= start-was-uprising #f)
+                    )
+                    (when (>= notoriety-level 3)
+                        (set! enemy-noto (+ notoriety-level 47))
+                        (set! start-was-uprising #t)
+                        (set! wasi 0)
+                    )
+                )
+                (when ;PRECUR
+                    (and
+                        (or
+                            (task-node-open? (game-task-node precursor-tour-introduction))
+                            (task-node-open? (game-task-node precursor-tour-generator-trigger))
+                            (task-node-open? (game-task-node precursor-tour-resolution))
+                        )
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'precura)
+                            (= (-> (level-get-target-inside *level*) name) 'precurb)
+                            (= (-> (level-get-target-inside *level*) name) 'precurc)
+                            (= (-> (level-get-target-inside *level*) name) 'precurd)
+                        )
+                        (!= enemy-noto 89)
+                    )
+                    (set! enemy-noto 89)
+                )
+                (when ;DESBOSS
+                    (and
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'deswalk)
+                            (= (-> (level-get-target-inside *level*) name) 'desboss2)
+                        )
+                        (!= enemy-noto 99)
+                    )
+                    (set! enemy-noto 99)
+                )
+                (when 
+                    (and 
+                        (= start-was-uprising #t)
+                        (= (-> (level-get-target-inside *level*) name) 'desert)
+                        *target*
+                        (not *scene-player*)
+                        (= (paused?) #f)
+                        (= (pause-allowed?) #t)
+                    )
+                    (+! wasi 1)
+                    (when (= wasi 3000)
+                        (+! enemy-noto 1)
+                        (set! wasi 0)
+                    )
+                )
+
+                (when 
+                    (and
+                        (!= (-> (level-get-target-inside *level*) name) 'desert)
+                        (not (task-node-open? (game-task-node arena-replay-1-fight)))
+                        (= start-was-uprising #t)
+                    )
                     (set! wasi 0)
                     (set! start-was-uprising #f)
                 )
-
-            (when ;STADIUMA+B
-                (and
-                    (or
-                        (= (-> (level-get-target-inside *level*) name) 'stadiuma)
-                        (= (-> (level-get-target-inside *level*) name) 'stadiumb)
-                        (= (-> (level-get-target-inside *level*) name) 'stadium)
-                    )
-                    (or
-                        (< enemy-noto 560)
-                        (> enemy-noto 590)
-                    )
-                )
-                (set! enemy-noto (rand-vu-int-range 560 590))
-            )
-
-            (when ;DARK SHIP
-                (and
-                    (or
-                        (= (-> (level-get-target-inside *level*) name) 'precura)
-                        (= (-> (level-get-target-inside *level*) name) 'precurb)
-                        (= (-> (level-get-target-inside *level*) name) 'precurc)
-                        (= (-> (level-get-target-inside *level*) name) 'precurd)
-                    )
-                    (task-node-closed? (game-task-node precursor-tour-resolution))
-                    (!= enemy-noto 1000)
-                )
-                (set! enemy-noto 1000)
-            )
             )
         )
         
@@ -2281,6 +2034,16 @@
                     (!= enemy-noto 40)
                 )
                 (set! enemy-noto 40)
+            )
+            (when ;DESBOSS
+                (and
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'deswalk)
+                        (= (-> (level-get-target-inside *level*) name) 'desboss2)
+                    )
+                    (!= enemy-noto 50)
+                )
+                (set! enemy-noto 50)
             )
             (when 
             (and 

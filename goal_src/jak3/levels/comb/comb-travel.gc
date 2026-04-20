@@ -167,6 +167,9 @@
       'scale-max-hit-points
       (* (-> self hp-scale) (+ 1.0 (-> self suck-factor)))
       )
+    (when (task-node-open? (game-task-node comb-wild-ride-resolution))
+      (send-event (handle->process (-> self player-vehicle)) 'ignore-damage #f)
+    )
     (send-event (handle->process (-> self player-vehicle)) 'ignore-impulse #f)
     (when (-> self outro-sequence)
       (until #f

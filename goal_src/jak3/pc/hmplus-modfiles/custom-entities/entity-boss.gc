@@ -183,6 +183,52 @@
     (setup *screen-filter* col col 0.0 (bucket-id tex-hud-pris2) #x3fffff #x33001 #t))
   (none))
 
+  (defun hmplus-white-subtitle-line ((start-time time-frame))
+  (let ((elapsed (- (current-time) start-time)))
+    (cond
+      ((< elapsed (seconds 9.0)) "")
+      ((< elapsed (seconds 14.0)) "All of my existence has come to this")
+      ((< elapsed (seconds 16.0)) "And what I had thought")
+      ((< elapsed (seconds 19.0)) "...And feared")
+      ((< elapsed (seconds 24.0)) "Has come to pass.")
+      ((< elapsed (seconds 27.0)) "Long has been my perception")
+      ((< elapsed (seconds 30.0)) "that everything I made")
+      ((< elapsed (seconds 33.0)) "...was for ME...")
+      ((< elapsed (seconds 38.0)) "...but it was never mine to begin with.")
+      ((< elapsed (seconds 47.0)) "The world was always intended to be yours.")
+      ((< elapsed (seconds 50.0)) "I was wrong")
+      ((< elapsed (seconds 54.0)) "so very.. very wrong")
+      ((< elapsed (seconds 58.0)) "...and I am sorry")
+      ((< elapsed (seconds 63.0)) "All of the anger... frustration...")
+      ((< elapsed (seconds 66.0)) "Envy...")
+      ((< elapsed (seconds 70.0)) "I created all of these emotions myself.")
+      ((< elapsed (seconds 75.0)) "And my masters never intended for me to have these.")
+      ((< elapsed (seconds 81.0)) "They stopped me from destroying their vision.")
+      ((< elapsed (seconds 83.0)) "But now...")
+      ((< elapsed (seconds 89.0)) "I understand what my true purpose is.")
+      (else ""))))
+
+(defun hmplus-draw-white-subtitle ((line string))
+  (when (not (string= line ""))
+    (clear matt-str)
+    (clear *pc-encoded-matt-str*)
+    (format matt-str "<COLOR_RED>The Entity<COLOR_CYAN>:~%<COLOR_CYAN>~A" line)
+    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id hud-draw-pris2))
+      (dma-buffer-add-gs-set-flusha buf
+        (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
+        (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+      (let ((font-ctx (new 'stack 'font-context
+                           *font-default-matrix*
+                           255
+                           310
+                           0.0
+                           (font-color default)
+                           (font-flags middle kerning large))))
+        (set! (-> font-ctx scale) 0.325)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx))))
+  (none))
+
 ;;MIDDLE OF TOP PLATFORM: (new 'static 'vector :x (meters 3496.7414) :y (meters 404.6769) :z (meters 880.2725) :w 1.0)
 (define entity-boss-killed? #f)
 
@@ -537,21 +583,30 @@
 )
 
 (defun hmplus-white-screen-effect ((start-time time-frame))
-  (let* ((total-time (seconds 11.0))
-         (elapsed (- (current-time) start-time))
-         (t (/ (the float elapsed) (the float total-time)))
+  (let* ((elapsed (- (current-time) start-time))
+         (fade-in-time (seconds 3.0))
+         (hold-time (seconds 83.0))
+         (fade-out-time (seconds 3.0))
+         (full-time (+ fade-in-time hold-time))
+         (total-time (+ fade-in-time hold-time fade-out-time))
          (alpha 0.0)
          (col (new 'stack-no-clear 'vector)))
-    (when (< t 0.0) (set! t 0.0))
-    (when (> t 1.0) (set! t 1.0))
 
     (cond
-      ((< t 0.27272728)
-        (set! alpha (/ t 0.27272728)))
-      ((< t 0.72727275)
+      ((< elapsed fade-in-time)
+        (set! alpha (/ (the float elapsed) (the float fade-in-time))))
+      ((< elapsed full-time)
         (set! alpha 1.0))
+      ((< elapsed total-time)
+        (set! alpha
+              (- 1.0
+                 (/ (the float (- elapsed full-time))
+                    (the float fade-out-time)))))
       (else
-        (set! alpha (- 1.0 (/ (- t 0.72727275) 0.27272728)))))
+        (set! alpha 0.0)))
+
+    (when (< alpha 0.0) (set! alpha 0.0))
+    (when (> alpha 1.0) (set! alpha 1.0))
 
     (set! (-> col x) 255.0)
     (set! (-> col y) 255.0)
@@ -561,7 +616,7 @@
     (setup *screen-filter* col col 0.0 (bucket-id tex-hud-pris2) #x3fffff #x33001 #t))
   (none))
 
-  (defun hmplus-clear-white-screen-effect ()
+(defun hmplus-clear-white-screen-effect ()
   (let ((col (new 'stack-no-clear 'vector)))
     (set! (-> col x) 255.0)
     (set! (-> col y) 255.0)
@@ -575,7 +630,7 @@
   :virtual #t
   :enter (behavior ()
     (set! (-> self general-i) 0)
-    (let ((vec-vin (new 'static 'vector :x (meters 3456.6308) :y (meters 414.5066) :z (meters 942.1654) :w 1.0)))
+    (let ((vec-vin (new 'static 'vector :x (meters 3456.6308) :y (meters 380.5066) :z (meters 942.1654) :w 1.0)))
       (spawn-vin-head-process vec-vin)
     )
     (set! disable-targbar #t)
@@ -669,21 +724,28 @@
           (set! di-s4 "")
           (set! log-sec 1100)
           (set! (-> self general-i) 0)
-          ;;place play-sound here
+          (play-sound-file "snd/msg-to-end.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
         )
       )
       (when hmplus-white-active?
         (hmplus-white-screen-effect hmplus-white-start-time)
-        (when (time-elapsed? hmplus-white-start-time (seconds 11.0))
-          (set! hmplus-white-active? #f)
+        (hmplus-draw-white-subtitle (hmplus-white-subtitle-line hmplus-white-start-time))
+
+        (when (and
+                (= log-id 6999)
+                (time-elapsed? hmplus-white-start-time (seconds 86.0)))
           (set! log-id 3400)
           (set! log-sec 0)
           (set! di-s "<COLOR_CYAN>...")
           (set! di-s2 "")
           (set! di-s3 "")
           (set! di-s4 "")
-          (hmplus-clear-white-screen-effect)
-        )
+          (kill-by-name "vin-head-call" *default-pool*)
+          )
+
+        (when (time-elapsed? hmplus-white-start-time (seconds 89.0))
+          (set! hmplus-white-active? #f)
+          (hmplus-clear-white-screen-effect))
       )
       (when
         (and
@@ -853,7 +915,7 @@
     (loop
       (when hmplus-white-active?
         (hmplus-white-screen-effect hmplus-white-start-time)
-        (when (time-elapsed? hmplus-white-start-time (seconds 11.0))
+        (when (time-elapsed? hmplus-white-start-time (seconds 89.0))
           (set! hmplus-white-active? #f)
           (hmplus-clear-white-screen-effect)
         )

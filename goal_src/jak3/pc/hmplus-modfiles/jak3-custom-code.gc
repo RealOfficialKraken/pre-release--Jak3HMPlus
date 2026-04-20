@@ -6623,7 +6623,7 @@ BUGS:
                         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
                         (clear matt-str)
                         (clear *pc-encoded-matt-str*)
-                        (format matt-str "<COLOR_WHITE>Welcome to HeroMode+ v~s,~%~%Let it be known that this mod is nothing like the Jak II HeroMode+ mod, ~%but something more.~%~%When creating the Jak II mod, I inteded Jak II to be ~%the holy grail in challenge and difficulty, while also making it feel like~%you're playing for the first time again.~%This mod is completely different from that goal.~%~%In this mod, ambition is at it's maximum.~%Missions are changed, some are completely replaced or taken out,~%and gameplay is overhauled.~%~%I cannot thank you all enough for playing this.~%Whenever I make something creative, most of it does not see the other~%end of a person playing it for their enjoyment.~%But this is different.~%So thank you, for giving me this opportunity to present such a~%huge passion project to you.~%...Also expect lots of crashes :)~%~%~%~% Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%~%~%X<COLOR_WHITE> Continue"
+                        (format matt-str "<COLOR_WHITE>Welcome to HeroMode+ v~s,~%~%Let it be known that this mod is nothing like the Jak II HeroMode+ mod, ~%but something more.~%~%When creating the Jak II mod, I inteded Jak II to be ~%the holy grail in challenge and difficulty, while also making it feel like~%you're playing for the first time again.~%This mod is completely different from that goal.~%~%In this mod, ambition is at it's maximum.~%Missions are changed, some are completely replaced or taken out,~%and gameplay is overhauled.~%~%I cannot thank you all enough for playing this.~%Whenever I make something creative, most of it does not see the other~%end of a person playing it for their enjoyment.~%But this is different.~%So thank you, for giving me this opportunity to present such a~%huge passion project to you.~%...Also expect lots of crashes :)~%~%ALSO also--Hero Mode is not yet fully implemented!~%Don't try it until 1.0 comes out~%~%~%~% Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%~%~%X<COLOR_WHITE> Continue"
                         mod-version
                         )
                         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
@@ -6932,6 +6932,7 @@ BUGS:
             *target*
             (not *scene-player*)
             (= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 4)
+            (not (task-node-closed? (game-task-node desert-final-boss-resolution)))
             (not weather-dark-mode)
             (not (search-process-tree *active-pool* (lambda ((p process)) (type? p task-arrow-c))))
         )
