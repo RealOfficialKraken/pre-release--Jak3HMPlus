@@ -634,7 +634,10 @@
           )
           (("warp-gate-dark-tower")
             (set! (-> this continue) #f)
-            (when (= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 3)
+            (when (and
+                    (= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 3)
+                    (task-node-closed? (game-task-node palace-ruins-attack-introduction))
+                  )
               (set! (-> this continue) (get-continue-by-name *game-info* "desertb-dark-tower"))
             )
             (when (>= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 4)

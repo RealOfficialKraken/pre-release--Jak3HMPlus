@@ -3240,7 +3240,7 @@
       (set! (-> this hit-points) (+ (* 14.0 (-> this enemy-info default-hit-points)) (* (the float enemy-noto) 3)))
       (set! (-> this hit-points) (+ (-> this enemy-info default-hit-points) (* (the float enemy-noto) 3)))
       )
-  (when (> enemy-noto 71)
+  (when (> enemy-noto 44)
     (set! (-> this name) "Black Harbinger")
     (set-vector! (-> this draw color-mult) -455.0 -455.0 -455.0 1.0)
   )

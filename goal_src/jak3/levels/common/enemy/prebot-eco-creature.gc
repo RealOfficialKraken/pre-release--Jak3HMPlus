@@ -1720,31 +1720,35 @@
                  )
            )
       (when v1-9
-        (set-vector!
-          (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0 incoming attack-direction)
-          (-> self incoming attack-direction z)
-          (-> self incoming attack-direction y)
-          (- (-> self incoming attack-direction x))
-          1.0
-          )
-        (set! (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0 incoming knocked-type)
-              (knocked-type blue-shot)
+        (let ((child (ppointer->process v1-9)))
+          (when (type? child prebot-medium-eco-creature)
+            (set-vector!
+              (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0 incoming attack-direction)
+              (-> self incoming attack-direction z)
+              (-> self incoming attack-direction y)
+              (- (-> self incoming attack-direction x))
+              1.0
               )
-        (if (logtest? (-> self flags) (eco-creature-flag ecf2))
-            (set! (-> (the-as prebot-medium-eco-creature (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0)) flags)
-                  (logior (-> (the-as prebot-large-eco-creature (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0)) flags)
-                          (eco-creature-flag ecf2)
-                          )
+            (set! (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0 incoming knocked-type)
+                  (knocked-type blue-shot)
                   )
-            (logclear!
-              (-> (the-as prebot-medium-eco-creature (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0)) flags)
-              (eco-creature-flag ecf2)
-              )
-            )
-        (prebot-medium-eco-creature-method-196
-          (the-as prebot-medium-eco-creature (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0))
-          )
-        )
+            (if (logtest? (-> self flags) (eco-creature-flag ecf2))
+                (set! (-> (the-as prebot-medium-eco-creature
+                                  (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0))
+                          flags)
+                      (logior
+                        (-> (the-as prebot-large-eco-creature
+                                    (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0))
+                            flags)
+                        (eco-creature-flag ecf2)))
+                (logclear!
+                  (-> (the-as prebot-medium-eco-creature
+                              (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0))
+                      flags)
+                  (eco-creature-flag ecf2)))
+            (prebot-medium-eco-creature-method-196
+              (the-as prebot-medium-eco-creature
+                      (-> (the-as (pointer prebot-medium-eco-creature) v1-9) 0))))))
       )
     (let* ((s5-2 (get-process *default-dead-pool* (-> self split-type) #x4000 1))
            (v1-13 (when s5-2
@@ -1757,30 +1761,35 @@
                   )
            )
       (when v1-13
-        (set-vector!
-          (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0 incoming attack-direction)
-          (- (-> self incoming attack-direction z))
-          (-> self incoming attack-direction y)
-          (-> self incoming attack-direction x)
-          1.0
-          )
-        (set! (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0 incoming knocked-type)
-              (knocked-type blue-shot)
+        (let ((child (ppointer->process v1-13)))
+          (when (type? child prebot-medium-eco-creature)
+            (set-vector!
+              (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0 incoming attack-direction)
+              (-> self incoming attack-direction z)
+              (-> self incoming attack-direction y)
+              (- (-> self incoming attack-direction x))
+              1.0
               )
-        (if (logtest? (-> self flags) (eco-creature-flag ecf2))
-            (logior!
-              (-> (the-as prebot-medium-eco-creature (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0)) flags)
-              (eco-creature-flag ecf2)
-              )
-            (logclear!
-              (-> (the-as prebot-medium-eco-creature (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0)) flags)
-              (eco-creature-flag ecf2)
-              )
-            )
-        (prebot-medium-eco-creature-method-197
-          (the-as prebot-medium-eco-creature (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0))
-          )
-        )
+            (set! (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0 incoming knocked-type)
+                  (knocked-type blue-shot)
+                  )
+            (if (logtest? (-> self flags) (eco-creature-flag ecf2))
+                (set! (-> (the-as prebot-medium-eco-creature
+                                  (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0))
+                          flags)
+                      (logior
+                        (-> (the-as prebot-large-eco-creature
+                                    (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0))
+                            flags)
+                        (eco-creature-flag ecf2)))
+                (logclear!
+                  (-> (the-as prebot-medium-eco-creature
+                              (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0))
+                      flags)
+                  (eco-creature-flag ecf2)))
+            (prebot-medium-eco-creature-method-196
+              (the-as prebot-medium-eco-creature
+                      (-> (the-as (pointer prebot-medium-eco-creature) v1-13) 0))))))
       )
     )
   (prebot-large-eco-creature-method-195 self)

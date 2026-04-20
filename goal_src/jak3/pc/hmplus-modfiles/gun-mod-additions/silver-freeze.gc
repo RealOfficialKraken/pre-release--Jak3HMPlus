@@ -14,6 +14,16 @@
     active)
   )
 
+(defun silver-freeze-exempt? ((victim process))
+  (if victim
+      (let ((enemy-name (remap-enemy-type-name (-> victim type))))
+        (or (= enemy-name 'eco-creature-small)
+            (= enemy-name 'eco-creature-medium)
+            (= enemy-name 'eco-creature-large)
+            (= enemy-name 'entity-boss)
+            (= enemy-name 'rage-ghost)))
+      #f))
+
 (defbehavior silver-freeze-proc-init-by-other silver-freeze-proc ((victim process))
   (set! (-> self victim) (process->handle victim))
   (set! (-> self end-time) (+ (current-time) (seconds 2)))
@@ -69,15 +79,15 @@
       (let ((pd (the-as process-drawable victim)))
         (when (and pd (nonzero? (-> pd draw)))
           (set! (-> pd draw color-mult quad) (the-as uint128 0))
-          (set! (-> pd draw color-mult x) 0.35)
-          (set! (-> pd draw color-mult y) 1.0)
+          (set! (-> pd draw color-mult x) 0.2)
+          (set! (-> pd draw color-mult y) 0.35)
           (set! (-> pd draw color-mult z) 1.0)
           (set! (-> pd draw color-mult w) 1.0)
 
           (set! (-> pd draw color-emissive quad) (the-as uint128 0))
           (set! (-> pd draw color-emissive x) 0.0)
-          (set! (-> pd draw color-emissive y) 0.12)
-          (set! (-> pd draw color-emissive z) 0.12)
+          (set! (-> pd draw color-emissive y) 0.03)
+          (set! (-> pd draw color-emissive z) 0.18)
           (set! (-> pd draw color-emissive w) 1.0))))
   (none))
 
@@ -100,17 +110,14 @@
 
 (defun silver-freeze-hit ((victim process))
   (when victim
-    (cond
-      ((type? victim rage-ghost)
-       (none))
-      (else
-        (silver-freeze-kill-procs victim)
-        (process-spawn
-          silver-freeze-proc
-          :init silver-freeze-proc-init-by-other
-          victim
-          :name "silver-freeze-proc"
-          :to *active-pool*))))
+    (unless (silver-freeze-exempt? victim)
+      (silver-freeze-kill-procs victim)
+      (process-spawn
+        silver-freeze-proc
+        :init silver-freeze-proc-init-by-other
+        victim
+        :name "silver-freeze-proc"
+        :to *active-pool*)))
   (none))
 
 (defstate active (silver-freeze-proc)

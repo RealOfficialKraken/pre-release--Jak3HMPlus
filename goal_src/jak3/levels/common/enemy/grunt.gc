@@ -2138,7 +2138,9 @@
      (freeze-hit-begin)
      (when (<= (-> this hit-points) 0.0)
       (silver-freeze-kill-procs this)
-      (drop-rage-crate (-> this root trans))
+      (when (not (logtest? (-> *game-info* features) (game-feature gun-dark-3)))
+        (drop-rage-crate (-> this root trans))
+      )
       (kill-by-name "rage-ghost" *default-pool*)
     )
      (cond

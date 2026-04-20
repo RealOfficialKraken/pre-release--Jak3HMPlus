@@ -35,13 +35,13 @@ There are 3 extra mods for each colored gun, making a total of 12 super gun mods
 - Commando Shot: Shoot out 3 blaster mod projectiles in a wide range
 - Quad Shot: Shots quadruple to fire out in all directions
 #### Yellow
-- Catapult Fury: Every shot sends a fireball down to strike your enemy
-- Silver Freeze: Every shot freezes an enemy for 0.5 seconds
+- Hailstorm Fury: Every shot sends a fireball down to strike your enemy
+- Silver Freeze: Every shot freezes an enemy for 3 seconds
 - Critical Shot: Chance to crit enemies for absolute massive damage.
 #### Blue
 - Ammo Shark: 33.33% chance to not consume ammo while firing
 - Minigun Shot: Fire a purple turret shot that does extra damage
-- Master Blaster: Chance for a purple turret shot to fire out from Jak in all directions
+- Disperser: Chance for a purple turret shot to fire out from Jak in all directions
 #### Dark (NONE OF THESE WORK WITH THE NUKE, FOR OBVIOUS REASONS)
 - Random Shot: Shoot out a few random projectiles when firing
 - Reaper: Fire a purple rift that lobs grenades at all your foes

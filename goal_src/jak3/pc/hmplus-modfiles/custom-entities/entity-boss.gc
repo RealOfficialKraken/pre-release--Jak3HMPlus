@@ -1652,7 +1652,7 @@
     :neck-joint 0
     :look-at-joint 0
     :bullseye-joint 0
-    :default-hit-points 10.0
+    :default-hit-points 100000.0
     :gnd-collide-with (collide-spec backgnd)
     :recover-gnd-collide-with (collide-spec backgnd crate obstacle hit-by-others-list pusher)
     :movement-gravity 0.0
@@ -2255,8 +2255,8 @@
   (vector-copy! (-> self move-start) (-> self root trans))
   (vector-copy! (-> self move-end) (-> self root trans))
   (logior! (-> self skel status) (joint-control-status sync-math))
-  (set! (-> self hit-points) 10.0)
-  (set! (-> self enemy-info default-hit-points) 10.0)
+  (set! (-> self hit-points) 100000.0)
+  (set! (-> self enemy-info default-hit-points) 100000.0)
   (reset-to-collide-spec (-> self focus) (collide-spec player-list))
   (clear-focused (-> self focus))
   (set! (-> self turn-speed) 1200.0)
@@ -2271,6 +2271,24 @@
   (set! (-> self fight-start-time) (current-time))
   (set! (-> self transition-phase) 0)
   (set! (-> self should-die?) #f)
+  (send-event *target* 'get-pickup (pickup-type ammo-yellow) 9999.0)
+  (send-event *target* 'get-pickup (pickup-type ammo-red) 9999.0)
+  (if (or
+          (logtest? (-> *game-info* features) (game-feature gun-blue-1))
+          (logtest? (-> *game-info* features) (game-feature gun-blue-2))
+          (logtest? (-> *game-info* features) (game-feature gun-blue-3))
+      )
+      (send-event *target* 'get-pickup (pickup-type ammo-blue) 9999.0)
+  )
+  (if (or
+          (logtest? (-> *game-info* features) (game-feature gun-dark-1))
+          (logtest? (-> *game-info* features) (game-feature gun-dark-2))
+          (logtest? (-> *game-info* features) (game-feature gun-dark-3))
+      )
+      (send-event *target* 'get-pickup (pickup-type ammo-dark) 9999.0)
+  )
+  (send-event *target* 'get-pickup (pickup-type eco-pill-dark) 100.0)
+  (send-event *target* 'get-pickup (pickup-type eco-pill-light) 100.0)
   (entity-boss-spawn-visible-model self)
   (go-virtual idle)
   (none)
