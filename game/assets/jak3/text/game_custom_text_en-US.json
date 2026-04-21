@@ -1,4 +1,6 @@
 {
+  "a4": "Please do not remove or insert any peripherals, turn off your system or shut down the game",
+  "b6": "While this icon is on screen, do not remove or insert any peripherals, turn off your system or shut down the game",
   "11fe": "Not in a mission",
   "11ff": "Playing a bonus mission",
   "1200": "Display Mode",
@@ -246,5 +248,6 @@
   "134b": "Swap R1 and R2",
   "134c": "Trigger Effects",
   "134d": "Fix Projectile Focus",
-  "134e": "Eco Grid (Pac-Man) D-Pad Controls"
+  "134e": "Eco Grid (Pac-Man) D-Pad Controls",
+  "134f": "Analog Sensitivity"
 }

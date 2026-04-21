@@ -6,7 +6,6 @@
 #include <random>
 #include <thread>
 #include <list>
-#include <set>
 
 #define MINIAUDIO_IMPLEMENTATION
 // NOTE - this is needed, because on macOS, there is a file called `MacTypes.h`
@@ -77,8 +76,7 @@ u32 vblank_interrupt_handler = 0;
 Timer ee_clock_timer;
 
 MiniAudioLib::ma_engine maEngine;
-std::map<std::string, std::list<MiniAudioLib::ma_sound*>> maSoundMap;
-std::set<MiniAudioLib::ma_sound*> pausedSounds;
+std::map<std::string, std::list<MiniAudioLib::ma_sound>> maSoundMap;
 MiniAudioLib::ma_sound* mainMusicSound;
 
 void kmachine_init_globals_common() {
@@ -162,8 +160,8 @@ void stopMP3(u32 filePathu32) {
     std::cerr << "Couldn't find sound to stop: " << filePath << std::endl;
   } else {
     // stop all instances of this sound
-    for (auto* sound : it->second) {
-      if (MiniAudioLib::ma_sound_stop(sound) != MiniAudioLib::MA_SUCCESS) {
+    for (auto sound : it->second) {
+      if (MiniAudioLib::ma_sound_stop(&sound) != MiniAudioLib::MA_SUCCESS) {
         std::cerr << "Failed to stop sound: " << filePath << std::endl;
       }
       // let the thread finish and handle ma_sound_uninit
@@ -177,36 +175,12 @@ void stopMP3(u32 filePathu32) {
 void stopAllSounds() {
   for (auto& pair : maSoundMap) {
     // stop all instances of this sound
-    for (auto* sound : pair.second) {
-      MiniAudioLib::ma_sound_stop(sound);
+    for (auto sound : pair.second) {
+      MiniAudioLib::ma_sound_stop(&sound);
     }
     pair.second.clear();
   }
   maSoundMap.clear();
-}
-
-// Function to pause all currently playing sounds.
-void pauseSoundFiles() {
-  std::lock_guard<std::mutex> lock(activeMusicsMutex);
-  for (auto& pair : maSoundMap) {
-    for (auto* sound : pair.second) {
-      if (sound && MiniAudioLib::ma_sound_is_playing(sound)) {
-        MiniAudioLib::ma_sound_stop(sound);
-        pausedSounds.insert(sound);
-      }
-    }
-  }
-}
-
-// Function to resume all paused sounds.
-void resumeSoundFiles() {
-  std::lock_guard<std::mutex> lock(activeMusicsMutex);
-  for (auto* sound : pausedSounds) {
-    if (sound && !MiniAudioLib::ma_sound_is_playing(sound)) {
-      MiniAudioLib::ma_sound_start(sound);
-    }
-  }
-  pausedSounds.clear();
 }
 
 // Function to get the names of currently playing files.
@@ -233,53 +207,50 @@ u64 playMP3_internal(u32 filePathu32, u32 volume, bool isMainMusic) {
     std::cout << "Playing file: " << filePath << std::endl;
 
     MiniAudioLib::ma_result result;
-    MiniAudioLib::ma_sound* sound = new MiniAudioLib::ma_sound;
+    MiniAudioLib::ma_sound sound;
 
     result = MiniAudioLib::ma_sound_init_from_file(&maEngine, fullFilePath.c_str(), 0, NULL, NULL,
-                                                    sound);
+                                                    &sound);
     if (result != MiniAudioLib::MA_SUCCESS) {
       std::cout << "Failed to load: " << filePath << std::endl;
-      delete sound;
       return;
     }
 
-    MiniAudioLib::ma_sound_set_volume(sound, ((float)volume) / 100.0);
+    MiniAudioLib::ma_sound_set_volume(&sound, ((float)volume) / 100.0);
 
     if (isMainMusic) {
-      MiniAudioLib::ma_sound_set_looping(sound, MA_TRUE);
+      MiniAudioLib::ma_sound_set_looping(&sound, MA_TRUE);
       mainMusicMutex.lock();
-      mainMusicSound = sound;
+      mainMusicSound = &sound;
       mainMusicMutex.unlock();
     }
 
-    MiniAudioLib::ma_sound_start(sound);
+    MiniAudioLib::ma_sound_start(&sound);
 
     if (!isMainMusic) {
       std::lock_guard<std::mutex> lock(activeMusicsMutex);
       if (maSoundMap.find(filePath) == maSoundMap.end()) {
-        maSoundMap.insert(std::make_pair(filePath, std::list<MiniAudioLib::ma_sound*>()));
+        maSoundMap.insert(std::make_pair(filePath, std::list<MiniAudioLib::ma_sound>()));
       }
       maSoundMap[filePath].push_back(sound);
     }
 
     // sleep/loop until we're no longer main music, or non-looping sound is stopped/ends
-    while (mainMusicSound == sound || MiniAudioLib::ma_sound_is_playing(sound) || pausedSounds.count(sound) > 0) {
+    while (mainMusicSound == &sound || MiniAudioLib::ma_sound_is_playing(&sound)) {
       std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-    MiniAudioLib::ma_sound_stop(sound);
-    MiniAudioLib::ma_sound_uninit(sound);
+    MiniAudioLib::ma_sound_stop(&sound);
+    MiniAudioLib::ma_sound_uninit(&sound);
     std::cout << "Finished playing file: " << filePath << std::endl;
 
     if (!isMainMusic) {
       std::lock_guard<std::mutex> lock(activeMusicsMutex);
       if (maSoundMap.find(filePath) != maSoundMap.end()) {
-        maSoundMap[filePath].remove(sound);
+        maSoundMap[filePath].remove_if(
+            [&](MiniAudioLib::ma_sound l_sound) { return &sound == &l_sound; });
       }
-      pausedSounds.erase(sound);
     }
-    
-    delete sound;
   });
 
   thread.detach();
@@ -534,6 +505,16 @@ s32 kwrite(u64 fs, u64 buffer, s32 size) {
     }
   }
   return result;
+}
+
+s32 kmkdir(u64 name) {
+  char acStack_90[128];
+  if (Ptr<String>(name)->data()[4] == '/') {  // start from the fourth character?
+    sprintf(acStack_90, "%s", Ptr<String>(name)->data() + 5);
+  } else {
+    sprintf(acStack_90, "host:%s", Ptr<String>(name)->data() + 4);
+  }
+  return ee::sceMkDir(acStack_90, 0x1fd);
 }
 
 /*!
@@ -1374,10 +1355,6 @@ void init_common_pc_port_functions(
 
   // Stop all sounds
   make_func_symbol_func("stop-all-sounds", (void*)stopAllSounds);
-
-  // Pause and resume all sounds
-  make_func_symbol_func("pause-sound-files", (void*)pauseSoundFiles);
-  make_func_symbol_func("resume-sound-files", (void*)resumeSoundFiles);
 
   // Main music stuff
   make_func_symbol_func("play-main-music", (void*)playMainMusic);

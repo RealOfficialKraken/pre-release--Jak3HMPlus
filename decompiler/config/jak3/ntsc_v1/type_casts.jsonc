@@ -8686,12 +8686,9 @@
   "(anon-function 8 mined-scenes)": [[31, "a0", "process"]],
   "(code flying maker)": [[10, "v1", "art-joint-anim"]],
   "(method 30 task-manager-wascity-defend)": [
-    [28, "v1", "handle"],
-    [55, "v1", "handle"],
-    [82, "v1", "handle"],
-    [25, "v1", "handle"],
-    [52, "v1", "handle"],
-    [79, "v1", "handle"]
+    [[25, 32], "v1", "handle"],
+    [[52, 59], "v1", "handle"],
+    [[79, 86], "v1", "handle"]
   ],
   "(code walking maker)": [[[123, 126], "v1", "task-manager-wascity-defend"]],
   "(post flying maker)": [[[260, 275], "v1", "task-manager-wascity-defend"]],
@@ -11298,9 +11295,7 @@
     [[844, 847], "a0", "dma-gif-packet"],
     [[921, 924], "v1", "dma-gif-packet"]
   ],
-  "(method 9 blit-displays-work)": [
-    [[2, 36], "v1", "(inline-array vector4w)"]
-  ],
+  "(method 9 blit-displays-work)": [[[2, 36], "v1", "(inline-array vector4w)"]],
   "(method 10 blit-displays-work)": [
     [[2, 141], "v1", "(inline-array vector4w)"]
   ],

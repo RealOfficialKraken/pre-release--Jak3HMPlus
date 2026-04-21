@@ -71,6 +71,18 @@
   (uk-english 11)
   ;; custom
   (finnish 12)
+  (swedish 13)
+  (danish 14)
+  (norwegian 15)
+  (br-portuguese 16)
+  (hungarian 17)
+  (catalan 18)
+  (icelandic 19)
+  (polish 20)
+  (lithuanian 21)
+  (czech 22)
+  (croatian 23)
+  (galician 24)
   )
 
 (defenum language-enum-s32
@@ -2604,6 +2616,8 @@
   (iop-mem)
   (cancel-dgo)
   (set-stereo-mode)
+  ;; og:preserve-this mirror mode
+  (set-mirror 201)
   )
 
 ;; +++gsound-h:sound-group
@@ -2941,6 +2955,17 @@
   :flag-assert         #x900000004
   )
 
+; added
+(defenum sound-mirror-mode
+  :type uint8
+  (normal)
+  (mirrored)
+  )
+
+; added for mirror mode
+(deftype sound-rpc-set-mirror-mode (sound-rpc-cmd)
+  ((mirror sound-mirror-mode)))
+
 (deftype sound-rpc-union (structure)
   ((data              uint32                      20 :offset-assert 0) ;; guessed by decompiler
    (load-bank         sound-rpc-load-bank            :offset-assert 0 :overlay-at data)
@@ -2964,6 +2989,7 @@
    (shutdown          sound-rpc-shutdown             :offset-assert 0 :overlay-at data)
    (list-sounds       sound-rpc-list-sounds          :offset-assert 0 :overlay-at data)
    (unload-music      sound-rpc-unload-music         :offset-assert 0 :overlay-at data)
+   (mirror-mode       sound-rpc-set-mirror-mode      :offset-assert 0 :overlay-at data)
    )
   :method-count-assert 9
   :size-assert         #x50
@@ -10153,10 +10179,10 @@
   (progress-cheats-suck-in-all-unlock #x126a)
   (progress-cheats-fast-travel-unlock #x126b)
   ; (progress-camera-options #x1280)
-  ; (progress-camera-options-first-horz #x1281)
-  ; (progress-camera-options-first-vert #x1282)
-  ; (progress-camera-options-third-horz #x1283)
-  ; (progress-camera-options-third-vert #x1284)
+  (progress-camera-options-first-horz #x1281)
+  (progress-camera-options-first-vert #x1282)
+  (progress-camera-options-third-horz #x1283)
+  (progress-camera-options-third-vert #x1284)
   (progress-normal #x1286)
   (progress-inverted #x1287)
   (progress-ps2-parts #x1288)
@@ -10297,6 +10323,7 @@
   (progress-controller-options-enable-trigger-effects #x134c)
   (progress-misc-fix-projectile-focus #x134d)
   (progress-controller-options-pacman-dpad #x134e)
+  (progress-controller-options-analog-sensitivity #x134f)
   )
 ;; ---text-h:text-id
 
@@ -42048,7 +42075,7 @@
     (find-offending-pfoc "Figure out the attacker process from the attack message sender and attack-info.
                           This is to handle cases where the attacker process is a non-focusable subprocess,
                           or the attacker is driving a vehicle."(_type_ process attack-info) process-focusable) ;; 145
-    (play-damage-sound "Pick and play the damage/death sound." (_type_ int) sound-id) ;; 146
+    (play-damage-or-death-sound "Pick and play the damage/death sound." (_type_ int) sound-id) ;; 146
     (clear-stale-victory "Remove victory flag if needed." (_type_) none) ;; 147
     (go-gun-dark-2-stretch "Go to the gun-dark-2-stretch state." (_type_) object) ;; 148
     (have-more-than-10-joints? "Does what it says, unused" (_type_) object) ;; 149
@@ -75041,5 +75068,3 @@
 (define-extern terraformer-head-advance-launch-script (function none :behavior terraformer-head))
 (define-extern terraformer-head-check-launch-script (function none :behavior terraformer-head))
 (define-extern terraformer-head-target-enable (function symbol none :behavior terraformer-head))
-
-
