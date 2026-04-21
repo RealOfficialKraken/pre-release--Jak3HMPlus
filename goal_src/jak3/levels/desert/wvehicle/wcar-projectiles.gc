@@ -621,6 +621,13 @@
             (else
              0.2)
             ))
+      (when 
+        (and
+          (not (task-node-closed? (game-task-node desert-artifact-race-1-resolution)))
+          (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+        )
+        (set! (-> this damage) 0.0)
+      )
     (if (logtest? (process-mask vehicle) (-> arg0 mask))
         (sound-play "inter-riccos")
         )
