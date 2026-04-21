@@ -241,10 +241,10 @@ dead
                 (let ((gp-0 (-> self spawn-pos)))
                     (let ((a2-2 (new 'stack-no-clear 'vector)))
                     (vector-! a2-2 (-> self lightning-pos) gp-0)
-                    (set! (-> *part-id-table* 9164 init-specs 4 initial-valuef) (vector-length a2-2))
-                    (draw-beam (-> *part-id-table* 9164) gp-0 a2-2 #f)
+                    (set! (-> *part-id-table* 1763 init-specs 4 initial-valuef) (vector-length a2-2))
+                    (draw-beam (-> *part-id-table* 1763) gp-0 a2-2 #f)
                     )
-                    (launch-particles (-> *part-id-table* 9166) (-> self lightning-pos))
+                    (launch-particles (-> *part-id-table* 1763) (-> self lightning-pos))
                     (let ((s5-1 (vector-normalize! (vector-! (new 'stack-no-clear 'vector) (-> self lightning-pos) gp-0) 1.0)))
                         (let ((s4-0 (new 'stack-no-clear 'vector)))
                             (if *target*
