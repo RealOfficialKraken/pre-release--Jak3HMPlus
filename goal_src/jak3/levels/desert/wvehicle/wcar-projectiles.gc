@@ -601,6 +601,13 @@
           (else
            0.2)
           ))
+  (when 
+        (and
+          (not (task-node-closed? (game-task-node desert-artifact-race-1-resolution)))
+          (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+        )
+        (set! (-> this damage) 0.0)
+      )
   (set! (-> this vehicle-damage-factor) 0.333)
   (set! (-> this vehicle-impulse-factor) 0.25)
   (set! (-> this timeout) (seconds 1.25))

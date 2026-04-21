@@ -422,6 +422,14 @@
    (set! global-max-marauder-cars 0)
    (set! (-> this target-count) 0)
    )
+  ((task-node-open? (game-task-node desert-artifact-race-1-race))
+   (set! global-max-marauder-cars 0)
+   (set! (-> this target-count) 0)
+   )
+  ((task-node-open? (game-task-node desert-artifact-race-1-resolution))
+   (set! global-max-marauder-cars 30)
+   (set! (-> this target-count) 30)
+   )
   (else
     (let ((scaled-count 3))
       (set! scaled-count
