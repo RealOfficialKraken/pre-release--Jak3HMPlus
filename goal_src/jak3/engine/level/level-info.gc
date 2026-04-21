@@ -20932,60 +20932,7 @@
                              )
         )
 
-;; og:preserve-this added test-zone level
-(define test-zone
-  (new 'static 'level-load-info
-    :name 'test-zone
-    :visname 'test-zone-vis
-    :nickname 'tsz
-    :dbname 'test-zone
-    :taskname 'default
-    :index #x128
-    :master-level #f
-    :packages '()
-    :run-packages '("common")
-    :memory-mode (level-memory-mode micro)
-    :music-bank #f
-    :extra-sound-bank #f
-    :mood-func 'update-mood-default
-    :special-mood #f
-    :ocean #f
-    :ocean-alpha 1.0
-    :priority 100
-    :draw-priority 10.0
-    :base-task-mask (task-mask task0)
-    :bigmap-id (bigmap-id none)
-    :continues '((new 'static 'continue-point
-                       :name "test-zone-start"
-                       :level 'wasdoors
-                       :flags (continue-flags no-auto warp-gate)
-                       :trans (new 'static 'vector :x (meters 2254.46) :y (meters 30.70) :z (meters 149.23) :w 1.0)
-                       :camera-trans (new 'static 'vector :x 9281600.0 :y 149347.94 :z 632856.2 :w 1.0)
-                       :quat (new 'static 'vector4h :data (new 'static 'array int16 4 0 #xc46 0 #x7f64))
-                       :camera-rot (new 'static 'array int16 9 #x7fd7 0 -1595 #xbe #x7f0c #xf6c #x62e -3954 #x7ee8)
-                       :on-goto #f
-                       :vis-nick 'wasdoors
-                       :vehicle-type #x1b
-                       :want-count 5
-                       :want (new 'static 'inline-array level-buffer-state-small 5
-                         (new 'static 'level-buffer-state-small :name 'wasall :display? 'special)
-                         (new 'static 'level-buffer-state-small :name 'waswide :display? 'display)
-                         (new 'static 'level-buffer-state-small :name 'wasdoors :display? 'display)
-                         (new 'static 'level-buffer-state-small :name 'wascitya :display? 'display)
-                         (new 'static 'level-buffer-state-small :name 'test-zone :display? 'display)
-                         )
-                       :want-sound (new 'static 'array symbol 3 'wasall1 'wascity1 'desert1)
-                       )
-      )
-    :callback-list '()
-    :borrow #f
-    :bottom-height (meters -150)
-    :fog-height (meters 80)
-    :max-rain 1.0
-    :fog-mult 1.0
-    :mood-range (new 'static 'mood-range :max-cloud 1.0 :min-fog 0.5 :max-fog 1.0)
-    )
-  )
+
 
   #|(define warp-room
   (new 'static 'level-load-info
