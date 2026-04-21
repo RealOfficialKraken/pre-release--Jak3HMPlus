@@ -2765,6 +2765,7 @@
 (defstate active (task-manager-prebot)
   :virtual #t
   :enter (behavior ()
+    (jak-refill!)
     (let ((t9-0 (-> (method-of-type task-manager active) enter)))
       (if t9-0
           (t9-0)

@@ -102,6 +102,7 @@
        )
        (else
         ;dark world
+          (jak-refill!)
          (when (string= (-> arg0 name) "desert-warp-dark")
           (set! (-> s5-1 quad) (-> wgd-vec quad))
           (+! (-> s5-1 y) 9011.2)

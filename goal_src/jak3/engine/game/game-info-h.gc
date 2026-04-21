@@ -149,6 +149,7 @@
   )
 
   (defun-extern reset-gunmod-vars! symbol none)
+  (defun-extern jak-refill! none)
 
   (define anchor-day? (if (rand-vu-percent? 0.5)
                         #t

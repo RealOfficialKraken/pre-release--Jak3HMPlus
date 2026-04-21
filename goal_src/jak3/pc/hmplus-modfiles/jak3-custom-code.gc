@@ -8374,6 +8374,28 @@ BUGS:
     (none)
   )
 
+  (defun jak-refill! ()
+    (send-event *target* 'get-pickup (pickup-type ammo-yellow) 9999.0)
+    (send-event *target* 'get-pickup (pickup-type ammo-red) 9999.0)
+    (if (or
+            (logtest? (-> *game-info* features) (game-feature gun-blue-1))
+            (logtest? (-> *game-info* features) (game-feature gun-blue-2))
+            (logtest? (-> *game-info* features) (game-feature gun-blue-3))
+        )
+        (send-event *target* 'get-pickup (pickup-type ammo-blue) 9999.0)
+    )
+    (if (or
+            (logtest? (-> *game-info* features) (game-feature gun-dark-1))
+            (logtest? (-> *game-info* features) (game-feature gun-dark-2))
+            (logtest? (-> *game-info* features) (game-feature gun-dark-3))
+        )
+        (send-event *target* 'get-pickup (pickup-type ammo-dark) 9999.0)
+    )
+    (send-event *target* 'get-pickup (pickup-type eco-pill-dark) 100.0)
+    (send-event *target* 'get-pickup (pickup-type eco-pill-light) 100.0)
+    (none)
+  )
+
   (defun init-entity-1! ()
     (let ((ent-pos (new-stack-vector0)))
         (set! (-> ent-pos quad) (-> (target-pos 0) quad))
