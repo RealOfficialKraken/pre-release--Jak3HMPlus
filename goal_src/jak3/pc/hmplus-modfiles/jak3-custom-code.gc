@@ -1094,6 +1094,7 @@ BUGS:
 (!= (-> *target* next-state name) 'target-turret-stance)
 (task-node-closed? (game-task-node arena-fight-1-resolution))
 (not (task-node-open? (game-task-node city-blow-barricade-resolution)))
+(not (search-process-tree *active-pool* (lambda ((p process)) (type? p final-boss-hm))))
 (not (focus-test? *target* pilot))
 )
 (freeze-enemies-in-menu!)
@@ -2494,10 +2495,10 @@ BUGS:
     (when (task-node-closed? (game-task-node modb-airstrike))
         (cond
             ((= gunmod-airstrike #t)
-                (set! blue-3s "<COLOR_GREEN>Portable Minigun")
+                (set! blue-3s "<COLOR_GREEN>Rocket Targeter")
             )
             (else
-                (set! blue-3s "<COLOR_RED>Portable Minigun")
+                (set! blue-3s "<COLOR_RED>Rocket Targeter")
             )
         )
     )
@@ -2846,7 +2847,7 @@ BUGS:
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_RED>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_GREEN>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)"
         blue-1s
         blue-2s
         blue-3s
@@ -2895,7 +2896,7 @@ BUGS:
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_RED>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_GREEN>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)"
         blue-1s
         blue-2s
         blue-3s
@@ -2944,7 +2945,7 @@ BUGS:
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_RED>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_GREEN>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)"
         blue-1s
         blue-2s
         blue-3s
@@ -2993,7 +2994,7 @@ BUGS:
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_RED>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_GREEN>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)"
         blue-1s
         blue-2s
         blue-3s
@@ -3042,7 +3043,7 @@ BUGS:
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_RED>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_GREEN>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)"
         blue-1s
         blue-2s
         blue-3s
@@ -3091,7 +3092,7 @@ BUGS:
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_RED>(<)"
+        (format matt-str "<COLOR_CYAN>BLUE:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%~%<COLOR_PINK>DARK:~%~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_WHITE>(<)~%<COLOR_ORANGE>~s <COLOR_GREEN>(<)"
         blue-1s
         blue-2s
         blue-3s
@@ -6980,6 +6981,22 @@ BUGS:
         )
             (send-event (ppointer->process *kv*) 'die #t)
         )
+
+    (when
+        (and
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            (using-gun? *target*)
+            (or 
+                (= (-> *target* gun gun-type) (pickup-type gun-blue-1))
+                (= (-> *target* gun gun-type) (pickup-type gun-blue-2))
+                (= (-> *target* gun gun-type) (pickup-type gun-blue-3))
+            )
+        )
+        (target-gun-airstrike-update)
+    )
 (none)
 )
 

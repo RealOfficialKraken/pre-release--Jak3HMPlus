@@ -592,4 +592,5 @@
   "floor-spikelight.o"
   "silver-freeze.o"
   "grunt.o"
+  "missle-seeker.o"
  ))

@@ -1,0 +1,462 @@
+(in-package goal)
+
+;; file-name: missle-seeker.gc
+
+(defpart 4710
+  :init-specs ((:texture (bigpuff level-default-sprite))
+    (:birth-func 'birth-func-texture-group)
+    (:num 1.0)
+    (:scale-x (meters 0.5) (meters 0.5))
+    (:rot-z (degrees 0) (degrees 360))
+    (:scale-y :copy scale-x)
+    (:r 150.0)
+    (:g 150.0)
+    (:b 150.0)
+    (:a 30.0 30.0)
+    (:scalevel-x (meters 0.01))
+    (:scalevel-y :copy scalevel-x)
+    (:fade-a -0.2 -0.2)
+    (:timer (seconds 1))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-13))
+    (:userdata :data (new 'static 'boxed-array :type int32 20 1 0 #x400000 #x405c00))
+    (:rotate-y (degrees 0))
+    )
+  )
+
+(defpart 4711
+  :init-specs ((:texture (bigpuff level-default-sprite))
+    (:birth-func 'birth-func-texture-group)
+    (:num 1.0)
+    (:scale-x (meters 1) (meters 0.5))
+    (:rot-z (degrees 0) (degrees 360))
+    (:scale-y :copy scale-x)
+    (:r 250.0)
+    (:g 80.0)
+    (:b 0.0)
+    (:a 30.0 30.0)
+    (:scalevel-x (meters 0.01))
+    (:scalevel-y :copy scalevel-x)
+    (:fade-r -2.0)
+    (:fade-g 1.4)
+    (:fade-b 3.0)
+    (:fade-a -0.2 -0.2)
+    (:timer (seconds 1))
+    (:flags (sp-cpuinfo-flag-2))
+    (:userdata :data (new 'static 'boxed-array :type int32 50 1 0 #x400000 #x405c00))
+    (:next-time (seconds 0.167))
+    (:next-launcher 4712)
+    (:rotate-y (degrees 0))
+    )
+  )
+
+(defpart 4712
+  :init-specs ((:fade-r 0.0) (:fade-g 0.0) (:fade-b 0.0))
+  )
+
+(defpartgroup group-missile-thruster-fire
+  :id 1432
+  :flags (sp0 sp4)
+  :bounds (static-bspherem 0 0 0 640)
+  :parts ((sp-item 4710)
+          (sp-item 4711)
+          (sp-item 4713 :flags (is-3d sp7))
+          (sp-item 4714 :flags (sp6 sp7)))
+)
+
+(defpart 4713
+  :init-specs ((:texture (gun-yellow-muzzleflash level-default-sprite))
+    (:num 4.0)
+    (:z (meters -0.4) 1 (meters -0.5))
+    (:scale-x (meters 0.1) 1 (meters 2))
+    (:rot-x (degrees 180))
+    (:rot-y (degrees 0))
+    (:rot-z (degrees 0) 1 (degrees 90))
+    (:scale-y (meters 2) 1 (meters 2))
+    (:r 255.0)
+    (:g 255.0)
+    (:b 255.0)
+    (:a 20.0 40.0)
+    (:fade-a -0.6)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+    (:conerot-z (degrees 0))
+    (:rotate-x (degrees 0))
+    (:rotate-y (degrees 0))
+    )
+  )
+
+(defpart 4714
+  :init-specs ((:texture (glow level-default-sprite))
+    (:num 1.0)
+    (:y (meters 0.25))
+    (:scale-x (meters 1.5) (meters 1))
+    (:rot-z (degrees 0) (degrees 360))
+    (:scale-y :copy scale-x)
+    (:r 255.0)
+    (:g 100.0)
+    (:b 0.0)
+    (:a 40.0 10.0)
+    (:timer (seconds 0.017))
+    (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3))
+    (:conerot-z (degrees 0))
+    (:rotate-y (degrees 0))
+    )
+  )
+
+(defskelgroup skel-missle-seeker cty-homing-missile cty-homing-missile-lod0-jg cty-homing-missile-idle-ja
+              ((cty-homing-missile-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 3)
+              :origin-joint-index 3
+              )
+
+(deftype missle-seeker (process-focusable)
+  ((root collide-shape-moving :override)
+   (slot-index int)
+   (fire-stamp time-frame)
+   (desired-target-pos vector :inline)
+   (speed float))
+  (:state-methods
+    from-back!
+    aim!
+    fire!
+    explode
+    dead))
+
+(defun missle-seeker-clear-slots ()
+  (dotimes (i 8)
+    (set! (-> *missle-seeker-slots* i) 0))
+  (none)
+)
+
+(defun missle-seeker-claim-slot ()
+  (dotimes (i 8)
+    (when (= (-> *missle-seeker-slots* i) 0)
+      (set! (-> *missle-seeker-slots* i) 1)
+      (return i)))
+  -1
+)
+
+(defun missle-seeker-release-slot ((slot int))
+  (when (and (>= slot 0) (< slot 8))
+    (set! (-> *missle-seeker-slots* slot) 0))
+  (none)
+)
+
+(defun missle-seeker-fire-all ((vec vector))
+  (when (< 0 *missle-seeker-count*)
+    (vector-copy! *missle-seeker-fire-target* vec)
+    (set! (-> *missle-seeker-fire-target* w) 1.0)
+    (set! *missle-seeker-fire-stamp* (current-time)))
+  (none)
+)
+
+(defun missle-seeker-reset-all ()
+  (missle-seeker-clear-slots)
+  (set! *missle-seeker-count* 0)
+  (set! *missle-seeker-fire-stamp* (the-as time-frame 0))
+  (set! (-> *missle-seeker-fire-target* quad) (the-as uint128 0))
+  (none)
+)
+
+(defun missle-seeker-spawn-tail-fx ((this missle-seeker))
+  (when (-> this part)
+    (let ((dir (new 'stack-no-clear 'vector))
+          (thruster-pos (new 'stack-no-clear 'vector))
+          (dir-len 0.0))
+      (vector-copy! dir (-> this root transv))
+      (set! dir-len (vector-length dir))
+      (when (< dir-len 0.001)
+        (vector-copy! dir
+          (vector-z-quaternion! (new 'stack-no-clear 'vector) (-> this root quat))))
+      (vector-normalize! dir 1.0)
+      (vector+float*! thruster-pos (-> this root trans) dir (meters -0.9))
+      (spawn (-> this part) thruster-pos)))
+  (none)
+)
+
+(defun missle-seeker-manual-hit? ((this missle-seeker))
+  (let ((q (new 'stack-no-clear 'collide-query))
+        (move (new 'stack-no-clear 'vector))
+        (hit 0.0)
+        (root (-> this root))
+        (prim (-> this root root-prim))
+        (jak-proc (the-as process #f)))
+
+    (when *target*
+      (set! jak-proc (the-as process *target*)))
+
+    (vector-copy! (-> q start-pos) (-> root trans))
+
+    (vector-copy! move (-> root transv))
+    (vector-float*! move move (seconds-per-frame))
+    (vector-copy! (-> q move-dist) move)
+
+    (set! (-> q radius) (-> prim prim-core world-sphere w))
+    (set! (-> q collide-with) (-> prim prim-core collide-with))
+    (set! (-> q ignore-process0) this)
+    (set! (-> q ignore-process1) jak-proc)
+    (set! (-> q ignore-pat) (-> root pat-ignore-mask))
+    (set! (-> q action-mask) (collide-action solid))
+
+    (set! hit (fill-and-probe-using-line-sphere *collide-cache* q))
+
+    (if (>= hit 0.0)
+        (if #t
+            (vector-copy! (-> root trans) (-> q best-other-tri intersect))
+            )
+        )
+
+    (>= hit 0.0)))
+
+(defbehavior missle-seeker-init-by-other missle-seeker ()
+  (set! (-> self slot-index) (missle-seeker-claim-slot))
+  (when (= (-> self slot-index) -1)
+    (go-virtual dead))
+
+  (let ((vec (new-stack-vector0)))
+    (vector-copy! vec (target-pos 0))
+    (+! (-> vec y) (meters 2))
+    (set! (-> vec w) 1.0)
+
+    (let ((root-shape (new 'process 'collide-shape-moving self (collide-list-enum hit-by-player))))
+      (set! (-> root-shape dynam) (copy *standard-dynamics* 'process))
+      (set! (-> root-shape reaction) cshape-reaction-default)
+      (set! (-> root-shape no-reaction)
+            (the-as (function collide-shape-moving collide-query vector vector object) nothing))
+      (set! (-> root-shape penetrate-using) (penetrate enemy-dark-shot))
+
+      ;; this was the big problem
+      ;; do NOT use (the-as penetrate -1)
+      (set! (-> root-shape penetrated-by) (penetrate))
+
+      (set! (-> root-shape max-iteration-count) (the-as uint 2))
+      (set! (-> root-shape event-self) 'touched)
+
+      (let ((prim (new 'process 'collide-shape-prim-sphere root-shape (the-as uint 0))))
+        ;; start with no collision
+        (set! (-> prim prim-core collide-as) (collide-spec))
+        (set! (-> prim prim-core collide-with) (collide-spec))
+        (set! (-> prim prim-core action) (collide-action))
+        (set-vector! (-> prim local-sphere) 0.0 0.0 0.0 2048.0)
+        (set! (-> root-shape total-prims) (the-as uint 1))
+        (set! (-> root-shape root-prim) prim))
+
+      (set! (-> root-shape nav-radius) (* 0.75 (-> root-shape root-prim local-sphere w)))
+      (set! (-> root-shape backup-collide-as) (-> root-shape root-prim prim-core collide-as))
+      (set! (-> root-shape backup-collide-with) (-> root-shape root-prim prim-core collide-with))
+      (set! (-> self root) root-shape)
+
+      (set! (-> self root pat-ignore-mask)
+            (new 'static 'pat-surface
+              :noentity #x1
+              :nojak #x1
+              :probe #x1
+              :noproj #x1
+              :noendlessfall #x1
+              :board #x1)))
+
+    (set! (-> self part) (create-launch-control (-> *part-group-id-table* 1432) self))
+
+    (initialize-skeleton
+      self
+      (the-as skeleton-group
+        (art-group-get-by-name *level* "skel-missle-seeker" (the-as (pointer level) #f)))
+      (the-as pair 0))
+
+    (set! (-> self fire-stamp) *missle-seeker-fire-stamp*)
+    (set! (-> self speed) 655360.0)
+    (set! (-> self desired-target-pos quad) (the-as uint128 0))
+
+    (vector-copy! (-> self root trans) vec)
+    (quaternion-identity! (-> self root quat))
+    (set-vector! (-> self root scale) 0.4 0.4 0.4 1.0))
+
+  (go-virtual from-back!)
+  (none))
+
+(defun spawn-missle-seeker ()
+  (when (< *missle-seeker-count* *missle-seeker-max*)
+    (+! *missle-seeker-count* 1)
+    (process-spawn missle-seeker :name "missle-seeker")
+  )
+  (none)
+)
+
+(defstate from-back! (missle-seeker)
+  :virtual #t
+  :enter (behavior ()
+    (logclear! (-> self draw status) (draw-control-status no-draw))
+    (set-time! (-> self state-time))
+  )
+  :code (behavior ()
+    (let ((base (new-stack-vector0))
+          (fwd (new 'stack-no-clear 'vector))
+          (right (new 'stack-no-clear 'vector))
+          (slot-pos (new 'stack-no-clear 'vector))
+          (jak (the-as process-focusable (as-type *target* process-focusable)))
+          (t 0.0)
+          (rise-y 0.0)
+          (slot-x 0.0)
+          (slot-y 0.0))
+      (loop
+        (when (and (nonzero? *missle-seeker-fire-stamp*)
+             (!= (-> self fire-stamp) *missle-seeker-fire-stamp*))
+            (set! (-> self fire-stamp) *missle-seeker-fire-stamp*)
+            (vector-copy! (-> self desired-target-pos) *missle-seeker-fire-target*)
+            (go-virtual fire!))
+        (when jak
+          (set! t
+            (fmin 1.0
+              (/ (the float (- (current-time) (-> self state-time)))
+                 (the float (seconds 0.2)))))
+          (set! rise-y (lerp (meters 2) (meters 5) t))
+          (case (-> self slot-index)
+            ;; left side
+            ((0) (set! slot-x (meters -2.6)) (set! slot-y (meters 2.0)))
+            ((1) (set! slot-x (meters -2.1)) (set! slot-y (meters 2.9)))
+            ((2) (set! slot-x (meters -1.4)) (set! slot-y (meters 3.6)))
+            ((3) (set! slot-x (meters -0.6)) (set! slot-y (meters 4.0)))
+
+            ;; right side (mirrored)
+            ((4) (set! slot-x (meters 0.6))  (set! slot-y (meters 4.0)))
+            ((5) (set! slot-x (meters 1.4))  (set! slot-y (meters 3.6)))
+            ((6) (set! slot-x (meters 2.1))  (set! slot-y (meters 2.9)))
+            ((7) (set! slot-x (meters 2.6))  (set! slot-y (meters 2.0))))
+          (set! slot-y (lerp rise-y slot-y t))
+          (vector-copy! base (target-pos 0))
+          (set! (-> base w) 1.0)
+          (quaternion-copy! (-> self root quat) (-> jak root quat))
+          (vector-copy! fwd
+            (vector-z-quaternion! (new 'stack-no-clear 'vector) (-> jak root quat)))
+          (set! (-> fwd y) 0.0)
+          (vector-normalize! fwd 1.0)
+          (vector-cross! right fwd *up-vector*)
+          (vector-normalize! right 1.0)
+          (vector-copy! slot-pos base)
+          (+! (-> slot-pos y) slot-y)
+          (vector+float*! slot-pos slot-pos right slot-x)
+          (vector-copy! (-> self root trans) slot-pos))
+          (missle-seeker-spawn-tail-fx self)
+          (when (and (nonzero? *missle-seeker-fire-stamp*)
+                    (!= (-> self fire-stamp) *missle-seeker-fire-stamp*))
+            (set! (-> self fire-stamp) *missle-seeker-fire-stamp*)
+            (vector-copy! (-> self desired-target-pos) *missle-seeker-fire-target*)
+            (go-virtual fire!)
+          )
+        (suspend)
+        )
+      )
+    )
+  :post ja-post
+)
+
+(defstate fire! (missle-seeker)
+  :virtual #t
+  :enter (behavior ()
+    (missle-seeker-release-slot (-> self slot-index))
+    (set! (-> self slot-index) -1)
+
+    (let ((dir (new 'stack-no-clear 'vector))
+          (prim (-> self root root-prim)))
+
+      (set! (-> prim prim-core collide-as) (collide-spec projectile))
+      (set! (-> prim prim-core collide-with)
+            (collide-spec
+              backgnd
+              jak
+              bot
+              crate
+              civilian
+              enemy
+              obstacle
+              vehicle-sphere
+              hit-by-others-list
+              player-list
+              special-obstacle
+              pusher))
+      (set! (-> prim prim-core action) (collide-action solid))
+
+      (set! (-> self root backup-collide-as) (-> prim prim-core collide-as))
+      (set! (-> self root backup-collide-with) (-> prim prim-core collide-with))
+
+      (vector-! dir (-> self desired-target-pos) (-> self root trans))
+      (vector-normalize! dir (-> self speed))
+      (vector-copy! (-> self root transv) dir)
+
+      (vector-normalize! dir 1.0)
+      (quaternion-look-at! (-> self root quat) dir *up-vector*)
+      (set-time! (-> self state-time))))
+  :code (behavior ()
+    (let ((dir (new 'stack-no-clear 'vector)))
+      (loop
+        ;; MANUAL collision sweep first
+        (when (missle-seeker-manual-hit? self)
+          (go-virtual explode))
+
+        ;; only move if the sweep found nothing
+        (integrate-and-collide! (-> self root) (-> self root transv))
+
+        ;; keep the old built-in status check too
+        (when (logtest? (-> self root status)
+                        (collide-status
+                          touch-surface
+                          touch-wall
+                          touch-ceiling
+                          touch-actor
+                          touch-background
+                          blocked
+                          stuck))
+          (go-virtual explode))
+
+        (vector-copy! dir (-> self root transv))
+        (when (> (vector-length dir) 0.001)
+          (vector-normalize! dir 1.0)
+          (quaternion-look-at! (-> self root quat) dir *up-vector*))
+
+        (missle-seeker-spawn-tail-fx self)
+
+        (when (time-elapsed? (-> self state-time) (seconds 10.0))
+          (go-virtual explode))
+
+        (suspend))))
+  :post ja-post
+)
+
+(defstate explode (missle-seeker)
+  :virtual #t
+  :enter (behavior ()
+    ;; reset all counters / slots / fire target immediately
+    (missle-seeker-reset-all)
+
+    (logior! (-> self draw status) (draw-control-status no-draw))
+
+    (let ((ep (new 'stack-no-clear 'explosion-init-params)))
+      (vector-copy! (-> ep spawn-point) (-> self root trans))
+      (quaternion-identity! (-> ep spawn-quat))
+      (set! (-> ep radius) (meters 5.0))
+      (set! (-> ep scale) 1.0)
+
+      (set! (-> ep group) (-> *part-group-id-table* 246))
+      (set! (-> ep collide-with)
+            (collide-spec backgnd civilian obstacle vehicle-sphere hit-by-others-list pusher))
+      (set! (-> ep damage) 12.0)
+      (set! (-> ep damage-scale) 1.0)
+      (set! (-> ep vehicle-damage-factor) 1.0)
+      (set! (-> ep vehicle-impulse-factor) 1.0)
+      (set! (-> ep ignore-proc) (the-as handle #f))
+
+      (explosion-spawn ep (the-as process-drawable *default-pool*))))
+  :code (behavior ()
+    (go-virtual dead))
+)
+
+(defstate dead (missle-seeker)
+  :virtual #t
+  :enter (behavior ()
+    (when (>= (-> self slot-index) 0)
+      (missle-seeker-release-slot (-> self slot-index)))
+    )
+  :code (behavior ()
+    (kill-by-name (-> self name) *default-pool*)
+    (deactivate self))
+)

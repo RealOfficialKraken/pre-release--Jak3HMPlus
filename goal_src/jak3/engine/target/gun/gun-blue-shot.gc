@@ -2213,17 +2213,60 @@
 
 (define *last-fire-blue-time* (the-as time-frame 0))
 
+(defun-extern spawn-missle-seeker none)
+
+(defun-extern missle-seeker-fire-all vector none)
+
+(defun target-gun-airstrike-update ()
+  (let ((targ (the-as target *target*)))
+    (when targ
+      (let ((blue-gun?
+              (or (= (-> targ gun gun-type) (pickup-type gun-blue-1))
+                  (= (-> targ gun gun-type) (pickup-type gun-blue-2))
+                  (= (-> targ gun gun-type) (pickup-type gun-blue-3))))
+            (holding-r1? (cpad-hold? (-> targ control cpad number) r1)))
+
+        (cond
+          ((and (= gunmod-airstrike #t) blue-gun? holding-r1?)
+           (set! *missle-seeker-blue-held-last* #t))
+
+          ((and (= gunmod-airstrike #t)
+                blue-gun?
+                (not holding-r1?)
+                (< 0 *missle-seeker-count*))
+           (missle-seeker-fire-all (-> targ gun laser-hit-point))
+           (set! *missle-seeker-blue-held-last* #f))
+
+          ((not holding-r1?)
+           (set! *missle-seeker-blue-held-last* #f))))))
+  (none)
+)
+
 ;; WARN: Return type mismatch object vs (pointer process).
 (defbehavior target-gun-fire-blue target ((arg0 pickup-type))
   (the-as (pointer process) (case arg0
                               (((pickup-type gun-blue-1))
                                (gun-fire-blue-1)
+                               (when 
+                                  (and 
+                                    (= gunmod-airstrike #t)
+                                    (rand-vu-percent? 0.8)
+                                  )
+                                  (spawn-missle-seeker)
+                                )
                                (when (and (= gunmod-disperser #t) (rand-vu-percent? 0.30))
                                   (disc-shot! (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
                                 )
                                )
                               (((pickup-type gun-blue-2))
                                (gun-fire-blue-2)
+                               (when 
+                                  (and 
+                                    (= gunmod-airstrike #t)
+                                    (rand-vu-percent? 0.8)
+                                  )
+                                  (spawn-missle-seeker)
+                                )
                                (when (and (= gunmod-disperser #t) (rand-vu-percent? 0.03))
                                   (disc-shot! (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
                                 )
@@ -2245,6 +2288,13 @@
                                (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 127 (seconds 0.1))
                                (when (and (= gunmod-disperser #t) (rand-vu-percent? 0.23))
                                   (disc-shot! (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
+                                )
+                                (when 
+                                  (and 
+                                    (= gunmod-airstrike #t)
+                                    (rand-vu-percent? 0.8)
+                                  )
+                                  (spawn-missle-seeker)
                                 )
                                (dotimes (s5-2 3)
                                  (gun-fire-blue-3)

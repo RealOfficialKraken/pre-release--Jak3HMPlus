@@ -40,7 +40,7 @@ There are 3 extra mods for each colored gun, making a total of 12 super gun mods
 - Critical Shot: Chance to crit enemies for absolute massive damage.
 #### Blue
 - Ammo Shark: 33.33% chance to not consume ammo while firing
-- Minigun Shot: Fire a purple turret shot that does extra damage
+- Rocket Targeter: Fire a purple turret shot that does extra damage
 - Disperser: Chance for a purple turret shot to fire out from Jak in all directions
 #### Dark (NONE OF THESE WORK WITH THE NUKE, FOR OBVIOUS REASONS)
 - Random Shot: Shoot out a few random projectiles when firing

@@ -783,6 +783,13 @@
 
     (define global-max-marauder-cars 3)
 
+    (define *missle-seeker-count* 0)
+    (define *missle-seeker-max* 8)
+    (define *missle-seeker-slots* (new 'static 'array int8 8))
+    (define *missle-seeker-fire-target* (new 'static 'vector))
+    (define *missle-seeker-fire-stamp* (the-as time-frame 0))
+    (define *missle-seeker-blue-held-last* #f)
+
     (defun hmplus-enemy-level-color ()
   (cond
     ((>= enemy-noto (+ notoriety-level 7))

@@ -24,7 +24,7 @@ on:
       jak1:
         description: 'Supports Jak 1?'
         required: true
-        default: 'true'
+        default: 'false'
         type: boolean
       jak2:
         description: 'Supports Jak 2?'
