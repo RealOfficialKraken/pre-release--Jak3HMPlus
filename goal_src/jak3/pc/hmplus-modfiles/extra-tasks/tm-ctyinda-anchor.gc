@@ -114,9 +114,7 @@
                     (static-vectorm 797.9023 7.9936 704.9885)
                     )
                 )
-            (when (>= (-> *time-of-day-context* time) 13.0)
-                (go-virtual flash-out-battle)
-            )
+            (go-virtual flash-out-battle)
             (when (or
                     (= in-debug? #t)
                     (= anchor-target-dead? #t)
@@ -154,16 +152,20 @@
                                 (print "~%~%dm-ship SPAWNED~%~%")
                                 (go-virtual idle)
                             )
-                            (cond 
-                                ((and 
-                                    (<= (vector-vector-distance (-> self spawn-pos) (target-pos 0)) 4000000.0)
-                                    (< (-> self fog-i) 1.0)
-                                )
-                                    (+! (-> self fog-i) 0.003)
-                                    (set! (-> *mood-control* overide-weather-flag) #t)
-                                )
-                                (else
-                                    (set! (-> self fog-i) 1.0)
+                            (let ((vec1 (new-stack-vector0)))
+                                (vector-copy! vec1 (-> self spawn-pos))
+                                (set! (-> vec1 y) (meters 7.7))
+                                (cond 
+                                    ((and 
+                                        (<= (vector-vector-distance vec1 (target-pos 0)) (meters 150))
+                                        (< (-> self fog-i) 1.0)
+                                    )
+                                        (+! (-> self fog-i) 0.003)
+                                        (set! (-> *mood-control* overide-weather-flag) #t)
+                                    )
+                                    (else
+                                        (set! (-> self fog-i) 1.0)
+                                    )
                                 )
                             )
                             (format *stdebug* "~%~%active: general-i = ~D~%fog-i: ~F~%~%" (-> self general-i) (-> self fog-i))
@@ -217,10 +219,7 @@
                     )
                 )
             )
-            (when 
-                (>= (-> *time-of-day-context* time) 13.0)
-                (go-virtual dead)
-            )
+            (go-virtual dead)
             (format *stdebug* "~%tm-ctyinda-anchor is dormant~%~%")
             (suspend)
         )
@@ -237,80 +236,82 @@
             (when (= in-desert-game-task? #t)
                 (go-virtual dormant)
             )
-            (when (and
-                    (<= (vector-vector-distance (-> self spawn-pos) (target-pos 0)) 3600000.0)
-                    (= in-desert-game-task? #f)
-                  )
-                    (set! enemy-noto (+ notoriety-level 3))
-                    (print "~%~%|||||||||||||BATTLE STARTED|||||||||||||~%~%")
-                    (set! onfoot-battle? #t)
-                    (set! anchor-float-time (-> *time-of-day-context* time))
-                    ;;;;;;;;;;;;;;;;;;;;Dark mode;;;;;;;;;;;;;;;;;;;;;
-                    (toggle-freeze)
-                    (send-event (ppointer->process *time-of-day*) 'change 'hour 19)
-                    (set! (-> *time-of-day-context* mode) (the-as time-of-day-palette-id 5))
-                    (send-event (ppointer->process *time-of-day*) 'change 'ratio 0.0)
-                    (set! (-> *time-of-day-context* overide-enable) #t)
-                    (set! (-> *mood-control* overide-weather-flag) #t)
-                    (set! (-> *overide-mood-fog-table*
-                                        data
-                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
-                                        fog-color
-                                        x
+            (let ((vec1 (new-stack-vector0)))
+                    (vector-copy! vec1 (-> self spawn-pos))
+                    (set! (-> vec1 y) (meters 7.7))
+                    (when (and
+                        (<= (vector-vector-distance vec1 (target-pos 0)) (meters 150))
+                        (= in-desert-game-task? #f)
+                    )
+                        (print "~%~%|||||||||||||BATTLE STARTED|||||||||||||~%~%")
+                        (set! onfoot-battle? #t)
+                        (set! anchor-float-time (-> *time-of-day-context* time))
+                        ;;;;;;;;;;;;;;;;;;;;Dark mode;;;;;;;;;;;;;;;;;;;;;
+                        (toggle-freeze)
+                        (set! (-> *time-of-day-context* mode) (the-as time-of-day-palette-id 5))
+                        (send-event (ppointer->process *time-of-day*) 'change 'ratio 0.0)
+                        (set! (-> *time-of-day-context* overide-enable) #t)
+                        (set! (-> *mood-control* overide-weather-flag) #t)
+                        (set! (-> *overide-mood-fog-table*
+                                            data
+                                            (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                            fog-color
+                                            x
+                                            )
+                                        255.0
                                         )
-                                    255.0
-                                    )
-                    (set! (-> *overide-mood-fog-table*
-                                        data
-                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
-                                        fog-color
-                                        y
+                        (set! (-> *overide-mood-fog-table*
+                                            data
+                                            (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                            fog-color
+                                            y
+                                            )
+                                        0.0
                                         )
-                                    0.0
-                                    )
-                    (set! (-> *overide-mood-fog-table*
-                                        data
-                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
-                                        fog-color
-                                        z
+                        (set! (-> *overide-mood-fog-table*
+                                            data
+                                            (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                            fog-color
+                                            z
+                                            )
+                                        255.0
                                         )
-                                    255.0
-                                    )
-                    (set! (-> *overide-mood-color-table*
-                                        data
-                                        (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2))
-                                        lgt-color
-                                        y
+                        (set! (-> *overide-mood-color-table*
+                                            data
+                                            (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2))
+                                            lgt-color
+                                            y
+                                            )
+                                        1.0
                                         )
-                                    1.0
-                                    )
-                    (set! (-> *overide-mood-color-table*
-                                        data
-                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
-                                        lgt-color
-                                        y
+                        (set! (-> *overide-mood-color-table*
+                                            data
+                                            (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                            lgt-color
+                                            y
+                                            )
+                                        0.0
                                         )
-                                    0.0
-                                    )
-                    (set! (-> *overide-mood-color-table*
-                                        data
-                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
-                                        lgt-color
-                                        z
+                        (set! (-> *overide-mood-color-table*
+                                            data
+                                            (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                            lgt-color
+                                            z
+                                            )
+                                        1.0
                                         )
-                                    1.0
-                                    )
-                    (set! (-> *overide-mood-color-table*
-                                        data
-                                        (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
-                                        lgt-color
-                                        w
+                        (set! (-> *overide-mood-color-table*
+                                            data
+                                            (the-as uint (logand (-> *time-of-day-context* mode) (time-of-day-palette-id unk0 unk1 unk2)))
+                                            lgt-color
+                                            w
+                                            )
+                                        1.0
                                         )
-                                    1.0
-                                    )
-                                    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                    (format *stdebug* "~%tm-ctyinda-anchor battle started")
-                    (go-virtual start-battle)
+                                        ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                        (format *stdebug* "~%tm-ctyinda-anchor battle started")
+                        (go-virtual start-battle)
+                )
             )
             (cond 
                 ((and
@@ -346,6 +347,8 @@
         (set! (-> self fling-max) 15)
         (set! (-> self fireball-pos) (target-pos 0))
         (add-setting! 'music 'desres2 0.0 0)
+        (set! level-override #t)
+        (set! enemy-noto (+ notoriety-level 3))
         (go-virtual general-handler)
     )
 )
@@ -359,16 +362,20 @@
                 (+! (-> self blast-i) 1)
             )
             (+! (-> self fling-i) 1)
-            (when (>= (-> self blast-i) 800)
-                (cond 
-                    ((<= (vector-vector-distance (-> self spawn-pos) (target-pos 0)) 4000000.0)
-                        (set! (-> self lightning-pos) (-> self laser-bank (rand-vu-int-range 0 4)))
+            (let ((vec1 (new-stack-vector0)))
+                    (vector-copy! vec1 (-> self spawn-pos))
+                    (set! (-> vec1 y) (meters 7.7))
+                (when (>= (-> self blast-i) 800)
+                    (cond 
+                        ((<= (vector-vector-distance vec1 (target-pos 0)) (meters 175))
+                            (set! (-> self lightning-pos) (-> self laser-bank (rand-vu-int-range 0 4)))
+                        )
+                        (else
+                            (set! (-> self lightning-pos) (-> self default-lightning-pos))
+                        )
                     )
-                    (else
-                        (set! (-> self lightning-pos) (-> self default-lightning-pos))
-                    )
+                    (go-virtual lightning-blast)
                 )
-                (go-virtual lightning-blast)
             )
             (when (>= (-> self fling-i) (-> self fling-max))
                 (go-virtual fling-fireball)
@@ -381,23 +388,27 @@
                     (set! *force-stop-pilot* #t)
                 )
             )
-            (when (> (vector-vector-distance (-> self spawn-pos) (target-pos 0)) 3800000.0) ;go dormant or idle when out of range
-                (set! (-> self general-i) 0)
-                (cond 
-                    ((and
-                            (!= (-> (level-get-target-inside *level*) name) 'ctyinda)
-                            (!= (-> (level-get-target-inside *level*) name) 'ctyindb)
-                            (!= (-> (level-get-target-inside *level*) name) 'ctyport)
-                            (!= (-> (level-get-target-inside *level*) name) 'ctysluma)
-                            (!= (-> (level-get-target-inside *level*) name) 'ctyslumb)
-                            (!= (-> (level-get-target-inside *level*) name) 'ctyslumc)
-                            (!= (-> (level-get-target-inside *level*) name) 'mhcitya)
-                            (!= (-> (level-get-target-inside *level*) name) 'mhcityb)
+            (let ((vec1 (new-stack-vector0)))
+                    (vector-copy! vec1 (-> self spawn-pos))
+                    (set! (-> vec1 y) (meters 7.7))
+                (when (> (vector-vector-distance vec1 (target-pos 0)) (meters 175)) ;go dormant or idle when out of range
+                    (set! (-> self general-i) 0)
+                    (cond 
+                        ((and
+                                (!= (-> (level-get-target-inside *level*) name) 'ctyinda)
+                                (!= (-> (level-get-target-inside *level*) name) 'ctyindb)
+                                (!= (-> (level-get-target-inside *level*) name) 'ctyport)
+                                (!= (-> (level-get-target-inside *level*) name) 'ctysluma)
+                                (!= (-> (level-get-target-inside *level*) name) 'ctyslumb)
+                                (!= (-> (level-get-target-inside *level*) name) 'ctyslumc)
+                                (!= (-> (level-get-target-inside *level*) name) 'mhcitya)
+                                (!= (-> (level-get-target-inside *level*) name) 'mhcityb)
+                            )
+                            (go-virtual dormant)
                         )
-                        (go-virtual dormant)
-                    )
-                    (else
-                        (go-virtual flash-out-battle)
+                        (else
+                            (go-virtual flash-out-battle)
+                        )
                     )
                 )
             )
@@ -590,7 +601,9 @@
     :virtual #t
     :code
     (behavior ()
+        (remove-setting! 'music)
         (set! *force-stop-pilot* #f)
+        (set! level-override #f)
         (kill-by-name "dp-bipedal-c" *default-pool*)
         (kill-by-name "Bipedal-Boss" *default-pool*)
         (kill-by-name "v-catapult-shot" *active-pool*)
@@ -600,21 +613,12 @@
         (set! (-> self general-f) 0.0)
         (loop
             (+! (-> self general-f) 0.1)
-            (when (< (-> self general-f) 72.0)
-                (send-event (ppointer->process *time-of-day*) 'change 'ratio (-> self general-f))
-            )
             (when 
                 (and 
-                    (>= (-> *time-of-day-context* time) anchor-float-time)
-                    (< (-> *time-of-day-context* time) (+ anchor-float-time 0.3))
                     (>= (-> self general-f) 72.0)
                 )
                 (set! onfoot-battle? #f)
-                (send-event (ppointer->process *time-of-day*) 'change 'ratio 1.0)
-                (if (or
-                        (>= (-> self wave) (-> self wave-max))
-                        (>= anchor-float-time 13.0)
-                    )
+                (if (>= (-> self wave) (-> self wave-max))
                     (go-virtual dead-win)
                     (go-virtual idle)
                 )
@@ -641,6 +645,13 @@
                 (set! *force-stop-pilot* #f)
                 (task-node-open! (game-task-node ctyinda-anchor-introduction) #t)
                 (group-drop! (-> self reward-box) 0.0 1.0)
+                (when (rand-vu-percent? 0.50)
+                    (if (rand-vu-percent? 0.35)
+                        (drop-gun-mod! (-> self reward-box))
+                        (birth-pickup-at-point (-> self reward-box) (pickup-type gun-yellow-1) 1.0 #t *entity-pool* (the-as fact-info #f))
+                    )
+                )
+                (set! level-override #f)
                 (set! anchor-cdr 0)
                 (set! anchor-cooldown #t)
                 (go-virtual dead)
@@ -656,6 +667,7 @@
     (behavior ()
         (task-node-open! (game-task-node ctyinda-anchor-introduction) #t)
         (set! *force-stop-pilot* #f)
+        (set! level-override #f)
         (kill-by-name "dp-bipedal-c" *default-pool*)
         (kill-by-name "v-catapult-shot" *active-pool*)
         (kill-by-name "Bipedal-Boss" *default-pool*)

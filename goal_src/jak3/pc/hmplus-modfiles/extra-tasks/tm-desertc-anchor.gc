@@ -111,9 +111,7 @@
                     (static-vectorm 815.3209 85.2933 1152.9169)
                     )
                 )
-            (when (>= (-> *time-of-day-context* time) 13.0)
-                (go-virtual flash-out-battle)
-            )
+            (go-virtual flash-out-battle)
             (when (or
                     (= in-debug? #t)
                     (= anchor-target-dead? #t)
@@ -204,10 +202,7 @@
                     )
                 )
             )
-            (when 
-                (>= (-> *time-of-day-context* time) 13.0)
-                (go-virtual dead)
-            )
+            (go-virtual dead)
             (format *stdebug* "~%tm-desertc-anchor is dormant~%~%")
             (suspend)
         )
@@ -232,13 +227,11 @@
                         (task-node-close! (game-task-node desert-interceptors-attack) #t)
                         (set! (-> self interceptors?) #t)
                     )
-                    (set! enemy-noto (+ notoriety-level 3))
                     (print "~%~%|||||||||||||BATTLE STARTED|||||||||||||~%~%")
                     (set! onfoot-battle? #t)
                     (set! anchor-float-time (-> *time-of-day-context* time))
                     ;;;;;;;;;;;;;;;;;;;;Dark mode;;;;;;;;;;;;;;;;;;;;;
                     (toggle-freeze)
-                    (send-event (ppointer->process *time-of-day*) 'change 'hour 19)
                     (set! (-> *time-of-day-context* mode) (the-as time-of-day-palette-id 5))
                     (send-event (ppointer->process *time-of-day*) 'change 'ratio 0.0)
                     (set! (-> *time-of-day-context* overide-enable) #t)
@@ -334,6 +327,8 @@
         (add-setting! 'music 'desres2 0.0 0)
         (spawn-dust-storm)
         (set-setting! 'dust-storm-sound-scalar #f 10.0 10)
+        (set! level-override #t)
+        (set! enemy-noto (+ notoriety-level 3))
         (send-event (handle->process (-> *game-info* dust-storm)) 'set-intensity 1000)
         #|(when (= mainmenu-camera #f)
             (task-node-close! (game-task-node desert-interceptors-attack) #t)
@@ -579,6 +574,7 @@
     :virtual #t
     :code
     (behavior ()
+        (remove-setting! 'music)
         (set! *force-stop-pilot* #f)
         (when (= (-> self interceptors?) #t)
             (task-node-open! (game-task-node desert-interceptors-attack) #t)
@@ -586,15 +582,13 @@
         (kill-by-name "dp-bipedal-c" *default-pool*)
         (kill-by-name "Bipedal-Boss" *default-pool*)
         (kill-by-name "v-catapult-shot" *active-pool*)
+        (set! level-override #f)
         (set! (-> *part-id-table* 2280 init-specs 8 initial-valuef) 128.0) ;a
         (set! (-> *part-id-table* 2283 init-specs 8 initial-valuef) 64.0) ;a
         (set! (-> *part-id-table* 2280 init-specs 1 initial-valuef) 1.0) ;scalex
         (set! (-> self general-f) 0.0)
         (loop
             (+! (-> self general-f) 0.1)
-            (when (< (-> self general-f) 72.0)
-                (send-event (ppointer->process *time-of-day*) 'change 'ratio (-> self general-f))
-            )
             (when 
                 (and 
                     (>= (-> *time-of-day-context* time) anchor-float-time)
@@ -633,8 +627,15 @@
                 (set! *force-stop-pilot* #f)
                 (task-node-open! (game-task-node desertc-anchor-introduction) #t)
                 (group-drop! (-> self reward-box) 0.0 1.0)
+                (when (rand-vu-percent? 0.25)
+                    (if (rand-vu-percent? 0.25)
+                        (drop-gun-mod! (-> self reward-box))
+                        (birth-pickup-at-point (-> self reward-box) (pickup-type gun-yellow-1) 1.0 #t *entity-pool* (the-as fact-info #f))
+                    )
+                )
                 (set! anchor-cdr 0)
                 (set! anchor-cooldown #t)
+                (set! level-override #f)
                 (go-virtual dead)
             )
             (suspend)
@@ -648,6 +649,7 @@
     (behavior ()
         (task-node-open! (game-task-node desertc-anchor-introduction) #t)
         (set! *force-stop-pilot* #f)
+        (set! level-override #f)
         (kill-by-name "dp-bipedal-c" *default-pool*)
         (kill-by-name "v-catapult-shot" *active-pool*)
         (kill-by-name "Bipedal-Boss" *default-pool*)
