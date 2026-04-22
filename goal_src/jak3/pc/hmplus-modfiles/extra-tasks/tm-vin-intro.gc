@@ -245,7 +245,7 @@
                     (when (= log-sec 15)
                         (set! di-s "<COLOR_PINK>Dark Eco Crystals<COLOR_WHITE>. They are out and about")
                         (set! di-s2 "everywhere! We should grab as many as we can.")
-                        (set! di-s3 "<COLOR_RED>The Entity<COLOR_WHITE> still seems to want collect dark eco.")
+                        (set! di-s3 "<COLOR_RED>The Entity<COLOR_WHITE> still seems to want to collect dark eco.")
                         (set! di-s4 "")
                     )
                     (when (= log-sec 16)
