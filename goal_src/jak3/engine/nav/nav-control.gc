@@ -166,27 +166,49 @@
 ;; WARN: Return type mismatch object vs none.
 ;; WARN: Function get-nav-control has a return type of none, but the expression builder found a return statement.
 (defun get-nav-control ((arg0 process-drawable) (arg1 nav-mesh))
-  (if (not arg1)
-      (set! arg1 (nav-mesh-from-res-tag (-> arg0 entity) 'nav-mesh-actor 0))
+  (cond
+    ((or
+      (= (-> (level-get-target-inside *level*) name) 'precura)
+      (= (-> (level-get-target-inside *level*) name) 'precurb)
+      (= (-> (level-get-target-inside *level*) name) 'precurc)
+      (= (-> (level-get-target-inside *level*) name) 'precurd)
+     )
+      (if (not arg1)
+        (set! arg1 (nav-mesh-from-res-tag (-> arg0 entity) 'nav-mesh-actor 0))
+        )
+    (when (not arg1)
+      (if (-> arg0 entity)
+          (logior! (-> arg0 entity extra perm status) (entity-perm-status error))
+          )
+      (go process-drawable-art-error "no nav-mesh")
+      (return 0)
+      )
+    (add-process-drawable-to-nav-mesh arg1 arg0 #t)
+    )
+    (else
+      (if (not arg1)
+        (set! arg1 (nav-mesh-from-res-tag (-> arg0 entity) 'nav-mesh-actor 0))
+        )
+
+    (when (and (not arg1) (-> arg0 root)) ;;has pos, but not nav-mesh
+      (set! arg1 (find-nearest-nav-mesh (-> arg0 root trans) 0.0))
       )
 
-  (when (and (not arg1) (-> arg0 root)) ;;has pos, but not nav-mesh
-    (set! arg1 (find-nearest-nav-mesh (-> arg0 root trans) 0.0))
-    )
+    (when (not arg1) ;;fallback attempt on default-nav-mesh
+      (set! arg1 *default-nav-mesh*)
+      )
 
-  (when (not arg1) ;;fallback attempt on default-nav-mesh
-    (set! arg1 *default-nav-mesh*)
-    )
+    (when (not arg1) ;;still no nav? rip.
+      (if (-> arg0 entity)
+          (logior! (-> arg0 entity extra perm status) (entity-perm-status error))
+          )
+      (go process-drawable-art-error "no nav-mesh")
+      (return 0)
+      )
 
-  (when (not arg1) ;;still no nav? rip.
-    (if (-> arg0 entity)
-        (logior! (-> arg0 entity extra perm status) (entity-perm-status error))
-        )
-    (go process-drawable-art-error "no nav-mesh")
-    (return 0)
+    (add-process-drawable-to-nav-mesh arg1 arg0 #t)
     )
-
-  (add-process-drawable-to-nav-mesh arg1 arg0 #t)
+  )
   (none)
   )
 

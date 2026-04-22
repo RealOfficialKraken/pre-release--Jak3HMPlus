@@ -5621,6 +5621,29 @@ BUGS:
             (= (paused?) #f)
             (= (pause-allowed?) #t)
             *target*
+            (or
+                (task-node-open? (game-task-node desertg-anchor-resolution))
+                (task-node-open? (game-task-node desertf-anchor-resolution))
+                (task-node-open? (game-task-node desertc-anchor-resolution))
+                (task-node-open? (game-task-node ctyinda-anchor-resolution))
+            )
+            (= (-> (level-get-target-inside *level*) name) 'precura)
+            (= (-> (level-get-target-inside *level*) name) 'precurb)
+            (= (-> (level-get-target-inside *level*) name) 'precurc)
+            (= (-> (level-get-target-inside *level*) name) 'precurd)
+        )
+        (task-node-close! (game-task-node desertg-anchor-resolution) #t)
+        (task-node-close! (game-task-node desertc-anchor-resolution) #t)
+        (task-node-close! (game-task-node desertf-anchor-resolution) #t)
+        (task-node-close! (game-task-node ctyinda-anchor-resolution) #t)
+    )
+
+    (when
+        (and
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            *target*
             (= freeze-happening? #t)
         )
         (+! freezi 1)
