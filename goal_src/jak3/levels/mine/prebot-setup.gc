@@ -889,6 +889,11 @@
   (set! (-> self event-hook) (-> (method-of-object self idle) event))
   (go-virtual idle)
   )
+  
+(defmethod get-search-info-flag ((this prebot))
+  "Get search-info-flag for this process."
+  (the-as search-info-flag 1)
+  )
 
 (defmethod init-from-entity! ((this prebot) (arg0 entity-actor))
   "Set up a newly created process from the entity that created it."

@@ -5302,7 +5302,7 @@ BUGS:
                     :y (meters 61.8098)
                     :z (meters -217.9078)
                     :w 1.0))
-                    85000.0)
+                    95000.0)
         )
             (task-node-close! (game-task-node mine-boss-extra) #t)
         )
@@ -7621,7 +7621,9 @@ BUGS:
 
     (set! (-> fact pickup-type) (the-as pickup-type #f))
     (set! (-> fact pickup-amount) 0.0)
-    (set! (-> fact options) (actor-option fall))
+    (when (not in-arena-fight?)
+        (set! (-> fact options) (actor-option fall))
+    )
 
     (cond
       ((= tier 1)

@@ -764,6 +764,7 @@
         (let ((v1-16 (-> self root root-prim)))
           (set! (-> v1-16 prim-core collide-as) (-> self root backup-collide-as))
           (set! (-> v1-16 prim-core collide-with) (-> self root backup-collide-with))
+          (logclear! (-> v1-16 prim-core action) (collide-action can-ride))
           )
         (go-virtual idle)
         )
