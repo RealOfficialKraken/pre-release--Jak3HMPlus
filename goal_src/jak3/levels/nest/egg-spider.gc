@@ -695,9 +695,9 @@
     (('death-end)
       (when (and
               (task-node-open? (game-task-node nest-hunt-fight))
-              (rand-vu-percent? 0.15)
+              (rand-vu-percent? 1.0)
             )
-         (birth-pickup-at-point (-> this root trans) (pickup-type ammo-yellow) 1.0 #t *entity-pool* (the-as fact-info #f))
+         (birth-pickup-at-point (-> this root trans) (pickup-type ammo-yellow) 5.0 #t *entity-pool* (the-as fact-info #f))
       )
      ((method-of-type nav-enemy event-handler) this arg0 arg1 arg2 arg3)
      )
