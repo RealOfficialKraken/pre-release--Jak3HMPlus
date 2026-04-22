@@ -172,6 +172,9 @@
       (= (-> (level-get-target-inside *level*) name) 'precurb)
       (= (-> (level-get-target-inside *level*) name) 'precurc)
       (= (-> (level-get-target-inside *level*) name) 'precurd)
+      (= (-> (level-get-target-inside *level*) name) 'lpattack)
+      (= (-> (level-get-target-inside *level*) name) 'rubblea)
+      (= (-> (level-get-target-inside *level*) name) 'rubbleb)
      )
       (if (not arg1)
         (set! arg1 (nav-mesh-from-res-tag (-> arg0 entity) 'nav-mesh-actor 0))
@@ -183,6 +186,7 @@
       (go process-drawable-art-error "no nav-mesh")
       (return 0)
       )
+    (print "Normal nav control")
     (add-process-drawable-to-nav-mesh arg1 arg0 #t)
     )
     (else
@@ -205,7 +209,7 @@
       (go process-drawable-art-error "no nav-mesh")
       (return 0)
       )
-
+    (print "My nav control")
     (add-process-drawable-to-nav-mesh arg1 arg0 #t)
     )
   )
