@@ -40,6 +40,10 @@ BUGS:
 (define hmplus-intro-fading? #f)
 
 (define in-picture-mode? #f)
+(define gm-desc1 "")
+(define gm-desc2 "")
+(define gm-desc3 "")
+(define gm-desc4 "")
 
 (defun toggle-picture-mode ()
     (cond
@@ -2411,6 +2415,7 @@ BUGS:
 (draw-sprite2d-xy s2-0 0 5 730 20 (new 'static 'rgba :a #x40) #x3fffff)
 (draw-sprite2d-xy s2-0 70 25 100 290 (new 'static 'rgba :a #x40) #x3fffff)
 (draw-sprite2d-xy s2-0 0 315 730 27 (new 'static 'rgba :a #x40) #x3fffff)
+(draw-sprite2d-xy s2-0 210 25 280 75 (new 'static 'rgba :a #x40) #x3fffff)
 )
     (when (task-node-closed? (game-task-node mody-fireball))
         (cond
@@ -2567,6 +2572,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node modr-bigshot))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_RED>Makes every shot/explosion~%3x bigger!"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (cond
         ((and
         (task-node-closed? (game-task-node modr-bigshot))
@@ -2617,6 +2634,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node modr-shield))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_RED>Fires 4 shots in every direction!"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (when
         (and
         (task-node-closed? (game-task-node modr-shield))
@@ -2666,6 +2695,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node modr-missles))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_RED>Shoots multiple Blaster projectiles out of~%your gun!"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (when
         (and
         (task-node-closed? (game-task-node modr-missles))
@@ -2714,6 +2755,18 @@ BUGS:
         (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 120 170 0.0 (font-color default) (font-flags middle shadow kerning large))))
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        (when (task-node-closed? (game-task-node mody-fireball))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_YELLOW>Strike your enemies with a~%shooting star that rains from above!"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
         (when
         (and
@@ -2764,6 +2817,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node mody-nukeonly))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_YELLOW>A chance to critically hit your enemies~%with a crazy-damage shot that's based~%off of your Hero-Level!"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (when
         (and
         (task-node-closed? (game-task-node mody-nukeonly))
@@ -2813,6 +2878,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node mody-freeze))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_YELLOW>Based off of the Legendary Throwing Knife~%from Pirates Online, Silver Freeze~%will put enemies in a frozen~%state for 3 seconds!"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (when
         (and
         (task-node-closed? (game-task-node mody-freeze))
@@ -2862,6 +2939,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node modb-ammo))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_CYAN>33.33% not to consume Blue Gun Ammo"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (when
         (and
         (task-node-closed? (game-task-node modb-ammo))
@@ -2911,6 +3000,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node modb-disperser))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_CYAN>Have a chance to fire purple shots~%in all directions!"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (when
         (and
         (task-node-closed? (game-task-node modb-disperser))
@@ -2960,6 +3061,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node modb-airstrike))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_CYAN>Missiles lock on from Jak's back while~%firing!"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (when
         (and
         (task-node-closed? (game-task-node modb-airstrike))
@@ -3009,6 +3122,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node modd-morpher))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_PINK>Shoot multiple shots of the same type!~%<COLOR_RED>(Does not work with nuke)"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (when
         (and
         (task-node-closed? (game-task-node modd-morpher))
@@ -3058,6 +3183,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node modd-random))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_PINK>Fire a random projectile of any kind!~%<COLOR_RED>(Does not work with nuke)"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (when
         (and
         (task-node-closed? (game-task-node modd-random))
@@ -3107,6 +3244,18 @@ BUGS:
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+        (when (task-node-closed? (game-task-node modd-reaper))
+            (clear matt-str)
+            (clear *pc-encoded-matt-str*)
+            (format matt-str "<COLOR_PINK>Eject a Warp Ball that sends~%grenades in all directions!~%<COLOR_RED>(Does not work with nuke)"
+            )
+            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 355 40 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (set! (-> font-ctx scale) 0.325)
+            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        )
         (when
         (and
         (task-node-closed? (game-task-node modd-reaper))
