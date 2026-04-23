@@ -201,7 +201,7 @@
                     (go-virtual statue-5)
                 )
             )
-            (format *stdcon* "tm-forest-survive: waiting~%")
+            ;(format *stdcon* "tm-forest-survive: waiting~%")
             (suspend)
         )
     )
@@ -245,7 +245,7 @@
     :code
     (behavior ()
         (loop
-            (format *stdcon* "tm-forest-survive: statue-1~%")
+            ;(format *stdcon* "tm-forest-survive: statue-1~%")
             (let ((vec (new 'static 'vector :x (meters -620.4437) :y (meters 21.9916) :z (meters 961.8020) :w 1.0))
                   (point-head (new 'static 'vector :x (meters -614.7424) :y (meters 27.4139) :z (meters 956.2082) :w 1.0))
                   (progress 0.0)
@@ -287,7 +287,7 @@
                         (when (and (not *nebula-splitter*)
                                    (> (-> *target* fact health) 0.0)
                                    (time-elapsed? (-> self splitter-spawn-time) spawn-delay))
-                            (spawn-nebula-splitter point-head (rand-vu-int-range 3 8))
+                            (spawn-nebula-splitter point-head (rand-vu-int-range 2 4))
                             (set-time! (-> self splitter-spawn-time))
                         )
                     )
@@ -337,7 +337,7 @@
             (when (and (not *white-fireball*) (time-elapsed? (-> self splitter-spawn-time) spawn-delay))
               (spawn-white-fireball (-> self proj-spawn-pos) (degrees 45) (degrees 20))
               (set-time! (-> self splitter-spawn-time))))))
-      (format *stdcon* "tm-forest-survive: statue-2~%")
+      ;(format *stdcon* "tm-forest-survive: statue-2~%")
       (suspend)))
 )
 
@@ -347,7 +347,7 @@
     :code
     (behavior ()
         (loop
-            (format *stdcon* "tm-forest-survive: statue-3~%")
+            ;(format *stdcon* "tm-forest-survive: statue-3~%")
             (let ((vec (new 'static 'vector :x (meters -776.0646) :y (meters 31.0085) :z (meters 956.4083) :w 1.0))
                   (point-head (new 'static 'vector :x (meters -776.0646) :y (meters 39.0085) :z (meters 956.4083) :w 1.0))
                   (progress 0.0)
@@ -412,7 +412,7 @@
                                    (time-elapsed? (-> self splitter-spawn-time) curr-delay))
                             (cond
                                 ((= (-> self statue-3-pattern-step) 0)
-                                    (spawn-nebula-splitter (-> self proj-spawn-pos) (rand-vu-int-range 3 8))
+                                    (spawn-nebula-splitter (-> self proj-spawn-pos) (rand-vu-int-range 2 4))
                                     (set! (-> self statue-3-pattern-step) 1)
                                 )
                                 ((= (-> self statue-3-pattern-step) 1)
@@ -440,7 +440,7 @@
     :code
     (behavior ()
         (loop
-            (format *stdcon* "tm-forest-survive: statue-3~%")
+            ;(format *stdcon* "tm-forest-survive: statue-3~%")
             (let ((vec (new 'static 'vector :x (meters -830.6266) :y (meters 28.9294) :z (meters 1040.3620) :w 1.0))
                   (point-head (new 'static 'vector :x (meters -776.0646) :y (meters 39.0085) :z (meters 956.4083) :w 1.0))
                   (progress 0.0)
@@ -532,13 +532,13 @@
                         (when (and (not *white-fireball*)
                                    (> (-> *target* fact health) 0.0)
                                    (time-elapsed? (-> self splitter-spawn-time) (seconds 6.0)))
-                            (spawn-nebula-splitter (-> self proj-spawn-pos) (rand-vu-int-range 1 4))
+                            (spawn-nebula-splitter (-> self proj-spawn-pos) (rand-vu-int-range 1 2))
                             (set-time! (-> self splitter-spawn-time))
                         )
                     )
                 )
             )
-            (format *stdcon* "tm-forest-survive: statue-5~%")
+            ;(format *stdcon* "tm-forest-survive: statue-5~%")
             (suspend)
         )
     )

@@ -7224,6 +7224,21 @@
             (set! going-heromode? #f)
         )
     )
+
+    (when
+        (and
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            (not (search-process-tree *active-pool* (lambda ((p process)) (type? p neo-sat))))
+            (task-node-open? (game-task-node desert-rescue-satellite-fight))
+            (!= (-> (level-get-target-inside *level*) name) 'desertc)
+            (!= (-> (level-get-target-inside *level*) name) 'deserte)
+            (!= (-> (level-get-target-inside *level*) name) 'desert)
+        )
+        (task-node-open! (game-task-node desert-rescue-introduction) #t)
+    )
 (none)
 )
 
