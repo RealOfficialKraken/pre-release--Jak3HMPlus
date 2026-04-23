@@ -104,13 +104,14 @@ playing
                 (= (pause-allowed?) #t)
             )
             (loop
-                (when 
-                    (and
-                        *target*
-                        (<= (-> *target* fact health) 0.0)
-                    )
-                    (go-virtual dead)
-                )
+                (let ((dead? #f))
+                (when *target*
+                    (let ((f (-> *target* fact)))
+                    (when f
+                        (when (<= (-> f health) 0.0)
+                        (set! dead? #t)))))
+                (when dead?
+                    (go-virtual dead)))
                 (when (time-elapsed? (-> self volume-check-time) (seconds 1.0))
                 (set! (-> self volume-check-time) (current-time))
                 (when (!= (the int (* (-> *setting-control* user-current sfx-volume) 100)) (-> self volume))
@@ -175,10 +176,8 @@ playing
                         (set! (-> self track) "dark-world-theme")
                     )
                 (when
-                    (or
-                        (<= (-> *target* fact health) 0.0)
-                    )
                     (and
+                        (<= (-> *target* fact health) 0.0)
                         (= weather-dark-mode #f)
                         (= in-main-menu? #f)
                         (= (paused?) #f)
