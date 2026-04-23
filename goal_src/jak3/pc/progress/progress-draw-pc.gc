@@ -291,7 +291,12 @@
                 (cond
                   ((-> this buy-menu)
                   (let ((opt (-> *menu-secrets-array* (-> this selected-index))))
-                  (if (= (-> opt secret) (game-secrets hero-mode))
+                  (if (or
+                        (= (-> opt secret) (game-secrets hero-mode))
+                        (= (-> opt secret) (game-secrets level-select-1))
+                        (= (-> opt secret) (game-secrets level-select-2))
+                        (= (-> opt secret) (game-secrets level-select-3))
+                      )
                       (string-format "")
                       (string-format "x~D ~S"
                         (-> opt cost)
@@ -400,16 +405,27 @@
                       (set! sv-208 (-> *menu-secrets-array* s1-5 name))
                       (set! sv-288 (secret-item-option-method-12 s0-6))
 
-                      (if (= (-> s0-6 secret) (game-secrets hero-mode))
-                          (set! sv-240 "Hero Mode is Coming Soon in v1.0!")
+                      (cond 
+                        ((= (-> s0-6 secret) (game-secrets hero-mode))
+                            (set! sv-240 "Hero Mode is Coming Soon in v1.0!")
+                        )
+                        ((or
+                          (= (-> s0-6 secret) (game-secrets level-select-1))
+                          (= (-> s0-6 secret) (game-secrets level-select-2))
+                          (= (-> s0-6 secret) (game-secrets level-select-3))
+                         )
+                            (set! sv-240 "Level Select is impossible in HM+!")
+                        )
+                        (else
                           (case sv-288
-                            ((4)
-                              (set! sv-240 "?????????")
+                              ((4)
+                                (set! sv-240 "?????????")
+                              )
+                              (else
+                                (set! sv-240 (lookup-text! *common-text* sv-208 #f))
+                              )
                             )
-                            (else
-                              (set! sv-240 (lookup-text! *common-text* sv-208 #f))
-                            )
-                          )
+                        )
                       )
                       (cond
                         ((logtest? (-> *menu-secrets-array* s1-5 flags) (secret-item-option-flags sf0))
@@ -457,7 +473,12 @@
                                 (set! sv-368 (lookup-text! *common-text* (text-id progress-off) #f))
                                 (cond
                                   ((or (zero? sv-288) (= sv-288 3))
-                                  (if (= (-> s0-6 secret) (game-secrets hero-mode))
+                                  (if (or
+                                        (= (-> s0-6 secret) (game-secrets hero-mode))
+                                        (= (-> s0-6 secret) (game-secrets level-select-1))
+                                        (= (-> s0-6 secret) (game-secrets level-select-2))
+                                        (= (-> s0-6 secret) (game-secrets level-select-3))
+                                      )
                                       (string-format "") ;; hide cost
                                       (string-format "~d" (-> s0-6 cost)))
 
