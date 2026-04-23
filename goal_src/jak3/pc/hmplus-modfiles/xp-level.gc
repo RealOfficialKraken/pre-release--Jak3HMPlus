@@ -735,7 +735,10 @@
         (= in-skill? #t)
         (= menu-slot 1)))
 
-    (when (task-node-closed? (game-task-node arena-fight-1-introduction))
+    (when (or
+            (task-node-closed? (game-task-node arena-fight-1-introduction))
+            (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+          )
       (let* ((level-cap (the float (* (+ (* guns-level 120) (* guns-level 200)) guns-level)))
              (arg1 (the float (-> *game-info* buzzer-total)))
              (new-percent 0.0))
@@ -871,6 +874,60 @@
 
   (none)
   )
+
+(defun hmplus-hero-clear-tier ()
+  (let ((tier (the int (-> *game-info* crates-opened))))
+    (when (< tier 1)
+      (set! tier 1))
+    tier))
+
+(defun hmplus-hero-start-level ()
+  (let* ((tier (hmplus-hero-clear-tier))
+         (n (- tier 1))
+         (pair-bonus (* (the int (/ n 2)) 50))
+         (odd-bonus 0))
+    (when (= (mod n 2) 1)
+      (set! odd-bonus 30))
+    (+ 50 pair-bonus odd-bonus)))
+
+(defun hmplus-hero-end-level ()
+  (let* ((tier (hmplus-hero-clear-tier))
+         (n (- tier 1))
+         (pair-bonus (* (the int (/ n 2)) 50))
+         (odd-bonus 0))
+    (when (= (mod n 2) 1)
+      (set! odd-bonus 20))
+    (+ 90 pair-bonus odd-bonus)))
+
+(defun hmplus-hero-map-level ((normal-level int))
+  (let ((n normal-level)
+        (hero-start (hmplus-hero-start-level))
+        (hero-end (hmplus-hero-end-level))
+        (hero-span 0))
+    (when (< n 1)
+      (set! n 1))
+    (when (> n 50)
+      (set! n 50))
+
+    (set! hero-span (- hero-end hero-start))
+
+    (+ hero-start
+       (the int (/ (* (- n 1) hero-span) 49)))))
+
+(defun hmplus-hero-map-range-low ((normal-low int))
+  (hmplus-hero-map-level normal-low))
+
+(defun hmplus-hero-map-range-high ((normal-high int))
+  (hmplus-hero-map-level normal-high))
+
+(defun hmplus-hero-map-rand ((normal-low int) (normal-high int))
+  (let ((low (hmplus-hero-map-range-low normal-low))
+        (high (hmplus-hero-map-range-high normal-high)))
+    (when (> low high)
+      (let ((tmp low))
+        (set! low high)
+        (set! high tmp)))
+    (rand-vu-int-range low high)))
 
 (defun update-xp! ()
 
@@ -1406,142 +1463,201 @@
                 (not level-override)
                 (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
               )
+
+            ;; DARK WORLD
             (when
-                (and 
-                    (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                (and
                     (task-node-closed? (game-task-node arena-training-1-introduction))
                     (= weather-dark-mode #t)
                 )
-                (when ;DARK-WORLD
-                    (and
-                        (!= enemy-noto (+ notoriety-level 64))
-                    )
-                    (set! enemy-noto (+ notoriety-level 64))
-                )
+                (let ((hero-dark (hmplus-hero-end-level)))
+                    (when (!= enemy-noto hero-dark)
+                    (set! enemy-noto hero-dark)))
             )
 
-            (when 
-                (and 
-                    (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-                    (= weather-dark-mode #f)
-                )
-                (when ;WASDOORS
-                    (and
-                        (= (-> (level-get-target-inside *level*) name) 'wasdoors)
-                        (!= enemy-noto 50)
+            (when
+                (= weather-dark-mode #f)
+
+                ;; WASDOORS
+                ;; normal = 1
+                (let ((hero-lvl (hmplus-hero-map-level 1)))
+                    (when
+                        (and
+                            (= (-> (level-get-target-inside *level*) name) 'wasdoors)
+                            (!= enemy-noto hero-lvl)
+                        )
+                        (set! enemy-noto hero-lvl)
                     )
-                    (set! enemy-noto 50)
                 )
+
                 (when
                     (not in-arena-fight?)
-                    (when (not (task-node-closed? (game-task-node arena-fight-2-resolution)))
-                        (when ;WASCITYA
-                            (and
-                                (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
-                                (= (-> (level-get-target-inside *level*) name) 'wascitya)
-                                (!= enemy-noto 50)
+
+                    ;; before arena-fight-2-resolution
+                    (when
+                        (not (task-node-closed? (game-task-node arena-fight-2-resolution)))
+
+                        ;; WASCITYA
+                        ;; normal = 1
+                        (let ((hero-lvl (hmplus-hero-map-level 1)))
+                            (when
+                                (and
+                                    (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
+                                    (= (-> (level-get-target-inside *level*) name) 'wascitya)
+                                    (!= enemy-noto hero-lvl)
+                                )
+                                (set! enemy-noto hero-lvl)
                             )
-                            (set! enemy-noto 50)
                         )
-                        (when ;WASCITYB
-                            (and
-                                (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
-                                (= (-> (level-get-target-inside *level*) name) 'wascityb)
-                                (not (task-node-open? (game-task-node wascity-pre-game-battle)))
-                                (!= enemy-noto 51)
+
+                        ;; WASCITYB
+                        ;; normal = 2
+                        (let ((hero-lvl (hmplus-hero-map-level 2)))
+                            (when
+                                (and
+                                    (not (task-node-open? (game-task-node wascity-leaper-race-resolution)))
+                                    (= (-> (level-get-target-inside *level*) name) 'wascityb)
+                                    (not (task-node-open? (game-task-node wascity-pre-game-battle)))
+                                    (!= enemy-noto hero-lvl)
+                                )
+                                (set! enemy-noto hero-lvl)
                             )
-                            (set! enemy-noto 51)
                         )
                     )
-                    (when (task-node-closed? (game-task-node arena-fight-2-resolution))
-                        (when ;WASCITYA
-                            (and
-                                (= (-> (level-get-target-inside *level*) name) 'wascitya)
-                                (or
-                                    (< enemy-noto 50)
-                                    (> enemy-noto 60)
+
+                    ;; after arena-fight-2-resolution
+                    (when
+                        (task-node-closed? (game-task-node arena-fight-2-resolution))
+
+                        ;; WASCITYA
+                        ;; hero was 50-60, which maps cleanly from early-game range
+                        (let ((hero-low (hmplus-hero-map-level 1))
+                                (hero-high (hmplus-hero-map-level 13)))
+                            (when
+                                (and
+                                    (= (-> (level-get-target-inside *level*) name) 'wascitya)
+                                    (or
+                                        (< enemy-noto hero-low)
+                                        (> enemy-noto hero-high)
+                                    )
                                 )
+                                (set! enemy-noto (hmplus-hero-map-rand 1 13))
                             )
-                            (set! enemy-noto (rand-vu-int-range 50 60))
                         )
-                        (when ;WASCITYB
-                            (and
-                                (= (-> (level-get-target-inside *level*) name) 'wascityb)
-                                (not (task-node-open? (game-task-node wascity-pre-game-battle)))
-                                (or
-                                    (< enemy-noto 56)
-                                    (> enemy-noto 66)
+
+                        ;; WASCITYB
+                        ;; hero was 56-66, use a slightly later early-game band
+                        (let ((hero-low (hmplus-hero-map-level 8))
+                                (hero-high (hmplus-hero-map-level 20)))
+                            (when
+                                (and
+                                    (= (-> (level-get-target-inside *level*) name) 'wascityb)
+                                    (not (task-node-open? (game-task-node wascity-pre-game-battle)))
+                                    (or
+                                        (< enemy-noto hero-low)
+                                        (> enemy-noto hero-high)
+                                    )
                                 )
+                                (set! enemy-noto (hmplus-hero-map-rand 8 20))
                             )
-                            (set! enemy-noto (rand-vu-int-range 56 66))
                         )
                     )
                 )
 
-                (when ;ARENA FIGHT 1
-                    (and
-                        (task-node-open? (game-task-node arena-fight-1-fight))
-                        (!= enemy-noto 50)
+                ;; ARENA FIGHT 1
+                ;; normal = 1
+                (let ((hero-lvl (hmplus-hero-map-level 1)))
+                    (when
+                        (and
+                            (task-node-open? (game-task-node arena-fight-1-fight))
+                            (!= enemy-noto hero-lvl)
+                        )
+                        (set! enemy-noto hero-lvl)
                     )
-                    (set! enemy-noto 50)
                 )
-                (when ;ARENA FIGHT 2
-                    (and
-                        (task-node-open? (game-task-node arena-fight-2-fight))
-                        (!= enemy-noto 55)
+
+                ;; ARENA FIGHT 2
+                ;; normal ~= early-mid anchor, mapped from 10
+                (let ((hero-lvl (hmplus-hero-map-level 10)))
+                    (when
+                        (and
+                            (task-node-open? (game-task-node arena-fight-2-fight))
+                            (!= enemy-noto hero-lvl)
+                        )
+                        (set! enemy-noto hero-lvl)
                     )
-                    (set! enemy-noto 55)
                 )
-                (when ;ARENA FIGHT 3
-                    (and
-                        (task-node-open? (game-task-node arena-fight-3-fight))
-                        (!= enemy-noto 65)
+
+                ;; ARENA FIGHT 3
+                ;; normal ~= mid anchor, mapped from 20
+                (let ((hero-lvl (hmplus-hero-map-level 20)))
+                    (when
+                        (and
+                            (task-node-open? (game-task-node arena-fight-3-fight))
+                            (!= enemy-noto hero-lvl)
+                        )
+                        (set! enemy-noto hero-lvl)
                     )
-                    (set! enemy-noto 65)
                 )
-                (when ;DESERT
+
+                ;; DESERT
+                ;; current hero version was (+ notoriety-level 47), but you wanted this
+                ;; based on crates-opened, not player level. Anchor it near endgame-mid.
+                (when
                     (and
                         (= (-> (level-get-target-inside *level*) name) 'desert)
                         (not (task-node-open? (game-task-node desert-jump-mission-protect-doors)))
                         (= in-satbattle? #f)
-                        (!= enemy-noto notoriety-level)
                         (= start-was-uprising #f)
                     )
-                    (when (>= notoriety-level 3)
-                        (set! enemy-noto (+ notoriety-level 47))
+                    (let ((hero-lvl (hmplus-hero-map-level 48)))
+                        (when (!= enemy-noto hero-lvl)
+                        (set! enemy-noto hero-lvl)
                         (set! start-was-uprising #t)
-                        (set! wasi 0)
+                        (set! wasi 0))
                     )
                 )
-                (when ;PRECUR
+
+                ;; PRECUR
+                ;; keep this as a late/endgame anchor
+                (let ((hero-lvl (hmplus-hero-map-level 49)))
+                    (when
+                        (and
+                            (or
+                                (task-node-open? (game-task-node precursor-tour-introduction))
+                                (task-node-open? (game-task-node precursor-tour-generator-trigger))
+                                (task-node-open? (game-task-node precursor-tour-resolution))
+                            )
+                            (or
+                                (= (-> (level-get-target-inside *level*) name) 'precura)
+                                (= (-> (level-get-target-inside *level*) name) 'precurb)
+                                (= (-> (level-get-target-inside *level*) name) 'precurc)
+                                (= (-> (level-get-target-inside *level*) name) 'precurd)
+                            )
+                            (!= enemy-noto hero-lvl)
+                        )
+                        (set! enemy-noto hero-lvl)
+                    )
+                )
+
+                ;; DESBOSS
+                ;; final band anchor
+                (let ((hero-lvl (hmplus-hero-map-level 50)))
+                    (when
+                        (and
+                            (or
+                                (= (-> (level-get-target-inside *level*) name) 'deswalk)
+                                (= (-> (level-get-target-inside *level*) name) 'desboss2)
+                            )
+                            (!= enemy-noto hero-lvl)
+                        )
+                        (set! enemy-noto hero-lvl)
+                    )
+                )
+
+                ;; desert escalation over time
+                (when
                     (and
-                        (or
-                            (task-node-open? (game-task-node precursor-tour-introduction))
-                            (task-node-open? (game-task-node precursor-tour-generator-trigger))
-                            (task-node-open? (game-task-node precursor-tour-resolution))
-                        )
-                        (or
-                            (= (-> (level-get-target-inside *level*) name) 'precura)
-                            (= (-> (level-get-target-inside *level*) name) 'precurb)
-                            (= (-> (level-get-target-inside *level*) name) 'precurc)
-                            (= (-> (level-get-target-inside *level*) name) 'precurd)
-                        )
-                        (!= enemy-noto 89)
-                    )
-                    (set! enemy-noto 89)
-                )
-                (when ;DESBOSS
-                    (and
-                        (or
-                            (= (-> (level-get-target-inside *level*) name) 'deswalk)
-                            (= (-> (level-get-target-inside *level*) name) 'desboss2)
-                        )
-                        (!= enemy-noto 99)
-                    )
-                    (set! enemy-noto 99)
-                )
-                (when 
-                    (and 
                         (= start-was-uprising #t)
                         (= (-> (level-get-target-inside *level*) name) 'desert)
                         *target*
@@ -1552,11 +1668,11 @@
                     (+! wasi 1)
                     (when (= wasi 3000)
                         (+! enemy-noto 1)
-                        (set! wasi 0)
-                    )
+                        (set! wasi 0))
                 )
 
-                (when 
+                ;; clear desert escalation flag when leaving
+                (when
                     (and
                         (!= (-> (level-get-target-inside *level*) name) 'desert)
                         (not (task-node-open? (game-task-node arena-replay-1-fight)))
@@ -1566,7 +1682,7 @@
                     (set! start-was-uprising #f)
                 )
             )
-        )
+            )
         
 
         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;level based enemy-levels in NORMALS
@@ -2085,7 +2201,10 @@
             (not *scene-player*)
             (= (paused?) #f)
             (not mainmenu-camera)
-            (task-node-closed? (game-task-node arena-fight-1-introduction))
+            (or
+                (task-node-closed? (game-task-node arena-fight-1-introduction))
+                (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+            )
         ) ;gain XP
         (+! xpi 1)
         (let ((max-time 300))
@@ -2289,7 +2408,10 @@
         (= (paused?) #f)
         (= r3-noto #t)
         (= in-menu? #f)
-        (task-node-closed? (game-task-node arena-fight-1-introduction))
+        (or
+            (task-node-closed? (game-task-node arena-fight-1-introduction))
+            (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+        )
     )
         (clear matt-str)
         (clear *pc-encoded-matt-str*)

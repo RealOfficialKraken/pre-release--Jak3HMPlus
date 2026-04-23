@@ -894,7 +894,7 @@
       )
     )
   :code (behavior ((arg0 symbol) (arg1 int))
-    (+! (-> *game-info* crates-opened) 1.0)
+    (+! (-> *game-info* crates-opened) 0.0)
     (when (string= (-> self name) "crate-tier1") 
       (birth-drop1 (-> self root trans))
     )

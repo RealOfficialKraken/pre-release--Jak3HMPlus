@@ -3,29 +3,8 @@
 
 ;; name: jak3-custom-code.gc
 
-#|
-TODO:
-- (CRITICAL) Add the sounds to the rage-ghost, and the anchor event
-- (CRITICAL) Add a NG+ to continue levelling with your current stats, higher level enemies, and extremely hard story missions
-- (CRITICAL) Make TP-FB with the terraformer in dark-world
-
-After all of these, the mod will be at a v1.0 state. Mod releasing is determined by Jak 3's open release
-
-BUGS:
-- Bipedal Boss' shield isnt strength 999
-- Crystal in hud has no texture
-- Blocking plane at course-race doesn't spawn
-- General Gouge doesn't have his attributes or hpbar name
-
-:CRASHES
-- 
-|#
-
-
-
 ;;MOD VERSION
-(define mod-version "0.9.1")
-;;
+(define mod-version "0.9.2")
 
 (defun-extern freeze-enemies-in-menu! (none))
 (defun-extern level-up! int none)
@@ -932,6 +911,8 @@ BUGS:
       (send-event *target* 'draw #f)
       (set! hmplus-intro-phase 1)
       (set! hmplus-intro-frame 0)
+      (process-grab? *target* #t)
+      (set! pause-menu-blocked? #t)
       (set! hmplus-intro-fx-started? #f))
     ((= hmplus-intro-phase 1)
       (send-event *target* 'draw #f)
@@ -1069,6 +1050,8 @@ BUGS:
       (set! hmplus-intro-phase 0)
       (set! hmplus-intro-frame 0)
       (set! hmplus-intro-fx-started? #f)
+      (process-release? *target*)
+      (set! pause-menu-blocked? #f)
       (launch-mmenu)
       )
     )
@@ -3700,11 +3683,12 @@ BUGS:
 )
     (clear matt-str)
     (clear *pc-encoded-matt-str*)
-    (format matt-str "<COLOR_GREEN>Mod Script Active!~%~%<COLOR_YELLOW>continue-deaths = <COLOR_ORANGE>~D~%<COLOR_YELLOW>task-deaths = <COLOR_ORANGE>~D~%<COLOR_YELLOW>total-deaths = <COLOR_ORANGE>~D~%<COLOR_RED>enemy-noto = ~d"
+    (format matt-str "<COLOR_GREEN>Mod Script Active!~%~%<COLOR_YELLOW>continue-deaths = <COLOR_ORANGE>~D~%<COLOR_YELLOW>task-deaths = <COLOR_ORANGE>~D~%<COLOR_YELLOW>total-deaths = <COLOR_ORANGE>~D~%<COLOR_RED>enemy-noto = ~d~%<COLOR_RED>crates-opened (hm tick)=~d"
     (-> *game-info* continue-deaths)
     (-> *game-info* task-deaths)
     (-> *game-info* total-deaths)
     enemy-noto
+    (the int (-> *game-info* crates-opened))
     )
     (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
     (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -6797,7 +6781,7 @@ BUGS:
                         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
                         (clear matt-str)
                         (clear *pc-encoded-matt-str*)
-                        (format matt-str "<COLOR_WHITE>Welcome to HeroMode+ v~s,~%~%Let it be known that this mod is nothing like the Jak II HeroMode+ mod, ~%but something more.~%~%When creating the Jak II mod, I intended Jak II to be ~%the holy grail in challenge and difficulty, while also making it feel like~%you're playing for the first time again.~%This mod is completely different from that goal.~%~%In this mod, ambition is at it's maximum.~%Missions are changed, some are completely replaced or taken out,~%and gameplay is overhauled.~%~%I cannot thank you all enough for playing this.~%Whenever I make something creative, most of it does not see the other~%end of a person playing it for their enjoyment.~%But this is different.~%So thank you, for giving me this opportunity to present such a~%huge passion project to you.~%...Also expect lots of crashes :)~%~%ALSO also--Hero Mode is not yet fully implemented!~%Don't try it until 1.0 comes out~%~%~%~% Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%X<COLOR_WHITE> Continue"
+                        (format matt-str "<COLOR_WHITE>Welcome to HeroMode+ v~s <COLOR_CYAN>PRE-RELEASE!~%~%<COLOR_WHITE>Let it be known that this mod is nothing like the Jak II HeroMode+ mod, ~%but something more.~%~%When creating the Jak II mod, I intended for it to be ~%the holy grail in challenge and difficulty, while also making it feel like~%you're playing for the first time again.~%This mod is completely different from that goal.~%~%In this mod, ambition is at it's maximum.~%Missions are changed, some are completely replaced or taken out,~%and gameplay is overhauled.~%~%I cannot thank you all enough for playing this.~%Whenever I make something creative, most of it does not see the other~%end of a person playing it for their enjoyment.~%But this is different.~%So thank you, for giving me this opportunity to present such a~%huge passion project to you.~%~%<COLOR_RED>EXPECT CRASHES~%~%~%~% <COLOR_WHITE>Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%X<COLOR_WHITE> Continue"
                         mod-version
                         )
                         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
@@ -7169,7 +7153,123 @@ BUGS:
         )
         (target-gun-airstrike-update)
     )
+
+    (when
+        (and
+            (= going-heromode? #f)
+            (!= (-> *game-info* crates-opened) 0.0)
+            (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+        )
+        (set! (-> *game-info* crates-opened) 0.0)
+    )
+
+    (when (= going-heromode? #t)
+        (+! hmp-i 1)
+        (when (= hmp-i 30)
+            (initialize! *game-info* 'game (the-as game-save #f) "wasstada-jump-training" (the-as resetter-spec #f))
+        )
+        (when
+            (and
+                *target*
+                (not *scene-player*)
+                (= (paused?) #f)
+                (= (pause-allowed?) #t)
+                (>= hmp-i 35)
+                (= (-> *game-info* civilians-killed) 0.0)
+            )
+            (set! (-> *game-info* total-trys) hero-level-count)
+            (set! (-> *game-info* karma) hero-level-xp-count)
+            (set! (-> *game-info* total-deaths) cars-level-count)
+            (set! (-> *game-info* fuel) cars-level-xp-count)
+            (set! (-> *game-info* auto-save-count) guns-level-count)
+            (set! (-> *game-info* buzzer-total) guns-level-xp-count)
+            (set! (-> *game-info* gem) skull-gem-count)
+            (send-event *target* 'get-pickup (pickup-type skill) orba-count)
+            (set! (-> *game-info* civilians-killed) crystal-count)
+            (set! (-> *game-info* crates-opened) heromode-tick)
+            (logior! (-> *game-info* secrets) (game-secrets hero-mode))
+            (when has-red-2?
+                (give-weapon! "red-2" 1)
+            )
+            (when has-red-3?
+                (give-weapon! "red-3" 1)
+            )
+            (when has-yellow-2?
+                (give-weapon! "yellow-2" 1)
+            )
+            (when has-yellow-3?
+                (give-weapon! "yellow-3" 1)
+            )
+            (when has-blue-1?
+                (give-weapon! "blue-1" 1)
+            )
+            (when has-blue-2?
+                (give-weapon! "blue-2" 1)
+            )
+            (when has-blue-3?
+                (give-weapon! "blue-3" 1)
+            )
+            (when has-dark-1?
+                (give-weapon! "dark-1" 1)
+            )
+            (when has-dark-2?
+                (give-weapon! "dark-2" 1)
+            )
+            (when has-dark-3?
+                (give-weapon! "dark-3" 1)
+            )
+            (set! hmp-i 0)
+            (activate-progress *dproc* 'select-save)
+            (task-node-close! (game-task-node arena-training-1-introduction) #t)
+            (set! going-heromode? #f)
+        )
+    )
 (none)
+)
+
+(defun activate-heromode! ()
+    (set! hero-level-count notoriety-level)
+    (set! hero-level-xp-count (-> *game-info* karma))
+    (set! guns-level-count guns-level)
+    (set! guns-level-xp-count (-> *game-info* buzzer-total))
+    (set! cars-level-count cars-level)
+    (set! cars-level-xp-count (-> *game-info* fuel))
+    (set! skull-gem-count (-> *game-info* gem))
+    (set! orba-count (-> *game-info* skill))
+    (set! crystal-count (-> *game-info* civilians-killed))
+    (set! heromode-tick (-> *game-info* crates-opened))
+    (when (logtest? (-> *game-info* features) (game-feature gun-red-2))
+        (set! has-red-2? #t)
+    )
+    (when (logtest? (-> *game-info* features) (game-feature gun-red-3))
+        (set! has-red-3? #t)
+    )
+    (when (logtest? (-> *game-info* features) (game-feature gun-yellow-2))
+        (set! has-yellow-2? #t)
+    )
+    (when (logtest? (-> *game-info* features) (game-feature gun-yellow-3))
+        (set! has-yellow-3? #t)
+    )
+    (when (logtest? (-> *game-info* features) (game-feature gun-blue-1))
+        (set! has-blue-1? #t)
+    )
+    (when (logtest? (-> *game-info* features) (game-feature gun-blue-2))
+        (set! has-blue-2? #t)
+    )
+    (when (logtest? (-> *game-info* features) (game-feature gun-blue-3))
+        (set! has-blue-3? #t)
+    )
+    (when (logtest? (-> *game-info* features) (game-feature gun-dark-1))
+        (set! has-dark-1? #t)
+    )
+    (when (logtest? (-> *game-info* features) (game-feature gun-dark-2))
+        (set! has-dark-2? #t)
+    )
+    (when (logtest? (-> *game-info* features) (game-feature gun-dark-3))
+        (set! has-dark-3? #t)
+    )
+    (set! going-heromode? #t)
+    (set! hmp-i 0)
 )
 
 (defun nice-try ()
@@ -7793,7 +7893,12 @@ BUGS:
 
     (set! (-> fact pickup-type) (the-as pickup-type #f))
     (set! (-> fact pickup-amount) 0.0)
-    (when (not in-arena-fight?)
+    (when (and
+            (not in-arena-fight?)
+            (!= (-> (level-get-target-inside *level*) name) 'wasstada)
+            (!= (-> (level-get-target-inside *level*) name) 'wasstadb)
+            (!= (-> (level-get-target-inside *level*) name) 'wasstadc)
+          )
         (set! (-> fact options) (actor-option fall))
     )
 

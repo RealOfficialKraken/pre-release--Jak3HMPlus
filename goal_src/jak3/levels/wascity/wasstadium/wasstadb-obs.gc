@@ -390,11 +390,17 @@
     (case message
       (('touch 'attack)
       (+! arena-token-count 1)
-      (when (= arena-token-count 1)
+      (when (and
+              (= arena-token-count 1)
+              (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+            )
         (set! tutorial-msg 0)
         (set! in-tutorial? #t)
       )
-       (when (= arena-token-count 18)
+       (when (and
+              (= arena-token-count 18)
+              (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+            )
         (set! tutorial-msg 1)
         (set! in-tutorial? #t)
        )

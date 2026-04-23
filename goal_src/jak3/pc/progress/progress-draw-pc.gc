@@ -290,7 +290,12 @@
                 (set-color! arg1 (font-color font-color-34))
                 (cond
                   ((-> this buy-menu)
-                   (string-format "x~D ~S" (-> *menu-secrets-array* (-> this selected-index) cost) (lookup-text! *common-text* (text-id progress-secrets-price) #f))
+                  (let ((opt (-> *menu-secrets-array* (-> this selected-index))))
+                  (if (= (-> opt secret) (game-secrets hero-mode))
+                      (string-format "")
+                      (string-format "x~D ~S"
+                        (-> opt cost)
+                        (lookup-text! *common-text* (text-id progress-secrets-price) #f))))
                    )
                   (else
                     (string-format "x~D ~S" (the int (-> *game-info* skill)) (lookup-text! *common-text* (text-id progress-secrets-orbs-available) #f))
@@ -394,14 +399,18 @@
                     (let ((s0-6 (-> *menu-secrets-array* s1-5)))
                       (set! sv-208 (-> *menu-secrets-array* s1-5 name))
                       (set! sv-288 (secret-item-option-method-12 s0-6))
-                      (case sv-288
-                        ((4)
-                          (set! sv-240 "?????????")
+
+                      (if (= (-> s0-6 secret) (game-secrets hero-mode))
+                          (set! sv-240 "Hero Mode is Coming Soon in v1.0!")
+                          (case sv-288
+                            ((4)
+                              (set! sv-240 "?????????")
+                            )
+                            (else
+                              (set! sv-240 (lookup-text! *common-text* sv-208 #f))
+                            )
                           )
-                        (else
-                          (set! sv-240 (lookup-text! *common-text* sv-208 #f))
-                          )
-                        )
+                      )
                       (cond
                         ((logtest? (-> *menu-secrets-array* s1-5 flags) (secret-item-option-flags sf0))
                          (set! (-> arg1 origin x) (+ 10.0 (adjust-x-if-needed (-> s3-3 x))))
@@ -448,7 +457,10 @@
                                 (set! sv-368 (lookup-text! *common-text* (text-id progress-off) #f))
                                 (cond
                                   ((or (zero? sv-288) (= sv-288 3))
-                                  (string-format "~d" (-> s0-6 cost))
+                                  (if (= (-> s0-6 secret) (game-secrets hero-mode))
+                                      (string-format "") ;; hide cost
+                                      (string-format "~d" (-> s0-6 cost)))
+
                                   (print-game-text *temp-string* arg1 #f 40 (bucket-id hud-draw-hud-alpha))
                                   )
                                   ((= sv-288 1)
