@@ -63,6 +63,7 @@
   :virtual #t
   :code (behavior ()
     (local-vars (a1-12 event-message-block) (gp-3 symbol))
+    (jak-refill!)
     (suspend-for (seconds 0.5)
       )
     (until (and (-> self manager-entity) (= (-> *game-info* counter) 0.0))

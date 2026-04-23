@@ -3707,12 +3707,39 @@
       (when (and (not (time-elapsed? (-> self state-time) (seconds 30.0)))
                  (time-elapsed? (-> self wander-generate-time)
                                 (the-as uint fire-frames)))
-        (spawn-satellite-grenade self src center-target center-power)
+        (cond 
+            ((task-node-open? (game-task-node desert-rescue-satellite-fight))
+              (when (rand-vu-percent? 0.75)
+                (spawn-satellite-grenade self src center-target center-power)
+              )
+            )
+            (else
+              (spawn-satellite-grenade self src center-target center-power)
+            )
+          )
         (when (>= (-> self current-stage) 1)
-          (spawn-satellite-grenade self src left-target left-power)
+          (cond 
+            ((task-node-open? (game-task-node desert-rescue-satellite-fight))
+              (when (rand-vu-percent? 0.35)
+                (spawn-satellite-grenade self src left-target left-power)
+              )
+            )
+            (else
+              (spawn-satellite-grenade self src left-target left-power)
+            )
+          )
         )
         (when (>= (-> self current-stage) 2)
-          (spawn-satellite-grenade self src right-target right-power)
+          (cond 
+            ((task-node-open? (game-task-node desert-rescue-satellite-fight))
+              (when (rand-vu-percent? 0.35)
+                (spawn-satellite-grenade self src right-target right-power)
+              )
+            )
+            (else
+              (spawn-satellite-grenade self src right-target right-power)
+            )
+          )
         )
         (set-time! (-> self wander-generate-time)))
 
