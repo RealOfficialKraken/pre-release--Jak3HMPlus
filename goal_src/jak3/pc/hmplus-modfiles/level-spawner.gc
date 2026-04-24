@@ -313,7 +313,7 @@ dead
                 )
                 (= mhcitya-bspawner #f)
             )
-            (init-respawner! mhcitya-vbspawner-1 neo-grenadier "neo-grenadier-boss" 600)
+            ;(init-respawner! mhcitya-vbspawner-1 neo-grenadier "neo-grenadier-boss" 600)
             (set! mhcitya-bspawner #t)
             )
             ((and
@@ -338,7 +338,7 @@ dead
                 )
                 (= ctyindb-bspawner #f)
             )
-            (init-respawner! ctyindb-vbspawner-4 roboguard-giant "roboguard-giant" 600)
+            ;(init-respawner! ctyindb-vbspawner-4 roboguard-giant "roboguard-giant" 600)
             (set! ctyindb-bspawner #t)
             )
             ((and
@@ -364,7 +364,7 @@ dead
                 (not (task-node-open? (game-task-node city-port-assault-resolution)))
                 (= ctyport-bspawner #f)
             )
-            (init-respawner! ctyport-vbspawner-1 roboguard "roboguard" 600)
+            ;(init-respawner! ctyport-vbspawner-1 roboguard "roboguard" 600)
             (set! ctyport-bspawner #t)
             )
             ((and

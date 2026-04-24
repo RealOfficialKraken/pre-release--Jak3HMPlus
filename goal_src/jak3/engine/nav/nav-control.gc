@@ -193,7 +193,9 @@
       (go process-drawable-art-error "no nav-mesh")
       (return 0)
       )
-    (print "Normal nav control")
+    (if *debug-segment*
+      (print "Normal nav control")
+    )
     (add-process-drawable-to-nav-mesh arg1 arg0 #t)
     )
     (else
@@ -216,7 +218,9 @@
       (go process-drawable-art-error "no nav-mesh")
       (return 0)
       )
-    (print "My nav control")
+    (if *debug-segment*
+      (print "My nav control")
+    )
     (add-process-drawable-to-nav-mesh arg1 arg0 #t)
     )
   )

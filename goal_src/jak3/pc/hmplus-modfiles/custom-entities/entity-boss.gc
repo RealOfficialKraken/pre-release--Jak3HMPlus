@@ -381,7 +381,7 @@
         (quickspawn-eb (new 'static 'vector :x (meters 3496.7414) :y (meters 406.6769) :z (meters 880.2725) :w 1.0))
         (camera-unlocked)
         (lightjak-get-off-part (target-pos 0))
-        (play-main-music "snd/music/final-boss.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+        (play-main-music "snd/music/final-boss.mp3" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
         (go-virtual idle)
       )
 
@@ -1138,7 +1138,7 @@
     (kill-by-name "dust-storm-randomizer" *default-pool*)
     (kill-by-name "eb-floater" *default-pool*)
     (kill-by-name "vin-head-call" *default-pool*)
-    (play-sound-file "snd/music/ending.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+    (play-sound-file "snd/music/ending.mp3" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
     (when (< (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 4)
       (+! (-> *game-info* continue-deaths) 1000000)
     )
@@ -1543,7 +1543,7 @@
 (defstate eb-dying (entity-boss-dying)
   :virtual #t
   :enter (behavior ()
-    (play-sound-file "snd/music/final-boss-win.wav" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+    (play-sound-file "snd/music/final-boss-win.mp3" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
   )
   :code (behavior ()
     (loop
