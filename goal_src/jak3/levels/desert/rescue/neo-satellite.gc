@@ -3373,6 +3373,14 @@
                 (task-node-close! (game-task-node darkworld-d2-reso) #t)
               )
             )
+            (when 
+              (or
+                (task-node-open? (game-task-node desert-rescue-satellite-fight))
+                (task-node-open? (game-task-node desert-rescue-resolution))
+                (task-node-open? (game-task-node desert-rescue-hold-doors))
+              )
+              (blank-hint! "Collect your Reward from" "the Fallen Satellite!" 250 600)
+            )
             (when (or (= (-> self diff-counter) 6) (= (-> self diff-counter) 5))
               (let ((fact (new 'static 'fact-info)))
                 (vector-copy! vec (-> self root trans))

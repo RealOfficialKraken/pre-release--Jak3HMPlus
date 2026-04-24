@@ -178,6 +178,7 @@
           (+! (-> s5-1 y) 9011.2)
           (set-continue! *game-info* "volcanoa-start" #t)
           (when (and (= in-volcano-level? #f) (task-node-closed? (game-task-node volcano-darkeco-resolution)))
+            (blank-hint! "<COLOR_ORANGE>This area has a level range on enter:" "Lv. 10-16" 290 400)
             (volcano-level)
           )
           (auto-save-user)
