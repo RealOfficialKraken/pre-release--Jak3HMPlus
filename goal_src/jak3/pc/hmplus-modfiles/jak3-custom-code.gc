@@ -3496,7 +3496,7 @@
     (= menu-slot 2)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_PINK>Vehicles:<COLOR_CYAN> ~d ~%~%<COLOR_ORANGE>All of Jak's cars get boost upgrades per level. Vehicle Guns can do more damage!~%~%<COLOR_YELLOW>Earn reputation while on a vehicle to earn XP~%~%~%<COLOR_ORANGE>At Level 2~%~s~%<COLOR_ORANGE>At Level 6~%~s~%<COLOR_ORANGE>At Level 14~%~s"
+        (format matt-str "<COLOR_PINK>Vehicles:<COLOR_CYAN> ~d ~%~%<COLOR_ORANGE>All of Jak's cars get boost upgrades per level.~%Vehicle Guns can do more damage!~%~%<COLOR_YELLOW>Earn reputation while on a vehicle to earn XP~%~%~%<COLOR_ORANGE>At Level 2~%~s~%<COLOR_ORANGE>At Level 6~%~s~%<COLOR_ORANGE>At Level 14~%~s"
         cars-level
         skill-cars-string1
         skill-cars-string2

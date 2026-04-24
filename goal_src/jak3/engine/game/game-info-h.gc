@@ -778,6 +778,8 @@
     (define going-heromode? #f)
     (define hmp-i 0)
 
+    (defun-extern delayed-play-continue string none)
+
     (defun-extern init-enemy-bpbar none)
 
     (define light-eco-guard-shot #f)
