@@ -175,6 +175,7 @@ dead
 (define minea-vbspawner-6 (new 'static 'vector :x (meters 75.4611) :y (meters 51.9216) :z (meters 15.3804) :w 1.0))
 (define minea-vbspawner-7 (new 'static 'vector :x (meters 71.8612) :y (meters 52.3163) :z (meters 2.7022) :w 1.0))
 (define minea-vbspawner-8 (new 'static 'vector :x (meters 74.4600) :y (meters 51.9492) :z (meters -7.5017) :w 1.0))
+(define minea-vbspawner-9 (new 'static 'vector :x (meters 39.3597) :y (meters 59.9648) :z (meters 36.5089) :w 1.0))
 (define minea-bspawner #f)
 
 (define darkworld-vbspawner-1 (new 'static 'vector :x (meters 242.7556) :y (meters 99.2942) :z (meters -81.5553) :w 1.0))
@@ -290,6 +291,7 @@ dead
             (init-respawner! minea-vbspawner-6 mantis "mantis-c" 600)
             (init-respawner! minea-vbspawner-7 mantis "mantis-c" 600)
             (init-respawner! minea-vbspawner-8 mantis "mantis-c" 600)
+            (init-respawner! minea-vbspawner-9 neo-grenadier "neo-grenadier-boss" 600)
             (set! minea-bspawner #t)
             )
             ((and
