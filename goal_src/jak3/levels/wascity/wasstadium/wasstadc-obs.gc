@@ -2372,7 +2372,10 @@
     (if (and (zero? (-> self count-alive)) (zero? (-> self count)))
         (task-node-close! (game-task-node arena-fight-1-fight) 'event)
         )
-    (when (>= (the-as uint 5) (-> self count))
+    (when (and
+        (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+        (>= (the-as uint 5) (-> self count))
+        )
       (set! (-> self display-fire) #f)
       (persist-with-delay *setting-control* 'gun (seconds 0.1) 'gun #f 0.0 0)
       (persist-with-delay *setting-control* 'board (seconds 0.1) 'board #f 0.0 0)
@@ -2501,7 +2504,9 @@
             )
           )
         )
-      (when (>= (the-as uint 5) (-> this count))
+      (when (and
+        (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+        (>= (the-as uint 5) (-> this count)))
         (set! (-> this display-fire) #f)
         (persist-with-delay *setting-control* 'gun (seconds 0.1) 'gun #f 0.0 0)
         (persist-with-delay *setting-control* 'board (seconds 0.1) 'board #f 0.0 0)

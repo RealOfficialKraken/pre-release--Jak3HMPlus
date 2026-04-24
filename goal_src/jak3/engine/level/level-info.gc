@@ -10695,6 +10695,26 @@
                          )
                        :want-sound (new 'static 'array symbol 3 'wascity1 'wasstad1 'wasstad2)
                        )
+                      (new 'static 'continue-point
+                       :name "set-in-heromode"
+                       :level 'wasstada
+                       :flags (continue-flags no-auto)
+                       :trans (new 'static 'vector :x 9301495.0 :y 66149.17 :z -1830771.9 :w 1.0)
+                       :camera-trans (new 'static 'vector :x 9261504.0 :y 87216.125 :z -1862743.6 :w 1.0)
+                       :quat (new 'static 'vector4h :data (new 'static 'array int16 4 0 #x38ee 0 #x729e))
+                       :camera-rot (new 'static 'array int16 9 #x4ff2 0 -25587 #xc22 #x7f09 #x9b3 #x6335 -3977 #x4f58)
+                       :on-goto #f
+                       :vis-nick 'wasstada
+                       :vehicle-type #x1b
+                       :want-count 4
+                       :want (new 'static 'inline-array level-buffer-state-small 4
+                         (new 'static 'level-buffer-state-small :name 'wasall :display? 'special)
+                         (new 'static 'level-buffer-state-small :name 'waswide :display? 'display)
+                         (new 'static 'level-buffer-state-small :name 'wasstada :display? 'display)
+                         (new 'static 'level-buffer-state-small :name 'arenacst :display? 'special)
+                         )
+                       :want-sound (new 'static 'array symbol 3 'wascity1 'wasstad1 'wasstad2)
+                       )
                      (new 'static 'continue-point
                        :name "game-start"
                        :level 'wasstada

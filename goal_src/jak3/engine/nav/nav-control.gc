@@ -175,6 +175,13 @@
       (= (-> (level-get-target-inside *level*) name) 'lpattack)
       (= (-> (level-get-target-inside *level*) name) 'rubblea)
       (= (-> (level-get-target-inside *level*) name) 'rubbleb)
+      (and
+        (or
+          (= (-> (level-get-target-inside *level*) name) 'wascitya)
+          (= (-> (level-get-target-inside *level*) name) 'wascityb)
+        )
+        (= weather-dark-mode #t)
+      )
      )
       (if (not arg1)
         (set! arg1 (nav-mesh-from-res-tag (-> arg0 entity) 'nav-mesh-actor 0))
