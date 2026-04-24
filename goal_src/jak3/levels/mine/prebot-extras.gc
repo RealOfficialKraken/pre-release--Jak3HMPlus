@@ -305,6 +305,7 @@
   (set! (-> this root pause-adjust-distance) 409600.0)
   (set! (-> this draw light-index) (the-as uint 10))
   (set! (-> this incoming-attack-id) (the-as uint 0))
+  (logior! (-> this draw status) (draw-control-status no-draw))
   (set! (-> this hit-points) 10.0)
   (set! (-> this trackable) #t)
   (set! (-> this notify-on-die) #f)
@@ -378,6 +379,7 @@
     (cleanup-for-death this)
     (deactivate this)
     )
+  (logior! (-> this draw status) (draw-control-status no-draw))
   (go (method-of-object this idle))
   )
 
