@@ -1413,6 +1413,7 @@
                 (not disable-targbar)
                 (not hmplus-intro-active?)
                 (not in-dialogue?)
+                (not in-menu?)
                 (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
                 (not (task-node-open? (game-task-node city-blow-tower-resolution)))
             )

@@ -112,6 +112,16 @@
     )
   )
 
+(defun jak-on-elevator? ()
+  (let ((tgt *target*))
+    (and
+      tgt
+      (not (logtest? (-> tgt focus-status)
+             (focus-status dead inactive in-air grabbed edge-grab pole pilot-riding pilot teleporting)))
+      (= (paused?) #f)
+      (= (pause-allowed?) #t)
+      ))
+  )
 
 (defmethod point-inside-shaft? ((this elevator) (arg0 vector) (arg1 float) (arg2 float))
   #f
