@@ -175,12 +175,16 @@
       (= (-> (level-get-target-inside *level*) name) 'lpattack)
       (= (-> (level-get-target-inside *level*) name) 'rubblea)
       (= (-> (level-get-target-inside *level*) name) 'rubbleb)
-      (or
-        (= (-> (level-get-target-inside *level*) name) 'wascitya)
-        (= (-> (level-get-target-inside *level*) name) 'wascityb)
-        (task-node-open? (game-task-node wascity-defend-introduction))
-        (task-node-open? (game-task-node wascity-defend-get-to))
-        (task-node-open? (game-task-node wascity-defend-resolution))
+      (and
+        (or
+          (= (-> (level-get-target-inside *level*) name) 'wascitya)
+          (= (-> (level-get-target-inside *level*) name) 'wascityb)
+        )
+        (or
+          (task-node-open? (game-task-node wascity-defend-introduction))
+          (task-node-open? (game-task-node wascity-defend-get-to))
+          (task-node-open? (game-task-node wascity-defend-resolution))
+        )
       )
       (and
         (or
