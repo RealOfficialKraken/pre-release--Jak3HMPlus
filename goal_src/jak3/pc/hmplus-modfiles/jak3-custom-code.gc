@@ -7166,6 +7166,56 @@
 
     (when
         (and
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            (or
+                (= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                (= (-> (level-get-target-inside *level*) name) 'volcanox)
+            )
+            (not in-volcano-level?)
+            (task-node-closed? (game-task-node temple-oracle-resolution))
+        )
+        (volcano-level)
+    )
+
+    (when
+        (and
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            (or
+                (= (-> (level-get-target-inside *level*) name) 'minea)
+                (= (-> (level-get-target-inside *level*) name) 'minec)
+            )
+            (not in-mine-level?)
+            (task-node-closed? (game-task-node sewer-met-hum-resolution))
+        )
+        (mine-level)
+    )
+
+    (when
+        (and
+            *target*
+            (not *scene-player*)
+            (= (paused?) #f)
+            (= (pause-allowed?) #t)
+            (or
+                (= (-> (level-get-target-inside *level*) name) 'factorya)
+                (= (-> (level-get-target-inside *level*) name) 'factoryb)
+                (= (-> (level-get-target-inside *level*) name) 'factoryc)
+                (= (-> (level-get-target-inside *level*) name) 'lfacrm1)
+            )
+            (not in-factory-level?)
+            (task-node-closed? (game-task-node factory-boss-resolution))
+        )
+        (factory-level)
+    )
+
+    (when
+        (and
             (= going-heromode? #f)
             (!= (-> *game-info* crates-opened) 0.0)
             (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))

@@ -6629,7 +6629,7 @@
                 :continues '((new 'static 'continue-point
                     :name "minea-start"
                     :level 'minea
-                    :flags (continue-flags no-auto)
+                    :flags (continue-flags no-auto change-continue)
                     :trans (new 'static 'vector :x -368403.25 :y 344054.16 :z -403614.94 :w 1.0)
                     :camera-trans (new 'static 'vector :x 181120.2 :y 279094.47 :z 118537.83 :w 1.0)
                     :quat (new 'static 'vector4h :data (new 'static 'array int16 4 0 -17792 0 #x6b77))
