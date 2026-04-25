@@ -141,7 +141,7 @@
          (when (string= (-> arg0 name) "factoryc-warp")
           (set! (-> s5-1 quad) (-> wgf-vec quad))
           (+! (-> s5-1 y) 9011.2)
-          (set-continue! *game-info* "factorys-start" #t)
+          (set-continue! *game-info* "factoryc-warp" #t)
           (when 
             (and 
               (= in-factory-level? #f)
@@ -176,7 +176,7 @@
          (when (string= (-> arg0 name) "volcanos-warp")
           (set! (-> s5-1 quad) (-> wgv-vec quad))
           (+! (-> s5-1 y) 9011.2)
-          (set-continue! *game-info* "volcanoa-start" #t)
+          (set-continue! *game-info* "volcanos-warp" #t)
           (when (and (= in-volcano-level? #f) (task-node-closed? (game-task-node volcano-darkeco-resolution)))
             (blank-hint! "<COLOR_ORANGE>This area has a level range on enter:" "Lv. 10-16" 290 400)
             (volcano-level)
