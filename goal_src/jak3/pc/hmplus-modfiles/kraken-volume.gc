@@ -175,18 +175,24 @@ playing
                         (play-main-music "snd/music/dark-world-theme.mp3" (-> self volume))
                         (set! (-> self track) "dark-world-theme")
                     )
+                (let ((dead? #f))
+                (when *target*
+                    (let ((f (-> *target* fact)))
+                    (when f
+                        (when (<= (-> f health) 0.0)
+                        (set! dead? #t)))))
                 (when
                     (and
-                        (<= (-> *target* fact health) 0.0)
-                        (= weather-dark-mode #f)
-                        (= in-main-menu? #f)
-                        (= (paused?) #f)
-                        (= (pause-allowed?) #t)
-                        *target*
+                    dead?
+                    (= weather-dark-mode #f)
+                    (= in-main-menu? #f)
+                    (= (paused?) #f)
+                    (= (pause-allowed?) #t)
                     )
                     (play-main-music "ejfiseuf" (-> self volume))
                     (stop-main-music)
                     (go-virtual dead)
+                    )
                 )
                 (suspend)
             )
