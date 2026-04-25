@@ -456,7 +456,7 @@
                 )
                 ((and (cpad-pressed? 0 x) (= vin-select 4) (>= vin-crystals 20))
                     (-! (-> *game-info* civilians-killed) 20.0)
-                    (drop-gun-mod! (target-pos 0))
+                    (set! drop-gun-mod #t)
                     (close-vin-shop!)
                 )
             )
