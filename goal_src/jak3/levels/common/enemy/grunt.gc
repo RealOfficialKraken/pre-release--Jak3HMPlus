@@ -2087,7 +2087,7 @@
           (quaternion-identity! (-> gp-0 spawn-quat))
           (set! (-> gp-0 radius) 42200.0)
           (set! (-> gp-0 scale) 1.0)
-          (set! (-> gp-0 group) (-> *part-group-id-table* 88)) ;(-> *part-group-id-table* 499)
+          (set! (-> gp-0 group) (-> *part-group-id-table* 88))
           (set! (-> gp-0 collide-with)
                   (collide-spec backgnd jak crate civilian obstacle vehicle-sphere hit-by-others-list player-list pusher)
                   )

@@ -1,0 +1,207 @@
+(in-package goal)
+
+;;name: pet-process.gc
+
+(defskelgroup skel-pet-skyship dm-ship dm-ship-lod0-jg dm-ship-idle-ja
+              ((dm-ship-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 90999999)
+              :origin-joint-index 3
+              :global-effects 32)
+
+(deftype pet-process-base (process-drawable)
+  ((side float)
+   (follow-offset vector :inline)
+   (target-follow-offset vector :inline)
+   (start-follow-offset vector :inline)
+   (base-pos vector :inline)
+   (bob-time time-frame)
+   (target-slot int))
+  (:state-methods
+    rise-up
+    follow
+    die))
+
+(defun pet-process-set-follow-offset-by-slot! ((out vector) (slot int))
+  (case slot
+    ((0) (set-vector! out (meters -2.0) (meters 4.0) (meters -1.0) 1.0))  
+    ((1) (set-vector! out (meters 2.0) (meters 4.0) (meters -1.0) 1.0))   
+    ((2) (set-vector! out 0.0 (meters 4.0) (meters -2.0) 1.0))            
+    ((3) (set-vector! out 0.0 (meters 4.0) (meters 2.0) 1.0)))            
+  (none))
+
+(defun pet-process-random-next-follow-offset! ((this pet-process-base))
+  (let ((new-slot (rand-vu-int-range 0 3)))
+    (when (= new-slot (-> this target-slot))
+      (+! new-slot 1)
+      (when (> new-slot 3)
+        (set! new-slot 0)))
+    (set! (-> this target-slot) new-slot)
+    (pet-process-set-follow-offset-by-slot! (-> this target-follow-offset) new-slot))
+  (none))
+
+(defbehavior pet-process-base-init-by-other pet-process-base ()
+  (stack-size-set! (-> self main-thread) 2048)
+  (set! (-> self root) (new 'process 'trsqv))
+
+  (vector-copy! (-> self root trans) (target-pos 0))
+  (quaternion-identity! (-> self root quat))
+  (set-vector! (-> self root scale) 0.07 0.07 0.07 1.0)
+
+  (initialize-skeleton
+    self
+    (the-as skeleton-group
+      (art-group-get-by-name *level* "skel-pet-skyship" (the-as (pointer level) #f)))
+    (the-as pair 0))
+
+  (logclear! (-> self draw status) (draw-control-status no-draw no-draw-temp uninited))
+
+  (set! (-> self side) 1.0)
+  (set! (-> self target-slot) (rand-vu-int-range 0 2))
+  (pet-process-set-follow-offset-by-slot! (-> self follow-offset) (-> self target-slot))
+  (vector-copy! (-> self target-follow-offset) (-> self follow-offset))
+  (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
+
+  (set-time! (-> self bob-time))
+  (go-virtual rise-up)
+  (none))
+
+(defun spawn-pet-process-base ()
+  (process-spawn pet-process-base :name "pet-process-base")
+  (none))
+
+(defstate rise-up (pet-process-base)
+  :virtual #t
+  :code (behavior ()
+    (let ((start-pos (new 'stack-no-clear 'vector))
+          (target-pos-v (new 'stack-no-clear 'vector))
+          (jak-pos (new 'stack-no-clear 'vector))
+          (off (new 'stack-no-clear 'vector))
+          (t 0.0)
+          (bob 0.0)
+          (phase-time 0.0))
+
+      (vector-copy! start-pos (target-pos 0))
+      (vector-copy! (-> self root trans) start-pos)
+      (set-time! (-> self state-time))
+
+      (loop
+        (when (not *target*)
+          (go-virtual die))
+
+        (set! phase-time (the float (- (current-time) (-> self state-time))))
+
+        (set! bob
+          (* (meters 0.35)
+             (sin (* 0.09 phase-time))))
+
+        (vector-copy! jak-pos (target-pos 0))
+        (vector-copy! off (-> self follow-offset))
+        (vector+! target-pos-v jak-pos off)
+        (+! (-> target-pos-v y) bob)
+
+        (set! t
+          (fmin 1.0
+            (/ phase-time
+               (the float (seconds 0.75)))))
+
+        (set! (-> self root trans x) (lerp (-> start-pos x) (-> target-pos-v x) t))
+        (set! (-> self root trans y) (lerp (-> start-pos y) (-> target-pos-v y) t))
+        (set! (-> self root trans z) (lerp (-> start-pos z) (-> target-pos-v z) t))
+        (set! (-> self root trans w) 1.0)
+
+        (quaternion-copy! (-> self root quat) (-> (the-as process-drawable *target*) root quat))
+
+        (when (>= t 1.0)
+          (go-virtual follow))
+
+        (suspend))))
+  :post ja-post)
+
+(defstate follow (pet-process-base)
+  :virtual #t
+  :code (behavior ()
+    (let ((jak-pos (new 'stack-no-clear 'vector))
+          (target-pos-v (new 'stack-no-clear 'vector))
+          (off (new 'stack-no-clear 'vector))
+          (bob 0.0)
+          (phase-time 0.0)
+          (move-t 0.0)
+          (moving #f))
+
+      (set-time! (-> self bob-time))
+      (set-time! (-> self state-time))
+      (set! moving #f)
+
+      (loop
+        (when (not *target*)
+          (go-virtual die))
+
+        (set! phase-time (the float (- (current-time) (-> self bob-time))))
+
+        (set! bob
+          (* (meters 1.25)
+             (sin (* 0.22 phase-time))))
+
+        (when (and (not moving) (time-elapsed? (-> self state-time) (seconds 3.0)))
+          (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
+          (pet-process-random-next-follow-offset! self)
+          (set-time! (-> self state-time))
+          (set! moving #t))
+
+        (when moving
+          (set! move-t
+            (fmin 1.0
+              (/ (the float (- (current-time) (-> self state-time)))
+                 (the float (seconds 10.0)))))
+
+          (set! (-> self follow-offset x)
+                (lerp (-> self start-follow-offset x) (-> self target-follow-offset x) move-t))
+          (set! (-> self follow-offset y)
+                (lerp (-> self start-follow-offset y) (-> self target-follow-offset y) move-t))
+          (set! (-> self follow-offset z)
+                (lerp (-> self start-follow-offset z) (-> self target-follow-offset z) move-t))
+          (set! (-> self follow-offset w) 1.0)
+
+          (when (>= move-t 1.0)
+            (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
+            (pet-process-random-next-follow-offset! self)
+            (set-time! (-> self state-time))))
+
+        (vector-copy! jak-pos (target-pos 0))
+        (vector-copy! off (-> self follow-offset))
+
+        (vector+! target-pos-v jak-pos off)
+        (+! (-> target-pos-v y) bob)
+
+        (vector-seek-3d-smooth!
+            (-> self root trans)
+            target-pos-v
+            (* (meters 40.0) (seconds-per-frame))
+            0.25)
+
+        (set! (-> self root trans w) 1.0)
+        (quaternion-copy! (-> self root quat) (-> (the-as process-drawable *target*) root quat))
+
+        (suspend))))
+  :post ja-post)
+
+(defstate die (pet-process-base)
+  :virtual #t
+  :enter (behavior ()
+    (let ((gp-0 (new 'stack-no-clear 'explosion-init-params)))
+      (set! (-> gp-0 spawn-point quad) (-> self root trans quad))
+      (quaternion-identity! (-> gp-0 spawn-quat))
+      (set! (-> gp-0 radius) 42200.0)
+      (set! (-> gp-0 scale) 1.0)
+      (set! (-> gp-0 group) (-> *part-group-id-table* 88))
+      (set! (-> gp-0 collide-with)
+            (collide-spec backgnd jak crate civilian obstacle vehicle-sphere hit-by-others-list player-list pusher))
+      (set! (-> gp-0 damage) 777.0)
+      (set! (-> gp-0 damage-scale) 777.0)
+      (set! (-> gp-0 vehicle-damage-factor) 777.0)
+      (set! (-> gp-0 vehicle-impulse-factor) 777.0)
+      (set! (-> gp-0 ignore-proc) (the-as handle #f))
+      (explosion-spawn gp-0 (the-as process-drawable *default-pool*))))
+  :code (behavior ()
+    (kill-by-name (-> self name) *default-pool*)
+    (deactivate self)))

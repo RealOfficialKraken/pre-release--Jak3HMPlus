@@ -888,7 +888,7 @@
          (odd-bonus 0))
     (when (= (mod n 2) 1)
       (set! odd-bonus 30))
-    (+ 50 pair-bonus odd-bonus)))
+    (+ 100 pair-bonus odd-bonus)))
 
 (defun hmplus-hero-end-level ()
   (let* ((tier (hmplus-hero-clear-tier))
@@ -897,7 +897,7 @@
          (odd-bonus 0))
     (when (= (mod n 2) 1)
       (set! odd-bonus 20))
-    (+ 90 pair-bonus odd-bonus)))
+    (+ 140 pair-bonus odd-bonus)))
 
 (defun hmplus-hero-map-level ((normal-level int))
   (let ((n normal-level)

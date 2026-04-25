@@ -593,4 +593,5 @@
   "silver-freeze.o"
   "grunt.o"
   "missle-seeker.o"
+  "pet-process.o"
  ))
