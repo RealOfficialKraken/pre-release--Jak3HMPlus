@@ -690,7 +690,7 @@
             (nerf-lol 0.23))
             (cond
               ((>= notoriety-level 25)
-                (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 1.0) 1.0) (/ notoriety-level 4.0)))
+                (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 1.0) 1.0) (/ notoriety-level 3.0)))
               )
               (else
                 (set! dmg (+ (+ (/ (the float guns-level) 1.85) 2.0) 2.0))
@@ -1736,7 +1736,7 @@
   (let ((dmg 0.0))
     (cond
         ((>= notoriety-level 25)
-          (set! dmg (+ (+ 1.0 (/ (the float guns-level) 4.25)) (/ notoriety-level 4.0)))
+          (set! dmg (+ (+ 1.0 (/ (the float guns-level) 4.25)) (/ notoriety-level 3.0)))
         )
         (else
           (set! dmg (+ 1.0 (/ (the float guns-level) 4.25)))
@@ -1745,7 +1745,7 @@
     (if (logtest? (game-secrets gun-upgrade-yellow-1) (-> *game-info* secrets))
         (cond
           ((>= notoriety-level 25)
-            (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 1.0) 2.0) (/ notoriety-level 4.0)))
+            (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 1.0) 2.0) (/ notoriety-level 3.0)))
           )
           (else
             (set! dmg (+ (+ (/ (the float guns-level) 1.85) 2.0) 4.0))
@@ -1777,7 +1777,7 @@
       )
     (cond
       ((>= notoriety-level 25)
-        (set! dmg (* (+ (+ 1.0 (/ (the float guns-level) 1.25)) (/ notoriety-level 4.0)) nerf-lol))
+        (set! dmg (* (+ (+ 1.0 (/ (the float guns-level) 1.25)) (/ notoriety-level 3.0)) nerf-lol))
       )
       (else
         (set! dmg (* (+ 1.0 (/ (the float guns-level) 1.25)) nerf-lol))
@@ -1786,7 +1786,7 @@
     (if (logtest? (game-secrets gun-upgrade-yellow-1) (-> *game-info* secrets))
         (cond
           ((>= notoriety-level 25)
-            (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 1.0) 2.0) (/ notoriety-level 4.0)))
+            (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 1.0) 2.0) (/ notoriety-level 3.0)))
           )
           (else
             (set! dmg (+ (+ (/ (the float guns-level) 1.85) 2.0) 2.0))
@@ -1907,7 +1907,7 @@
             (if (>= (-> this enemy-hit-count) 1)
               (cond
                 ((>= notoriety-level 25)
-                  (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 1.0) 1.5) (/ notoriety-level 4.0)))
+                  (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 1.0) 1.5) (/ notoriety-level 3.0)))
                 )
                 (else
                   (set! dmg (+ (+ (/ (the float guns-level) 1.85) 2.0) 1.5))
@@ -2021,7 +2021,7 @@
         (nerf-lol 0.23))
     (set! dmg (+ (/ (* (the float guns-level) 1.85) 2.0) 2.0))
     (when (logtest? (game-feature feature22) (-> *game-info* features))
-      (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 1.0) 1.0) (/ notoriety-level 4.0)))
+      (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 1.0) 1.0) (/ notoriety-level 3.0)))
       (set! (-> this vehicle-impulse-factor) (* 0.5 (-> this vehicle-impulse-factor)))
       )
     (when (focus-test? *target* dark)

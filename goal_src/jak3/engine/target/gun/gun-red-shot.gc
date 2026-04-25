@@ -670,7 +670,7 @@
   (cond
     ((>= notoriety-level 25)
       (let ((dmg 0.0))
-        (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 2.0) 2.0) (/ notoriety-level 4.0)))
+        (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 2.0) 2.0) (/ notoriety-level 3.0)))
         (when (focus-test? *target* dark)
           (set! dmg (* 1.5 dmg))
           (send-event *target* 'get-pickup (pickup-type eco-pill-dark) -2.0)
@@ -2365,7 +2365,7 @@
           (cond
             ((>= notoriety-level 25)
             (let ((dmg 0.0))
-              (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 2.0) 2.0) (/ notoriety-level 4.0)))
+              (set! dmg (+ (+ (/ (* (the float guns-level) 1.85) 2.0) 2.0) (/ notoriety-level 3.0)))
               (when (focus-test? *target* dark)
                 (set! dmg (* 1.5 dmg))
                 (send-event *target* 'get-pickup (pickup-type eco-pill-dark) -0.75)
