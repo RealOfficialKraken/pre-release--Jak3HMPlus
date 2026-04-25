@@ -77,6 +77,7 @@
 (define-extern monster-frog type)
 (define-extern gekko type)
 (define-extern rat type)
+(define-extern robo-hover type)
 (declare-type rage-ghost process-focusable)
 (define *rage-ghost* (the (pointer rage-ghost) #f))
 (declare-type leaper-boss process-focusable)
@@ -151,6 +152,7 @@
     ((type-type? en-type monster-frog) 'monster-frog)
     ((type-type? en-type gekko) 'gekko)
     ((type-type? en-type rat) 'rat)
+    ((type-type? en-type robo-hover) 'robo-hover)
     (else (-> en-type symbol)))
   )
 
