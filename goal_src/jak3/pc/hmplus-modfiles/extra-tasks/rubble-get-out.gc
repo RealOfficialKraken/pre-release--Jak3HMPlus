@@ -48,6 +48,7 @@
                     (cond 
                       ((< (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 3)
                         (set! in-dialogue? #t)
+                        (disable-hudmap)
                         (set! log-sec 0)
                         (set! log-id 529)
                         (set! di-s "Bad news!")
@@ -57,6 +58,7 @@
                       )
                       (else
                         (set! in-dialogue? #t)
+                        (disable-hudmap)
                         (set! log-sec 0)
                         (set! log-id 529)
                         (set! di-s "Jak! It's me, Vin!")

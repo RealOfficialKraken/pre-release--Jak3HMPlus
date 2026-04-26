@@ -11,12 +11,14 @@
 
 (defun play-story-log-1 ()
     (set! in-dialogue? #t)
+    (disable-hudmap)
     (set! log-id 1337)
     (none)
 )
 
 (defun play-story-log-2 ()
     (set! in-dialogue? #t)
+    (disable-hudmap)
     (set! di-s "Okay... This is weird")
     (set! di-s2 "These crystals contain huge amounts of code in them")
     (set! di-s3 "")
@@ -26,6 +28,7 @@
 
 (defun play-story-log-3 ()
     (set! in-dialogue? #t)
+    (disable-hudmap)
     (set! di-s "Jak! I'm in your pocket.")
     (set! di-s2 "Let's complete the main missions and")
     (set! di-s3 "and get to the end!")
@@ -38,6 +41,7 @@
 (defun play-story-log-4 ()
     (set! in-dialogue? #t)
     (set! di-s "Great work, boys! As always...")
+    (disable-hudmap)
     (set! di-s2 "I can count on you..")
     (set! di-s3 "")
     (set! di-s4 "")

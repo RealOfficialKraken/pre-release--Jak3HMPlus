@@ -354,6 +354,8 @@ void extract_common(const ObjectFileDB& db,
   extract_single_ag("INTROCST.DGO", "jak-highres-ag", db, tex_db, tfrag_level);
   extract_single_ag("FACD.DGO", "kg-grunt-ag", db, tex_db, tfrag_level);
   extract_single_ag("FACD.DGO", "robo-hover-ag", db, tex_db, tfrag_level);
+  extract_single_ag("VOCX.DGO", "flitter-ag", db, tex_db, tfrag_level);
+  extract_single_ag("VOCX.DGO", "flamer-lava-ag", db, tex_db, tfrag_level);
 
 
   // copy in any art groups that were requested to be common

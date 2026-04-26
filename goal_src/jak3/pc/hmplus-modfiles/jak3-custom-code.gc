@@ -4268,7 +4268,7 @@
                     (set! di-s4 "")
                 )
                 (when (= log-sec 4)
-                    (set! di-s "Damos and I are the only ones who have bested him")
+                    (set! di-s "Damas and I are the only ones who have bested him")
                     (set! di-s2 "so far, and he keeps coming back in the same spot")
                     (set! di-s3 "")
                     (set! di-s4 "")
@@ -5236,7 +5236,7 @@
                 )
                 (clear matt-str)
                 (clear *pc-encoded-matt-str*)
-                (format matt-str "<COLOR_WHITE>Samos~%Keira~%Ashelin~%Damos~%and everyone else~%...are all missing"
+                (format matt-str "<COLOR_WHITE>Samos~%Keira~%Ashelin~%Damas~%and everyone else~%...are all missing"
                 )
                 (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
                 (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -6806,7 +6806,7 @@
                         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
                         (clear matt-str)
                         (clear *pc-encoded-matt-str*)
-                        (format matt-str "<COLOR_WHITE>Welcome to HeroMode+ v~s <COLOR_CYAN>PRE-RELEASE!~%~%<COLOR_WHITE>Let it be known that this mod is nothing like the Jak II HeroMode+ mod, ~%but something more.~%~%When creating the Jak II mod, I intended for it to be ~%the holy grail in challenge and difficulty, while also making it feel like~%you're playing for the first time again.~%This mod is completely different from that goal.~%~%In this mod, ambition is at it's maximum.~%Missions are changed, some are completely replaced or taken out,~%and gameplay is overhauled.~%~%I cannot thank you all enough for playing this.~%Whenever I make something creative, most of it does not see the other~%end of a person playing it for their enjoyment.~%But this is different.~%So thank you, for giving me this opportunity to present such a~%huge passion project to you.~%~%<COLOR_RED>EXPECT CRASHES~%~%~%~% <COLOR_WHITE>Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%X<COLOR_WHITE> Continue"
+                        (format matt-str "<COLOR_WHITE>Welcome to HeroMode+ v~s <COLOR_CYAN>PRE-RELEASE!~%~%~%~%<COLOR_WHITE>Let it be known that this mod is difficult.~%~%The average casual Jak 3 player will have a rough time~%~%If you're still up for it, I hope you have fun!~%~%<COLOR_RED>EXPECT CRASHES~%~%~%~% <COLOR_WHITE>Sincerely, <COLOR_BLUE>Kraken~%~%~%~%~%X<COLOR_WHITE> Continue"
                         mod-version
                         )
                         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)

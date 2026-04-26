@@ -1946,7 +1946,7 @@
                       (set! enemy-string "Metal-Sabre Alligator")
                     )
                     ((= enemy-name 'needlefish)
-                      (set! enemy-string "Needle MineFish")
+                      (set! enemy-string "NeedleFish")
                     )
                     ((= enemy-name 'juicer)
                       (set! enemy-string "Metalhead Juice Goon")

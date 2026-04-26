@@ -15,7 +15,22 @@
    (start-follow-offset vector :inline)
    (base-pos vector :inline)
    (bob-time time-frame)
-   (target-slot int))
+   (target-slot int)
+   (skel-name string)
+   (idle-anim int)
+   (walk-anim int)
+   (has-walk-anim int)
+   (follow-speed float)
+   (pet-size float)
+   (is-flying? symbol)
+   (ground-y-vel float)
+   (was-outside-follow-radius int)
+   (victory-anim int)
+   (has-victory-anim int)
+   (ground-idle-timer time-frame)
+   (ground-moving-to-slot int)
+   (death-anim int)
+   (has-death-anim int))
   (:state-methods
     rise-up
     follow
@@ -39,30 +54,92 @@
     (pet-process-set-follow-offset-by-slot! (-> this target-follow-offset) new-slot))
   (none))
 
-(defbehavior pet-process-base-init-by-other pet-process-base ()
+  (defun pet-process-start-anim! ((self pet-process-base) (anim int) (blend time-frame))
+  (when (>= anim 0)
+    (ja-channel-push! 1 blend)
+    (ja-no-eval
+      :group! (the-as art-joint-anim (-> self draw art-group data anim))
+      :num! (loop!)
+      :frame-num 0.0))
+  (none))
+
+(defun pet-process-face-catchup-dir! ((self pet-process-base) (old-pos vector))
+  (let ((move-dir (new 'stack-no-clear 'vector))
+        (target-quat (new 'stack-no-clear 'quaternion)))
+
+    (vector-! move-dir (-> self root trans) old-pos)
+    (set! (-> move-dir y) 0.0)
+
+    (when (> (vector-length move-dir) (meters 0.03))
+      (vector-normalize! move-dir 1.0)
+      (quaternion-look-at! target-quat move-dir *up-vector*)
+      (quaternion-slerp! (-> self root quat) (-> self root quat) target-quat 0.08)))
+
+  (none))
+
+(defun find-y! ((out-y float) (pos vector))
+  (let ((q (new 'stack-no-clear 'collide-query))
+        (hit 0.0))
+
+    (vector-copy! (-> q start-pos) pos)
+    (+! (-> q start-pos y) (meters 2.0))
+
+    (vector-reset! (-> q move-dist))
+    (set! (-> q move-dist y) (meters -12.0))
+
+    (set! (-> q radius) (meters 0.5))
+    (set! (-> q collide-with) (collide-spec backgnd))
+    (set! (-> q ignore-process0) #f)
+    (set! (-> q ignore-process1) #f)
+    (set! (-> q ignore-pat)
+          (new 'static 'pat-surface :noentity #x1 :nojak #x1 :probe #x1 :noendlessfall #x1 :board #x1))
+    (set! (-> q action-mask) (collide-action solid))
+
+    (set! hit (fill-and-probe-using-line-sphere *collide-cache* q))
+
+    (if (>= hit 0.0)
+      (-> q best-other-tri intersect y)
+      out-y)))
+
+(defun pet-process-base-shared-init! ((self pet-process-base)) ;;used as an init-by-other for all pet processes
   (stack-size-set! (-> self main-thread) 2048)
   (set! (-> self root) (new 'process 'trsqv))
-
   (vector-copy! (-> self root trans) (target-pos 0))
   (quaternion-identity! (-> self root quat))
-  (set-vector! (-> self root scale) 0.07 0.07 0.07 1.0)
-
+  (set-vector! (-> self root scale) (-> self pet-size) (-> self pet-size) (-> self pet-size) 1.0)
   (initialize-skeleton
     self
     (the-as skeleton-group
-      (art-group-get-by-name *level* "skel-pet-skyship" (the-as (pointer level) #f)))
+      (art-group-get-by-name *level* (-> self skel-name) (the-as (pointer level) #f)))
     (the-as pair 0))
-
+  (set! (-> self ground-y-vel) 0.0)
+  (set! (-> self was-outside-follow-radius) 0)
+  (set! (-> self follow-speed) (meters 4.0))
   (logclear! (-> self draw status) (draw-control-status no-draw no-draw-temp uninited))
-
+  (set-time! (-> self ground-idle-timer))
+  (set! (-> self ground-moving-to-slot) 0)
   (set! (-> self side) 1.0)
   (set! (-> self target-slot) (rand-vu-int-range 0 2))
   (pet-process-set-follow-offset-by-slot! (-> self follow-offset) (-> self target-slot))
   (vector-copy! (-> self target-follow-offset) (-> self follow-offset))
   (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
-
   (set-time! (-> self bob-time))
   (go-virtual rise-up)
+  (none))
+
+
+(defbehavior pet-process-base-init-by-other pet-process-base ()
+  (set! (-> self skel-name) "skel-pet-skyship")
+  (set! (-> self idle-anim) -1)
+  (set! (-> self walk-anim) -1)
+  (set! (-> self victory-anim) -1)
+  (set! (-> self has-victory-anim) 0)
+  (set! (-> self death-anim) -1)
+  (set! (-> self has-death-anim) 0)
+  (set! (-> self has-walk-anim) 0)
+  (set! (-> self pet-size) 0.045)
+  (set! (-> self is-flying?) #t)
+  (pet-process-base-shared-init! self)
   (none))
 
 (defun spawn-pet-process-base ()
@@ -82,8 +159,15 @@
 
       (vector-copy! start-pos (target-pos 0))
       (vector-copy! (-> self root trans) start-pos)
+      (when (not (-> self is-flying?))
+        (set! (-> self root trans y)
+              (find-y! (-> self root trans y) (-> self root trans)))
+        (set! (-> start-pos y) (-> self root trans y))
+        (set! (-> self ground-y-vel) 0.0))
       (set-time! (-> self state-time))
 
+      ;; force idle anim
+      (pet-process-start-anim! self (-> self idle-anim) 0)
       (loop
         (when (not *target*)
           (go-virtual die))
@@ -97,7 +181,11 @@
         (vector-copy! jak-pos (target-pos 0))
         (vector-copy! off (-> self follow-offset))
         (vector+! target-pos-v jak-pos off)
-        (+! (-> target-pos-v y) bob)
+
+        (if (-> self is-flying?)
+          (+! (-> target-pos-v y) bob)
+          (set! (-> target-pos-v y)
+                (find-y! (-> target-pos-v y) target-pos-v)))
 
         (set! t
           (fmin 1.0
@@ -109,11 +197,9 @@
         (set! (-> self root trans z) (lerp (-> start-pos z) (-> target-pos-v z) t))
         (set! (-> self root trans w) 1.0)
 
-        (quaternion-copy! (-> self root quat) (-> (the-as process-drawable *target*) root quat))
-
         (when (>= t 1.0)
           (go-virtual follow))
-
+        (ja :num! (loop!))
         (suspend))))
   :post ja-post)
 
@@ -126,33 +212,91 @@
           (bob 0.0)
           (phase-time 0.0)
           (move-t 0.0)
-          (moving #f))
-
+          (moving #f)
+          (old-pos (new 'stack-no-clear 'vector))
+          (catchup-dist 0.0)
+          (speed-scale 0.0)
+          (target-speed 0.0)
+          (cur-anim 0)
+          (last-anim -999))
       (set-time! (-> self bob-time))
       (set-time! (-> self state-time))
       (set! moving #f)
-
+      (set! cur-anim (-> self idle-anim))
       (loop
         (when (not *target*)
           (go-virtual die))
-
         (set! phase-time (the float (- (current-time) (-> self bob-time))))
-
         (set! bob
           (* (meters 1.25)
              (sin (* 0.22 phase-time))))
+        (vector-copy! jak-pos (target-pos 0))
+        (vector-copy! off (-> self follow-offset))
+        (vector+! target-pos-v jak-pos off)
 
-        (when (and (not moving) (time-elapsed? (-> self state-time) (seconds 3.0)))
-          (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
-          (pet-process-random-next-follow-offset! self)
-          (set-time! (-> self state-time))
-          (set! moving #t))
+        (if (-> self is-flying?)
+          (+! (-> target-pos-v y) bob)
+          (set! (-> target-pos-v y) (-> self root trans y)))
+        (vector-copy! old-pos (-> self root trans))
+        (set! catchup-dist
+          (vector-vector-distance (-> self root trans) target-pos-v))
+          (when (> catchup-dist (meters 25.0))
+            (pet-process-random-next-follow-offset! self)
+            (vector-copy! (-> self follow-offset) (-> self target-follow-offset))
+            (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
+
+            (vector-copy! jak-pos (target-pos 0))
+            (vector-copy! off (-> self follow-offset))
+            (vector+! target-pos-v jak-pos off)
+
+            (if (-> self is-flying?)
+              (+! (-> target-pos-v y) bob)
+              (set! (-> target-pos-v y)
+                    (find-y! (-> target-pos-v y) target-pos-v)))
+
+            (vector-copy! (-> self root trans) target-pos-v)
+            (set! (-> self root trans w) 1.0)
+
+            (set! moving #f)
+            (set! (-> self ground-moving-to-slot) 0)
+            (set! (-> self was-outside-follow-radius) 0)
+            (set! (-> self ground-y-vel) 0.0)
+            (set-time! (-> self state-time))
+            (set-time! (-> self ground-idle-timer))
+
+            (set! cur-anim (-> self idle-anim)))
+        (if (-> self is-flying?)
+          (when (and (not moving)
+                     (time-elapsed? (-> self state-time) (seconds 3.0)))
+            (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
+            (pet-process-random-next-follow-offset! self)
+            (set-time! (-> self state-time))
+            (set! moving #t))
+          (when (and (<= catchup-dist (meters 6.0))
+                     (= (-> self ground-moving-to-slot) 0)
+                     (time-elapsed? (-> self ground-idle-timer) (seconds 6.0)))
+            (set-time! (-> self ground-idle-timer))
+
+            (if (= (rand-vu-int-range 0 1) 0)
+              (when #t
+                (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
+                (pet-process-random-next-follow-offset! self)
+                (set-time! (-> self state-time))
+                (set! moving #t)
+                (set! (-> self ground-moving-to-slot) 1))
+              (when (= (-> self has-victory-anim) 1)
+                (set! cur-anim (-> self victory-anim))))))
+
+        ;;;;;;;;;;;MOVE OFFSET SLOT;;;;;;;;;;;
 
         (when moving
           (set! move-t
             (fmin 1.0
               (/ (the float (- (current-time) (-> self state-time)))
-                 (the float (seconds 10.0)))))
+                (if (and (not (-> self is-flying?))
+                          (= (-> self ground-moving-to-slot) 1))
+                  (the float (seconds 1.25))
+                  (the float (seconds 10.0))))))
 
           (set! (-> self follow-offset x)
                 (lerp (-> self start-follow-offset x) (-> self target-follow-offset x) move-t))
@@ -161,47 +305,126 @@
           (set! (-> self follow-offset z)
                 (lerp (-> self start-follow-offset z) (-> self target-follow-offset z) move-t))
           (set! (-> self follow-offset w) 1.0)
-
           (when (>= move-t 1.0)
-            (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
-            (pet-process-random-next-follow-offset! self)
-            (set-time! (-> self state-time))))
-
+            (set! moving #f)
+            (set! (-> self ground-moving-to-slot) 0)
+            (set-time! (-> self ground-idle-timer))
+            (when (-> self is-flying?)
+              (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
+              (pet-process-random-next-follow-offset! self)
+              (set-time! (-> self state-time)))))
         (vector-copy! jak-pos (target-pos 0))
         (vector-copy! off (-> self follow-offset))
-
         (vector+! target-pos-v jak-pos off)
-        (+! (-> target-pos-v y) bob)
+        (if (-> self is-flying?)
+          (+! (-> target-pos-v y) bob)
+          (set! (-> target-pos-v y) (-> self root trans y)))
+        (set! catchup-dist
+          (vector-vector-distance (-> self root trans) target-pos-v))
 
-        (vector-seek-3d-smooth!
+        ;;;;;;;;;;;GROUND;;;;;;;;;;;
+
+        (when (and (not (-> self is-flying?))
+                   (> catchup-dist (meters 6.0))
+                   (= (-> self was-outside-follow-radius) 0))
+          (set! (-> self was-outside-follow-radius) 1)
+          (vector-copy! (-> self start-follow-offset) (-> self follow-offset))
+          (pet-process-random-next-follow-offset! self)
+          (set-time! (-> self state-time)))
+
+        (when (and (not (-> self is-flying?))
+                   (<= catchup-dist (meters 6.0)))
+          (set! (-> self was-outside-follow-radius) 0))
+
+        ;;;;;;;;;;;SPEED;;;;;;;;;;;
+
+        (set! speed-scale
+          (fmax 0.0
+            (fmin 1.0
+              (/ (- catchup-dist (meters 6.0))
+                 (meters 10.0)))))
+
+        (set! speed-scale
+          (* speed-scale speed-scale (- 3.0 (* 2.0 speed-scale))))
+
+        (if (and (not (-> self is-flying?))
+                 (= (-> self ground-moving-to-slot) 1))
+          (set! target-speed (meters 18.0))
+          (set! target-speed
+            (lerp (meters 8.0) (meters 100.0) speed-scale)))
+
+        (set! (-> self follow-speed)
+          (lerp (-> self follow-speed) target-speed 0.045))
+
+        ;;;;;;;;;;;ANIM CONTROL;;;;;;;;;;;
+
+        (if (and (= (-> self has-walk-anim) 1)
+              (or (and (-> self is-flying?)
+                        (> catchup-dist (meters 0.25)))
+                  (and (not (-> self is-flying?))
+                        (or (> catchup-dist (meters 6.0))
+                            (= (-> self ground-moving-to-slot) 1)))))
+        (set! cur-anim (-> self walk-anim))
+        (set! cur-anim (-> self idle-anim)))
+
+        (when (!= cur-anim last-anim)
+          (pet-process-start-anim! self cur-anim (seconds 0.1))
+          (set! last-anim cur-anim))
+
+        (ja :num! (loop!))
+
+        ;;;;;;;;;;;POSITION SEEK;;;;;;;;;;;
+
+        (when (or (-> self is-flying?)
+                  (> catchup-dist (meters 6.0))
+                  (= (-> self ground-moving-to-slot) 1))
+          (vector-seek-3d-smooth!
             (-> self root trans)
             target-pos-v
-            (* (meters 40.0) (seconds-per-frame))
-            0.25)
+            (* (-> self follow-speed) (seconds-per-frame))
+            (lerp 0.025 0.22 speed-scale)))
 
+        ;;;;;;;;;;;GROUND GRAVITY;;;;;;;;;;;
+
+        (when (not (-> self is-flying?))
+          (+! (-> self ground-y-vel)
+              (* (meters -9.81) (seconds-per-frame)))
+
+          (+! (-> self root trans y)
+              (* (-> self ground-y-vel) (seconds-per-frame)))
+
+          (let ((ground-y (find-y! (-> self root trans y) (-> self root trans))))
+            (when (< (-> self root trans y) ground-y)
+              (set! (-> self root trans y) ground-y)
+              (set! (-> self ground-y-vel) 0.0))))
         (set! (-> self root trans w) 1.0)
-        (quaternion-copy! (-> self root quat) (-> (the-as process-drawable *target*) root quat))
-
+        (pet-process-face-catchup-dir! self old-pos)
+        (when (and *target*
+                (<= (-> *target* fact health) 0.0))
+        (go-virtual die))
         (suspend))))
   :post ja-post)
 
 (defstate die (pet-process-base)
   :virtual #t
   :enter (behavior ()
-    (let ((gp-0 (new 'stack-no-clear 'explosion-init-params)))
-      (set! (-> gp-0 spawn-point quad) (-> self root trans quad))
-      (quaternion-identity! (-> gp-0 spawn-quat))
-      (set! (-> gp-0 radius) 42200.0)
-      (set! (-> gp-0 scale) 1.0)
-      (set! (-> gp-0 group) (-> *part-group-id-table* 88))
-      (set! (-> gp-0 collide-with)
-            (collide-spec backgnd jak crate civilian obstacle vehicle-sphere hit-by-others-list player-list pusher))
-      (set! (-> gp-0 damage) 777.0)
-      (set! (-> gp-0 damage-scale) 777.0)
-      (set! (-> gp-0 vehicle-damage-factor) 777.0)
-      (set! (-> gp-0 vehicle-impulse-factor) 777.0)
-      (set! (-> gp-0 ignore-proc) (the-as handle #f))
-      (explosion-spawn gp-0 (the-as process-drawable *default-pool*))))
+    (when (= (-> self has-death-anim) 1)
+      (pet-process-start-anim! self (-> self death-anim) (seconds 0.1)))
+    (set-time! (-> self state-time))
+    )
+
   :code (behavior ()
-    (kill-by-name (-> self name) *default-pool*)
-    (deactivate self)))
+    (loop
+      (when (and *target*
+                 (> (-> *target* fact health) 0.0))
+        (go-virtual rise-up))
+
+      (if (= (-> self has-death-anim) 1)
+        (if (ja-done? 0)
+          (ja :num! (last!))
+          (ja :num! (loop!)))
+        (ja :num! (loop!)))
+
+      (suspend)))
+  :post ja-post)
+
