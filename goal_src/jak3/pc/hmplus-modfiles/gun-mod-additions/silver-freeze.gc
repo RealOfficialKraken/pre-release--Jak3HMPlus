@@ -48,14 +48,16 @@
   (none))
 
 (defun silver-freeze-acquire-clock ((self silver-freeze-proc) (victim process))
-  (when (and victim (< (-> victim clock index) 12))
+  (when (and victim
+             (not (-> self freeze-clock))
+             (< (-> victim clock index) 12))
     (dotimes (i 10)
       (when (zero? (-> *display* clock (+ i 12) ref-count))
         (set! (-> self freeze-clock) (-> *display* clock (+ i 12)))
         (set! (-> self old-clock) (-> victim clock))
         (copy! (-> self freeze-clock) (-> victim clock))
         (+! (-> victim clock ref-count) -1)
-        (+! (-> self freeze-clock ref-count) 1)
+        (set! (-> self freeze-clock ref-count) 1)
         (set! (-> victim clock) (-> self freeze-clock))
         (update-rates! (-> self freeze-clock) 0.0)
         (goto done))))
@@ -63,15 +65,72 @@
   (none))
 
 (defun silver-freeze-release-clock ((self silver-freeze-proc) (victim process))
-  (when (and victim (-> self freeze-clock) (-> self old-clock))
-    (+! (-> (the-as clock (-> victim clock)) ref-count) -1)
-    (+! (-> self old-clock ref-count) 1)
-    (set! (-> victim clock) (-> self old-clock)))
   (when (-> self freeze-clock)
+    (when (and victim
+               (-> self old-clock)
+               (= (-> victim clock) (-> self freeze-clock)))
+      (+! (-> self old-clock ref-count) 1)
+      (set! (-> victim clock) (-> self old-clock)))
     (set! (-> self freeze-clock ref-count) 0)
     (update-rates! (-> self freeze-clock) 1.0))
   (set! (-> self freeze-clock) (the-as clock #f))
   (set! (-> self old-clock) (the-as clock #f))
+  (none))
+
+(defun silver-freeze-reset-clocks! ()
+  (dotimes (i 10)
+    (let ((clk (-> *display* clock (+ i 12))))
+      (set! (-> clk ref-count) 0)
+      (update-rates! clk 1.0)))
+  (none))
+
+(define *silver-freeze-cleanup-end-time* (the-as time-frame 0))
+(define *silver-freeze-cleanup-proc* (the-as handle #f))
+
+(deftype silver-freeze-cleanup-proc (process)
+  ()
+  (:state-methods
+    cleanup-active)
+  )
+
+(defun silver-freeze-any-procs-active? ()
+  (let ((result #f)
+        (p (-> *active-pool* child)))
+    (while p
+      (let ((next-p (-> p 0 brother))
+            (proc (ppointer->process p)))
+        (when (type? proc silver-freeze-proc)
+          (set! result #t))
+        (set! p next-p)))
+    result))
+
+(defbehavior silver-freeze-cleanup-proc-init silver-freeze-cleanup-proc ()
+  (go-virtual cleanup-active)
+  (none))
+
+(defstate cleanup-active (silver-freeze-cleanup-proc)
+  :virtual #t
+
+  :code (behavior ()
+    (until #f
+      (when (and (>= (current-time) *silver-freeze-cleanup-end-time*)
+                 (not (silver-freeze-any-procs-active?)))
+        (silver-freeze-reset-clocks!)
+        (set! *silver-freeze-cleanup-proc* (the-as handle #f))
+        (deactivate self))
+      (suspend))
+    #f))
+
+(defun silver-freeze-arm-cleanup! ()
+  (set! *silver-freeze-cleanup-end-time* (+ (current-time) (seconds 1)))
+  (when (not (handle->process *silver-freeze-cleanup-proc*))
+    (set! *silver-freeze-cleanup-proc*
+          (ppointer->handle
+            (process-spawn
+              silver-freeze-cleanup-proc
+              :init silver-freeze-cleanup-proc-init
+              :name "silver-freeze-cleanup-proc"
+              :to *active-pool*))))
   (none))
 
 (defun silver-freeze-apply-color ((victim process))
@@ -111,6 +170,7 @@
 (defun silver-freeze-hit ((victim process))
   (when victim
     (unless (silver-freeze-exempt? victim)
+      (silver-freeze-arm-cleanup!)
       (silver-freeze-kill-procs victim)
       (process-spawn
         silver-freeze-proc
@@ -158,11 +218,11 @@
                   (set! (-> cm dynam gravity-max) 0.0)
                   (set! (-> cm dynam gravity-length) 0.0)))))))))
 
-  :exit (behavior ()
+    :exit (behavior ()
     (let ((victim (handle->process (-> self victim))))
-      (when victim
-        (silver-freeze-release-clock self victim)
+      (silver-freeze-release-clock self victim)
 
+      (when victim
         (let ((pd (the-as process-drawable victim)))
           (when pd
             (let ((cm (if (type? (-> pd root) collide-shape-moving)
