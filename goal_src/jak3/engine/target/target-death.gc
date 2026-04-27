@@ -132,7 +132,7 @@
                   (= in-mine-level? #f)
                   (task-node-closed? (game-task-node mine-boss-resolution))
                 )
-            (blank-hint! "<COLOR_ORANGE>Mini-bosses have a higher chance" "<COLOR_ORANGE>to drop <COLOR_CYAN>Followers<COLOR_ORANGE>!" 290 300)
+            (blank-hint! "<COLOR_ORANGE>All Mini-bosses have a higher" "<COLOR_ORANGE>chance to drop <COLOR_CYAN>Followers<COLOR_ORANGE>!" 290 300)
             (mine-level)
           )
           (auto-save-user)
