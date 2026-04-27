@@ -380,8 +380,8 @@
                   )
                     (process-release? *target*)
                     (camera-unlocked)
-                    (kill-by-name "stay-as-jak2" *active-pool*)
                     (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
+                    (kill-by-name "stay-as-jak2" *active-pool*)
                     (deactivate self)
             )
             (when (cpad-pressed? 0 left)
@@ -426,6 +426,7 @@
         (process-release? *target*)
         (camera-unlocked)
         (initialize! *game-info* 'dead (the-as game-save #f) (the-as string #f) (the-as resetter-spec #f))
+        (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
         (kill-by-name "stay-as-jak2" *active-pool*)
         (deactivate self)
     )
@@ -8739,7 +8740,7 @@
     (spawn-pet-pickup pos pickup))
   (none))
 
-  (defun drop-loot-crate! ((vec vector) (tier2-chance float) (tier3-chance float))
+  (defun drop-loot-crate! ((vec vector) (tier2-chance float) (tier3-chance float) (pet-chance float))
   (let ((rnd 1)
         (pet-count 0)
         (pet-pick 0)
@@ -8750,7 +8751,7 @@
     (if (and
           (> pet-count 0)
           (task-node-closed? (game-task-node arena-fight-1-resolution))
-          (rand-vu-percent? 0.0005))
+          (rand-vu-percent? pet-chance))
       (begin
         (set! pet-pick (rand-vu-int-count pet-count))
         (set! pet-pickup (hmplus-nth-unowned-pet pet-pick))

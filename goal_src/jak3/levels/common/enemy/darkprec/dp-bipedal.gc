@@ -3138,7 +3138,7 @@
         )
         (<= (-> this hit-points) 0.0)
       )
-      (drop-loot-crate! (-> this root trans) 0.5 0.3)
+      (drop-loot-crate! (-> this root trans) 0.5 0.3 0.0005)
       (when (or (<= (-> this hit-points) 0.0)(< enemy-noto (+ notoriety-level 7)))
             (go (method-of-object this knocked))
          )

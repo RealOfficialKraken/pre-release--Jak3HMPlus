@@ -2398,7 +2398,7 @@
           (if (> notoriety-level 40)
             (set! dark-drop-chance 0.01)
           )
-          (drop-loot-crate! (-> this root trans) 0.3 dark-drop-chance)
+          (drop-loot-crate! (-> this root trans) 0.3 dark-drop-chance 0.0005)
         )
     )
      (if (-> this skel effect)

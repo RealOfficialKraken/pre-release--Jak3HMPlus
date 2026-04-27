@@ -517,7 +517,7 @@
   (defun-extern spawn-volcano-blocker (none))
   (defun-extern spawn-arena-blocker (none))
   (defun-extern spawn-course-race-block (none))
-  (defun-extern drop-loot-crate! vector float float none)
+  (defun-extern drop-loot-crate! vector float float float none)
   (defun-extern group-drop! vector float float none)
   (defun-extern drop-gun-mod! vector none)
   (define drop-gun-mod #f)
