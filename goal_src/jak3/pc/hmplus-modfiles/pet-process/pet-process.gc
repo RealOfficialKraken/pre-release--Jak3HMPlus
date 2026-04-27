@@ -681,7 +681,7 @@
   (set! (-> self has-victory-anim) 0)
   (set! (-> self death-anim) 5)
   (set! (-> self has-death-anim) 1)
-  (set! (-> self pet-size) 0.18)
+  (set! (-> self pet-size) 0.045)
   (set! (-> self is-flying?) #t)
   (pet-process-base-shared-init! self)
   (none))
@@ -926,61 +926,61 @@
     (if enabled-pet-flitter?
       (set! pet-flitter-s "<COLOR_GREEN>Flitter")
       (set! pet-flitter-s "<COLOR_RED>Flitter"))
-    (set! pet-flitter-s "<COLOR_WHITE>???"))
+    (set! pet-flitter-s "<COLOR_ORANGE>???"))
 
   (if (task-node-closed? (game-task-node pet-spiky-frog))
     (if enabled-pet-spiky-frog?
       (set! pet-spiky-frog-s "<COLOR_GREEN>Spiky Frog")
       (set! pet-spiky-frog-s "<COLOR_RED>Spiky Frog"))
-    (set! pet-spiky-frog-s "<COLOR_WHITE>???"))
+    (set! pet-spiky-frog-s "<COLOR_ORANGE>???"))
 
   (if (task-node-closed? (game-task-node pet-rat))
     (if enabled-pet-rat?
       (set! pet-rat-s "<COLOR_GREEN>Rat")
       (set! pet-rat-s "<COLOR_RED>Rat"))
-    (set! pet-rat-s "<COLOR_WHITE>???"))
+    (set! pet-rat-s "<COLOR_ORANGE>???"))
 
   (if (task-node-closed? (game-task-node pet-manta))
     (if enabled-pet-manta?
       (set! pet-manta-s "<COLOR_GREEN>Manta")
       (set! pet-manta-s "<COLOR_RED>Manta"))
-    (set! pet-manta-s "<COLOR_WHITE>???"))
+    (set! pet-manta-s "<COLOR_ORANGE>???"))
 
   (if (task-node-closed? (game-task-node pet-neo-wasp))
     (if enabled-pet-neo-wasp?
       (set! pet-neo-wasp-s "<COLOR_GREEN>Neo Wasp")
       (set! pet-neo-wasp-s "<COLOR_RED>Neo Wasp"))
-    (set! pet-neo-wasp-s "<COLOR_WHITE>???"))
+    (set! pet-neo-wasp-s "<COLOR_ORANGE>???"))
 
   (if (task-node-closed? (game-task-node pet-kangarat))
     (if enabled-pet-kangarat?
       (set! pet-kangarat-s "<COLOR_GREEN>Kangarat")
       (set! pet-kangarat-s "<COLOR_RED>Kangarat"))
-    (set! pet-kangarat-s "<COLOR_WHITE>???"))
+    (set! pet-kangarat-s "<COLOR_ORANGE>???"))
 
   (if (task-node-closed? (game-task-node pet-mantis))
     (if enabled-pet-mantis?
       (set! pet-mantis-s "<COLOR_GREEN>Mantis")
       (set! pet-mantis-s "<COLOR_RED>Mantis"))
-    (set! pet-mantis-s "<COLOR_WHITE>???"))
+    (set! pet-mantis-s "<COLOR_ORANGE>???"))
 
   (if (task-node-closed? (game-task-node pet-terra))
     (if enabled-pet-terra?
-      (set! pet-terra-s "<COLOR_GREEN>Terra")
-      (set! pet-terra-s "<COLOR_RED>Terra"))
-    (set! pet-terra-s "<COLOR_WHITE>???"))
+      (set! pet-terra-s "<COLOR_GREEN>")
+      (set! pet-terra-s "<COLOR_RED>Metalhead Bat"))
+    (set! pet-terra-s "<COLOR_ORANGE>???"))
 
   (if (task-node-closed? (game-task-node pet-scouter))
     (if enabled-pet-scouter?
       (set! pet-scouter-s "<COLOR_GREEN>Scouter")
       (set! pet-scouter-s "<COLOR_RED>Scouter"))
-    (set! pet-scouter-s "<COLOR_WHITE>???"))
+    (set! pet-scouter-s "<COLOR_ORANGE>???"))
 
   (if (task-node-closed? (game-task-node pet-dogat))
     (if enabled-pet-dogat?
       (set! pet-dogat-s "<COLOR_GREEN>Desert Scurrier")
       (set! pet-dogat-s "<COLOR_RED>Desert Scurrier"))
-    (set! pet-dogat-s "<COLOR_WHITE>???"))
+    (set! pet-dogat-s "<COLOR_ORANGE>???"))
     
   (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
                                (bucket-id particles))
@@ -991,7 +991,7 @@
     (clear matt-str)
   (clear *pc-encoded-matt-str*)
 
-  (cat-string<-string matt-str "<COLOR_CYAN>Followers")
+  (cat-string<-string matt-str "<COLOR_CYAN>Can you collect them all?~%")
   (pet-menu-newline! matt-str)
   (pet-menu-newline! matt-str)
 

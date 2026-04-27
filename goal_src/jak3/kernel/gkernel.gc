@@ -2344,6 +2344,14 @@
                           )
         )
 
+(define *dark-tower-dead-pool*
+  (new 'global 'dead-pool
+    96
+    #x4000
+    "*dark-tower-dead-pool*"
+    )
+  )
+
 (define *8k-dead-pool* (new 'global 'dead-pool 4 #x2800 "*8k-dead-pool*"))
 (define *4k-dead-pool* (new 'global 'dead-pool 4 4096 "*4k-dead-pool*"))
 (define *target-dead-pool* (new 'global 'dead-pool 1 #x16800 "*target-dead-pool*"))
