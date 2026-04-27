@@ -663,10 +663,10 @@
   (process-spawn pet-mantis :name "pet-mantis")
   (none))
 
-(defskelgroup skel-pet-terra mh-flyer mh-flyer-lod0-jg -1
-              ((mh-flyer-lod0-mg (meters 999999)))
-              :bounds (static-spherem 0 0 0 32)
-              :shadow mh-flyer-shadow-mg
+(defskelgroup skel-pet-terra mh-bat mh-bat-lod0-jg -1
+              ((mh-bat-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 2 -2 8)
+              :shadow mh-bat-shadow-mg
               )
 
 (deftype pet-terra (pet-process-base)
