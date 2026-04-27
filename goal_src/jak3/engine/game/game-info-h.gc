@@ -212,6 +212,8 @@
   (define wasdh-i 0)
 
   (define matt-str (new 'global 'string 2048 (the-as string #f)))
+  (define debug-matt-str (new 'global 'string 2048 (the-as string #f)))
+  (define debug2-matt-str (new 'global 'string 2048 (the-as string #f)))
   (define *pc-encoded-matt-str* (new 'global 'string 2048 (the-as string #f)))
 
   (define pause-menu-blocked? #f)
@@ -580,6 +582,8 @@
 
   (defun-extern custom-intro (none))
 
+  (declare-type pet-menu process)
+
   (define has-boost-tap? #f)
   (define has-fast-attacks? #f)
   (define has-luck-stat? #f)
@@ -588,9 +592,20 @@
   (define has-enemy-hp? #f)
   (define has-ambush? #f)
   (define has-more-enemies? #f)
+  (define has-pet-flitter? #f)
+  (define has-pet-spiky-frog? #f)
+  (define has-pet-rat? #f)
+  (define has-pet-manta? #f)
+  (define has-pet-neo-wasp? #f)
+  (define has-pet-kangarat? #f)
+  (define has-pet-mantis? #f)
+  (define has-pet-terra? #f)
+  (define has-pet-scouter? #f)
+  (define has-pet-dogat? #f)
   (define camera-locked? #f)
 
   (defun-extern spawn-jak2-stayas none)
+  (defun-extern spawn-pet-menu none)
   (define asked-jak-if-jak2? #f)
 
   (define-extern *xp-gain* float)
@@ -963,9 +978,20 @@
   (light-random 50)
   (eco-crystal-dark-c 51)
   (gun-mod-upgrade 52)
+  (pet-flitter 53)
+  (pet-spiky-frog 54)
+  (pet-rat 55)
+  (pet-manta 56)
+  (pet-neo-wasp 57)
+  (pet-kangarat 58)
+  (pet-mantis 59)
+  (pet-terra 60)
+  (pet-scouter 61)
+  (pet-dogat 62)
   )
 ;; ---pickup-type
 
+(defun-extern spawn-pet-or-crystal-pickup vector pickup-type none)
 
 ;; +++highscore-flags
 (defenum highscore-flags

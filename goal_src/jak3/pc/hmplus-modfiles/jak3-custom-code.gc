@@ -4,7 +4,7 @@
 ;; name: jak3-custom-code.gc
 
 ;;MOD VERSION
-(define mod-version "0.9.4")
+(define mod-version "0.9.5")
 
 (defun-extern freeze-enemies-in-menu! (none))
 (defun-extern level-up! int none)
@@ -381,6 +381,7 @@
                     (process-release? *target*)
                     (camera-unlocked)
                     (kill-by-name "stay-as-jak2" *active-pool*)
+                    (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
                     (deactivate self)
             )
             (when (cpad-pressed? 0 left)
@@ -405,9 +406,11 @@
                 (case (-> self jak2-select)
                     ((0)
                         (logior! (-> *game-info* secrets) (game-secrets jak-is-jak2))
+                        (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
                     )
                     ((1)
                         (logclear! (-> *game-info* secrets) (game-secrets jak-is-jak2))
+                        (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
                     )
                 )
                 (go-virtual die)
@@ -1236,11 +1239,31 @@
 (= menu-select 4)
 )
 (set! in-menu? #f)
-(kill-by-name "proc-mask-enemyfreeze" *active-pool*)
 (when (= (-> *game-info* total-deaths) 0)
     (level-up-cars! 1)
 )
 (spawn-jak2-stayas)
+)
+
+(when 
+(and 
+(cpad-pressed? 0 x) ;select jak model and exit menu
+*target*
+(= (paused?) #f)
+(= (pause-allowed?) #t)
+(not *scene-player*)
+(= in-menu? #t)
+(= in-modifiers? #f)
+(= in-gunmods? #f)
+(= in-superpowers? #f)
+(= in-skill? #f)
+(= menu-select 5)
+)
+(set! in-menu? #f)
+(when (= (-> *game-info* total-deaths) 0)
+    (level-up-cars! 1)
+)
+(spawn-pet-menu)
 )
 
 
@@ -1324,7 +1347,7 @@
         (cpad-pressed? 0 down)
         )
     (+! menu-select 1)
-    (when (> menu-select 4)
+    (when (> menu-select 5)
         (set! menu-select 1)
     )
     )
@@ -1336,7 +1359,7 @@
         )
     (-! menu-select 1)
     (when (< menu-select 1)
-        (set! menu-select 4)
+        (set! menu-select 5)
     )
     )
 )
@@ -2050,7 +2073,7 @@
     (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
                                         (bucket-id particles)
                                         )
-(draw-sprite2d-xy s2-0 0 5 730 108 (new 'static 'rgba :a #x40) #x3fffff)
+(draw-sprite2d-xy s2-0 0 5 730 120 (new 'static 'rgba :a #x40) #x3fffff)
 (draw-sprite2d-xy s2-0 0 315 730 27 (new 'static 'rgba :a #x40) #x3fffff)
 )
 )
@@ -2235,7 +2258,7 @@
     (= menu-select 0)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)~%<COLOR_ORANGE>Followers <COLOR_WHITE>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -2248,7 +2271,7 @@
     (= menu-select 1)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_GREEN>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_GREEN>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)~%<COLOR_ORANGE>Followers <COLOR_WHITE>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -2261,7 +2284,7 @@
     (= menu-select 2)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_GREEN>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_GREEN>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)~%<COLOR_ORANGE>Followers <COLOR_WHITE>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -2274,7 +2297,7 @@
     (= menu-select 3)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_GREEN>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_GREEN>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)~%<COLOR_ORANGE>Followers <COLOR_WHITE>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -2287,7 +2310,20 @@
     (= menu-select 4)
         (clear matt-str)
         (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_GREEN>(<)"
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_GREEN>(<)~%<COLOR_ORANGE>Followers <COLOR_WHITE>(<)"
+        )
+        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 50 0.0 (font-color default) (font-flags middle shadow kerning large))))
+        (set! (-> font-ctx scale) 0.325)
+        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+    )
+    (when
+    (= menu-select 5)
+        (clear matt-str)
+        (clear *pc-encoded-matt-str*)
+        (format matt-str "<COLOR_ORANGE>Select Menu:~%~%<COLOR_BLUE>Super Gun Mods <COLOR_WHITE>(<)~%<COLOR_PINK>Skills <COLOR_WHITE>(<)~%<COLOR_RED>Fast-Travel Warps <COLOR_WHITE>(<)~%<COLOR_CYAN>Jak Model <COLOR_WHITE>(<)~%<COLOR_ORANGE>Followers <COLOR_GREEN>(<)"
         )
         (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
         (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -7291,6 +7327,36 @@
             (when has-dark-3?
                 (give-weapon! "dark-3" 1)
             )
+            (when has-pet-flitter?
+                (task-node-close! (game-task-node pet-flitter) #t)
+            )
+            (when has-pet-spiky-frog?
+                (task-node-close! (game-task-node pet-spiky-frog) #t)
+            )
+            (when has-pet-rat?
+                (task-node-close! (game-task-node pet-rat) #t)
+            )
+            (when has-pet-manta?
+                (task-node-close! (game-task-node pet-manta) #t)
+            )
+            (when has-pet-neo-wasp?
+                (task-node-close! (game-task-node pet-neo-wasp) #t)
+            )
+            (when has-pet-kangarat?
+                (task-node-close! (game-task-node pet-kangarat) #t)
+            )
+            (when has-pet-mantis?
+                (task-node-close! (game-task-node pet-mantis) #t)
+            )
+            (when has-pet-terra?
+                (task-node-close! (game-task-node pet-terra) #t)
+            )
+            (when has-pet-scouter?
+                (task-node-close! (game-task-node pet-scouter) #t)
+            )
+            (when has-pet-dogat?
+                (task-node-close! (game-task-node pet-dogat) #t)
+            )
             (set! hmp-i 0)
             (activate-progress *dproc* 'select-save)
             (task-node-close! (game-task-node arena-training-1-introduction) #t)
@@ -7353,6 +7419,36 @@
     )
     (when (logtest? (-> *game-info* features) (game-feature gun-dark-3))
         (set! has-dark-3? #t)
+    )
+    (when (task-node-closed? (game-task-node pet-flitter))
+        (set! has-pet-flitter? #t)
+    )
+    (when (task-node-closed? (game-task-node pet-spiky-frog))
+        (set! has-pet-spiky-frog? #t)
+    )
+    (when (task-node-closed? (game-task-node pet-rat))
+        (set! has-pet-rat? #t)
+    )
+    (when (task-node-closed? (game-task-node pet-manta))
+        (set! has-pet-manta? #t)
+    )
+    (when (task-node-closed? (game-task-node pet-neo-wasp))
+        (set! has-pet-neo-wasp? #t)
+    )
+    (when (task-node-closed? (game-task-node pet-kangarat))
+        (set! has-pet-kangarat? #t)
+    )
+    (when (task-node-closed? (game-task-node pet-mantis))
+        (set! has-pet-mantis? #t)
+    )
+    (when (task-node-closed? (game-task-node pet-terra))
+        (set! has-pet-terra? #t)
+    )
+    (when (task-node-closed? (game-task-node pet-scouter))
+        (set! has-pet-scouter? #t)
+    )
+    (when (task-node-closed? (game-task-node pet-dogat))
+        (set! has-pet-dogat? #t)
     )
     (set! going-heromode? #t)
     (set! hmp-i 0)
@@ -8247,6 +8343,21 @@
     (none)
   )
 
+  (defun spawn-pet-pickup ((pos vector) (pickup pickup-type))
+  (let ((fact (new 'static 'fact-info)))
+    (set! (-> fact pickup-type) pickup)
+    (set! (-> fact pickup-amount) 1.0)
+    (set! (-> fact pickup-spawn-amount) 1.0)
+    (set! (-> fact options) (actor-option dont-override-fact))
+    (birth-pickup-at-point
+      pos
+      pickup
+      1.0
+      #t
+      *entity-pool*
+      fact))
+  (none))
+
   (defun group-drop! ((arg1 vector) (tier2-chance float) (tier3-chance float)) ;rewrite this to add an integer and utilize dotimes to plant every specific crate
     (let ((rnd 1)
           (vec (new-stack-vector0))
@@ -8448,27 +8559,220 @@
     (none)
   )
 
+  (defun hmplus-pet-owned? ((pickup pickup-type))
+  (case pickup
+    (((pickup-type pet-flitter))
+      (task-node-closed? (game-task-node pet-flitter)))
+    (((pickup-type pet-spiky-frog))
+      (task-node-closed? (game-task-node pet-spiky-frog)))
+    (((pickup-type pet-rat))
+      (task-node-closed? (game-task-node pet-rat)))
+    (((pickup-type pet-manta))
+      (task-node-closed? (game-task-node pet-manta)))
+    (((pickup-type pet-neo-wasp))
+      (task-node-closed? (game-task-node pet-neo-wasp)))
+    (((pickup-type pet-kangarat))
+      (task-node-closed? (game-task-node pet-kangarat)))
+    (((pickup-type pet-mantis))
+      (task-node-closed? (game-task-node pet-mantis)))
+    (((pickup-type pet-terra))
+      (task-node-closed? (game-task-node pet-terra)))
+    (((pickup-type pet-scouter))
+      (task-node-closed? (game-task-node pet-scouter)))
+    (((pickup-type pet-dogat))
+      (task-node-closed? (game-task-node pet-dogat)))
+    (else
+      #t)))
+
+(defun hmplus-unowned-pet-count ()
+  (let ((count 0))
+    (when (not (task-node-closed? (game-task-node pet-flitter)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node pet-spiky-frog)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node pet-rat)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node pet-manta)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node pet-neo-wasp)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node pet-kangarat)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node pet-mantis)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node pet-terra)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node pet-scouter)))
+      (+! count 1))
+    (when (not (task-node-closed? (game-task-node pet-dogat)))
+      (+! count 1))
+    count))
+
+(defun hmplus-nth-unowned-pet ((idx int))
+  (let ((i 0)
+        (done #f)
+        (result (pickup-type none)))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node pet-flitter))))
+      (if (= i idx)
+        (begin
+          (set! result (pickup-type pet-flitter))
+          (set! done #t))
+        (+! i 1)))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node pet-spiky-frog))))
+      (if (= i idx)
+        (begin
+          (set! result (pickup-type pet-spiky-frog))
+          (set! done #t))
+        (+! i 1)))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node pet-rat))))
+      (if (= i idx)
+        (begin
+          (set! result (pickup-type pet-rat))
+          (set! done #t))
+        (+! i 1)))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node pet-manta))))
+      (if (= i idx)
+        (begin
+          (set! result (pickup-type pet-manta))
+          (set! done #t))
+        (+! i 1)))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node pet-neo-wasp))))
+      (if (= i idx)
+        (begin
+          (set! result (pickup-type pet-neo-wasp))
+          (set! done #t))
+        (+! i 1)))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node pet-kangarat))))
+      (if (= i idx)
+        (begin
+          (set! result (pickup-type pet-kangarat))
+          (set! done #t))
+        (+! i 1)))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node pet-mantis))))
+      (if (= i idx)
+        (begin
+          (set! result (pickup-type pet-mantis))
+          (set! done #t))
+        (+! i 1)))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node pet-terra))))
+      (if (= i idx)
+        (begin
+          (set! result (pickup-type pet-terra))
+          (set! done #t))
+        (+! i 1)))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node pet-scouter))))
+      (if (= i idx)
+        (begin
+          (set! result (pickup-type pet-scouter))
+          (set! done #t))
+        (+! i 1)))
+
+    (when (and (not done) (not (task-node-closed? (game-task-node pet-dogat))))
+      (if (= i idx)
+        (begin
+          (set! result (pickup-type pet-dogat))
+          (set! done #t))
+        (+! i 1)))
+
+    result))
+
+(defun hmplus-pet-crate-name ((pickup pickup-type))
+  (case pickup
+    (((pickup-type pet-flitter)) "crate-flitter")
+    (((pickup-type pet-spiky-frog)) "crate-spiky-frog")
+    (((pickup-type pet-rat)) "crate-rat")
+    (((pickup-type pet-manta)) "crate-manta")
+    (((pickup-type pet-neo-wasp)) "crate-neo-wasp")
+    (((pickup-type pet-kangarat)) "crate-kangarat")
+    (((pickup-type pet-mantis)) "crate-mantis")
+    (((pickup-type pet-terra)) "crate-terra")
+    (((pickup-type pet-scouter)) "crate-scouter")
+    (((pickup-type pet-dogat)) "crate-dogat")
+    (else "crate-flitter")))
+
+(defun drop-pet-crate ((vec vector) (pickup pickup-type))
+  (let ((fact (new 'static 'fact-info)))
+    (set! (-> fact pickup-type) (the-as pickup-type #f))
+    (set! (-> fact pickup-amount) 0.0)
+
+    (when (and
+            (not in-arena-fight?)
+            (!= (-> (level-get-target-inside *level*) name) 'wasstada)
+            (!= (-> (level-get-target-inside *level*) name) 'wasstadb)
+            (!= (-> (level-get-target-inside *level*) name) 'wasstadc))
+      (set! (-> fact options) (actor-option fall)))
+
+    (process-spawn
+      crate
+      (the-as entity #f)
+      vec
+      'metal
+      fact
+      :name (hmplus-pet-crate-name pickup)
+      *entity-pool*))
+  (none))
+
+(defun spawn-pet-or-crystal-pickup ((pos vector) (pickup pickup-type))
+  (if (hmplus-pet-owned? pickup)
+    (let ((fact (new 'static 'fact-info))
+          (rnd-crystal (rand-vu-int-range 3 20)))
+      (set! (-> fact pickup-type) (pickup-type eco-crystal-dark-c))
+      (set! (-> fact pickup-amount) (the float rnd-crystal))
+      (set! (-> fact pickup-spawn-amount) (the float rnd-crystal))
+      (set! (-> fact options) (actor-option dont-override-fact))
+      (birth-pickup-at-point
+        pos
+        (-> fact pickup-type)
+        (-> fact pickup-amount)
+        #t
+        *entity-pool*
+        fact))
+    (spawn-pet-pickup pos pickup))
+  (none))
+
   (defun drop-loot-crate! ((vec vector) (tier2-chance float) (tier3-chance float))
-    (let ((rnd 1))
-          (when 
-            (and 
-              (rand-vu-percent? tier2-chance)
-              (>= notoriety-level 10)
-            )
-            (set! rnd 2)
-          )
-          (when 
-            (and 
-              (rand-vu-percent? tier2-chance)
-              (>= notoriety-level 18)
-            )
-            (set! rnd 3)
-          )
-          (drop-crate vec rnd)
-          (format #t "~%~%[][][][]~%Dropped Tier ~D Crate" rnd)
-        )
-        (none)
-  )
+  (let ((rnd 1)
+        (pet-count 0)
+        (pet-pick 0)
+        (pet-pickup (pickup-type pet-flitter)))
+
+    (set! pet-count (hmplus-unowned-pet-count))
+
+    (if (and
+          (> pet-count 0)
+          (task-node-closed? (game-task-node arena-fight-1-resolution))
+          (rand-vu-percent? 0.0005))
+      (begin
+        (set! pet-pick (rand-vu-int-count pet-count))
+        (set! pet-pickup (hmplus-nth-unowned-pet pet-pick))
+        (drop-pet-crate vec pet-pickup)
+        (format #t "~%~%[][][][]~%Dropped Pet Crate"))
+      (begin
+        (when 
+          (and 
+            (rand-vu-percent? tier2-chance)
+            (>= notoriety-level 10))
+          (set! rnd 2))
+
+        (when 
+          (and 
+            (rand-vu-percent? tier3-chance)
+            (>= notoriety-level 18))
+          (set! rnd 3))
+
+        (drop-crate vec rnd)
+        (format #t "~%~%[][][][]~%Dropped Tier ~D Crate" rnd))))
+
+  (none))
 
   (defun drop-rage-crate ((vec vector))
     (let ((fact (new 'static 'fact-info))
@@ -8542,7 +8846,6 @@
               (the-as sound-id #f)
               :name "freeze-control"
               :to *target*))))
-  (send-event *target* 'get-pickup (pickup-type eco-pill-light) 10.0)
   (set! *hmplus-hit-freeze-end-time* (+ (current-time) (seconds 6.0))))
     (none)
   )

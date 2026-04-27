@@ -526,6 +526,7 @@
   "hover-formation.o"
   "hover-nav-edit.o"
   "neo-wasp.o"
+  "neo-wasp-part.o"
   "flamer-lava.o"
   "manta.o"
   "spyder.o"

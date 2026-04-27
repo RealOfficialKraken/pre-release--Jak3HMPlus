@@ -30,11 +30,19 @@
    (ground-idle-timer time-frame)
    (ground-moving-to-slot int)
    (death-anim int)
-   (has-death-anim int))
+   (has-death-anim int)
+  )
   (:state-methods
     rise-up
     follow
-    die))
+    die)
+  (:methods
+    (pet-process-extra-post! (_type_) none)
+  )
+)
+
+(defmethod pet-process-extra-post! ((this pet-process-base))
+  (none))
 
 (defun pet-process-set-follow-offset-by-slot! ((out vector) (slot int))
   (case slot
@@ -272,7 +280,7 @@
             (pet-process-random-next-follow-offset! self)
             (set-time! (-> self state-time))
             (set! moving #t))
-          (when (and (<= catchup-dist (meters 6.0))
+          (when (and (<= catchup-dist (meters 4.0))
                      (= (-> self ground-moving-to-slot) 0)
                      (time-elapsed? (-> self ground-idle-timer) (seconds 6.0)))
             (set-time! (-> self ground-idle-timer))
@@ -333,7 +341,7 @@
           (set-time! (-> self state-time)))
 
         (when (and (not (-> self is-flying?))
-                   (<= catchup-dist (meters 6.0)))
+                   (<= catchup-dist (meters 4.0)))
           (set! (-> self was-outside-follow-radius) 0))
 
         ;;;;;;;;;;;SPEED;;;;;;;;;;;
@@ -399,6 +407,7 @@
               (set! (-> self ground-y-vel) 0.0))))
         (set! (-> self root trans w) 1.0)
         (pet-process-face-catchup-dir! self old-pos)
+        (pet-process-extra-post! self)
         (when (and *target*
                 (<= (-> *target* fact health) 0.0))
         (go-virtual die))
@@ -428,3 +437,604 @@
       (suspend)))
   :post ja-post)
 
+(defskelgroup skel-flitter-pet flitter flitter-lod0-jg flitter-idle-ja
+              ((flitter-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 50)
+              :shadow flitter-shadow-mg
+              :origin-joint-index 3)
+
+(deftype pet-flitter (pet-process-base)
+  ())
+
+(defbehavior pet-flitter-init-by-other pet-flitter ()
+  (set! (-> self skel-name) "skel-flitter-pet")
+  (set! (-> self victory-anim) 12)
+  (set! (-> self has-victory-anim) 1)
+  (set! (-> self idle-anim) 5)
+  (set! (-> self walk-anim) 14)
+  (set! (-> self pet-size) 0.5)
+  (set! (-> self is-flying?) #f)
+  (set! (-> self has-walk-anim) 1)
+  (set! (-> self death-anim) 13)
+  (set! (-> self has-death-anim) 1)
+  (pet-process-base-shared-init! self)
+  (none))
+
+(defun spawn-pet-flitter ()
+  (process-spawn pet-flitter :name "pet-flitter")
+  (none))
+
+(defskelgroup skel-spiky-frog-pet spiky-frog spiky-frog-lod0-jg spiky-frog-idle0-ja
+              ((spiky-frog-lod0-mg (meters 20)) (spiky-frog-lod1-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 5)
+              :shadow spiky-frog-shadow-mg
+              :origin-joint-index 13
+              )
+
+(deftype pet-spiky-frog (pet-process-base)
+  ())
+
+(defbehavior pet-spiky-frog-init-by-other pet-spiky-frog ()
+  (set! (-> self skel-name) "skel-spiky-frog-pet")
+  (set! (-> self victory-anim) 4)
+  (set! (-> self has-victory-anim) 1)
+  (set! (-> self idle-anim) 4)
+  (set! (-> self walk-anim) 14)
+  (set! (-> self pet-size) 0.5)
+  (set! (-> self is-flying?) #f)
+  (set! (-> self has-walk-anim) 1)
+  (set! (-> self death-anim) 24)
+  (set! (-> self has-death-anim) 1)
+  (pet-process-base-shared-init! self)
+  (none))
+
+(defun spawn-pet-spiky-frog ()
+  (process-spawn pet-spiky-frog :name "pet-spiky-frog")
+  (none))
+
+(defskelgroup skel-rat-pet rat rat-lod0-jg -1
+              ((rat-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 4)
+              :shadow rat-shadow-mg
+              :origin-joint-index 18
+              )
+
+(deftype pet-rat (pet-process-base)
+  ())
+
+(defbehavior pet-rat-init-by-other pet-rat ()
+  (set! (-> self skel-name) "skel-rat-pet")
+  (set! (-> self victory-anim) 5)
+  (set! (-> self has-victory-anim) 1)
+  (set! (-> self idle-anim) 6)
+  (set! (-> self walk-anim) 11)
+  (set! (-> self pet-size) 0.5)
+  (set! (-> self death-anim) 24)
+  (set! (-> self has-death-anim) 1)
+  (set! (-> self is-flying?) #f)
+  (set! (-> self has-walk-anim) 1)
+  (pet-process-base-shared-init! self)
+  (none))
+
+(defun spawn-pet-rat ()
+  (process-spawn pet-rat :name "pet-rat")
+  (none))
+
+
+(defskelgroup skel-manta-pet manta manta-lod0-jg manta-idle0-ja
+              ((manta-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 4)
+              :shadow manta-shadow-mg
+              :shadow-joint-index 3
+              )
+
+(deftype pet-manta (pet-process-base)
+  ())
+
+(defbehavior pet-manta-init-by-other pet-manta ()
+  (set! (-> self skel-name) "skel-manta-pet")
+  (set! (-> self victory-anim) 8)
+  (set! (-> self has-victory-anim) 1)
+  (set! (-> self idle-anim) 8)
+  (set! (-> self walk-anim) 8)
+  (set! (-> self pet-size) 0.25)
+  (set! (-> self death-anim) 3)
+  (set! (-> self has-death-anim) 1)
+  (set! (-> self is-flying?) #t)
+  (set! (-> self has-walk-anim) 1)
+  (pet-process-base-shared-init! self)
+  (none))
+
+(defun spawn-pet-manta ()
+  (process-spawn pet-manta :name "pet-manta")
+  (none))
+
+(defskelgroup skel-neo-wasp-pet neo-wasp-b neo-wasp-b-lod0-jg neo-wasp-b-idle-ja
+              ((neo-wasp-b-lod0-mg (meters 20))
+               (neo-wasp-b-lod1-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 7.5)
+              :shadow neo-wasp-b-shadow-mg
+              :origin-joint-index 3
+              :global-effects 32
+              )
+
+(deftype pet-neo-wasp (pet-process-base)
+  ()
+)
+
+(defun pet-neo-wasp-init-particles! ((self pet-neo-wasp))
+  (add-connection
+    *part-engine*
+    self
+    18
+    self
+    2203
+    (new 'static 'vector :x 1597.44 :y 696.32 :z 737.28 :w 163840.0))
+
+  (add-connection
+    *part-engine*
+    self
+    18
+    self
+    2203
+    (new 'static 'vector :x -1597.44 :y 696.32 :z 737.28 :w 163840.0))
+
+  (add-connection
+    *part-engine*
+    self
+    18
+    self
+    2204
+    (new 'static 'vector :y 1433.6 :z 1228.8 :w 163840.0))
+
+  (none))
+
+(defbehavior pet-neo-wasp-init-by-other pet-neo-wasp ()
+  (set! (-> self skel-name) "skel-neo-wasp-pet")
+  (set! (-> self victory-anim) 4)
+  (set! (-> self has-victory-anim) 1)
+  (set! (-> self idle-anim) 4)
+  (set! (-> self walk-anim) 7)
+  (set! (-> self death-anim) 4)
+  (set! (-> self has-death-anim) 1)
+  (set! (-> self pet-size) 0.35)
+  (set! (-> self is-flying?) #t)
+  (set! (-> self has-walk-anim) 1)
+  (pet-neo-wasp-init-particles! self)
+  (pet-process-base-shared-init! self)
+  (none))
+
+(defun spawn-pet-neo-wasp ()
+  (process-spawn pet-neo-wasp :name "pet-neo-wasp")
+  (none))
+
+(defskelgroup skel-kangarat-pet kanga-lizard kanga-lizard-lod0-jg kanga-lizard-idle-ja
+              ((kanga-lizard-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 2)
+              :shadow kanga-lizard-shadow-mg
+              :origin-joint-index 3
+              )
+
+(deftype pet-kangarat (pet-process-base)
+  ())
+
+(defbehavior pet-kangarat-init-by-other pet-kangarat ()
+  (set! (-> self skel-name) "skel-kangarat-pet")
+  (set! (-> self victory-anim) 7)
+  (set! (-> self has-victory-anim) 1)
+  (set! (-> self idle-anim) 3)
+  (set! (-> self walk-anim) 6)
+  (set! (-> self pet-size) 0.4)
+  (set! (-> self death-anim) 3)
+  (set! (-> self has-death-anim) 1)
+  (set! (-> self is-flying?) #f)
+  (set! (-> self has-walk-anim) 1)
+  (pet-process-base-shared-init! self)
+  (none))
+
+(defun spawn-pet-kangarat ()
+  (process-spawn pet-kangarat :name "pet-kangarat")
+  (none))
+
+(defskelgroup skel-mantis-pet mantis mantis-lod0-jg mantis-idle0-ja
+              ((mantis-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 1.5 0 4)
+              :shadow mantis-shadow-mg
+              )
+
+(deftype pet-mantis (pet-process-base)
+  ())
+
+(defbehavior pet-mantis-init-by-other pet-mantis ()
+  (set! (-> self skel-name) "skel-mantis-pet")
+  (set! (-> self victory-anim) 8)
+  (set! (-> self has-victory-anim) 1)
+  (set! (-> self idle-anim) 5)
+  (set! (-> self walk-anim) 9)
+  (set! (-> self pet-size) 0.4)
+  (set! (-> self death-anim) 24)
+  (set! (-> self has-death-anim) 1)
+  (set! (-> self is-flying?) #f)
+  (set! (-> self has-walk-anim) 1)
+  (pet-process-base-shared-init! self)
+  (none))
+
+(defun spawn-pet-mantis ()
+  (process-spawn pet-mantis :name "pet-mantis")
+  (none))
+
+(defskelgroup skel-pet-terra mh-flyer mh-flyer-lod0-jg -1
+              ((mh-flyer-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 32)
+              :shadow mh-flyer-shadow-mg
+              )
+
+(deftype pet-terra (pet-process-base)
+  ())
+
+(defbehavior pet-terra-init-by-other pet-terra ()
+  (set! (-> self skel-name) "skel-pet-terra")
+  (set! (-> self idle-anim) 5)
+  (set! (-> self walk-anim) 5)
+  (set! (-> self has-walk-anim) 1)
+  (set! (-> self victory-anim) -1)
+  (set! (-> self has-victory-anim) 0)
+  (set! (-> self death-anim) 5)
+  (set! (-> self has-death-anim) 1)
+  (set! (-> self pet-size) 0.18)
+  (set! (-> self is-flying?) #t)
+  (pet-process-base-shared-init! self)
+  (none))
+
+(defun spawn-pet-terra ()
+  (process-spawn pet-terra :name "pet-terra")
+  (none))
+
+(defskelgroup skel-scouter-pet spydroid-orig spydroid-orig-lod0-jg spydroid-orig-idle-ja
+              ((spydroid-orig-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 4)
+              :shadow spydroid-orig-shadow-mg
+              )
+
+(deftype pet-scouter (pet-process-base)
+  ())
+
+(defbehavior pet-scouter-init-by-other pet-scouter ()
+  (set! (-> self skel-name) "skel-scouter-pet")
+  (set! (-> self idle-anim) 3)
+  (set! (-> self walk-anim) 5)
+  (set! (-> self has-walk-anim) 1)
+  (set! (-> self victory-anim) 11)
+  (set! (-> self has-victory-anim) 1)
+  (set! (-> self death-anim) 15)
+  (set! (-> self has-death-anim) 1)
+  (set! (-> self pet-size) 0.3)
+  (set! (-> self is-flying?) #f)
+  (pet-process-base-shared-init! self)
+  (none))
+
+(defun spawn-pet-scouter ()
+  (process-spawn pet-scouter :name "pet-scouter")
+  (none))
+
+(defskelgroup skel-dogat-pet dogat dogat-lod0-jg dogat-idle-ja
+              ((dogat-lod0-mg (meters 999999)))
+              :bounds (static-spherem 0 0 0 4)
+              :shadow dogat-shadow-mg
+              )
+
+(deftype pet-dogat (pet-process-base)
+  ())
+
+(defbehavior pet-dogat-init-by-other pet-dogat ()
+  (set! (-> self skel-name) "skel-dogat-pet")
+  (set! (-> self idle-anim) 4)
+  (set! (-> self walk-anim) 7)
+  (set! (-> self has-walk-anim) 1)
+  (set! (-> self victory-anim) -1)
+  (set! (-> self has-victory-anim) 0)
+  (set! (-> self death-anim) 3)
+  (set! (-> self has-death-anim) 1)
+  (set! (-> self pet-size) 1.3)
+  (set! (-> self is-flying?) #f)
+  (pet-process-base-shared-init! self)
+  (none)
+)
+
+(defun spawn-pet-dogat ()
+  (process-spawn pet-dogat :name "pet-dogat")
+  (none))
+
+;;pet-menu process
+
+(define enabled-pet-flitter? #f)
+(define enabled-pet-spiky-frog? #f)
+(define enabled-pet-rat? #f)
+(define enabled-pet-manta? #f)
+(define enabled-pet-neo-wasp? #f)
+(define enabled-pet-kangarat? #f)
+(define enabled-pet-mantis? #f)
+(define enabled-pet-terra? #f)
+(define enabled-pet-scouter? #f)
+(define enabled-pet-dogat? #f)
+
+(define pet-flitter-s "???")
+(define pet-spiky-frog-s "???")
+(define pet-rat-s "???")
+(define pet-manta-s "???")
+(define pet-neo-wasp-s "???")
+(define pet-kangarat-s "???")
+(define pet-mantis-s "???")
+(define pet-terra-s "???")
+(define pet-scouter-s "???")
+(define pet-dogat-s "???")
+
+(defun pet-menu-toggle-pet! ((idx int))
+  (case idx
+    ((0)
+      (when (task-node-closed? (game-task-node pet-flitter))
+        (if enabled-pet-flitter?
+          (begin
+            (set! enabled-pet-flitter? #f)
+            (kill-by-name "pet-flitter" *default-pool*))
+          (begin
+            (set! enabled-pet-flitter? #t)
+            (spawn-pet-flitter)))))
+    ((1)
+      (when (task-node-closed? (game-task-node pet-spiky-frog))
+        (if enabled-pet-spiky-frog?
+          (begin
+            (set! enabled-pet-spiky-frog? #f)
+            (kill-by-name "pet-spiky-frog" *default-pool*))
+          (begin
+            (set! enabled-pet-spiky-frog? #t)
+            (spawn-pet-spiky-frog)))))
+    ((2)
+      (when (task-node-closed? (game-task-node pet-rat))
+        (if enabled-pet-rat?
+          (begin
+            (set! enabled-pet-rat? #f)
+            (kill-by-name "pet-rat" *default-pool*))
+          (begin
+            (set! enabled-pet-rat? #t)
+            (spawn-pet-rat)))))
+    ((3)
+      (when (task-node-closed? (game-task-node pet-manta))
+        (if enabled-pet-manta?
+          (begin
+            (set! enabled-pet-manta? #f)
+            (kill-by-name "pet-manta" *default-pool*))
+          (begin
+            (set! enabled-pet-manta? #t)
+            (spawn-pet-manta)))))
+    ((4)
+      (when (task-node-closed? (game-task-node pet-neo-wasp))
+        (if enabled-pet-neo-wasp?
+          (begin
+            (set! enabled-pet-neo-wasp? #f)
+            (kill-by-name "pet-neo-wasp" *default-pool*))
+          (begin
+            (set! enabled-pet-neo-wasp? #t)
+            (spawn-pet-neo-wasp)))))
+    ((5)
+      (when (task-node-closed? (game-task-node pet-kangarat))
+        (if enabled-pet-kangarat?
+          (begin
+            (set! enabled-pet-kangarat? #f)
+            (kill-by-name "pet-kangarat" *default-pool*))
+          (begin
+            (set! enabled-pet-kangarat? #t)
+            (spawn-pet-kangarat)))))
+
+    ((6)
+      (when (task-node-closed? (game-task-node pet-mantis))
+        (if enabled-pet-mantis?
+          (begin
+            (set! enabled-pet-mantis? #f)
+            (kill-by-name "pet-mantis" *default-pool*))
+          (begin
+            (set! enabled-pet-mantis? #t)
+            (spawn-pet-mantis)))))
+
+    ((7)
+      (when (task-node-closed? (game-task-node pet-terra))
+        (if enabled-pet-terra?
+          (begin
+            (set! enabled-pet-terra? #f)
+            (kill-by-name "pet-terra" *default-pool*))
+          (begin
+            (set! enabled-pet-terra? #t)
+            (spawn-pet-terra)))))
+
+    ((8)
+      (when (task-node-closed? (game-task-node pet-scouter))
+        (if enabled-pet-scouter?
+          (begin
+            (set! enabled-pet-scouter? #f)
+            (kill-by-name "pet-scouter" *default-pool*))
+          (begin
+            (set! enabled-pet-scouter? #t)
+            (spawn-pet-scouter)))))
+
+    ((9)
+      (when (task-node-closed? (game-task-node pet-dogat))
+        (if enabled-pet-dogat?
+          (begin
+            (set! enabled-pet-dogat? #f)
+            (kill-by-name "pet-dogat" *default-pool*))
+          (begin
+            (set! enabled-pet-dogat? #t)
+            (spawn-pet-dogat)))))
+  )
+  (none))
+
+(deftype pet-menu (process)
+  ((men-select int)
+   (men-section int)
+   (men-max int))
+  (:state-methods
+    idle
+    dead)
+  (:methods
+    (pet-menu-controls! (_type_) none)
+    (pet-menu-draw! (_type_) none)))
+
+(defbehavior pet-menu-init-by-other pet-menu ()
+  (stack-size-set! (-> self main-thread) 2048)
+  (set! (-> self men-select) 0)
+  (set! (-> self men-section) 0)
+  (set! (-> self men-max) 9)
+  (go-virtual idle)
+  (none))
+
+(defun spawn-pet-menu ()
+  (process-spawn pet-menu :name "pet-menu")
+  (none))
+
+(defmethod pet-menu-controls! ((this pet-menu))
+  (when (cpad-pressed? 0 up)
+    (-! (-> this men-select) 1)
+    (when (< (-> this men-select) 0)
+      (set! (-> this men-select) (-> this men-max))))
+
+  (when (cpad-pressed? 0 down)
+    (+! (-> this men-select) 1)
+    (when (> (-> this men-select) (-> this men-max))
+      (set! (-> this men-select) 0)))
+
+  (when (or (cpad-pressed? 0 square)
+          (cpad-pressed? 0 circle))
+  (pet-menu-toggle-pet! (-> this men-select)))
+
+  (none))
+
+(defun pet-menu-newline! ((dst string))
+  (cat-string<-string dst "
+")
+  (none))
+
+(defun pet-menu-append-item! ((dst string) (text string) (selected symbol))
+  (cat-string<-string dst text)
+  (if selected
+    (cat-string<-string dst "<COLOR_GREEN>(<)")
+    (cat-string<-string dst "<COLOR_WHITE>(<)"))
+  (pet-menu-newline! dst)
+  (none))
+
+(defmethod pet-menu-draw! ((this pet-menu))
+  (if (task-node-closed? (game-task-node pet-flitter))
+    (if enabled-pet-flitter?
+      (set! pet-flitter-s "<COLOR_GREEN>Flitter")
+      (set! pet-flitter-s "<COLOR_RED>Flitter"))
+    (set! pet-flitter-s "<COLOR_WHITE>???"))
+
+  (if (task-node-closed? (game-task-node pet-spiky-frog))
+    (if enabled-pet-spiky-frog?
+      (set! pet-spiky-frog-s "<COLOR_GREEN>Spiky Frog")
+      (set! pet-spiky-frog-s "<COLOR_RED>Spiky Frog"))
+    (set! pet-spiky-frog-s "<COLOR_WHITE>???"))
+
+  (if (task-node-closed? (game-task-node pet-rat))
+    (if enabled-pet-rat?
+      (set! pet-rat-s "<COLOR_GREEN>Rat")
+      (set! pet-rat-s "<COLOR_RED>Rat"))
+    (set! pet-rat-s "<COLOR_WHITE>???"))
+
+  (if (task-node-closed? (game-task-node pet-manta))
+    (if enabled-pet-manta?
+      (set! pet-manta-s "<COLOR_GREEN>Manta")
+      (set! pet-manta-s "<COLOR_RED>Manta"))
+    (set! pet-manta-s "<COLOR_WHITE>???"))
+
+  (if (task-node-closed? (game-task-node pet-neo-wasp))
+    (if enabled-pet-neo-wasp?
+      (set! pet-neo-wasp-s "<COLOR_GREEN>Neo Wasp")
+      (set! pet-neo-wasp-s "<COLOR_RED>Neo Wasp"))
+    (set! pet-neo-wasp-s "<COLOR_WHITE>???"))
+
+  (if (task-node-closed? (game-task-node pet-kangarat))
+    (if enabled-pet-kangarat?
+      (set! pet-kangarat-s "<COLOR_GREEN>Kangarat")
+      (set! pet-kangarat-s "<COLOR_RED>Kangarat"))
+    (set! pet-kangarat-s "<COLOR_WHITE>???"))
+
+  (if (task-node-closed? (game-task-node pet-mantis))
+    (if enabled-pet-mantis?
+      (set! pet-mantis-s "<COLOR_GREEN>Mantis")
+      (set! pet-mantis-s "<COLOR_RED>Mantis"))
+    (set! pet-mantis-s "<COLOR_WHITE>???"))
+
+  (if (task-node-closed? (game-task-node pet-terra))
+    (if enabled-pet-terra?
+      (set! pet-terra-s "<COLOR_GREEN>Terra")
+      (set! pet-terra-s "<COLOR_RED>Terra"))
+    (set! pet-terra-s "<COLOR_WHITE>???"))
+
+  (if (task-node-closed? (game-task-node pet-scouter))
+    (if enabled-pet-scouter?
+      (set! pet-scouter-s "<COLOR_GREEN>Scouter")
+      (set! pet-scouter-s "<COLOR_RED>Scouter"))
+    (set! pet-scouter-s "<COLOR_WHITE>???"))
+
+  (if (task-node-closed? (game-task-node pet-dogat))
+    (if enabled-pet-dogat?
+      (set! pet-dogat-s "<COLOR_GREEN>Desert Scurrier")
+      (set! pet-dogat-s "<COLOR_RED>Desert Scurrier"))
+    (set! pet-dogat-s "<COLOR_WHITE>???"))
+    
+  (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                               (bucket-id particles))
+    (draw-sprite2d-xy s2-0 0 5 768 20 (new 'static 'rgba :a #x40) #x3fffff)
+    (draw-sprite2d-xy s2-0 140 25 225 293 (new 'static 'rgba :a #x40) #x3fffff)
+    (draw-sprite2d-xy s2-0 0 315 730 27 (new 'static 'rgba :a #x40) #x3fffff))
+
+    (clear matt-str)
+  (clear *pc-encoded-matt-str*)
+
+  (cat-string<-string matt-str "<COLOR_CYAN>Followers")
+  (pet-menu-newline! matt-str)
+  (pet-menu-newline! matt-str)
+
+  (pet-menu-append-item! matt-str pet-flitter-s (= (-> this men-select) 0))
+  (pet-menu-append-item! matt-str pet-spiky-frog-s (= (-> this men-select) 1))
+  (pet-menu-append-item! matt-str pet-rat-s (= (-> this men-select) 2))
+  (pet-menu-append-item! matt-str pet-manta-s (= (-> this men-select) 3))
+  (pet-menu-append-item! matt-str pet-neo-wasp-s (= (-> this men-select) 4))
+
+  (pet-menu-append-item! matt-str pet-kangarat-s (= (-> this men-select) 5))
+  (pet-menu-append-item! matt-str pet-mantis-s (= (-> this men-select) 6))
+  (pet-menu-append-item! matt-str pet-terra-s (= (-> this men-select) 7))
+  (pet-menu-append-item! matt-str pet-scouter-s (= (-> this men-select) 8))
+  (pet-menu-append-item! matt-str pet-dogat-s (= (-> this men-select) 9))
+
+  (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+  (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+    (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+    (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 60 0.0 (font-color default) (font-flags middle shadow kerning large))))
+      (set! (-> font-ctx scale) 0.325)
+      (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+      
+
+  (none))
+
+(defstate idle (pet-menu)
+  :virtual #t
+  :enter (behavior ()
+    (camera-locked #f #t #f)
+    (disable-hudmap))
+  :code (behavior ()
+    (loop
+      (pet-menu-controls! self)
+      (pet-menu-draw! self)
+      (when (cpad-pressed? 0 triangle)
+        (go-virtual dead))
+      (suspend))))
+
+(defstate dead (pet-menu)
+  :virtual #t
+  :code (behavior ()
+    (camera-unlocked)
+    (enable-hudmap)
+    (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
+    (kill-by-name (-> self name) *default-pool*)
+    (deactivate self)))

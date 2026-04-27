@@ -1392,6 +1392,55 @@
      (set! (-> this eco-source-time) (-> *display* game-clock frame-counter))
      (-> this eco-level)
      )
+        (((pickup-type pet-flitter))
+     (task-node-close! (game-task-node pet-flitter) #t)
+     1.0
+     )
+
+    (((pickup-type pet-spiky-frog))
+     (task-node-close! (game-task-node pet-spiky-frog) #t)
+     1.0
+     )
+
+    (((pickup-type pet-rat))
+     (task-node-close! (game-task-node pet-rat) #t)
+     1.0
+     )
+
+    (((pickup-type pet-manta))
+     (task-node-close! (game-task-node pet-manta) #t)
+     1.0
+     )
+
+    (((pickup-type pet-neo-wasp))
+     (task-node-close! (game-task-node pet-neo-wasp) #t)
+     1.0
+     )
+
+    (((pickup-type pet-kangarat))
+     (task-node-close! (game-task-node pet-kangarat) #t)
+     1.0
+     )
+
+    (((pickup-type pet-mantis))
+     (task-node-close! (game-task-node pet-mantis) #t)
+     1.0
+     )
+
+    (((pickup-type pet-terra))
+     (task-node-close! (game-task-node pet-terra) #t)
+     1.0
+     )
+
+    (((pickup-type pet-scouter))
+     (task-node-close! (game-task-node pet-scouter) #t)
+     1.0
+     )
+
+    (((pickup-type pet-dogat))
+     (task-node-close! (game-task-node pet-dogat) #t)
+     1.0
+     )
     (else
       ((method-of-type fact-info pickup-collectable!) this pickup amount pickup-handle)
       )

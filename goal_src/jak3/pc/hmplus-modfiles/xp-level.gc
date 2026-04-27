@@ -888,7 +888,7 @@
          (odd-bonus 0))
     (when (= (mod n 2) 1)
       (set! odd-bonus 30))
-    (+ 100 pair-bonus odd-bonus)))
+    (+ 60 pair-bonus odd-bonus)))
 
 (defun hmplus-hero-end-level ()
   (let* ((tier (hmplus-hero-clear-tier))
@@ -897,7 +897,7 @@
          (odd-bonus 0))
     (when (= (mod n 2) 1)
       (set! odd-bonus 20))
-    (+ 140 pair-bonus odd-bonus)))
+    (+ 100 pair-bonus odd-bonus)))
 
 (defun hmplus-hero-map-level ((normal-level int))
   (let ((n normal-level)
@@ -1416,6 +1416,7 @@
                 (not in-menu?)
                 (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
                 (not (task-node-open? (game-task-node city-blow-tower-resolution)))
+                (not (search-process-tree *active-pool* (lambda ((p process)) (type? p pet-menu))))
             )
                 (draw-targbar-hp)
                 (draw-targbar-dark)

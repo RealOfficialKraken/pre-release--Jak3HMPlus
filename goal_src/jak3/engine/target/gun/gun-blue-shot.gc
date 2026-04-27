@@ -659,11 +659,6 @@
         )
       )
     )
-  (when (and (>= guns-level 16) (rand-vu-percent? 0.5))
-    (someone-fire-blue-3 (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
-    (someone-fire-blue-3 (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
-    (someone-fire-blue-3 (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
-  )
   (someone-fire-blue-3 (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
   (someone-fire-blue-3 (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
   (someone-fire-blue-3 (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
@@ -681,7 +676,6 @@
   ((time  time-frame)
    )
   )
-
 
 (define *gun-blue-2-last-attack-id-time* (new 'static 'timeframe-wrapper))
 
