@@ -5026,7 +5026,7 @@
 
         (when
             (and
-                (not (search-process-tree *default-pool* (lambda ((p process)) (type? p rage-ghost))))
+                (not (ppointer->process *rage-ghost*))
                 *rage-ghost*
             )
                 (set! *rage-ghost* #f)

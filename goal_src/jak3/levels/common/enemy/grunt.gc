@@ -2210,8 +2210,7 @@
   (when (and
           *target*
           (not *rage-ghost*)
-          (not (search-process-tree *default-pool*
-                 (lambda ((p process)) (type? p rage-ghost)))))
+          (not (ppointer->process *rage-ghost*)))
     (let ((vec (new-stack-vector0)))
       (set! (-> vec x) (-> (target-pos 0) x))
       (set! (-> vec y) (+ (-> (target-pos 0) y) (meters 8.0)))
