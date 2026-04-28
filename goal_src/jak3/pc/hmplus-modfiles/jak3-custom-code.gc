@@ -7410,6 +7410,7 @@
             )
         )
         (kill-by-name "darkworld-tower" *dark-tower-dead-pool*)
+        (kill-by-name "darkworld-orb" *default-pool*)
         (set! *dark-forest* #f)
     )
     (when

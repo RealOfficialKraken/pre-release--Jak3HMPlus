@@ -731,6 +731,7 @@
         (process-spawn dark-tree towj 2 *dark-tower-dead-pool* :name "darkworld-tower")
         (set-vector! towk (meters 3591.0900) (meters 28.0) (meters 826.3735) 1.0)
         (process-spawn dark-tree towk 2 *dark-tower-dead-pool* :name "darkworld-tower")
+        (print "spawned darkworld tower forest")
     )
     (none)
 )
