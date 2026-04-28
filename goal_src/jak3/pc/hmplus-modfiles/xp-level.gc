@@ -1602,22 +1602,24 @@
                     )
                 )
 
-                ;; DESERT
-                ;; current hero version was (+ notoriety-level 47), but you wanted this
-                ;; based on crates-opened, not player level. Anchor it near endgame-mid.
-                (when
+                (when ;DESERT
                     (and
                         (= (-> (level-get-target-inside *level*) name) 'desert)
                         (not (task-node-open? (game-task-node desert-jump-mission-protect-doors)))
                         (= in-satbattle? #f)
+                        (!= enemy-noto notoriety-level)
                         (= start-was-uprising #f)
                     )
-                    (let ((hero-lvl (hmplus-hero-map-level 48)))
-                        (when (!= enemy-noto hero-lvl)
-                        (set! enemy-noto hero-lvl)
+                    (when (>= notoriety-level 3)
+                        (set! enemy-noto (- notoriety-level 2))
                         (set! start-was-uprising #t)
-                        (set! wasi 0))
+                        (set! wasi 0)
                     )
+                    (when (< notoriety-level 3)
+                        (set! enemy-noto notoriety-level)
+                    )
+                    ;(set! cdr-satbattle #t)
+                    ;(set! cdr-i (rand-vu-int-range 2400 14000))
                 )
 
                 ;; PRECUR
@@ -1656,6 +1658,314 @@
                         (set! enemy-noto hero-lvl)
                     )
                 )
+
+                (when ;VOLCANO MISSION
+                    (and
+                        (or 
+                            (= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                            (= (-> (level-get-target-inside *level*) name) 'volcanob)
+                            (= (-> (level-get-target-inside *level*) name) 'volcanox)
+                        )
+                        (not (task-node-closed? (game-task-node volcano-darkeco-resolution)))
+                        (!= enemy-noto (hmplus-hero-map-level 6))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 6))
+                )
+                (when ;VOLCANO BACKTRACK LEVEL
+                    (and
+                        (or 
+                            (= (-> (level-get-target-inside *level*) name) 'volcanoa)
+                            (= (-> (level-get-target-inside *level*) name) 'volcanob)
+                            (= (-> (level-get-target-inside *level*) name) 'volcanox)
+                        )
+                        (task-node-closed? (game-task-node volcano-darkeco-resolution))
+                        (or 
+                            (< enemy-noto (hmplus-hero-map-level 10))
+                            (> enemy-noto (hmplus-hero-map-level 16))
+                        )
+                    )
+                    (set! enemy-noto (rand-vu-int-range (hmplus-hero-map-level 10) (hmplus-hero-map-level 16)))
+                )
+
+                (cond ;ctyport
+                    ((and
+                        (not (task-node-open? (game-task-node city-port-assault-resolution)))
+                        (= (-> (level-get-target-inside *level*) name) 'ctyport)
+                        (!= enemy-noto (hmplus-hero-map-level 19))
+                        (!= enemy-noto (hmplus-hero-map-level 20))
+                    )
+                    (set! enemy-noto (rand-vu-int-range (hmplus-hero-map-level 19) (hmplus-hero-map-level 20)))
+                )
+                ((task-node-open? (game-task-node city-port-assault-resolution))
+                    (set! enemy-noto (- notoriety-level 5))
+                )
+                )
+
+                (when ;ctyindb
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'ctyindb)
+                        (!= enemy-noto (hmplus-hero-map-level 33))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 33))
+                )
+                (when ;ctysluma
+                    (and
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'ctysluma)
+                            (= (-> (level-get-target-inside *level*) name) 'ctyslumb)
+                            (= (-> (level-get-target-inside *level*) name) 'ctyslumc)
+                        )
+                        (!= enemy-noto (hmplus-hero-map-level 29))
+                        (!= enemy-noto (hmplus-hero-map-level 30))
+                        (!= enemy-noto (hmplus-hero-map-level 31))
+                        (!= enemy-noto (hmplus-hero-map-level 32))
+                        (!= enemy-noto (hmplus-hero-map-level 33))
+                        (!= enemy-noto (hmplus-hero-map-level 34))
+                    )
+                    (set! enemy-noto (rand-vu-int-range (hmplus-hero-map-level 29) (hmplus-hero-map-level 34)))
+                )
+                (cond ;mhcitya+mhcityb
+                    ((and
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'mhcitya)
+                            (= (-> (level-get-target-inside *level*) name) 'mhcityb)
+                        )
+                        (not (task-node-open? (game-task-node city-destroy-grid-resolution)))
+                        (!= enemy-noto (hmplus-hero-map-level 40))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 40))
+                )
+                ((and
+                    (task-node-open? (game-task-node city-destroy-grid-resolution))
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'mhcitya)
+                        (= (-> (level-get-target-inside *level*) name) 'mhcityb)
+                    )
+                    (!= enemy-noto notoriety-level)
+                )
+                    (set! enemy-noto notoriety-level)
+                )
+                )
+                (when ;ltowera+ltowerb
+                    (and
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'ltowera)
+                            (= (-> (level-get-target-inside *level*) name) 'ltowerb)
+                            (= (-> (level-get-target-inside *level*) name) 'towera)
+                            (= (-> (level-get-target-inside *level*) name) 'towerb)
+                        )
+                        (!= enemy-noto (hmplus-hero-map-level 48))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 48))
+                )
+                (when ;STADIUMA+B
+                    (and
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'stadiuma)
+                            (= (-> (level-get-target-inside *level*) name) 'stadiumb)
+                            (= (-> (level-get-target-inside *level*) name) 'stadium)
+                        )
+                        (!= enemy-noto (hmplus-hero-map-level 50))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 50))
+                )
+                (when ;FORESTA
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'foresta)
+                        (or
+                            (< enemy-noto (hmplus-hero-map-level 47))
+                            (> enemy-noto (hmplus-hero-map-level 56))
+                        )
+                    )
+                    (set! enemy-noto (rand-vu-int-range (hmplus-hero-map-level 47) (hmplus-hero-map-level 56)))
+                )
+                (when ;factory
+                    (and
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'factorya)
+                            (= (-> (level-get-target-inside *level*) name) 'factoryb)
+                            (= (-> (level-get-target-inside *level*) name) 'factoryc)
+                            (= (-> (level-get-target-inside *level*) name) 'lfacrm1)
+                        )
+                        (not (= (-> (level-get-target-inside *level*) name) 'factoryd))
+                        (!= enemy-noto (hmplus-hero-map-level 45))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 45))
+                )
+                (when ;factory-boss
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'factoryd)
+                        (!= enemy-noto (hmplus-hero-map-level 50))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 50))
+                )
+                (when ;PRECUR
+                    (and
+                        (not (task-node-open? (game-task-node precursor-tour-introduction)))
+                        (not (task-node-open? (game-task-node precursor-tour-generator-trigger)))
+                        (not (task-node-open? (game-task-node precursor-tour-resolution)))
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'precura)
+                            (= (-> (level-get-target-inside *level*) name) 'precurb)
+                            (= (-> (level-get-target-inside *level*) name) 'precurc)
+                            (= (-> (level-get-target-inside *level*) name) 'precurd)
+                        )
+                        (!= enemy-noto (hmplus-hero-map-level 60))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 60))
+                )
+                (when ;PRECUR
+                    (and
+                        (or
+                            (task-node-open? (game-task-node precursor-tour-introduction))
+                            (task-node-open? (game-task-node precursor-tour-generator-trigger))
+                            (task-node-open? (game-task-node precursor-tour-resolution))
+                        )
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'precura)
+                            (= (-> (level-get-target-inside *level*) name) 'precurb)
+                            (= (-> (level-get-target-inside *level*) name) 'precurc)
+                            (= (-> (level-get-target-inside *level*) name) 'precurd)
+                        )
+                        (!= enemy-noto (hmplus-hero-map-level 40))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 40))
+                )
+
+                (when
+                (and
+                    (task-node-closed? (game-task-node desert-oasis-defense-meeting))
+                    (not (task-node-closed? (game-task-node desert-oasis-defense-resolution)))
+                    (= (-> (level-get-target-inside *level*) name) 'desert)
+                    (!= enemy-noto (hmplus-hero-map-level 19))
+                )
+                    (set! enemy-noto (hmplus-hero-map-level 19))
+                    )
+
+                (cond ((not (task-node-closed? (game-task-node factory-boss-resolution)))
+                (when ;TEMPLEA
+                    (and
+                        (or
+                            (= (-> (level-get-target-inside *level*) name) 'templea)
+                            (= (-> (level-get-target-inside *level*) name) 'templex)
+                        )
+                        (!= enemy-noto (hmplus-hero-map-level 11))
+                    )
+                    (set! enemy-noto (+ notoriety-level 3))
+                )
+                (when ;TEMPLEB
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'templeb)
+                        (!= enemy-noto (hmplus-hero-map-level 14))
+                    )
+                    (set! enemy-noto (+ notoriety-level 3))
+                )
+                (when ;TEMPLED
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'templed)
+                        (!= enemy-noto (hmplus-hero-map-level 50))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 50))
+                )
+            )
+                ((task-node-closed? (game-task-node factory-boss-resolution))
+                    (when ;TEMPLEA
+                        (and
+                            (or
+                                (= (-> (level-get-target-inside *level*) name) 'templea)
+                                (= (-> (level-get-target-inside *level*) name) 'templex)
+                            )
+                            (!= enemy-noto (hmplus-hero-map-level 45))
+                        )
+                        (set! enemy-noto (hmplus-hero-map-level 45))
+                    )
+                    (when ;TEMPLEB
+                        (and
+                            (= (-> (level-get-target-inside *level*) name) 'templeb)
+                            (!= enemy-noto (hmplus-hero-map-level 46))
+                        )
+                        (set! enemy-noto (hmplus-hero-map-level 46))
+                    )
+                    (when ;TEMPLED
+                        (and
+                            (= (-> (level-get-target-inside *level*) name) 'templed)
+                            (!= enemy-noto (hmplus-hero-map-level 50))
+                        )
+                        (set! enemy-noto (hmplus-hero-map-level 50))
+                    )
+                )
+            )
+                (when ;MINE
+                    (and
+                        (or 
+                            (= (-> (level-get-target-inside *level*) name) 'minea)
+                            (= (-> (level-get-target-inside *level*) name) 'mineb)
+                            (= (-> (level-get-target-inside *level*) name) 'minec)
+                            (= (-> (level-get-target-inside *level*) name) 'mined)
+                        )
+                    )
+                    (when
+                        (and
+                            (!= enemy-noto (hmplus-hero-map-level 24))
+                            (!= enemy-noto (hmplus-hero-map-level 25))
+                            (!= enemy-noto (hmplus-hero-map-level 26))
+                            (!= enemy-noto (hmplus-hero-map-level 27))
+                            (not (task-node-closed? (game-task-node mine-boss-resolution)))
+                        )
+                        (set! enemy-noto (rand-vu-int-range (hmplus-hero-map-level 24) (hmplus-hero-map-level 27)))
+                    )
+                    (when
+                        (and
+                            (!= enemy-noto (+ notoriety-level 7))
+                            (task-node-closed? (game-task-node mine-boss-resolution))
+                        )
+                        (set! enemy-noto (+ notoriety-level 7))
+                    )
+                )
+
+                (when ;CTYGENB
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'ctygenb)
+                        (task-node-open? (game-task-node mine-boss-resolution))
+                        (!= enemy-noto (hmplus-hero-map-level 27))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 27))
+                )
+                (when ;CTYGENB
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'ctygenb)
+                        (!= enemy-noto (hmplus-hero-map-level 25))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 25))
+                )
+
+                (when ;SEW1
+                (and
+                    (or
+                        (task-node-open? (game-task-node sewer-kg-met-introduction))
+                        (task-node-open? (game-task-node sewer-met-hum-resolution))
+                        (task-node-open? (game-task-node sewer-kg-met-button0-pressed))
+                        (task-node-open? (game-task-node sewer-kg-met-button1-pressed))
+                        (task-node-open? (game-task-node sewer-kg-met-resolution))
+                    )
+                    (= (-> (level-get-target-inside *level*) name) 'sewa)
+                    (!= enemy-noto (hmplus-hero-map-level 25))
+                    (!= enemy-noto (hmplus-hero-map-level 26))
+                )
+                (set! enemy-noto (rand-vu-int-range (hmplus-hero-map-level 25) (hmplus-hero-map-level 26)))
+            )
+            (when ;SEW2
+                (and
+                    (task-node-open? (game-task-node sewer-hum-kg-switch-off))
+                    (or
+                        (= (-> (level-get-target-inside *level*) name) 'sewb)
+                        (= (-> (level-get-target-inside *level*) name) 'sewc)
+                        (= (-> (level-get-target-inside *level*) name) 'sewd)
+                    )
+                    (!= enemy-noto (hmplus-hero-map-level 45))
+                )
+                (set! enemy-noto (hmplus-hero-map-level 45))
+            )
 
                 ;; desert escalation over time
                 (when
@@ -1976,6 +2286,7 @@
                 (and
                     (or
                         (task-node-open? (game-task-node sewer-kg-met-introduction))
+                        (task-node-open? (game-task-node sewer-met-hum-resolution))
                         (task-node-open? (game-task-node sewer-kg-met-button0-pressed))
                         (task-node-open? (game-task-node sewer-kg-met-button1-pressed))
                         (task-node-open? (game-task-node sewer-kg-met-resolution))

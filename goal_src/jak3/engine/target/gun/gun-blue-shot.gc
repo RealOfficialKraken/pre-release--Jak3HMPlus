@@ -25,6 +25,33 @@
   )
 ;; ---gun-blue-lightning-cmd-msg
 
+(defun hmplus-disperser-dark-eco-cost ()
+  (let ((cost 4.0)
+        (t 0.0))
+    (cond
+      ((>= guns-level 150)
+        0.0)
+      ((>= guns-level 50)
+        (set! t (/ (- (the float guns-level) 50.0) 100.0))
+        (set! t (fmax 0.0 (fmin 1.0 t)))
+        (* cost (- 1.0 t)))
+      (else
+        cost))))
+
+(defun hmplus-disperser-pay-dark-eco! ()
+  (let ((cost (hmplus-disperser-dark-eco-cost))
+        (cur (-> *game-info* eco-pill-dark)))
+    (cond
+      ((<= cost 0.0)
+        #t)
+      ((<= cur 0.0)
+        #f)
+      ((<= cur cost)
+        (send-event *target* 'get-pickup (pickup-type eco-pill-dark) (- cur))
+        #t)
+      (else
+        (send-event *target* 'get-pickup (pickup-type eco-pill-dark) (- cost))
+        #t))))
 
 ;; DECOMP BEGINS
 
@@ -2248,9 +2275,20 @@
                                   )
                                   (spawn-missle-seeker)
                                 )
-                               (when (and (= gunmod-disperser #t) (rand-vu-percent? 0.30))
+                               (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                                (when (and
+                                        (= gunmod-disperser #t)
+                                        (rand-vu-percent? 0.30)
+                                        (hmplus-disperser-pay-dark-eco!))
                                   (disc-shot! (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
                                 )
+                                (when (and
+                                        (= gunmod-disperser #t)
+                                        (rand-vu-percent? 0.30)
+                                      )
+                                  (disc-shot! (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
+                                )
+                               )
                                )
                               (((pickup-type gun-blue-2))
                                (gun-fire-blue-2)
@@ -2261,9 +2299,20 @@
                                   )
                                   (spawn-missle-seeker)
                                 )
-                               (when (and (= gunmod-disperser #t) (rand-vu-percent? 0.03))
+                               (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                                (when (and
+                                        (= gunmod-disperser #t)
+                                        (rand-vu-percent? 0.03)
+                                        (hmplus-disperser-pay-dark-eco!))
                                   (disc-shot! (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
                                 )
+                                (when (and
+                                        (= gunmod-disperser #t)
+                                        (rand-vu-percent? 0.03)
+                                      )
+                                  (disc-shot! (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
+                                )
+                               )
                                )
                               (((pickup-type gun-blue-3))
                                (let ((f0-0 -2.0))
@@ -2280,9 +2329,20 @@
                                  )
                                (sound-play "blue-gun3-trace")
                                (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 127 (seconds 0.1))
-                               (when (and (= gunmod-disperser #t) (rand-vu-percent? 0.23))
+                               (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                                (when (and
+                                        (= gunmod-disperser #t)
+                                        (rand-vu-percent? 0.23)
+                                        (hmplus-disperser-pay-dark-eco!))
                                   (disc-shot! (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
                                 )
+                                (when (and
+                                        (= gunmod-disperser #t)
+                                        (rand-vu-percent? 0.23)
+                                      )
+                                  (disc-shot! (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
+                                )
+                               )
                                 (when 
                                   (and 
                                     (= gunmod-airstrike #t)

@@ -2202,31 +2202,36 @@
     (set! (-> self path curve num-cverts) 3))
 
   (set! (-> self hit-points) 99999.0)
+  (set! (-> self next-rage-time) (+ (current-time) (seconds 6.0)))
   (go (method-of-object self pacing))
 )
 
 (defun spawn-rage-ghost ()
+  (when (and
+          *target*
+          (not *rage-ghost*)
+          (not (search-process-tree *default-pool*
+                 (lambda ((p process)) (type? p rage-ghost)))))
     (let ((vec (new-stack-vector0)))
-        (set! (-> vec x) (-> (target-pos 0) x))
-        (set! (-> vec y) (+ (-> (target-pos 0) y) (* 8.0 4096.0)))
-        (set! (-> vec z) (-> (target-pos 0) z))
-        (if (rand-vu-percent? 0.5)
-            (+! (-> vec x) (* (rand-vu-float-range 9.0 18.0) 4096.0))
-            (-! (-> vec x) (* (rand-vu-float-range 9.0 18.0) 4096.0))
-        )
-        (if (rand-vu-percent? 0.5)
-            (+! (-> vec z) (* (rand-vu-float-range 9.0 18.0) 4096.0))
-            (-! (-> vec z) (* (rand-vu-float-range 9.0 18.0) 4096.0))
-        )
-        (set! 
-            *rage-ghost* 
-            (process-spawn 
-                rage-ghost 
-                vec 
-                :name "rage-ghost" 
-                *default-pool*
-            )
-        )
-    )
-    (none)
-)
+      (set! (-> vec x) (-> (target-pos 0) x))
+      (set! (-> vec y) (+ (-> (target-pos 0) y) (meters 8.0)))
+      (set! (-> vec z) (-> (target-pos 0) z))
+      (set! (-> vec w) 1.0)
+
+      (if (rand-vu-percent? 0.5)
+        (+! (-> vec x) (meters (rand-vu-float-range 9.0 18.0)))
+        (-! (-> vec x) (meters (rand-vu-float-range 9.0 18.0))))
+
+      (if (rand-vu-percent? 0.5)
+        (+! (-> vec z) (meters (rand-vu-float-range 9.0 18.0)))
+        (-! (-> vec z) (meters (rand-vu-float-range 9.0 18.0))))
+
+      (set! *rage-ghost*
+        (process-spawn
+          rage-ghost
+          :init rage-ghost-init-by-other
+          vec
+          :name "rage-ghost"
+          *default-pool*))))
+
+  (none))

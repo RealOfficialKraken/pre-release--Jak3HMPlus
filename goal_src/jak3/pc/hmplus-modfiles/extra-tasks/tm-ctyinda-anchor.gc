@@ -644,7 +644,7 @@
                 (set! in-ctyinda-anchor? #f)
                 (set! *force-stop-pilot* #f)
                 (task-node-open! (game-task-node ctyinda-anchor-introduction) #t)
-                (group-drop! (-> self reward-box) 0.0 1.0)
+                (group-drop! (-> self reward-box) 0.0 1.0 0.03)
                 (when (rand-vu-percent? 0.50)
                     (if (rand-vu-percent? 0.35)
                         (drop-gun-mod! (-> self reward-box))

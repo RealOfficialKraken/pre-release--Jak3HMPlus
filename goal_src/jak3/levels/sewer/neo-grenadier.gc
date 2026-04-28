@@ -1773,10 +1773,10 @@
       (when (= (-> this dropped-crate?) #f)
         (cond 
           ((> enemy-noto 50)
-            (drop-loot-crate! (-> this root trans) 0.75 0.43 0.015)
+            (drop-loot-crate! (-> this root trans) 0.75 0.43 0.075)
           )
             (else
-              (drop-loot-crate! (-> this root trans) 0.75 0.43 0.015)
+              (drop-loot-crate! (-> this root trans) 0.75 0.43 0.075)
             )
         )
         (when 

@@ -1,6 +1,14 @@
 (in-package goal)
 ;name: gyro-warp.gc
 
+(define *hmplus-gyro-warp-active-count* 0)
+(define *hmplus-gyro-warp-shot-count* 0)
+
+(define *hmplus-gyro-warp-max-active* 2)
+(define *hmplus-gyro-warp-max-shots* 48)
+
+(define *hmplus-gyro-warp-shot-headroom* 8)
+
 (defpartgroup group-nestb-rift-ring
   :id 1559
   :duration (seconds 0.017)
@@ -140,6 +148,21 @@
     )
   )
 
+  (defun hmplus-gyro-warp-can-spawn? ()
+  (< *hmplus-gyro-warp-active-count* *hmplus-gyro-warp-max-active*)
+  )
+
+(defun hmplus-gyro-warp-can-fire? ()
+  (< (+ *hmplus-gyro-warp-shot-count* *hmplus-gyro-warp-shot-headroom*)
+     *hmplus-gyro-warp-max-shots*)
+  )
+
+(defun hmplus-gyro-warp-shot-died ()
+  (when (> *hmplus-gyro-warp-shot-count* 0)
+    (-! *hmplus-gyro-warp-shot-count* 1))
+  (none)
+  )
+
   (deftype jak-maker-grenade (dp-bipedal-grenade-shot)
     ()
   )
@@ -276,10 +299,23 @@
         (load-particles (_type_) none)
         (spawn-tentacles (_type_) none)
         (track-tentacles! (_type_) none)
+        (gyro-warp-try-shot! (_type_) none)
         (send-anim-idle (_type_) none)
         (vector-spazz (_type_) none)
     )
 )
+
+(defun hmplus-gyro-tie-budget-ok? ()
+  ;; The real tie code reserves prototype-max-qwc * 16 bytes.
+  ;; Since gyro-warp doesn't know the current level's biggest tie prototype,
+  ;; use a fat safety reserve. Tune upward if it still warns.
+  (let ((buf (-> *display* frames (-> *display* on-screen) global-buf))
+        (reserve #x30000) ;; 196 KB headroom
+        )
+    (< (the-as uint (&+ (-> buf base) reserve))
+       (the-as uint (-> buf end)))
+    )
+  )
 
 (defstate set-unique-name (gyro-warp)
     :virtual #t
@@ -312,6 +348,7 @@
 )
 
 (defbehavior gyro-warp-init-by-other gyro-warp ((vec vector))
+    (+! *hmplus-gyro-warp-active-count* 1)
     (stack-size-set! (-> self main-thread) 128)
     (set! (-> self timer) 0)
     (set! (-> self pos quad) (-> vec quad))
@@ -409,34 +446,23 @@
     (none)
 )
 
+(defmethod gyro-warp-try-shot! ((this gyro-warp))
+  (when (hmplus-gyro-tie-budget-ok?)
+    (vector-spazz this))
+  (none)
+  )
+
 (defmethod fire-grenades! ((this gyro-warp))
-    (vector-spazz this)
-    (vector-spazz this)
-    (vector-spazz this)
-    (vector-spazz this)
-    (when (rand-vu-percent? 0.5)
-        (vector-spazz this)
-    )
-    (when (rand-vu-percent? 0.5)
-        (vector-spazz this)
-    )
-    (when (rand-vu-percent? 0.5)
-        (vector-spazz this)
-    )
-    (when (rand-vu-percent? 0.5)
-        (vector-spazz this)
-    )
-    (when (rand-vu-percent? 0.5)
-        (vector-spazz this)
-    )
-    (when (rand-vu-percent? 0.5)
-        (vector-spazz this)
-    )
-    (when (rand-vu-percent? 0.5)
-        (vector-spazz this)
-    )
-    (none)
-)
+  (gyro-warp-try-shot! this)
+  (gyro-warp-try-shot! this)
+
+  (when (rand-vu-percent? 0.5)
+    (gyro-warp-try-shot! this))
+  (when (rand-vu-percent? 0.5)
+    (gyro-warp-try-shot! this))
+
+  (none)
+  )
 
 (defmethod spawn-tentacles ((this gyro-warp))
     (let ((vec-size (new-stack-vector0))
@@ -578,19 +604,22 @@
 )
 
 (defstate dead (gyro-warp)
-    :virtual #t
-    :code
-    (behavior ()
-        (print "gyro-warp dead")
-        (kill-by-name (-> self name) *active-pool*)
-        (suspend)
+  :virtual #t
+  :code
+  (behavior ()
+    (when (> *hmplus-gyro-warp-active-count* 0)
+      (-! *hmplus-gyro-warp-active-count* 1))
+    (print "gyro-warp dead")
+    (kill-by-name (-> self name) *active-pool*)
+    (suspend)
     )
-)
+  )
 
 (defun black-hole! ((vec vector))
-    (process-spawn gyro-warp vec :name "gyro-warp")
-    (none)
-)
+  (when (hmplus-gyro-tie-budget-ok?)
+    (process-spawn gyro-warp vec :name "gyro-warp"))
+  (none)
+  )
 
 (defun spawn-man-tentacle ((vec vector))
     (let ((tentaclea 

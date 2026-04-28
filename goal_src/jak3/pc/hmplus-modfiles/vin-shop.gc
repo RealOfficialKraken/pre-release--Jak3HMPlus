@@ -65,8 +65,8 @@
 (defun draw-vin-shop ()
     (when *dark-forest*
         (set! *dark-forest* #f)
-        (kill-by-name "darkworld-tower" *default-pool*)
-        (kill-by-name "darkworld-orb" *default-pool*)
+        (kill-by-name "darkworld-tower" *dark-tower-dead-pool*)
+        (kill-by-name "darkworld-orb" *dark-tower-dead-pool*)
     )
     (when (!= vin-crystals (the int (-> *game-info* civilians-killed)))
         (set! vin-crystals (the int (-> *game-info* civilians-killed)))
@@ -114,71 +114,140 @@
       (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 30 0.0 (font-color default) (font-flags middle kerning large))))
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
-    (cond
-        ((= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0)
-            (set! vin-objective1 "<COLOR_YELLOW>We should start by gathering <COLOR_PINK>10 Dark Crystals<COLOR_YELLOW>.")
-            (set! vin-objective2 "<COLOR_YELLOW>That should give me some clues about what exactly these are")
-            (set! vin-objective3 "<COLOR_YELLOW>")
-            (set! vin-objective4 "<COLOR_YELLOW>")
-            (clear matt-str)
-            (clear *pc-encoded-matt-str*)
-            (format matt-str "~S(x10) Research in The Entity~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x20) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
-            vinw1
-            vinw2
-            vinw3
-            vinw4
-            vinw5
+    (if (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+        (cond
+            ((= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0)
+                (set! vin-objective1 "<COLOR_YELLOW>We should start by gathering <COLOR_PINK>10 Dark Crystals<COLOR_YELLOW>.")
+                (set! vin-objective2 "<COLOR_YELLOW>That should give me some clues about what exactly these are")
+                (set! vin-objective3 "<COLOR_YELLOW>")
+                (set! vin-objective4 "<COLOR_YELLOW>")
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "~S(x10) Research in The Entity~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x20) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+                vinw1
+                vinw2
+                vinw3
+                vinw4
+                vinw5
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                ;; reset bucket settings prior to drawing - font won't do self for us, and
+                ;; draw-raw-image can sometimes mess them up. (intro sequence)
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 130 90 0.0 (font-color default) (font-flags kerning large))))
+                    (set! (-> font-ctx scale) 0.325)
+                    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
             )
-            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-            ;; reset bucket settings prior to drawing - font won't do self for us, and
-            ;; draw-raw-image can sometimes mess them up. (intro sequence)
-            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 130 90 0.0 (font-color default) (font-flags kerning large))))
-                (set! (-> font-ctx scale) 0.325)
-                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            ((= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0)
+                (set! vin-objective1 "<COLOR_YELLOW>We should start by gathering <COLOR_PINK>10 Dark Crystals<COLOR_YELLOW>.")
+                (set! vin-objective2 "<COLOR_YELLOW>That should give me some clues about what exactly these are")
+                (set! vin-objective3 "<COLOR_YELLOW>")
+                (set! vin-objective4 "<COLOR_YELLOW>")
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "~S(x15) Talk to Vin (OR) Research in The Entity~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x20) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+                vinw1
+                vinw2
+                vinw3
+                vinw4
+                vinw5
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                ;; reset bucket settings prior to drawing - font won't do self for us, and
+                ;; draw-raw-image can sometimes mess them up. (intro sequence)
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 130 90 0.0 (font-color default) (font-flags kerning large))))
+                    (set! (-> font-ctx scale) 0.325)
+                    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            )
+            (else
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "~S(Talk) <COLOR_WHITE>To Vin~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x20) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+                vinw1
+                vinw2
+                vinw3
+                vinw4
+                vinw5
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                ;; reset bucket settings prior to drawing - font won't do self for us, and
+                ;; draw-raw-image can sometimes mess them up. (intro sequence)
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 130 90 0.0 (font-color default) (font-flags kerning large))))
+                    (set! (-> font-ctx scale) 0.325)
+                    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            )
         )
-        ((= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0)
-            (set! vin-objective1 "<COLOR_YELLOW>We should start by gathering <COLOR_PINK>10 Dark Crystals<COLOR_YELLOW>.")
-            (set! vin-objective2 "<COLOR_YELLOW>That should give me some clues about what exactly these are")
-            (set! vin-objective3 "<COLOR_YELLOW>")
-            (set! vin-objective4 "<COLOR_YELLOW>")
-            (clear matt-str)
-            (clear *pc-encoded-matt-str*)
-            (format matt-str "~S(x15) Talk to Vin (OR) Research in The Entity~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x20) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
-            vinw1
-            vinw2
-            vinw3
-            vinw4
-            vinw5
+        (cond
+            ((= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0)
+                (set! vin-objective1 "<COLOR_YELLOW>We should start by gathering <COLOR_PINK>50 Dark Crystals<COLOR_YELLOW>.")
+                (set! vin-objective2 "<COLOR_YELLOW>That should give me some clues about what exactly these are")
+                (set! vin-objective3 "<COLOR_YELLOW>")
+                (set! vin-objective4 "<COLOR_YELLOW>")
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "~S(x50) Research in The Entity~%~%~S(x65) Receive Mass Inverter~%~%~S(x50) Receive Peacemaker~%~%~S(x100) Receive Random Weapon~%~%~S(x150) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+                vinw1
+                vinw2
+                vinw3
+                vinw4
+                vinw5
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                ;; reset bucket settings prior to drawing - font won't do self for us, and
+                ;; draw-raw-image can sometimes mess them up. (intro sequence)
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 130 90 0.0 (font-color default) (font-flags kerning large))))
+                    (set! (-> font-ctx scale) 0.325)
+                    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
             )
-            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-            ;; reset bucket settings prior to drawing - font won't do self for us, and
-            ;; draw-raw-image can sometimes mess them up. (intro sequence)
-            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 130 90 0.0 (font-color default) (font-flags kerning large))))
-                (set! (-> font-ctx scale) 0.325)
-                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
-        )
-        (else
-            (clear matt-str)
-            (clear *pc-encoded-matt-str*)
-            (format matt-str "~S(Talk) <COLOR_WHITE>To Vin~%~%~S(x15) Receive Mass Inverter~%~%~S(x10) Receive Peacemaker~%~%~S(x10) Receive Random Weapon~%~%~S(x20) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
-            vinw1
-            vinw2
-            vinw3
-            vinw4
-            vinw5
+            ((= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0)
+                (set! vin-objective1 "<COLOR_YELLOW>We should start by gathering <COLOR_PINK>50 Dark Crystals<COLOR_YELLOW>.")
+                (set! vin-objective2 "<COLOR_YELLOW>That should give me some clues about what exactly these are")
+                (set! vin-objective3 "<COLOR_YELLOW>")
+                (set! vin-objective4 "<COLOR_YELLOW>")
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "~S(x50) Talk to Vin (OR) Research in The Entity~%~%~S(x65) Receive Mass Inverter~%~%~S(x50) Receive Peacemaker~%~%~S(x100) Receive Random Weapon~%~%~S(x150) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+                vinw1
+                vinw2
+                vinw3
+                vinw4
+                vinw5
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                ;; reset bucket settings prior to drawing - font won't do self for us, and
+                ;; draw-raw-image can sometimes mess them up. (intro sequence)
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 130 90 0.0 (font-color default) (font-flags kerning large))))
+                    (set! (-> font-ctx scale) 0.325)
+                    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
             )
-            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-            ;; reset bucket settings prior to drawing - font won't do self for us, and
-            ;; draw-raw-image can sometimes mess them up. (intro sequence)
-            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 130 90 0.0 (font-color default) (font-flags kerning large))))
-                (set! (-> font-ctx scale) 0.325)
-                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            (else
+                (clear matt-str)
+                (clear *pc-encoded-matt-str*)
+                (format matt-str "~S(Talk) <COLOR_WHITE>To Vin~%~%~S(x65) Receive Mass Inverter~%~%~S(x50) Receive Peacemaker~%~%~S(x100) Receive Random Weapon~%~%~S(x150) Recieve Gun Mod~%~%~%<COLOR_ORANGE>(<COLOR_BLUE>X <COLOR_ORANGE>Confirm)~%(<COLOR_RED>O <COLOR_ORANGE>Back)"
+                vinw1
+                vinw2
+                vinw3
+                vinw4
+                vinw5
+                )
+                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
+                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
+                ;; reset bucket settings prior to drawing - font won't do self for us, and
+                ;; draw-raw-image can sometimes mess them up. (intro sequence)
+                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
+                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 130 90 0.0 (font-color default) (font-flags kerning large))))
+                    (set! (-> font-ctx scale) 0.325)
+                    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            )
         )
     )
     (when (= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0)
@@ -418,48 +487,77 @@
             ;select options
             (cond 
                 ((and (cpad-pressed? 0 x) (= vin-select 0))
-                    (cond
-                        ((and (>= vin-crystals 10)(= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0))
-                            (-! (-> *game-info* civilians-killed) 10.0)
-                            (+! (-> *game-info* continue-deaths) 1000000)
-                            (play-story-log-1)
-                            (set! log-sec 0)
+                    (if (not (logtest? (-> *game-info* secrets) (game-secrets hero-mode)))
+                        (cond
+                            ((and (>= vin-crystals 10)(= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0))
+                                (-! (-> *game-info* civilians-killed) 10.0)
+                                (+! (-> *game-info* continue-deaths) 1000000)
+                                (play-story-log-1)
+                                (set! log-sec 0)
+                            )
+                            ((and (>= vin-crystals 15)(= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 1))
+                                (-! (-> *game-info* civilians-killed) 15.0)
+                                (+! (-> *game-info* continue-deaths) 1000000)
+                                (play-story-log-2)
+                                (set! log-id 1345)
+                                (set! log-sec 0)
+                            )
+                            ((and (>= vin-crystals 20)(= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 2))
+                                (-! (-> *game-info* civilians-killed) 20.0)
+                                (+! (-> *game-info* continue-deaths) 1000000)
+                                (play-story-log-3)
+                                (set! log-id 1410)
+                                (set! log-sec 0)
+                            )
+                            (else
+                                (when (> (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0)
+                                    (play-default-log)
+                                )
+                            )
                         )
-                        ((and (>= vin-crystals 15)(= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 1))
-                            (-! (-> *game-info* civilians-killed) 15.0)
-                            (+! (-> *game-info* continue-deaths) 1000000)
-                            (play-story-log-2)
-                            (set! log-id 1345)
-                            (set! log-sec 0)
-                        )
-                        ((and (>= vin-crystals 20)(= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 2))
-                            (-! (-> *game-info* civilians-killed) 20.0)
-                            (+! (-> *game-info* continue-deaths) 1000000)
-                            (play-story-log-3)
-                            (set! log-id 1410)
-                            (set! log-sec 0)
-                        )
-                        (else
-                            (when (> (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0)
-                                (play-default-log)
+                        (cond
+                            ((and (>= vin-crystals 50)(= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0))
+                                (-! (-> *game-info* civilians-killed) 50.0)
+                                (+! (-> *game-info* continue-deaths) 1000000)
+                                (play-story-log-1)
+                                (set! log-sec 0)
+                            )
+                            ((and (>= vin-crystals 150)(= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 1))
+                                (-! (-> *game-info* civilians-killed) 150.0)
+                                (+! (-> *game-info* continue-deaths) 1000000)
+                                (play-story-log-2)
+                                (set! log-id 1345)
+                                (set! log-sec 0)
+                            )
+                            ((and (>= vin-crystals 300)(= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 2))
+                                (-! (-> *game-info* civilians-killed) 300.0)
+                                (+! (-> *game-info* continue-deaths) 1000000)
+                                (play-story-log-3)
+                                (set! log-id 1410)
+                                (set! log-sec 0)
+                            )
+                            (else
+                                (when (> (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 0)
+                                    (play-default-log)
+                                )
                             )
                         )
                     )
                 )
-                ((and (cpad-pressed? 0 x) (= vin-select 1) (>= vin-crystals 15) (not (logtest? (-> *game-info* features) (game-feature gun-dark-2))))
-                    (-! (-> *game-info* civilians-killed) 15.0)
+                ((and (cpad-pressed? 0 x) (= vin-select 1) (>= vin-crystals 65) (not (logtest? (-> *game-info* features) (game-feature gun-dark-2))))
+                    (-! (-> *game-info* civilians-killed) 65.0)
                     (give-weapon! "dark-2" 1)
                 )
-                ((and (cpad-pressed? 0 x) (= vin-select 2) (>= vin-crystals 10) (not (logtest? (-> *game-info* features) (game-feature gun-dark-1))))
-                    (-! (-> *game-info* civilians-killed) 10.0)
+                ((and (cpad-pressed? 0 x) (= vin-select 2) (>= vin-crystals 50) (not (logtest? (-> *game-info* features) (game-feature gun-dark-1))))
+                    (-! (-> *game-info* civilians-killed) 50.0)
                     (give-weapon! "dark-1" 1)
                 )
-                ((and (cpad-pressed? 0 x) (= vin-select 3) (>= vin-crystals 10))
-                    (-! (-> *game-info* civilians-killed) 10.0)
+                ((and (cpad-pressed? 0 x) (= vin-select 3) (>= vin-crystals 100))
+                    (-! (-> *game-info* civilians-killed) 100.0)
                     (give-random-weapon)
                 )
-                ((and (cpad-pressed? 0 x) (= vin-select 4) (>= vin-crystals 20))
-                    (-! (-> *game-info* civilians-killed) 20.0)
+                ((and (cpad-pressed? 0 x) (= vin-select 4) (>= vin-crystals 150))
+                    (-! (-> *game-info* civilians-killed) 150.0)
                     (set! drop-gun-mod #t)
                     (close-vin-shop!)
                 )
@@ -943,7 +1041,7 @@
         )
         (when (= log-sec 7)
               (set! di-s "I'll have to look into this further, when you")
-              (set! di-s2 "bring me <COLOR_GREEN>15 more <COLOR_PINK>dark crystals")
+              (set! di-s2 "bring me <COLOR_GREEN>150 more <COLOR_PINK>dark crystals")
               (set! di-s3 "")
               (set! di-s4 "")
         )
@@ -1493,7 +1591,7 @@
         (when (= log-sec 4)
             (set! di-s "It would make sense that they would be carrying")
             (set! di-s2 "tons of those crystals, too.")
-            (set! di-s3 "We need <COLOR_PINK>20 more.")
+            (set! di-s3 "We need <COLOR_PINK>300 more.")
             (set! di-s4 "Those will be the last.")
         )
         (when (= log-sec 5)

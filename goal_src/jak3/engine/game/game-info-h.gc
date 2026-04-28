@@ -158,6 +158,7 @@
 
   (defun-extern reset-gunmod-vars! symbol none)
   (defun-extern jak-refill! none)
+  (defun-extern jak-refill-slight! none)
   (defun-extern jak-on-elevator? object)
 
   (define anchor-day? (if (rand-vu-percent? 0.5)
@@ -438,6 +439,11 @@
   (define ied-i 0)
   (define stored-target-vector (new 'static 'vector :x 0.0 :y 0.0 :z 0.0 :w 1.0))
 
+  (defun hmplus-tie-buffer-free-bytes ()
+  (let ((buf (-> *display* frames (-> *display* on-screen) global-buf)))
+    (&- (-> buf end) (the-as uint (-> buf base)))
+    )
+  )
 
   (deftype vehicle-info (structure)
   ((handle-by-vehicle-type  handle  44)
@@ -518,7 +524,7 @@
   (defun-extern spawn-arena-blocker (none))
   (defun-extern spawn-course-race-block (none))
   (defun-extern drop-loot-crate! vector float float float none)
-  (defun-extern group-drop! vector float float none)
+  (defun-extern group-drop! vector float float float none)
   (defun-extern drop-gun-mod! vector none)
   (define drop-gun-mod #f)
   (define gun-i 0)

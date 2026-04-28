@@ -116,10 +116,51 @@
    )
   )
 
-(defmethod projectile-method-26 ((this gun-yellow-shot-2))
-  (when (= gunmod-fireball #t)
-    (spawn-yellow-rain-fireball (-> this hit-pos)))
+(defun hmplus-fireball-light-eco-cost ()
+  (let ((cost 0.3)
+        (t 0.0))
+    (cond
+      ((>= guns-level 150)
+        0.0)
+      ((>= guns-level 50)
+        (set! t (/ (- (the float guns-level) 50.0) 100.0))
+        (set! t (fmax 0.0 (fmin 1.0 t)))
+        (* cost (- 1.0 t)))
+      (else
+        cost))))
 
+(defun hmplus-fireball-pay-light-eco! ()
+  (let ((cost (hmplus-fireball-light-eco-cost))
+        (cur (-> *game-info* eco-pill-light)))
+    (cond
+      ;; level 150+ = free proc, even with 0 light eco
+      ((<= cost 0.0)
+        #t)
+
+      ;; below 150, no light eco = no proc
+      ((<= cur 0.0)
+        #f)
+
+      ;; less than cost remaining = spend all remaining
+      ((<= cur cost)
+        (send-event *target* 'get-pickup (pickup-type eco-pill-light) (- cur))
+        #t)
+
+      ;; normal cost
+      (else
+        (send-event *target* 'get-pickup (pickup-type eco-pill-light) (- cost))
+        #t))))
+
+(defmethod projectile-method-26 ((this gun-yellow-shot-2))
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (when (and
+          (= gunmod-fireball #t)
+          (hmplus-fireball-pay-light-eco!))
+    (spawn-yellow-rain-fireball (-> this hit-pos)))
+    (when (and
+          (= gunmod-fireball #t))
+    (spawn-yellow-rain-fireball (-> this hit-pos)))
+  )
   (call-parent-method this)
   0
   (none)
@@ -1199,8 +1240,15 @@
       #t)))
 
 (defmethod projectile-method-26 ((this gun-yellow-shot))
-  (when (= gunmod-fireball #t)
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (when (and
+          (= gunmod-fireball #t)
+          (hmplus-fireball-pay-light-eco!))
     (spawn-yellow-rain-fireball (-> this root trans)))
+    (when (and
+          (= gunmod-fireball #t))
+    (spawn-yellow-rain-fireball (-> this root trans)))
+  )
 
   (let ((v1-8
           (cond
@@ -1355,10 +1403,15 @@
         (vector+! a1-5 a1-5 v1-14)
         (move-to-point! (-> arg0 root) a1-5))
       (print "made-vector")
-      ;; fireball on BOTH actor and surface impact
-      (when (= gunmod-fireball #t)
-        (print "impact")
+      (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+        (when (and
+              (= gunmod-fireball #t)
+              (hmplus-fireball-pay-light-eco!))
         (spawn-yellow-rain-fireball (-> arg0 hit-pos)))
+        (when (and
+              (= gunmod-fireball #t))
+        (spawn-yellow-rain-fireball (-> arg0 hit-pos)))
+      )
 
       (when (= gunmod-nukeonly #t)
         (let ((rnd (+ 0.16 (/ notoriety-level 100))))
@@ -2203,7 +2256,9 @@
   )
 
 (defmethod projectile-method-26 ((this gun-yellow-shot-3))
-  (when (= gunmod-fireball #t)
+  (when (and
+          (= gunmod-fireball #t)
+          (hmplus-fireball-pay-light-eco!))
     (spawn-yellow-rain-fireball (-> this root trans)))
 
   (let ((v1-8

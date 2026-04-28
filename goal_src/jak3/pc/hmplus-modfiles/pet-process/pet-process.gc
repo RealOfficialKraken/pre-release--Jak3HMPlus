@@ -41,6 +41,15 @@
   )
 )
 
+(defun pet-process-y-failsafe! ((self pet-process-base))
+  (when *target*
+    (let ((jak-y (-> (target-pos 0) y)))
+      (when (<= (-> self root trans y) (- jak-y (meters 25.0)))
+        (set! (-> self root trans y) jak-y)
+        (set! (-> self root trans w) 1.0)
+        (set! (-> self ground-y-vel) 0.0))))
+  (none))
+
 (defmethod pet-process-extra-post! ((this pet-process-base))
   (none))
 
@@ -405,6 +414,7 @@
             (when (< (-> self root trans y) ground-y)
               (set! (-> self root trans y) ground-y)
               (set! (-> self ground-y-vel) 0.0))))
+        (pet-process-y-failsafe! self)
         (set! (-> self root trans w) 1.0)
         (pet-process-face-catchup-dir! self old-pos)
         (pet-process-extra-post! self)

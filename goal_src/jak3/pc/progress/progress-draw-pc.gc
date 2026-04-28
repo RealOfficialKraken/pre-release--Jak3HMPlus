@@ -296,6 +296,9 @@
                         (= (-> opt secret) (game-secrets level-select-1))
                         (= (-> opt secret) (game-secrets level-select-2))
                         (= (-> opt secret) (game-secrets level-select-3))
+                        (= (-> opt secret) (game-secrets invulnerable))
+                        (= (-> opt secret) (game-secrets endless-dark))
+                        (= (-> opt secret) (game-secrets endless-light))
                       )
                       (string-format "")
                       (string-format "x~D ~S"
@@ -413,8 +416,11 @@
                           (= (-> s0-6 secret) (game-secrets level-select-1))
                           (= (-> s0-6 secret) (game-secrets level-select-2))
                           (= (-> s0-6 secret) (game-secrets level-select-3))
+                          (= (-> s0-6 secret) (game-secrets invulnerable))
+                          (= (-> s0-6 secret) (game-secrets endless-dark))
+                          (= (-> s0-6 secret) (game-secrets endless-light))
                          )
-                            (set! sv-240 "Level Select is impossible in HM+!")
+                            (set! sv-240 "Disabled in HM+! Sorry!")
                         )
                         (else
                           (case sv-288
@@ -478,6 +484,9 @@
                                         (= (-> s0-6 secret) (game-secrets level-select-1))
                                         (= (-> s0-6 secret) (game-secrets level-select-2))
                                         (= (-> s0-6 secret) (game-secrets level-select-3))
+                                        (= (-> s0-6 secret) (game-secrets invulnerable))
+                                        (= (-> s0-6 secret) (game-secrets endless-dark))
+                                        (= (-> s0-6 secret) (game-secrets endless-light))
                                       )
                                       (string-format "") ;; hide cost
                                       (string-format "~d" (-> s0-6 cost)))
@@ -1292,7 +1301,7 @@
                     (set! (-> arg1 origin x) (adjust-x-if-needed (+ (-> s3-1 x) (* 0.4 (- (-> s3-1 z) (-> s3-1 x))))))
                     (set! (-> arg1 origin y) (+ 8.0 (-> s3-1 y)))
                     (set-width! arg1 (the int (* 0.6 (- (-> s3-1 z) (-> s3-1 x)))))
-                    (string-format "Hell Mode")
+                    (string-format "~3LPresti~+6Vg~-6Ve Save~32L")
                     (print-game-text *temp-string* arg1 #f 44 (bucket-id hud-draw-hud-alpha))
                     )
                   )

@@ -361,7 +361,7 @@
                 (>= notoriety-level 60)
                 (!= (remap-enemy-type-name (-> arg0 type)) 'entity-boss)
                 (rand-vu-percent? 0.06))
-        (toggle-freeze-2 arg1)))
+        (jak-refill-slight!)))
       (set! sv-96
             (the-as symbol (send-event
                              arg0

@@ -2168,7 +2168,7 @@
        (else
          (when (or (<= (-> this hit-points) 0.0))
           (boss-killed? 1250.0)
-          (drop-loot-crate! (-> this root trans) 0.7 1.0 0.015)
+          (drop-loot-crate! (-> this root trans) 0.7 1.0 0.045)
           (go (method-of-object this knocked))
          )
          )

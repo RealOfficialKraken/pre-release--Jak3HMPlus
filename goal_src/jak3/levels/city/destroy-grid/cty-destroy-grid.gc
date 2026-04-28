@@ -1666,6 +1666,7 @@
                   (deactivate a0-22)
                   )
               )
+            (kill-by-type roboguard-city *default-pool*)
             (send-event this 'complete)
             )
           (let ((a1-6 *target*))
