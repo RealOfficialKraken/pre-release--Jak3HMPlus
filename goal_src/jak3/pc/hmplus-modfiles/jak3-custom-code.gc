@@ -9212,7 +9212,7 @@
     (kill-by-name "man-eb" *default-pool*)
     (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
     (kill-by-name "arena-event-1" *active-pool*)
-    (kill-by-name "darkworld-tower" *dark-tower-dead-pool*)
+    (kill-by-name "darkworld-tower" *default-pool*)
     (kill-by-name "darkworld-orb" *default-pool*)
     (kill-by-name "jak3logo" *active-pool*)
     (kill-by-name "jak3logo-flicker" *active-pool*)
