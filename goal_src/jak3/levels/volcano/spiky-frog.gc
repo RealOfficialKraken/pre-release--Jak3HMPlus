@@ -1012,7 +1012,7 @@
         (<= (-> this hit-points) 0.0)
       )
       (when (rand-vu-percent? 0.83)
-        (drop-loot-crate! (-> this root trans) 0.3 0.14 0.045)
+        (drop-loot-crate! (-> this root trans) 0.3 0.14 0.025)
         (boss-killed? 2500.0)
       )
       (when (or (<= (-> this hit-points) 0.0)(< enemy-noto (+ notoriety-level 7)))

@@ -626,7 +626,7 @@
                 (set! in-desertg-anchor? #f)
                 (set! *force-stop-pilot* #f)
                 (task-node-open! (game-task-node desertg-anchor-introduction) #t)
-                (group-drop! (-> self reward-box) 0.0 1.0 0.1)
+                (group-drop! (-> self reward-box) 0.0 1.0 0.03)
                 (set! level-override #f)
                 (when (rand-vu-percent? 0.25)
                     (if (rand-vu-percent? 0.25)

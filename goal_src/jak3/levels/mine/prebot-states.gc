@@ -451,7 +451,7 @@
                   (set! rndchance-2 0.50)
                   (set! rndchance-3 0.38)
                 )
-              (group-drop! vec 0.0 1.0 0.015)
+              (group-drop! vec 0.0 1.0 0.003)
               (when (rand-vu-percent? 0.02)
                 (drop-crate vec 99)
               )

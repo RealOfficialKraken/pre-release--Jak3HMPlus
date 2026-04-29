@@ -626,7 +626,7 @@
                 (set! in-desertc-anchor? #f)
                 (set! *force-stop-pilot* #f)
                 (task-node-open! (game-task-node desertc-anchor-introduction) #t)
-                (group-drop! (-> self reward-box) 0.0 1.0 0.1)
+                (group-drop! (-> self reward-box) 0.0 1.0 0.03)
                 (when (rand-vu-percent? 0.25)
                     (if (rand-vu-percent? 0.25)
                         (drop-gun-mod! (-> self reward-box))
