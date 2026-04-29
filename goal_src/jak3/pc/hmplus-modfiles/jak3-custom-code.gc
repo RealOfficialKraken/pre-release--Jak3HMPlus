@@ -5026,7 +5026,7 @@
 
         (when
             (and
-                (not (ppointer->process *rage-ghost*))
+                (not (search-process-tree *active-pool* (lambda ((p process)) (type? p rage-ghost))))
                 *rage-ghost*
             )
                 (set! *rage-ghost* #f)
@@ -7419,6 +7419,7 @@
             (not *dark-forest*)
             (!= (-> (level-get-target-inside *level*) name) 'wascitya)
             (!= (-> (level-get-target-inside *level*) name) 'wascityb)
+            (not in-vin-intro?)
         )
         (spawn-dark-world-forest)
     )

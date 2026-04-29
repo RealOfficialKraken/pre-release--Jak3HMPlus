@@ -348,6 +348,8 @@
   (defun-extern spawn-vin-effect vector string none)
   (defun-extern spawn-giant-vin-effect vector none)
   (define *dark-forest* #f)
+  (define in-vin-intro? #f)
+
 
   ;firefight stuff
   (define-extern *target-battle!* symbol)

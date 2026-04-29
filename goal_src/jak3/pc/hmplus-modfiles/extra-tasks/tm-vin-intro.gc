@@ -70,6 +70,12 @@
 
 (defstate spawn-vin (tm-vin-intro)
     :virtual #t
+    :enter (behavior ()
+        (set! in-vin-intro? #t)
+        (kill-by-name "darkworld-tower" *default-pool*)
+        (kill-by-name "darkworld-orb" *default-pool*)
+        (set! *dark-forest* #f)
+    )
     :code 
     (behavior ()
         (loop
@@ -106,7 +112,6 @@
                 (set! di-s2 "")
                 (set! di-s3 "")
                 (set! di-s4 "")
-                (set! *dark-forest* #f)
             )
             (when (= (-> self vin-spawned?) #t)
                 (when (= (-> self vin-timer) 537)
@@ -293,11 +298,11 @@
     (behavior ()
         (set-vector! (-> *target* control trans) (meters 2275.8981) (meters 30.1341) (meters 286.3391) 1.0)
         (suspend-for (seconds 2))
+            (set! in-vin-intro? #f)
             (kill-by-name "vin-effect-giant" *default-pool*)
             (kill-by-name "vin-talk-to" *default-pool*)
             (task-node-close! (game-task-node desert-vin-quest-introduction) #t)
             (task-node-close! (game-task-node desert-vin-quest-resolution) #t)
-            (spawn-dark-world-forest)
-        (auto-save-user)
+            (auto-save-user)
     )
 )

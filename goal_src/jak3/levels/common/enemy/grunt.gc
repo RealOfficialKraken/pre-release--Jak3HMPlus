@@ -2207,11 +2207,7 @@
 )
 
 (defun spawn-rage-ghost ()
-  (when (and
-          *target*
-          (not *rage-ghost*)
-          (not (ppointer->process *rage-ghost*)))
-    (let ((vec (new-stack-vector0)))
+  (let ((vec (new-stack-vector0)))
       (set! (-> vec x) (-> (target-pos 0) x))
       (set! (-> vec y) (+ (-> (target-pos 0) y) (meters 8.0)))
       (set! (-> vec z) (-> (target-pos 0) z))
@@ -2231,6 +2227,5 @@
           :init rage-ghost-init-by-other
           vec
           :name "rage-ghost"
-          *default-pool*))))
-
+          *default-pool*)))
   (none))
