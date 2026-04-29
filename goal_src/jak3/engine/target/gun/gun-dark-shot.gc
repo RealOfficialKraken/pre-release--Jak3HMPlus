@@ -140,7 +140,6 @@
   (let ((s5-0 (-> self gun))
         (gp-0 (new 'stack-no-clear 'projectile-init-by-other-params))
         )
-    (+! (-> *game-info* buzzer-total) 1862.0)
     (set! (-> gp-0 ent) (-> self entity))
     (set! (-> gp-0 charge) (-> s5-0 fire-charge))
     (set! (-> gp-0 options) (projectile-options))
@@ -1988,6 +1987,7 @@
 (defstate impact (gun-dark-shot)
   :virtual #t
   :enter (behavior ()
+    (+! (-> *game-info* buzzer-total) 1862.0)
     (cpad-set-buzz! (-> *cpad-list* cpads 0) 1 153 (seconds 0.2))
     (let ((t9-1 (-> (method-of-type projectile impact) enter)))
       (if t9-1

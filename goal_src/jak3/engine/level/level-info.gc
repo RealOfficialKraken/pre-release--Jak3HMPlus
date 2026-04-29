@@ -10758,7 +10758,7 @@
                      (new 'static 'continue-point
                        :name "wasstada-fight"
                        :level 'wasstada
-                       :flags (continue-flags no-auto)
+                       :flags (continue-flags change-continue no-auto)
                        :trans (new 'static 'vector :x 9530975.0 :y 49048.78 :z -1842454.1 :w 1.0)
                        :camera-trans (new 'static 'vector :x 9526466.0 :y 66888.086 :z -1881178.1 :w 1.0)
                        :quat (new 'static 'vector4h :data (new 'static 'array int16 4 0 #x2006 0 #x7be9))

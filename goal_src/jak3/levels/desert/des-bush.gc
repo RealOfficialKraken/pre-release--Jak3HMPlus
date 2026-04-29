@@ -699,6 +699,7 @@
 (defstate active (task-manager-desert-bbush-ring)
   :virtual #t
   :event (behavior ((proc process) (argc int) (message symbol) (block event-message-block))
+    (set! in-desert-game-task? #t)
     (case message
       (('goal)
        (send-event self 'complete)
@@ -1707,6 +1708,7 @@
 (defstate active (task-manager-bbush-spirit-chase)
   :virtual #t
   :event (behavior ((proc process) (argc int) (message symbol) (block event-message-block))
+  (set! in-desert-game-task? #t)
     (case message
       (('goal)
        (send-event self 'complete)

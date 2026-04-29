@@ -478,7 +478,7 @@
                     (set! (-> gp-0 spawn-point quad) (-> self lightning-pos quad))
                     (quaternion-identity! (-> gp-0 spawn-quat))
                     (set! (-> gp-0 radius) 293200.0)
-                    ;(set! (-> gp-0 scale) 1.0)
+                    (set! (-> gp-0 scale) 1.0)
                     (set! (-> gp-0 group) (-> *part-group-id-table* 585))
                     (set! (-> gp-0 collide-with)
                             (collide-spec backgnd jak civilian obstacle vehicle-sphere hit-by-others-list player-list pusher)

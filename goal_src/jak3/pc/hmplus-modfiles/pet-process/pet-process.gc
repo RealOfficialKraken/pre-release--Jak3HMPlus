@@ -976,7 +976,7 @@
 
   (if (task-node-closed? (game-task-node pet-terra))
     (if enabled-pet-terra?
-      (set! pet-terra-s "<COLOR_GREEN>")
+      (set! pet-terra-s "<COLOR_GREEN>Metalhead Bat")
       (set! pet-terra-s "<COLOR_RED>Metalhead Bat"))
     (set! pet-terra-s "<COLOR_ORANGE>???"))
 
