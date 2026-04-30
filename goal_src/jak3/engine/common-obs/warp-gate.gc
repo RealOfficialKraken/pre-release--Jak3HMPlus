@@ -662,8 +662,16 @@
           )
           (("warp-gate-heromode")
             (set! (-> this continue) #f)
-            (when (task-node-closed? (game-task-node desert-final-boss-resolution))
-              (set! (-> this continue) (get-continue-by-name *game-info* "set-in-heromode"))
+            (cond 
+              ((task-node-closed? (game-task-node desert-final-boss-resolution))
+                (set! (-> this continue) (get-continue-by-name *game-info* "set-in-heromode"))
+              )
+              ((and 
+                (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                (task-node-closed? (game-task-node arena-fight-1-resolution))
+               )
+                (set! (-> this continue) (get-continue-by-name *game-info* "set-in-heromode"))
+              )
             )
             (set! (-> this on-activate) '())
             (set! (-> this wait-for) '())

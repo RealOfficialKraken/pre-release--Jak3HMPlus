@@ -687,8 +687,6 @@
       )
     )
   (someone-fire-blue-3 (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
-  (someone-fire-blue-3 (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
-  (someone-fire-blue-3 (-> *target* gun fire-point) (-> *target* gun fire-dir-out))
   )
 
 (defun draw-beam-segment ()

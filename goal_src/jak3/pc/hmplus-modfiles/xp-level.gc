@@ -334,7 +334,7 @@
             (<= notoriety-level (- enemy-noto 7))
         )
         (set! (-> self rep-string) "(+ Hi~+7Vg~-7Vh Level Bonus)~%~S: +~D Re~+7Vp~-7Vutation")
-        (set! (-> self xp-gain) (+ (-> self xp-gain) (* (-> self xp-gain) 1.93)))
+        (set! (-> self xp-gain) (+ (-> self xp-gain) (* (-> self xp-gain) 1.23)))
       )
       (+! (-> self y-ofs) (* 0.6 (-> self clock time-adjust-ratio)))
       )
@@ -561,11 +561,8 @@
     )
 
     (let ((xp-gain2 (/ (* xp-gain enemy-noto) 1.5))
-          (xp-gain3 (/ (* xp-gain enemy-noto) 4)))
-
-        (when (> xp-gain2 2500.0)
-            (set! xp-gain2 2500.0)
-        )
+          (xp-gain3 (/ (* xp-gain enemy-noto) 4))
+          (high-xp-gain 0.0))
 
         ;; color-based xp scaling
         (set! xp-gain2 (* xp-gain2 (hmplus-enemy-xp-scale)))
@@ -573,13 +570,16 @@
         (when (> xp-gain2 2500.0)
             (set! xp-gain2 2500.0)
         )
-
         (when (<= notoriety-level (- enemy-noto 7))
-            (set! xp-gain2 (* xp-gain2 2.93)) ;; or whatever multiplier
+            (set! xp-gain2 (+ xp-gain2 (* xp-gain2 1.23))) ;; or whatever multiplier
         )
-
+        (set! high-xp-gain xp-gain2)
+        (when (<= notoriety-level (- enemy-noto 7))
+            (set! high-xp-gain (+ high-xp-gain (* xp-gain2 1.23))) ;; or whatever multiplier
+        )
+        (format #t "+ ~f karma" high-xp-gain)
         (set! *xp-gain* xp-gain2)
-        (+! (-> *game-info* karma) xp-gain2)
+        (+! (-> *game-info* karma) high-xp-gain)
 
         (when (focus-test? *target* pilot)
             (when (> xp-gain3 2500.0)
@@ -1700,7 +1700,22 @@
                     (set! enemy-noto (- notoriety-level 5))
                 )
                 )
-
+                (when ;ctyinda
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'ctyinda)
+                        (not (task-node-open? (game-task-node city-destroy-grid-resolution)))
+                        (!= enemy-noto (hmplus-hero-map-level 28))
+                    )
+                    (set! enemy-noto (hmplus-hero-map-level 28))
+                )
+                (when ;ctyinda
+                    (and
+                        (= (-> (level-get-target-inside *level*) name) 'ctyinda)
+                        (task-node-open? (game-task-node city-destroy-grid-resolution))
+                        (= enemy-noto notoriety-level)
+                    )
+                    (set! enemy-noto notoriety-level)
+                )
                 (when ;ctyindb
                     (and
                         (= (-> (level-get-target-inside *level*) name) 'ctyindb)

@@ -408,7 +408,7 @@
      )
     (((pickup-type eco-green) (pickup-type health))
      (sound-play "g-eco-pickup")
-     (+! (-> *game-info* health-collected) 1.0)
+     (+! (-> *game-info* health-collected) 0.0)
      )
     (((pickup-type eco-pill-green))
      (sound-play "pill-pickup")

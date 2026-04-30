@@ -438,8 +438,8 @@
 
       (set! (-> ep group) (-> *part-group-id-table* 246))
       (set! (-> ep collide-with)
-            (collide-spec backgnd civilian obstacle vehicle-sphere hit-by-others-list pusher))
-      (set! (-> ep damage) 12.0)
+            (collide-spec backgnd enemy civilian obstacle vehicle-sphere hit-by-others-list pusher))
+      (set! (-> ep damage) (+ 6.0 (* guns-level 3)))
       (set! (-> ep damage-scale) 1.0)
       (set! (-> ep vehicle-damage-factor) 1.0)
       (set! (-> ep vehicle-impulse-factor) 1.0)
