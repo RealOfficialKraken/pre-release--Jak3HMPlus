@@ -381,6 +381,9 @@
                         (go-virtual dormant)
                     )
                     (else
+                        (kill-by-name "dp-bipedal-c" *default-pool*)
+                        (kill-by-name "dp-bipedal" *default-pool*)
+                        (kill-by-name "Bipedal Boss" *default-pool*)
                         (go-virtual flash-out-battle)
                     )
                 )

@@ -334,7 +334,7 @@
             (<= notoriety-level (- enemy-noto 7))
         )
         (set! (-> self rep-string) "(+ Hi~+7Vg~-7Vh Level Bonus)~%~S: +~D Re~+7Vp~-7Vutation")
-        (set! (-> self xp-gain) (+ (-> self xp-gain) (* (-> self xp-gain) 1.23)))
+        (set! (-> self xp-gain) (+ (-> self xp-gain) (* (-> self xp-gain) 0.43)))
       )
       (+! (-> self y-ofs) (* 0.6 (-> self clock time-adjust-ratio)))
       )
@@ -575,7 +575,7 @@
         )
         (set! high-xp-gain xp-gain2)
         (when (<= notoriety-level (- enemy-noto 7))
-            (set! high-xp-gain (+ high-xp-gain (* xp-gain2 1.23))) ;; or whatever multiplier
+            (set! high-xp-gain (+ high-xp-gain (* xp-gain2 0.43))) ;; or whatever multiplier
         )
         (format #t "+ ~f karma" high-xp-gain)
         (set! *xp-gain* xp-gain2)
@@ -1278,7 +1278,11 @@
         (when
           (and
             (= weather-dark-mode #f)
-            (= onfoot-battle? #f))
+            (= onfoot-battle? #f)
+            (not (task-node-open? (game-task-node precursor-tour-introduction)))
+            (not (task-node-open? (game-task-node precursor-tour-generator-trigger)))
+            (not (task-node-open? (game-task-node precursor-tour-resolution)))
+            )
           (clear matt-str)
           (clear *pc-encoded-matt-str*)
           (format matt-str "~s~%~%<COLOR_WHITE>~s~d"
@@ -1297,7 +1301,11 @@
         (when
           (or
             (= weather-dark-mode #t)
-            (= onfoot-battle? #t))
+            (= onfoot-battle? #t)
+            (task-node-open? (game-task-node precursor-tour-introduction))
+            (task-node-open? (game-task-node precursor-tour-generator-trigger))
+            (task-node-open? (game-task-node precursor-tour-resolution))
+          )
           (clear matt-str)
           (clear *pc-encoded-matt-str*)
           (format matt-str "~s~%~%<COLOR_WHITE>~s<COLOR_RED>??"
@@ -1842,9 +1850,9 @@
                             (= (-> (level-get-target-inside *level*) name) 'precurc)
                             (= (-> (level-get-target-inside *level*) name) 'precurd)
                         )
-                        (!= enemy-noto (hmplus-hero-map-level 40))
+                        (!= enemy-noto (hmplus-hero-map-level 1))
                     )
-                    (set! enemy-noto (hmplus-hero-map-level 40))
+                    (set! enemy-noto 40)
                 )
 
                 (when
