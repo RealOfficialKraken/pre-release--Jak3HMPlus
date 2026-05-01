@@ -93,7 +93,7 @@
                           (set! di-s "I've spawned a warp gate here, use it to")
                           (set! di-s2 "come back to the Spargus Vehicle room, and") 
                           (set! di-s3 "meet me in the Dark Eco World.")
-                          (set! di-s4 "We need to collect more crystals.")
+                          (set! di-s4 "")
                         )
                         (else
                           (set! di-s "I've spawned a warp gate here, use it to")
