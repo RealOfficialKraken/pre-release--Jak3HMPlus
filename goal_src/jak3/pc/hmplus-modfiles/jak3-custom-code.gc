@@ -1401,7 +1401,6 @@ Have fun!~%
                 ((4) ;; enter pets menu
                     (set! in-pets? #t)
                     (set! menu-index 0)
-                    (+! (-> *game-info* civilians-killed) 100.0)
                     (spawn-pet-menu)
                 )
             )
