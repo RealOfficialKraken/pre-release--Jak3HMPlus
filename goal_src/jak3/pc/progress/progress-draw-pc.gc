@@ -410,7 +410,7 @@
 
                       (cond 
                         ((= (-> s0-6 secret) (game-secrets hero-mode))
-                            (set! sv-240 "Hero Mode is Coming Soon in v1.0!")
+                            (set! sv-240 "Hero Mode Comin~+7Vg~-7V Soon in v1.0")
                         )
                         ((or
                           (= (-> s0-6 secret) (game-secrets level-select-1))
@@ -420,7 +420,7 @@
                           (= (-> s0-6 secret) (game-secrets endless-dark))
                           (= (-> s0-6 secret) (game-secrets endless-light))
                          )
-                            (set! sv-240 "Disabled in HM+! Sorry!")
+                            (set! sv-240 "Disabled in HM+")
                         )
                         (else
                           (case sv-288

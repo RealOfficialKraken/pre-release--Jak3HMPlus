@@ -1767,7 +1767,7 @@
     )
     (set! hpbar-hit-points (-> self hit-points))
     (init-enemy-hpbar 'normal)
-    (set! enemy-string "Wasteland Metalhead Beast")
+    (set! enemy-string "Metal Head Beast")
     (when (<= (-> this hit-points) 0.0) 
       (set! hpbar-hit-points 0.0)
     )

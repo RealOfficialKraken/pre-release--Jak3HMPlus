@@ -481,8 +481,8 @@
     :virtual #t
     :code (behavior ()
         (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-          (blank-hint! "<COLOR_RED>This mission drops a <COLOR_CYAN>Follower" "" 240 600)
-          (blank-hint! "<COLOR_RED>This mission drops a Super Gun Mod!" "<COLOR_YELLOW>This mission can also be skipped for later" 240 600)
+          (blank-hint! "This mission drops a Pet" 240 600)
+          (blank-hint! "This mission drops a <COLOR_CYAN>Super Gun Mod!~%<COLOR_WHITE>Can be skipped for later" 240 600)
         )
         (let ((vec 
               (new 'static 'vector

@@ -483,7 +483,7 @@
                 (set! log-sec 0)
                 (send-event *camera* 'teleport-to-vector-start-string (new 'static 'vector :x (meters 2264.6652) :y (meters 34.3564) :z (meters 166.1648)))
                 (camera-locked #f #f)
-                (set! di-s "So, you boys lookin' for some artifacts, aye?")
+                (set! di-s1 "So, you boys lookin' for some artifacts, aye?")
                 (set! di-s2 "") 
                 (set! di-s3 "")
                 (set! di-s4 "")
@@ -536,35 +536,36 @@
         (and
             (= in-dialogue? #t)
             (cpad-pressed? 0 x)
+            (not (paused?))
             (= log-id 1)
         )
         (+! log-sec 1)
         (when (= log-sec 1)
-            (set! di-s "Damas says the best time to find artifacts are")
+            (set! di-s1 "Damas says the best time to find artifacts are")
             (set! di-s2 "when there's nothing actively happening in") 
             (set! di-s3 "the desert already")
             (set! di-s4 "")
         )
         (when (= log-sec 2)
-            (set! di-s "I'll always be right here when that happens,")
+            (set! di-s1 "I'll always be right here when that happens,")
             (set! di-s2 "scopin' out the wasteland with our") 
             (set! di-s3 "desert scanner")
             (set! di-s4 "")
         )
         (when (= log-sec 3)
-            (set! di-s "I can give ye boys a tip on some whereabouts,")
+            (set! di-s1 "I can give ye boys a tip on some whereabouts,")
             (set! di-s2 "for a price, of course") 
             (set! di-s3 "")
             (set! di-s4 "")
         )
         (when (= log-sec 3)
-            (set! di-s "But if you don't want me help,")
+            (set! di-s1 "But if you don't want me help,")
             (set! di-s2 "you can always go out yerselves and look") 
             (set! di-s3 "around the desert.")
             (set! di-s4 "I'm sure you'll find something of value")
         )
         (when (= log-sec 4)
-            (set! di-s "")
+            (set! di-s1 "")
             (set! di-s2 "") 
             (set! di-s3 "")
             (set! di-s4 "")
@@ -585,7 +586,7 @@
     (clear matt-str)
     (clear *pc-encoded-matt-str*)
     (format matt-str "<COLOR_WHITE>~S~%~S~%~S~%~S~%~%<COLOR_GREEN>Ok"
-    di-s
+    di-s1
     di-s2
     di-s3
     di-s4
@@ -608,7 +609,7 @@
     (clear matt-str)
     (clear *pc-encoded-matt-str*)
     (format matt-str "<COLOR_WHITE>~S~%~S~%~S~%~S~%~%<COLOR_YELLOW>Ok"
-    di-s
+    di-s1
     di-s2
     di-s3
     di-s4
@@ -631,7 +632,7 @@
     (clear matt-str)
     (clear *pc-encoded-matt-str*)
     (format matt-str "<COLOR_GREEN>-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------~%~%~%~%~%~%~%~%~%-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
-    di-s
+    di-s1
     )
     (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
     (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
@@ -651,7 +652,7 @@
     (clear matt-str)
     (clear *pc-encoded-matt-str*)
     (format matt-str "<COLOR_YELLOW>-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------~%~%~%~%~%~%~%~%~%-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
-    di-s
+    di-s1
     )
     (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
     (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))

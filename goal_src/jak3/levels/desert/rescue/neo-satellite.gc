@@ -3379,7 +3379,7 @@
                 (task-node-open? (game-task-node desert-rescue-resolution))
                 (task-node-open? (game-task-node desert-rescue-hold-doors))
               )
-              (blank-hint! "Collect your Reward from" "the Fallen Satellite!" 250 600)
+              (blank-hint! "Collect your Reward from~%the Fallen Satellite!" 250 600)
             )
             (when (or (= (-> self diff-counter) 6) (= (-> self diff-counter) 5))
               (let ((fact (new 'static 'fact-info)))

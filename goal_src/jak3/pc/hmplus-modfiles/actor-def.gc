@@ -183,7 +183,7 @@
   (define in-skill? #f)
   (define on-vehicle? #f)
 
-  (define menu-slot 0)
+  (define menu-index 0)
   (define menu-type 0)
   (define menu-select 0)
 

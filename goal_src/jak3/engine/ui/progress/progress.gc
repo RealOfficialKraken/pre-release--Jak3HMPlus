@@ -3018,7 +3018,7 @@
   )
 
 (defmethod respond-progress ((this menu-missions-option) (arg0 progress) (arg1 symbol)) ;;go back to main for now until I fix the missions tab
-  (blank-hint! "Viewing missions is currently" "unavailable" 310 400)
+  (blank-hint! "Viewing missions is currently~%unavailable" 310 400)
   (set! (-> this current-index) 0.0)
   (set! (-> this target-index) 0.0)
   (set-next-state arg0 'main 0)
