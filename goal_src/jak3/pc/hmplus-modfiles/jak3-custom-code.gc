@@ -1568,7 +1568,7 @@ Have fun!~%
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))|#
         
         ; new
-        ;; (draw-mod-menu-text-custom "<PAD_TRIANGLE> Exit   <PAD_X>+<PAD_SQUARE> Picture mode"
+        ;; (draw-mod-menu-text-custom "<PAD_X>+<PAD_SQUARE> Picture mode   <PAD_TRIANGLE> Exit"
         ;; 255 255 0.325 #f #t #f)
     )
     (when
@@ -2323,7 +2323,7 @@ As you complete through main missions, you'll unlock more <COLOR_YELLOW>points o
     )
         (set! menu-index-max 4)
         (draw-mod-menu-text-preset 0 "<COLOR_ORANGE>Hero Menu")
-        (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Exit   <PAD_X> Confirm")
+        (draw-mod-menu-text-preset 1 "<PAD_X> Confirm   <PAD_TRIANGLE> Exit")
         (case menu-index
             ((0)
                 (draw-mod-menu-text-preset 2 "<COLOR_YELLOW>Super Gun Mods<COLOR_MENU-PARENT>~%~%Skills~%~%Fast Travel~%~%Jak Model~%~%Pets"))
@@ -2341,14 +2341,14 @@ As you complete through main missions, you'll unlock more <COLOR_YELLOW>points o
     (when in-gunmods?
         (set! menu-index-max 11)
         (draw-mod-menu-text-preset 0 "<COLOR_ORANGE>Super Gun Mods")
-        (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Back   <PAD_X> Toggle")
+        (draw-mod-menu-text-preset 1 "<PAD_X> Toggle   <PAD_TRIANGLE> Back")
         (draw-gunmod-menu!)
     )
 
     (when in-superpowers?
         (set! menu-index-max 2)
         (draw-mod-menu-text-preset 0 "<COLOR_ORANGE>Skills")
-        (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Back   <PAD_X> Confirm")
+        (draw-mod-menu-text-preset 1 "<PAD_X> Confirm   <PAD_TRIANGLE> Back")
         (clear matt-str)
         (clear *temp-string*)
         (case menu-index
@@ -2498,7 +2498,7 @@ weapon damage by leveling up.
     (when in-modifiers?
         (set! menu-index-max 4)
         (draw-mod-menu-text-preset 0 "<COLOR_ORANGE>Fast Travel")
-        (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Back   <PAD_X> Warp")
+        (draw-mod-menu-text-preset 1 "<PAD_X> Warp   <PAD_TRIANGLE> Back")
 
         (if (task-node-closed? (game-task-node desert-course-race-resolution))
             (set! warp-s1 "Spargus Garage")
@@ -2574,12 +2574,12 @@ weapon damage by leveling up.
     (when in-jak-model?
         (set! menu-index-max 0)
         (draw-mod-menu-text-preset 0 "Jak Model")
-        (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Back   <PAD_X> Confirm")
+        (draw-mod-menu-text-preset 1 "<PAD_X> Confirm   <PAD_TRIANGLE> Back")
     )
     (when in-pets?
         (set! menu-index-max 9)
         (draw-mod-menu-text-preset 0 "Pets")
-        (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Back   <PAD_X> Toggle")
+        (draw-mod-menu-text-preset 1 "<PAD_X> Toggle   <PAD_TRIANGLE> Back")
         (draw-mod-menu-text-custom "Loyal little companions for emotional support.~%~%Can you collect them all?" 
         256 90 0.325 #f #t #f)
     )
@@ -3270,7 +3270,7 @@ weapon damage by leveling up.
                     di-s3
                     di-s4
                     )
-                    (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Exit   <PAD_X> Confirm")
+                    (draw-mod-menu-text-preset 1 "<PAD_X> Confirm   <PAD_TRIANGLE> Exit")
                 )
                 (else
                     (format *temp-string* "<COLOR_WHITE>~S~%~S~%~S~%~S~%~%"
@@ -3279,7 +3279,7 @@ weapon damage by leveling up.
                     di-s3
                     di-s4
                     )
-                    (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Exit   <PAD_X> Next")
+                    (draw-mod-menu-text-preset 1 "<PAD_X> Next   <PAD_TRIANGLE> Exit")
                 )
             )
             (draw-mod-menu-text-custom *temp-string* 
@@ -4199,7 +4199,7 @@ a high score and earn massive XP!"
             (set! menu-index-max 3)
             (draw-mod-menu-text-custom "~%~%~%Test your skills in the Arena of Death" 
             255 50 0.325 #f #t #f)
-            (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Exit   <PAD_X> Confirm   <PAD_SQUARE> Info")
+            (draw-mod-menu-text-preset 1 "<PAD_X> Confirm   <PAD_SQUARE> Info   <PAD_TRIANGLE> Exit")
             (cond
                 ((task-node-open? (game-task-node arena-challenge-1))
                     (set! achallenge-str "Last 3 minutes without dying")

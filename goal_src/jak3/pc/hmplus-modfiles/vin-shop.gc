@@ -402,7 +402,7 @@
     )
     (draw-mod-menu-background)
     (draw-mod-menu-text-preset 0 "<COLOR_PINK>Vin's Black Market")
-    (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Exit   <PAD_X> Purchase")
+    (draw-mod-menu-text-preset 1 "<PAD_X> Purchase   <PAD_TRIANGLE> Exit")
     (draw-mod-menu-text-custom "~%~%~%Trade your Dark Eco Crystals for goods" 255 50 0.325 #f #t #f)
     (draw-vin-shop-items)
 
