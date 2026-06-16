@@ -132,7 +132,7 @@
                   (= in-mine-level? #f)
                   (task-node-closed? (game-task-node mine-boss-resolution))
                 )
-            (blank-hint! "All mini bosses have a higher~%chance to drop Pets!" 290 300)
+            ;; (blank-hint! "All mini bosses have a higher~%chance to drop Pets!" 290 300)
             (mine-level)
           )
           (auto-save-user)

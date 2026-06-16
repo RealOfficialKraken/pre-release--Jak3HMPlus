@@ -404,7 +404,7 @@
         (set! draw-enemy-noto enemy-noto)
         (init-enemy-hpbar 'normal)
         (let ((enemy-name (remap-enemy-type-name (-> self type))))
-          (set! enemy-string "Precursor Minibot")
+          (set! enemy-string "Precursor Robot")
         )
         (when (<= (-> self hit-points) 0.0) 
           (set! hpbar-hit-points 0.0)
