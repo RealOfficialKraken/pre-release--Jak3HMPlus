@@ -51,6 +51,7 @@
    (hit-ground-count          uint32)
    (fade-level                float)
    (pad                       uint8   8)
+   (is-albino?                symbol)
    )
   (:state-methods
     land-approach
@@ -1694,9 +1695,23 @@
      (logclear! (-> this enemy-flags) (enemy-flag use-notice-distance))
      (logior! (-> this enemy-flags) (enemy-flag alert))
      (logior! (-> this focus-status) (focus-status hit))
-     (if (= (-> this hit-points) 0.0)
-         (logior! (-> this focus-status) (focus-status dead))
-         )
+     (if (<= (-> this hit-points) 0.0)
+        (and
+          (logior! (-> this focus-status) (focus-status dead))
+          ;; kleiver mantaray quest kill
+          (when (and
+            (= (-> this is-albino?) #t)
+            (< (-> *game-info* side-enemies-killed?) 8)
+            (task-node-open? (game-task-node wascity-kleeverquest-mantaray))
+            )
+            (side-enemy-killed?)
+            (when (= (-> *game-info* side-enemies-killed?) 8)
+              (auto-save-user)
+              (task-node-close! (game-task-node wascity-kleeverquest-mantaray) #t)
+            )
+          )
+        )
+     )
      (logclear! (-> this enemy-flags) (enemy-flag lock-focus))
      (focus-on-attacker! this)
      (logior! (-> this enemy-flags) (enemy-flag lock-focus))
@@ -1984,6 +1999,7 @@
   (vector-identity! (-> self root scale))
   (init-enemy! self)
   (set! (-> self hit-points) (+ (-> self enemy-info default-hit-points) (* enemy-noto 2)))
+  (set! (-> self is-albino?) #f)
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (let ((nav (find-nearest-nav-mesh vec 0.0)) ;; try to find a nav mesh in the vicinity
     ;; verts for the path
@@ -2010,6 +2026,7 @@
         (rand-vu-percent? 0.3)
       )
   (set-vector! (-> self draw color-mult) 255.0 255.0 255.0 255.0)
+  (set! (-> self is-albino?) #t)
 )
 (go (method-of-object self ambush))
 (none)
