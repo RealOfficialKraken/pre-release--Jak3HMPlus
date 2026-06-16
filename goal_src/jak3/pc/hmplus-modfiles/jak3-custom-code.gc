@@ -2564,7 +2564,7 @@ weapon damage by leveling up.
         (draw-mod-menu-text-preset 0 "Pets")
         (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Back   <PAD_X> Toggle")
         (draw-mod-menu-text-custom "Loyal little companions for emotional support.~%~%Can you collect them all?" 
-        256 70 0.325 #f #t #f)
+        256 90 0.325 #f #t #f)
     )
 )
 
