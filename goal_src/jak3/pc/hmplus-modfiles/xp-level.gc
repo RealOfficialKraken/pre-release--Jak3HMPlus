@@ -10,6 +10,7 @@
 (define car-bar-x-pos 416)
 
 (defun-extern draw-mod-menu-text-custom string int int float symbol symbol symbol none)
+(defun-extern draw-active-quest none)
 
 #|
 (when 
@@ -525,6 +526,19 @@
     (none)
 )
 
+(defun view-xp ()
+    (set! r3-noto #t)
+    (set! anim-noto -30)
+    (set! notoi 0)
+    (when (and
+        (task-node-closed? (game-task-node wascity-gungame-introduction))
+        (not (task-node-closed? (game-task-node wascity-gungame-resolution)))
+        )
+        (draw-active-quest)
+    )
+    (none)
+)
+
 ;XP dist
 
 (defun mission-complete? ((amount int)) ;default amount is 130
@@ -533,12 +547,12 @@
     (+! (-> *game-info* karma) (/ (* amount notoriety-level) 10))
     (set! *xp-gain* (the float (/ (* amount notoriety-level) 10)))
     (set! xp-string "Mission Complete")
-    (sound-play "special-pickup")
     (when (task-node-closed? (game-task-node arena-fight-1-introduction))
         (set! xp-draw #t)
     )
     (auto-save-delayed)
     (set! xpi 0)
+    (sound-play "special-pickup")
     (none)
 )
 
@@ -561,6 +575,7 @@
     (set! xp-draw #t)
     (auto-save-delayed)
     (set! xp-i 0)
+    (sound-play "special-pickup")
     (none)
 )
 
@@ -617,6 +632,7 @@
     )
     (set! xpi 0)
     )
+    (sound-play "special-pickup")
     (none)
 )
 
@@ -628,6 +644,7 @@
     (when (task-node-closed? (game-task-node arena-fight-1-introduction))
         (set! xp-draw #t)
     )
+    (draw-active-quest)
     (none)
 )
 
@@ -2665,25 +2682,22 @@
             (not mainmenu-camera)
             (= r3-noto #f)
         )
-        (set! r3-noto #t)
-        (set! anim-noto -30)
+        (view-xp)
+    )
+
+    (when
+        (and
+            *target*
+            (not *scene-player*)
+            (not (paused?))
+            (pause-allowed?)
+            (cpad-pressed? 0 l3)
+            r3-noto
+            (> notoi 0)
+        )
         (set! notoi 0)
     )
-
-    (when
-        (and
-            *target*
-            (not *scene-player*)
-            (= (paused?) #f)
-            (= (pause-allowed?) #t)
-            (cpad-pressed? 0 l3)
-            (= r3-noto #t)
-            (> notoi 32)
-        )
-        (set! notoi 32)
-        (set! anim-noto 2)
-    )
-
+    ;; animate xp bars on l3 press
     (when
         (and
             *target*
@@ -2691,32 +2705,30 @@
             (= (paused?) #f)
             (= r3-noto #t)
         )
+        (when (and (< anim-noto 0) (< notoi 300))
+            (+! anim-noto 1)
+        )
+        (when (and (>= anim-noto 0) (<= notoi 300))
             (+! notoi 1)
-            (when (and (>= notoi 1)(<= notoi 32))
-                (+! anim-noto 1)
-            )
-            (when (and (>= notoi 1) (<= notoi 400))
-                (set! noto-draw-x (- noto-bar-x-pos (/ xp-bar-width 2)))
-                (set! noto-draw-y (+ anim-noto 11))
-                (set! guns-draw-x (- gun-bar-x-pos (/ xp-bar-width 2)))
-                (set! guns-draw-y (+ anim-noto 11))
-                (set! car-draw-x (- car-bar-x-pos (/ xp-bar-width 2)))
-                (set! car-draw-y (+ anim-noto 11))
-
-                (when (>= noto-draw-y 1)
-                    (draw-XP-bar))
-                
-            )
-            (when (>= notoi 370)
-                (-! anim-noto 1)
-            )
-            (when (or (>= notoi 400)(= in-menu? #t))
-                (set! notoi 0)
-                (set! anim-noto -30)
-                (set! r3-noto #f)
-                (set! xp-bar-spawned? #f)
-            )
         )
+        (when (and (> anim-noto -30) (>= notoi 300))
+            (-! anim-noto 1)
+        )
+        (when (or (<= anim-noto -30)(= in-menu? #t))
+            (set! notoi 0)
+            (set! anim-noto -30)
+            (set! r3-noto #f)
+            (set! xp-bar-spawned? #f)
+        )
+        (set! noto-draw-x (- noto-bar-x-pos (/ xp-bar-width 2)))
+        (set! noto-draw-y (+ anim-noto 11))
+        (set! guns-draw-x (- gun-bar-x-pos (/ xp-bar-width 2)))
+        (set! guns-draw-y (+ anim-noto 11))
+        (set! car-draw-x (- car-bar-x-pos (/ xp-bar-width 2)))
+        (set! car-draw-y (+ anim-noto 11))
+        (when (>= noto-draw-y 1)
+            (draw-XP-bar))
+    )
 
     (when ;draw the notoriety level onscreen
     (and

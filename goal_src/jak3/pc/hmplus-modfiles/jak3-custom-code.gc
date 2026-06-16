@@ -1469,6 +1469,18 @@ Have fun!~%
     )
 )
 
+(define anim-quest 0)
+(define anim-quest-i 0)
+(define draw-active-quest? #f)
+
+(defun draw-active-quest ()
+    (set! draw-active-quest? #t)
+    (if (< anim-quest -29)
+        (set! anim-quest -30))
+    (set! anim-quest-i 0)
+    (none)
+)
+
 
 (defun runs-jak3-every-frame () ;;START RUNNING EVERY FRAME
 
@@ -2708,6 +2720,74 @@ weapon damage by leveling up.
     (task-node-open! (game-task-node desert-interceptors-attack-exclude) #t)
 )
 
+;quest params for kleiver
+(when (and (not (paused?))
+    (or draw-active-quest?
+        (not in-menu?)
+    ))
+    (when (and (< anim-quest 0) (< anim-quest-i 300))
+        (+! anim-quest 1)
+    )
+    (when (and (>= anim-quest 0) (<= anim-quest-i 300))
+        (+! anim-quest-i 1)
+    )
+    (when (and (> anim-quest -30) (>= anim-quest-i 300))
+        (-! anim-quest 1)
+    )
+    (when (or (<= anim-quest -30) in-menu?)
+        (set! draw-active-quest? #f)
+    )
+    (when 
+        (and
+            (not (paused?))
+            (task-node-closed? (game-task-node wascity-gungame-introduction))
+            (not (task-node-closed? (game-task-node wascity-gungame-resolution)))
+        )
+        (clear *temp-string*)
+        (cond 
+            ((task-node-open? (game-task-node wascity-kleeverquest-lavatoad))
+                (format *temp-string* "<COLOR_ORANGE>Active Quest:~%~%<COLOR_WHITE>~d/16 Gather Lava Toad Skins"
+                (-> *game-info* side-enemies-killed?)
+                )
+            )
+            ((task-node-open? (game-task-node wascity-kleeverquest-mantaray))
+                    (format *temp-string* "<COLOR_ORANGE>Active Quest:~%~%<COLOR_WHITE>~d/4 Slay Albino Mantas"
+                (-> *game-info* side-enemies-killed?)
+                )
+            )
+            ((task-node-open? (game-task-node wascity-kleeverquest-marauders))
+                (format *temp-string* "<COLOR_ORANGE>Active Quest:~%~%<COLOR_WHITE>Find the Artifact"
+                )
+            )
+            ((task-node-open? (game-task-node wascity-kleeverquest-bruteboss))
+                (format *temp-string* "<COLOR_ORANGE>Active Quest:~%~%<COLOR_WHITE>Slay the Goredrinker"
+                (-> *game-info* side-enemies-killed?)
+                )
+            )
+            (else
+                (format *temp-string* "<COLOR_GREEN>Active Quest Completed~%~%<COLOR_WHITE>Return to Kleiver"
+                (-> *game-info* side-enemies-killed?)
+                )
+            )
+        )
+        (draw-mod-menu-text-custom *temp-string* 
+        (+ (* anim-quest 10) 20) 60 0.325 #t #f #f)
+    )
+)
+;; reset anim-quest draw timer
+(when
+    (and
+        *target*
+        (not *scene-player*)
+        (not (paused?))
+        (pause-allowed?)
+        (cpad-pressed? 0 l3)
+        draw-active-quest?
+        (> anim-quest-i 0)
+    )
+    (set! anim-quest-i 0)
+)
+
 
 ;; kleiver quests
 (when
@@ -2873,7 +2953,7 @@ weapon damage by leveling up.
             1.0)
             (task-node-close! (game-task-node wascity-gungame-introduction) #t)
             (process-spawn hud-map :init hud-init-by-other :name "hud-map" :to *target*)
-            (r3-hint)
+            (draw-active-quest)
         )
     )
 
@@ -2920,7 +3000,7 @@ weapon damage by leveling up.
             1.0)
             (process-spawn hud-map :init hud-init-by-other :name "hud-map" :to *target*)
             (task-node-close! (game-task-node wascity-kleeverquest-lavatoad-res) #t)
-            (r3-hint)
+            (draw-active-quest)
         )
     )
 
@@ -2985,7 +3065,7 @@ weapon damage by leveling up.
             1.0)
             (process-spawn hud-map :init hud-init-by-other :name "hud-map" :to *target*)
             (task-node-close! (game-task-node wascity-kleeverquest-mantaray-res) #t)
-            (r3-hint)
+            (draw-active-quest)
         )
     )
 
@@ -3050,7 +3130,7 @@ weapon damage by leveling up.
                 1.0)
                 (process-spawn hud-map :init hud-init-by-other :name "hud-map" :to *target*)
                 (task-node-close! (game-task-node wascity-kleeverquest-marauders-res) #t)
-                (r3-hint)
+                (draw-active-quest)
             )
         )
 
@@ -3133,45 +3213,8 @@ weapon damage by leveling up.
     )
     )
 
-;quest params for kliever
 
-(when 
-    (and
-        r3-noto
-        (not (paused?))
-        (task-node-closed? (game-task-node wascity-gungame-introduction))
-        (not (task-node-closed? (game-task-node wascity-gungame-resolution))))
 
-    (clear *temp-string*)
-    (cond 
-        ((task-node-open? (game-task-node wascity-kleeverquest-lavatoad))
-            (format *temp-string* "<COLOR_ORANGE>Active Quest:~%~%<COLOR_WHITE>~d/16 Gather Lava Toad Skins"
-            (-> *game-info* side-enemies-killed?)
-            )
-        )
-        ((task-node-open? (game-task-node wascity-kleeverquest-mantaray))
-                (format *temp-string* "<COLOR_ORANGE>Active Quest:~%~%<COLOR_WHITE>~d/4 Slay Albino Mantas"
-            (-> *game-info* side-enemies-killed?)
-            )
-        )
-        ((task-node-open? (game-task-node wascity-kleeverquest-marauders))
-            (format *temp-string* "<COLOR_ORANGE>Active Quest:~%~%<COLOR_WHITE>Find the Artifact"
-            )
-        )
-        ((task-node-open? (game-task-node wascity-kleeverquest-bruteboss))
-            (format *temp-string* "<COLOR_ORANGE>Active Quest:~%~%<COLOR_WHITE>Slay the Goredrinker"
-            (-> *game-info* side-enemies-killed?)
-            )
-        )
-        (else
-            (format *temp-string* "<COLOR_GREEN>Active Quest Completed~%~%<COLOR_WHITE>Return to Kleiver"
-            (-> *game-info* side-enemies-killed?)
-            )
-        )
-    )
-    (draw-mod-menu-text-custom *temp-string* 
-    (+ (* anim-noto 10)) 60 0.325 #t #f #f)
-)
 
 ;; dialogue box
 (when (and
