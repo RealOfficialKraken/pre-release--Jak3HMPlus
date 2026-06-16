@@ -12,6 +12,7 @@
 (defun-extern draw-mod-menu-text-custom string int int float symbol symbol symbol none)
 (defun-extern draw-active-quest none)
 
+(set! anim-noto -30)
 #|
 (when 
         (and
@@ -1293,11 +1294,20 @@
         (set! enemy-hp-chip-percent 0.0))
       (when (> enemy-hp-chip-percent 1.0)
         (set! enemy-hp-chip-percent 1.0))
-      (let ((health-pos 0))
-        (when (= hud-timer-on? #f)
-          (set! health-pos 10))
-        (when (or (= hud-timer-on? #t) (= r3-noto #t))
-          (set! health-pos (+ anim-noto 40))) ;; enemy hp bar text y when viewing xp bars
+
+      (let ((health-pos 0)) ;; enemy hp bar text y positioning
+        (cond 
+            ((= hud-timer-on? #f)
+                ;; (set! health-pos 10)
+                (set! health-pos (+ anim-noto 40))
+            )
+            ((= hud-timer-on? #t)
+                (set! health-pos 70)
+            )
+            ;; ((= r3-noto #t) 
+            ;;     (set! health-pos (+ anim-noto 40))
+            ;; )
+        )
         (when
           (and
             (= weather-dark-mode #f)
@@ -1318,7 +1328,7 @@
               buf
               (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
               (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color white) (font-flags middle shadow kerning large))))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 256 health-pos 0.0 (font-color white) (font-flags middle shadow kerning large))))
               (set! (-> font-ctx scale) 0.325)
               (draw-string-adv *pc-encoded-matt-str* buf font-ctx))))
         (when
@@ -1340,7 +1350,7 @@
               buf
               (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
               (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color white) (font-flags middle shadow kerning large))))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 256 health-pos 0.0 (font-color white) (font-flags middle shadow kerning large))))
               (set! (-> font-ctx scale) 0.325)
               (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))))
       (let* ((x 100)
@@ -1384,9 +1394,20 @@
              :b (the int b)
              :a #x40)))
        (chip-arg (new 'static 'rgba :r 255 :g 0 :b 0 :a chip-alpha)))
-  (when (or (= hud-timer-on? #t) (= r3-noto #t))
-    (set! y (+ anim-noto 51)) ;; enemy hp bar y when viewing xp bars
-    (set! chip-y (+ y 1)))
+
+       (cond ;; enemy hp bar y positioning
+            ((= hud-timer-on? #f)
+                ;; (set! y 10)
+                (set! y (+ anim-noto 51))
+            )
+            ((= hud-timer-on? #t)
+                (set! y 81)
+            )
+            ;; ((= r3-noto #t) 
+            ;;     (set! y (+ anim-noto 51))
+            ;; )
+        )
+        (set! chip-y (+ y 1))
   (when (= enemy-hp-chip-active #t)
     (when (> enemy-hp-chip-timer enemy-hp-chip-delay)
       (set! chip-u (/ (- enemy-hp-chip-timer enemy-hp-chip-delay)

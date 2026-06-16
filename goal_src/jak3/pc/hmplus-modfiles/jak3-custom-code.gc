@@ -1888,7 +1888,7 @@ Have fun!~%
         (when (= tutorial-freeze 1)
             (process-grab? *target* #f)
             (set! r3-noto #t)
-            (set! anim-noto -20)
+            (set! anim-noto -30)
             (set! notoi 0)
         )
         (when (and (>= tutorial-freeze 20) (< tutorial-freeze 700))
