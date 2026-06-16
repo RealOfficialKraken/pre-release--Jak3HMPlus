@@ -9,6 +9,8 @@
 (define gun-bar-x-pos 96)
 (define car-bar-x-pos 416)
 
+(defun-extern draw-mod-menu-text-custom string int int float symbol symbol symbol none)
+
 #|
 (when 
         (and
@@ -339,7 +341,7 @@
             (< (-> self y-ofs) 33.0)
             (<= notoriety-level (- enemy-noto 7))
         )
-        (set! (-> self rep-string) "(+ Hi~+7Vg~-7Vh Level Bonus)~%~S: +~D Re~+7Vp~-7Vutation")
+        (set! (-> self rep-string) "(+ Hi~+7Vg~-7Vh Level Bonus)~%~S: +~D XP")
         (set! (-> self xp-gain) (+ (-> self xp-gain) (* (-> self xp-gain) 0.43)))
       )
       (+! (-> self y-ofs) (* 0.6 (-> self clock time-adjust-ratio)))
@@ -387,10 +389,10 @@
   "create the font that will be used used."
 
   (if (zero? (-> self font))
-      (set! (-> self font) (new 'process 'font-context *font-default-matrix* 0 0 0.0 (font-color default) (font-flags shadow kerning))))
+      (set! (-> self font) (new 'process 'font-context *font-default-matrix* 0 0 0.0 (font-color white) (font-flags shadow kerning))))
   (set! (-> self xp-string) xp-string)
   (set! (-> self xp-gain) *xp-gain*)
-  (set! (-> self rep-string) "~S: +~D Re~+7Vp~-7Vutation")
+  (set! (-> self rep-string) "~S: +~D XP")
   (set-scale! (-> self font) 0.2)
   (set-flags! (-> self font) (font-flags shadow kerning large middle))
   (set-width! (-> self font) 350)
@@ -531,6 +533,7 @@
     (+! (-> *game-info* karma) (/ (* amount notoriety-level) 10))
     (set! *xp-gain* (the float (/ (* amount notoriety-level) 10)))
     (set! xp-string "Mission Complete")
+    (sound-play "special-pickup")
     (when (task-node-closed? (game-task-node arena-fight-1-introduction))
         (set! xp-draw #t)
     )
@@ -1298,7 +1301,7 @@
               buf
               (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
               (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color white) (font-flags middle shadow kerning large))))
               (set! (-> font-ctx scale) 0.325)
               (draw-string-adv *pc-encoded-matt-str* buf font-ctx))))
         (when
@@ -1320,7 +1323,7 @@
               buf
               (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
               (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color white) (font-flags middle shadow kerning large))))
               (set! (-> font-ctx scale) 0.325)
               (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))))
       (let* ((x 100)
@@ -2553,29 +2556,31 @@
                 (process-spawn reputation-text global-root-trans global-parent-mask)
             )
             (when (= xp-draw-override #f)
-                (let ((y 50))
+                (let ((y 80))
                 (when (= hud-timer-on? #f)
-                            (set! y 50)
+                            (set! y 80)
                         )
                         (when (or (= hud-timer-on? #t) (= r3-noto #t))
-                            (set! y 120)
+                            (set! y 80)
                         )
                 (when (string= xp-string "Duplicate Gun Mod Found")
                     (set! max-time 400)
-                    (set! y 120)
+                    (set! y 80)
                 )
-                (clear matt-str)
-                (clear *pc-encoded-matt-str*)
-                (format matt-str "<COLOR_ORANGE>~s~%<COLOR_WHITE>+~d XP"
-                xp-string
-                (the int *xp-gain*)
+                (when (and
+                        (not in-menu?) 
+                        (not in-vin-shop?) 
+                        (not in-arena-menu?) 
+                        (not in-arena-menu-info?)
+                    )
+                    (clear *temp-string*)
+                    (format *temp-string* "<COLOR_ORANGE>~s~%<COLOR_WHITE>+~d XP"
+                    xp-string
+                    (the int *xp-gain*)
+                    )
+                    (draw-mod-menu-text-custom *temp-string*
+                    255 y 0.425 #f #t #f)
                 )
-                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 y 0.0 (font-color default) (font-flags middle shadow kerning large))))
-                (set! (-> font-ctx scale) 0.325)
-                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
             )
             )
             (when (= xpi max-time)
@@ -2618,18 +2623,13 @@
                     (when (= in-vin-shop? #t)
                         (set! y 280)
                     )
-            (clear matt-str)
-            (clear *pc-encoded-matt-str*)
-            (format matt-str "<COLOR_ORANGE>~s~%<COLOR_WHITE>+~d"
+            (clear *temp-string*)
+            (format *temp-string* "<COLOR_ORANGE>~s~%<COLOR_WHITE>+~d"
             xp-string
             (the int *xp-gain*)
             )
-            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 y 0.0 (font-color default) (font-flags middle shadow kerning large))))
-            (set! (-> font-ctx scale) 0.325)
-            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            (draw-mod-menu-text-custom *temp-string*
+            256 y 0.425 #f #t #f)
         )
     )
 
@@ -2646,18 +2646,13 @@
                 (= (paused?) #f)
                 (= in-menu? #f)
             )
-            (clear matt-str)
-            (clear *pc-encoded-matt-str*)
-            (format matt-str "<COLOR_GREEN>LEVEL UP~%~%~s Level ~d"
+            (clear *temp-string*)
+            (format *temp-string* "<COLOR_WHITE>LEVEL UP~%~s Level ~d"
             noto-string
             draw-levelup-int
             )
-            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 150 0.0 (font-color default) (font-flags middle shadow kerning large))))
-            (set! (-> font-ctx scale) 0.425)
-            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            (draw-mod-menu-text-custom *temp-string*
+            256 150 0.425 #f #t #f)
         )
     )
     (when
@@ -2731,19 +2726,14 @@
         (= r3-noto #t)
         (= in-menu? #f)
     )
-        (clear matt-str)
-        (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Hero Level ~d~%~%~d / ~d"
+        (clear *temp-string*)
+        (format *temp-string* "<COLOR_ORANGE>Hero Level ~d~%~%~d / ~d"
         notoriety-level
         (the int (-> *game-info* karma))
         (the int (* (+ (* notoriety-level 60) (* notoriety-level 100)) notoriety-level))
         )
-        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* noto-bar-x-pos anim-noto 0.0 (font-color default) (font-flags middle shadow kerning large))))
-        (set! (-> font-ctx scale) 0.325)
-        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        (draw-mod-menu-text-custom *temp-string*
+        noto-bar-x-pos anim-noto 0.325 #f #t #f)
     )
     (when ;draw the guns level onscreen
     (and
@@ -2757,19 +2747,14 @@
             (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
         )
     )
-        (clear matt-str)
-        (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_RED>Gun Level ~d~%~%~d / ~d"
+        (clear *temp-string*)
+        (format *temp-string* "<COLOR_RED>Gun Level ~d~%~%~d / ~d"
         guns-level
         (the int (-> *game-info* buzzer-total))
         (the int (* (+ (* guns-level 120) (* guns-level 200)) guns-level))
         )
-        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* gun-bar-x-pos anim-noto 0.0 (font-color default) (font-flags middle shadow kerning large))))
-        (set! (-> font-ctx scale) 0.325)
-        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        (draw-mod-menu-text-custom *temp-string*
+        gun-bar-x-pos anim-noto 0.325 #f #t #f)
     )
     (when ;draw the cars level onscreen
     (and
@@ -2780,19 +2765,14 @@
         (= in-menu? #f)
         (!= (-> *game-info* total-deaths) 0)
     )
-        (clear matt-str)
-        (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_PINK>Vehicle Level ~d~%~%~d / ~d"
+        (clear *temp-string*)
+        (format *temp-string* "<COLOR_PINK>Vehicle Level ~d~%~%~d / ~d"
         cars-level
         (the int (-> *game-info* fuel))
         (the int (* (+ (* cars-level 30) (* cars-level 175)) cars-level))
         )
-        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* car-bar-x-pos anim-noto 0.0 (font-color default) (font-flags middle shadow kerning large))))
-        (set! (-> font-ctx scale) 0.325)
-        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        (draw-mod-menu-text-custom *temp-string*
+        car-bar-x-pos anim-noto 0.325 #f #t #f)
     )
 
     (when (and 

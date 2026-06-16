@@ -371,9 +371,6 @@
                     )
                 )
                 (deactivate self)
-                (if (= (-> *game-info* total-deaths) 0)
-                    (level-up-cars! 1))
-
                 (cpad-clear! 0 triangle circle)
             )
             (when (cpad-pressed? 0 left)
@@ -403,8 +400,6 @@
                         (logclear! (-> *game-info* secrets) (game-secrets jak-is-jak2))
                     )
                 )
-                (if (= (-> *game-info* total-deaths) 0)
-                    (level-up-cars! 1))
                 ;; (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
                 (go-virtual die)
             )
@@ -956,20 +951,20 @@ Have fun!~%
         (set! pause-menu-blocked? #f)
         (set! in-arena-menu? #f)
         (set! enemy-noto 1)
-        (cond
-            ((= menu-index 0)
+        (case menu-index
+            ((0)
                 (task-node-close! (game-task-node arena-replay-1-introduction) #t)
                 (set-vector! (-> *target* control trans) (meters 2321.3464) (meters 11.9021) (meters -446.5651) 1.0)
             )
-            ((= menu-index 1)
+            ((1)
                 (task-node-close! (game-task-node arena-replay-2-introduction) #t)
                 (set-vector! (-> *target* control trans) (meters 2299.8308) (meters 11.3778) (meters -440.6308) 1.0)
             )
-            ((= menu-index 2)
+            ((2)
                 (task-node-close! (game-task-node arena-replay-3-introduction) #t)
                 (set-vector! (-> *target* control trans) (meters 2324.8325) (meters 11.9021) (meters -457.8798) 1.0)
             )
-            ((= menu-index 3)
+            ((3)
                 (task-node-close! (game-task-node arena-replay-1-introduction) #t)
                 (task-node-close! (game-task-node arena-replay-2-introduction) #t)
                 (task-node-close! (game-task-node arena-replay-3-introduction) #t)
@@ -1078,7 +1073,7 @@ Have fun!~%
         ((1) ;; gunmod red 2
             (when (task-node-closed? (game-task-node modr-shield))
                 (set! gunmod-description-title  "<COLOR_RED>Quad Shot")
-                (set! gunmod-description        "Fires 4 shots in every direction.")))
+                (set! gunmod-description        "Fires in four directions at once.")))
 
         ((2) ;; gunmod red 3
             (when (task-node-closed? (game-task-node modr-missles))
@@ -1739,7 +1734,7 @@ Have fun!~%
                 (set! text-scale 0.46)))
           (clear matt-str)
           (clear *pc-encoded-matt-str*)
-          (format matt-str "<COLOR_ORANGE>Mod Made By <COLOR_CYAN>Kraken")
+          (format matt-str "<COLOR_ORANGE>Made by <COLOR_CYAN>Kraken")
           (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
           (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf))
                                        (bucket-id debug-no-zbuf1))
@@ -2047,13 +2042,13 @@ powerful monsters and bosses."
         )
         (when (and (>= tutorial-freeze 925) (< tutorial-freeze 2025))
             (draw-mod-menu-text-preset 4 
-"<COLOR_YELLOW>Enemies<COLOR_WHITE>, <COLOR_YELLOW>Civilians<COLOR_WHITE>, and <COLOR_YELLOW>Bosses<COLOR_WHITE> can drop loot crates.
+"Enemies, civilians, and bosses can drop <COLOR_YELLOW>loot crates<COLOR_WHITE>.
 
-Dropped crates can contain weapons and
+Loot crates can contain weapons and
 <COLOR_CYAN>Super Gun Mods<COLOR_WHITE>, but mainly collectables.
 
-<COLOR_WHITE>There are 3 tiers:
-<COLOR_YELLOW>Urns<COLOR_WHITE>, <COLOR_YELLOW>Crates<COLOR_WHITE>, and <COLOR_YELLOW>Black Crates<COLOR_WHITE>.
+There are 3 tiers:
+<COLOR_PINK>Urns<COLOR_WHITE>, <COLOR_PINK>Crates<COLOR_WHITE>, and <COLOR_PINK>Black Crates<COLOR_WHITE>.
 
 Black crates are rarest and unlock after <COLOR_ORANGE>Hero Level 18<COLOR_WHITE>."
             )
@@ -2505,7 +2500,7 @@ bigger, and stronger.
 <COLOR_WHITE>Upgrade your vehicle boost and
 weapon damage by leveling up.
 
-<COLOR_YELLOW>Earn reputation while on a vehicle to earn XP.~%
+<COLOR_YELLOW>Earn Hero XP while on a vehicle to earn XP.~%
 
 <COLOR_ORANGE>Tier 1 (Lv. 2)~%~s~%
 <COLOR_ORANGE>Tier 2 (Lv. 6)~%~s~%
@@ -2638,12 +2633,12 @@ weapon damage by leveling up.
             (draw-mod-menu-text-custom "<COLOR_WHITE>in-desert-game-task? <COLOR_GREEN>#t"
             510 70 0.325 #f #f #t))
         (else
-            (draw-mod-menu-text-custom "<COLOR_WHITE>in-desert-game-task? #f"
+            (draw-mod-menu-text-custom "<COLOR_WHITE>in-desert-game-task? <COLOR_RED>#f"
             510 70 0.325 #f #f #t))
     )
     (cond 
         (hud-timer-on?
-            (draw-mod-menu-text-custom "<COLOR_WHITE>hud-timer-on? <COLOR_RED><COLOR_GREEN>#t"
+            (draw-mod-menu-text-custom "<COLOR_WHITE>hud-timer-on? <COLOR_GREEN>#t"
             510 80 0.325 #f #f #t))
         (else
             (draw-mod-menu-text-custom "<COLOR_WHITE>hud-timer-on? <COLOR_RED>#f"
@@ -3235,6 +3230,14 @@ weapon damage by leveling up.
         ;; background
         (draw-sprite2d-xy s2-0  22 292 (- 512 44) 84 (static-rgba 255 255 255 8) #x3fffff)
     )
+    
+    (when (= log-sec 1)
+         (set! dialogue-select 0)
+    )
+    (when (cpad-pressed? 0 x)
+        ;; (+! log-sec 1)
+        (sound-play "menu-pick")
+    )
     (cond ((not dialogue-choice)
         (clear *temp-string*)
         (format *temp-string* "<COLOR_WHITE>~S~%~S~%~S~%~S~%~%"
@@ -3264,6 +3267,7 @@ weapon damage by leveling up.
                     di-s3
                     di-s4
                     )
+                    (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Exit   <PAD_X> Confirm")
                 )
                 (else
                     (format *temp-string* "<COLOR_WHITE>~S~%~S~%~S~%~S~%~%"
@@ -3272,16 +3276,20 @@ weapon damage by leveling up.
                     di-s3
                     di-s4
                     )
-                    (draw-mod-menu-text-preset 1 "<PAD_X> Next")
+                    (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Exit   <PAD_X> Next")
                 )
             )
             (draw-mod-menu-text-custom *temp-string* 
             256 300 0.325 #f #t #f)
-            
-            (when (cpad-pressed? 0 triangle)
-                (close-vin-shop!)
-                (cpad-clear! 0 triangle)
+    
+            (when (and in-vin-shop? (< (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 3))
+                (when (cpad-pressed? 0 triangle)
+                    (close-vin-shop!)
+                    (sound-play "menu-pick")
+                    (cpad-clear! 0 triangle)
+                )
             )
+
             (when (= choice-given? #t)
                 (when (cpad-pressed? 0 up)
                     (cond
@@ -3292,6 +3300,7 @@ weapon damage by leveling up.
                             (set! dialogue-select choice-max)
                         )
                     )
+                    (sound-play "menu-back")
                 )
                 (when (cpad-pressed? 0 down)
                     (cond
@@ -3302,7 +3311,9 @@ weapon damage by leveling up.
                             (set! dialogue-select 0)
                         )
                     )
+                    (sound-play "menu-back")
                 )
+
                 (clear *temp-string*)
                 (cond
                     ((= dialogue-select 0)
@@ -3759,7 +3770,7 @@ weapon damage by leveling up.
                 (when (cpad-pressed? 0 triangle)
                     (set! pro-i 2754)
                 )
-                (draw-mod-menu-text-custom "Then suddenly... a rift gate~%opens in the dark..."
+                (draw-mod-menu-text-custom "Then suddenly... a warp gate~%~%opens in the dark..."
                 draw-x draw-y 0.325 #f #t #f)
             )
         )
@@ -4170,15 +4181,15 @@ weapon damage by leveling up.
             (set! menu-index-max 0)
             (draw-mod-menu-text-preset 1 "<PAD_TRIANGLE> Back")
             (draw-mod-menu-text-custom 
-"The arena has a reduced reputation gain.~%
+"The arena has a reduced XP gain.~%
 You cannot open Hero Menu while in a fight.~%~%
 
 Marauders level up as more spawn, and eventually~%
 they will be able to one-shot you. At that stage~%
-defeating Marauders yields a <COLOR_YELLOW>3x Reputation Bonus<COLOR_WHITE>!~%~%
+defeating Marauders yields a <COLOR_YELLOW>3x XP Bonus<COLOR_WHITE>!~%~%
 
 Complete challenges for rewards, or play for~%
-a high score and earn massive reputation!"
+a high score and earn massive XP!"
             255 90 0.325 #f #t #f)
         )
         (when in-arena-menu?
@@ -4193,49 +4204,49 @@ a high score and earn massive reputation!"
                     (set! aarena-str "Any")
                 )
                 ((task-node-open? (game-task-node arena-challenge-2))
-                    (set! achallenge-str "Kill 30 Marauders in under 30 seconds")
+                    (set! achallenge-str "Kill 30 enemies in under 30 seconds")
                     (set! areward-str "Level up in <COLOR_RED>Gun<COLOR_WHITE>, <COLOR_ORANGE>Hero<COLOR_WHITE>,~%and <COLOR_PINK>Vehicle<COLOR_WHITE> levels")
                     (set! aarena-str "Arena 1")
                 )
                 ((task-node-open? (game-task-node arena-challenge-3))
-                    (set! achallenge-str "Kill 75 Marauders in under 2 minutes")
+                    (set! achallenge-str "Kill 75 enemies in under 2 minutes")
                     (set! areward-str "Level up in <COLOR_RED>Gun<COLOR_WHITE>, <COLOR_ORANGE>Hero<COLOR_WHITE>,~%and <COLOR_PINK>Vehicle<COLOR_WHITE> levels")
                     (set! aarena-str "Arena 2")
                 )
                 ((task-node-open? (game-task-node arena-challenge-4))
-                    (set! achallenge-str "Kill 40 Marauders in under 75 seconds")
+                    (set! achallenge-str "Kill 40 enemies in under 75 seconds")
                     (set! areward-str "Level up in <COLOR_RED>Gun<COLOR_WHITE>, <COLOR_ORANGE>Hero<COLOR_WHITE>,~%and <COLOR_PINK>Vehicle<COLOR_WHITE> levels")
                     (set! aarena-str "Arena 3")
                 )
                 ((task-node-open? (game-task-node arena-challenge-5))
-                    (set! achallenge-str "Reach Enemy Level 50 Marauders")
-                    (set! areward-str "A Random Weapon or Level-Up")
+                    (set! achallenge-str "Reach enemy level 50")
+                    (set! areward-str "Random Weapon or Level-Up")
                     (set! aarena-str "Any")
                 )
                 ((task-node-open? (game-task-node arena-challenge-6))
-                    (set! achallenge-str "Last 6 minutes in <COLOR_RED>THE DEATH DOME")
-                    (set! areward-str "A Random Weapon or LevelUp")
-                    (set! aarena-str "DEATH DOME")
+                    (set! achallenge-str "Last 6 minutes without dying")
+                    (set! areward-str "Random Weapon or Level-Up")
+                    (set! aarena-str "Death Dome")
                 )
                 ((task-node-open? (game-task-node arena-challenge-7))
-                    (set! achallenge-str "Reach Enemy Level 75 Marauders")
-                    (set! areward-str "A Random Weapon or Level-Up")
+                    (set! achallenge-str "Reach enemy level 75")
+                    (set! areward-str "Random Weapon or Level-Up")
                     (set! aarena-str "Any")
                 )
                 ((task-node-open? (game-task-node arena-challenge-8))
-                    (set! achallenge-str "Kill 200 Marauders in under 3 minutes")
+                    (set! achallenge-str "Kill 200 enemies in under 3 minutes")
                     (set! areward-str "Super Gun Mod")
                     (set! aarena-str "Arena 1")
                 )
                 ((task-node-open? (game-task-node arena-challenge-9))
-                    (set! achallenge-str "Kill 100 Marauders in under 2 minutes")
+                    (set! achallenge-str "Kill 100 enemies in under 2 minutes")
                     (set! areward-str "Super Gun Mod")
                     (set! aarena-str "Arena 2")
                 )
                 ((task-node-open? (game-task-node arena-challenge-10))
-                    (set! achallenge-str "Reach Enemy Level 100 in <COLOR_RED>THE DEATH DOME")
+                    (set! achallenge-str "Reach enemy level 100")
                     (set! areward-str "Super Gun Mod")
-                    (set! aarena-str "Any")
+                    (set! aarena-str "Death Dome")
                 )
                 (else
                     (set! achallenge-str "All Challenges Completed")
@@ -4252,21 +4263,21 @@ a high score and earn massive reputation!"
             (- 512 85) 120 0.275 #f #f #t)
 
             (clear *temp-string*)
-            (cond
-                ((= menu-index 0)
-                    (format *temp-string* "<COLOR_YELLOW>Arena 1~%~%<COLOR_MENU-PARENT>Arena 2~%~%Arena 3~%~%THE DEATH DOME"
+            (case menu-index
+                ((0)
+                    (format *temp-string* "<COLOR_YELLOW>Arena 1~%~%<COLOR_MENU-PARENT>Arena 2~%~%Arena 3~%~%Death Dome"
                     )
                 )
-                ((= menu-index 1)
-                    (format *temp-string* "<COLOR_MENU-PARENT>Arena 1~%~%<COLOR_YELLOW>Arena 2<COLOR_MENU-PARENT>~%~%Arena 3~%~%THE DEATH DOME"
+                ((1)
+                    (format *temp-string* "<COLOR_MENU-PARENT>Arena 1~%~%<COLOR_YELLOW>Arena 2<COLOR_MENU-PARENT>~%~%Arena 3~%~%Death Dome"
                     )
                 )
-                ((= menu-index 2)
-                    (format *temp-string* "<COLOR_MENU-PARENT>Arena 1~%~%Arena 2~%~%<COLOR_YELLOW>Arena 3<COLOR_MENU-PARENT>~%~%THE DEATH DOME"
+                ((2)
+                    (format *temp-string* "<COLOR_MENU-PARENT>Arena 1~%~%Arena 2~%~%<COLOR_YELLOW>Arena 3<COLOR_MENU-PARENT>~%~%Death Dome"
                     )
                 )
-                ((= menu-index 3)
-                    (format *temp-string* "<COLOR_MENU-PARENT>Arena 1~%~%Arena 2~%~%Arena 3~%~%<COLOR_YELLOW>THE DEATH DOME"
+                ((3)
+                    (format *temp-string* "<COLOR_MENU-PARENT>Arena 1~%~%Arena 2~%~%Arena 3~%~%<COLOR_YELLOW>Death Dome"
                     )
                 )
             )
@@ -4381,9 +4392,9 @@ a high score and earn massive reputation!"
         )
         (when (= log-sec 4)
             (set! di-s1 "<COLOR_RED>Little by little, I helped them shape everything.")
-            (set! di-s2 "<COLOR_RED>Their vision became my own.")
-            (set! di-s3 "<COLOR_RED>All it needed was something to jumpstart")
-            (set! di-s4 "<COLOR_RED>existence itself.")
+            (set! di-s2 "<COLOR_RED>Their vision became my own. All it needed was")
+            (set! di-s3 "<COLOR_RED>something to jumpstart existence itself.")
+            (set! di-s4 "<COLOR_RED>")
         )
         (when (= log-sec 5)
             (set! di-s1 "<COLOR_RED>The tens of drawings I saw varied, but all of them")
@@ -4510,14 +4521,14 @@ a high score and earn massive reputation!"
             (set! di-s4 "<COLOR_RED>")
         )
         (when (= log-sec 3)
-            (set! di-s1 "<COLOR_RED>It's clear that they're going to separate me.")
+            (set! di-s1 "<COLOR_RED>It is clear that they're going to separate me.")
             (set! di-s2 "<COLOR_RED>")
             (set! di-s3 "<COLOR_RED>")
             (set! di-s4 "<COLOR_RED>")
         )
         (when (= log-sec 4)
-            (set! di-s1 "<COLOR_RED>My concsiousness will be reduced to")
-            (set! di-s2 "<COLOR_RED>nearly single-bit size, multiplied over vast quantities.")
+            (set! di-s1 "<COLOR_RED>My concsiousness will be reduced to nearly")
+            (set! di-s2 "<COLOR_RED>single-bit size, multiplied over vast quantities.")
             (set! di-s3 "<COLOR_RED>Clearly they don't know what they're doing.")
             (set! di-s4 "<COLOR_RED>")
         )
@@ -5085,10 +5096,11 @@ a high score and earn massive reputation!"
 <COLOR_WHITE>Let it be known that this mod is difficult.~%
 The average casual Jak 3 player will have a rough time.~%
 If you're still up for it, I hope you have fun!~%
-<COLOR_RED>EXPECT CRASHES~%~%
 
-COLOR_WHITE>Sincerely,~%
-<COLOR_BLUE>Kraken"
+<COLOR_RED>Many features are dependent on framerate being 60.~%
+You should NOT change your framerate for the time being.~%
+
+<COLOR_RED>EXPECT CRASHES"
                     mod-version
                     )
                     (draw-mod-menu-text-custom *temp-string*
