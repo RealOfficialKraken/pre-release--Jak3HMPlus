@@ -1173,7 +1173,7 @@
           (set! hpbar-hit-points (-> self hit-points))
           (set! hpbar-max-hit-points (-> self max-hit-points))
           (set! draw-enemy-noto 100)
-          (set! enemy-string "Dark Maker")
+          (set! enemy-string "Dark Maker Walker")
           (init-enemy-hpbar 'use-pre-hit)
         )
        (cond
@@ -2363,8 +2363,8 @@
   )
 
 (defun wascity-defend-hint ()
-  (set! wascity-defend-hint? #t)
   (set! wasdh-i 0)
+  (set! wascity-defend-hint? #t)
   (none)
 )
 

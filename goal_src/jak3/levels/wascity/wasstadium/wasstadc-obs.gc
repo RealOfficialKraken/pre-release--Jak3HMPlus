@@ -2669,7 +2669,7 @@
   :exit (behavior ()
     (set! (-> self play-hint) #t)
     (when (task-node-open? (game-task-node arena-fight-2-fight))
-      (blank-hint! "Your weapons do more" "damage in <COLOR_PINK>DarkJak!" 170 400)
+      (blank-hint! "Your weapons do more~%damage while <COLOR_PINK>Dark Jak<COLOR_WHITE>!" 170 400)
     )
     (set-time! (-> self hint-time))
     (set-setting! 'music 'arenafi 0.0 0)

@@ -3,6 +3,16 @@
 
 ;name: xp-level.gc
 
+(define xp-bar-width 128)
+(define xp-bar-height 6)
+(define noto-bar-x-pos 256)
+(define gun-bar-x-pos 96)
+(define car-bar-x-pos 416)
+
+(defun-extern draw-mod-menu-text-custom string int int float symbol symbol symbol none)
+(defun-extern draw-active-quest none)
+
+(set! anim-noto -30)
 #|
 (when 
         (and
@@ -333,7 +343,7 @@
             (< (-> self y-ofs) 33.0)
             (<= notoriety-level (- enemy-noto 7))
         )
-        (set! (-> self rep-string) "(+ Hi~+7Vg~-7Vh Level Bonus)~%~S: +~D Re~+7Vp~-7Vutation")
+        (set! (-> self rep-string) "(+ Hi~+7Vg~-7Vh Level Bonus)~%~S: +~D XP")
         (set! (-> self xp-gain) (+ (-> self xp-gain) (* (-> self xp-gain) 0.43)))
       )
       (+! (-> self y-ofs) (* 0.6 (-> self clock time-adjust-ratio)))
@@ -381,10 +391,10 @@
   "create the font that will be used used."
 
   (if (zero? (-> self font))
-      (set! (-> self font) (new 'process 'font-context *font-default-matrix* 0 0 0.0 (font-color default) (font-flags shadow kerning))))
+      (set! (-> self font) (new 'process 'font-context *font-default-matrix* 0 0 0.0 (font-color white) (font-flags shadow kerning))))
   (set! (-> self xp-string) xp-string)
   (set! (-> self xp-gain) *xp-gain*)
-  (set! (-> self rep-string) "~S: +~D Re~+7Vp~-7Vutation")
+  (set! (-> self rep-string) "~S: +~D XP")
   (set-scale! (-> self font) 0.2)
   (set-flags! (-> self font) (font-flags shadow kerning large middle))
   (set-width! (-> self font) 350)
@@ -427,7 +437,7 @@
     (+! (-> *game-info* total-trys) arg0)
     (set! (-> *game-info* karma) extra-offthetop)
     (set! draw-levelup-noto #t)
-    (set! noto-string "<COLOR_ORANGE>Hero<COLOR_YELLOW>")
+    (set! noto-string "<COLOR_ORANGE>Hero")
     (set! draw-levelup-int (-> *game-info* total-trys))
     (cond
         ((>= notoriety-level 10)
@@ -460,7 +470,7 @@
     (+! (-> *game-info* karma) (/ extra-offthetop 2))
     (set! (-> *game-info* buzzer-total) extra-offthetop)
     (set! draw-levelup-noto #t)
-    (set! noto-string "<COLOR_RED>Guns<COLOR_YELLOW>")
+    (set! noto-string "<COLOR_RED>Gun")
     (set! draw-levelup-int (-> *game-info* auto-save-count))
     (when
         (or
@@ -500,7 +510,7 @@
         (+! (-> *game-info* karma) (/ extra-offthetop 2))
     )
     (set! draw-levelup-noto #t)
-    (set! noto-string "<COLOR_PINK>Vehicle<COLOR_YELLOW>")
+    (set! noto-string "<COLOR_PINK>Vehicle")
     (set! draw-levelup-int (-> *game-info* total-deaths))
     (when
         (or
@@ -517,6 +527,19 @@
     (none)
 )
 
+(defun view-xp ()
+    (set! r3-noto #t)
+    (set! anim-noto -30)
+    (set! notoi 0)
+    (when (and
+        (task-node-closed? (game-task-node wascity-gungame-introduction))
+        (not (task-node-closed? (game-task-node wascity-gungame-resolution)))
+        )
+        (draw-active-quest)
+    )
+    (none)
+)
+
 ;XP dist
 
 (defun mission-complete? ((amount int)) ;default amount is 130
@@ -530,6 +553,7 @@
     )
     (auto-save-delayed)
     (set! xpi 0)
+    (sound-play "special-pickup")
     (none)
 )
 
@@ -547,11 +571,12 @@
 (defun mod-killed? ((xp-gain float))
     ;(+! (-> *game-info* karma) (* xp-gain guns-level))
     (level-up-guns! 1)
-    (set! xp-string "<COLOR_RED>Duplicate Gun Mod found~%<COLOR_YELLOW>Level up to increase chances of higher tier weapons!")
+    (set! xp-string "Duplicate Gun Mod Found")
     (set! *xp-gain* (* xp-gain enemy-noto))
     (set! xp-draw #t)
     (auto-save-delayed)
     (set! xp-i 0)
+    (sound-play "special-pickup")
     (none)
 )
 
@@ -608,17 +633,19 @@
     )
     (set! xpi 0)
     )
+    (sound-play "special-pickup")
     (none)
 )
 
 (defun side-enemy-killed? ()
     (+! (-> *game-info* side-enemies-killed?) 1)
-    (set! xp-string "Current Quest")
+    (set! xp-string "Active Quest")
     (set! *xp-gain* 1.0)
     (auto-save-delayed)
     (when (task-node-closed? (game-task-node arena-fight-1-introduction))
         (set! xp-draw #t)
     )
+    (draw-active-quest)
     (none)
 )
 
@@ -656,7 +683,7 @@
       (= in-menu? #f)
       (and
         (= in-skill? #t)
-        (= menu-slot 0)))
+        (= menu-index 0)))
 
     ;;update percent and restart animation if changed
     (let* ((level-cap (the float (* (+ (* notoriety-level 60) (* notoriety-level 100)) notoriety-level)))
@@ -722,10 +749,9 @@
                      :g 255
                      :b 0
                      :a #x40)))
-      (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                   (bucket-id particles))
-        (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-        (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff))))
+      (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf)) (bucket-id particles))
+        (draw-sprite2d-xy s2-0 x y xp-bar-width xp-bar-height (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+        (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) (- xp-bar-height 2) arg3 #x3fffff))))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Guns ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (when
@@ -733,7 +759,7 @@
       (= in-menu? #f)
       (and
         (= in-skill? #t)
-        (= menu-slot 1)))
+        (= menu-index 1)))
 
     (when (or
             (task-node-closed? (game-task-node arena-fight-1-introduction))
@@ -796,10 +822,9 @@
                        :g 1
                        :b 0
                        :a #x40)))
-        (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                     (bucket-id particles))
-          (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-          (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff)))))
+        (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf)) (bucket-id particles))
+            (draw-sprite2d-xy s2-0 x y xp-bar-width xp-bar-height (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) (- xp-bar-height 2) arg3 #x3fffff)))))
 
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Vehicles ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   (when
@@ -807,7 +832,7 @@
       (= in-menu? #f)
       (and
         (= in-skill? #t)
-        (= menu-slot 2)))
+        (= menu-index 2)))
 
     (when (!= (-> *game-info* total-deaths) 0)
       (let* ((level-cap (the float (* (+ (* cars-level 30) (* cars-level 175)) cars-level)))
@@ -867,10 +892,9 @@
                        :g 0
                        :b 255
                        :a #x40)))
-        (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                     (bucket-id particles))
-          (draw-sprite2d-xy s2-0 x y 125 6 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-          (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) 4 arg3 #x3fffff)))))
+        (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf)) (bucket-id particles))
+          (draw-sprite2d-xy s2-0 x y xp-bar-width xp-bar-height (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+          (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 123.0 progress)) (- xp-bar-height 2) arg3 #x3fffff)))))
 
   (none)
   )
@@ -1169,25 +1193,25 @@
         ;NEW HP BAR:
         (when (= enemy-hp #t)
   (+! hpi 1)
-  (let ((color-string "<COLOR_WHITE>Lv. "))
+  (let ((color-string "<COLOR_WHITE>Level "))
     (when (and
             (<= enemy-noto (+ notoriety-level 3))
             (> enemy-noto (- notoriety-level 3))
-            (not (string= color-string "<COLOR_YELLOW>Lv. ")))
-      (set! color-string "<COLOR_YELLOW>Lv. "))
+            (not (string= color-string "<COLOR_YELLOW>Level ")))
+      (set! color-string "<COLOR_YELLOW>Level "))
     (when (and
             (>= enemy-noto (+ notoriety-level 3))
-            (not (string= color-string "<COLOR_RED>Lv. ")))
-      (set! color-string "<COLOR_RED>Lv. "))
+            (not (string= color-string "<COLOR_RED>Level ")))
+      (set! color-string "<COLOR_RED>Level "))
     (when (and
             (<= enemy-noto (- notoriety-level 3))
             (> enemy-noto (- notoriety-level 7))
-            (not (string= color-string "<COLOR_GREEN>Lv. ")))
-      (set! color-string "<COLOR_GREEN>Lv. "))
+            (not (string= color-string "<COLOR_GREEN>Level ")))
+      (set! color-string "<COLOR_GREEN>Level "))
     (when (and
             (< enemy-noto (- notoriety-level 7))
-            (not (string= color-string "<COLOR_TRANSPARENT>Lv. ")))
-      (set! color-string "<COLOR_TRANSPARENT>Lv. "))
+            (not (string= color-string "<COLOR_TRANSPARENT>Level ")))
+      (set! color-string "<COLOR_TRANSPARENT>Level "))
     (when
       (and
         *target*
@@ -1270,11 +1294,20 @@
         (set! enemy-hp-chip-percent 0.0))
       (when (> enemy-hp-chip-percent 1.0)
         (set! enemy-hp-chip-percent 1.0))
-      (let ((health-pos 0))
-        (when (= hud-timer-on? #f)
-          (set! health-pos 10))
-        (when (or (= hud-timer-on? #t) (= r3-noto #t))
-          (set! health-pos 80))
+
+      (let ((health-pos 0)) ;; enemy hp bar text y positioning
+        (cond 
+            ((= hud-timer-on? #f)
+                ;; (set! health-pos 10)
+                (set! health-pos (+ anim-noto 40))
+            )
+            ((= hud-timer-on? #t)
+                (set! health-pos 70)
+            )
+            ;; ((= r3-noto #t) 
+            ;;     (set! health-pos (+ anim-noto 40))
+            ;; )
+        )
         (when
           (and
             (= weather-dark-mode #f)
@@ -1295,7 +1328,7 @@
               buf
               (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
               (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 256 health-pos 0.0 (font-color white) (font-flags middle shadow kerning large))))
               (set! (-> font-ctx scale) 0.325)
               (draw-string-adv *pc-encoded-matt-str* buf font-ctx))))
         (when
@@ -1317,7 +1350,7 @@
               buf
               (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1))
               (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 health-pos 0.0 (font-color default) (font-flags middle shadow kerning large))))
+            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 256 health-pos 0.0 (font-color white) (font-flags middle shadow kerning large))))
               (set! (-> font-ctx scale) 0.325)
               (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))))
       (let* ((x 100)
@@ -1361,9 +1394,20 @@
              :b (the int b)
              :a #x40)))
        (chip-arg (new 'static 'rgba :r 255 :g 0 :b 0 :a chip-alpha)))
-  (when (or (= hud-timer-on? #t) (= r3-noto #t))
-    (set! y 90)
-    (set! chip-y (+ y 1)))
+
+       (cond ;; enemy hp bar y positioning
+            ((= hud-timer-on? #f)
+                ;; (set! y 10)
+                (set! y (+ anim-noto 51))
+            )
+            ((= hud-timer-on? #t)
+                (set! y 81)
+            )
+            ;; ((= r3-noto #t) 
+            ;;     (set! y (+ anim-noto 51))
+            ;; )
+        )
+        (set! chip-y (+ y 1))
   (when (= enemy-hp-chip-active #t)
     (when (> enemy-hp-chip-timer enemy-hp-chip-delay)
       (set! chip-u (/ (- enemy-hp-chip-timer enemy-hp-chip-delay)
@@ -1416,12 +1460,14 @@
                 (not (focus-test? *target* pilot))
                 (= in-pre-tutorial? #f)
                 (= (paused?) #f)
-                (= in-vin-shop? #f)
+                (not in-vin-shop?)
                 (not mainmenu-camera)
                 (not disable-targbar)
                 (not hmplus-intro-active?)
                 (not in-dialogue?)
                 (not in-menu?)
+                (not in-arena-menu?)
+                (not in-arena-menu-info?)
                 (not (task-node-open? (game-task-node city-blow-tower-phase-1)))
                 (not (task-node-open? (game-task-node city-blow-tower-resolution)))
                 (not (search-process-tree *active-pool* (lambda ((p process)) (type? p pet-menu))))
@@ -2548,29 +2594,31 @@
                 (process-spawn reputation-text global-root-trans global-parent-mask)
             )
             (when (= xp-draw-override #f)
-                (let ((y 50))
+                (let ((y 80))
                 (when (= hud-timer-on? #f)
-                            (set! y 50)
+                            (set! y 80)
                         )
                         (when (or (= hud-timer-on? #t) (= r3-noto #t))
-                            (set! y 120)
+                            (set! y 80)
                         )
-                (when (string= xp-string "<COLOR_RED>Duplicate Gun Mod found~%<COLOR_YELLOW>Level up to increase chances of higher tier weapons!")
-                    (set! max-time 900)
-                    (set! y 310)
+                (when (string= xp-string "Duplicate Gun Mod Found")
+                    (set! max-time 400)
+                    (set! y 80)
                 )
-                (clear matt-str)
-                (clear *pc-encoded-matt-str*)
-                (format matt-str "~s~%<COLOR_CYAN>+~d Reputation"
-                xp-string
-                (the int *xp-gain*)
+                (when (and
+                        (not in-menu?) 
+                        (not in-vin-shop?) 
+                        (not in-arena-menu?) 
+                        (not in-arena-menu-info?)
+                    )
+                    (clear *temp-string*)
+                    (format *temp-string* "<COLOR_ORANGE>~s~%<COLOR_WHITE>+~d XP"
+                    xp-string
+                    (the int *xp-gain*)
+                    )
+                    (draw-mod-menu-text-custom *temp-string*
+                    255 y 0.425 #f #t #f)
                 )
-                (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-                (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-                (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-                (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 y 0.0 (font-color default) (font-flags middle shadow kerning large))))
-                (set! (-> font-ctx scale) 0.325)
-                (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
             )
             )
             (when (= xpi max-time)
@@ -2613,24 +2661,19 @@
                     (when (= in-vin-shop? #t)
                         (set! y 280)
                     )
-            (clear matt-str)
-            (clear *pc-encoded-matt-str*)
-            (format matt-str "~s~%<COLOR_CYAN>+~d"
+            (clear *temp-string*)
+            (format *temp-string* "<COLOR_ORANGE>~s~%<COLOR_WHITE>+~d"
             xp-string
             (the int *xp-gain*)
             )
-            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 y 0.0 (font-color default) (font-flags middle shadow kerning large))))
-            (set! (-> font-ctx scale) 0.325)
-            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            (draw-mod-menu-text-custom *temp-string*
+            256 y 0.425 #f #t #f)
         )
     )
 
     (when (= draw-levelup-noto #t) ;Level Up
         (+! lvli 1)
-        (when (= lvli 600)
+        (when (= lvli 400)
             (set! lvli 0)
             (set! draw-levelup-noto #f)
         )
@@ -2641,18 +2684,13 @@
                 (= (paused?) #f)
                 (= in-menu? #f)
             )
-            (clear matt-str)
-            (clear *pc-encoded-matt-str*)
-            (format matt-str "<COLOR_GREEN>LEVEL UP!~%~%~s Level ~d"
+            (clear *temp-string*)
+            (format *temp-string* "<COLOR_WHITE>LEVEL UP~%~s Level ~d"
             noto-string
             draw-levelup-int
             )
-            (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-            (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-            (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-            (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 250 150 0.0 (font-color default) (font-flags middle shadow kerning large))))
-            (set! (-> font-ctx scale) 0.325)
-            (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+            (draw-mod-menu-text-custom *temp-string*
+            256 150 0.425 #f #t #f)
         )
     )
     (when
@@ -2665,25 +2703,22 @@
             (not mainmenu-camera)
             (= r3-noto #f)
         )
-        (set! r3-noto #t)
-        (set! anim-noto -20)
+        (view-xp)
+    )
+
+    (when
+        (and
+            *target*
+            (not *scene-player*)
+            (not (paused?))
+            (pause-allowed?)
+            (cpad-pressed? 0 l3)
+            r3-noto
+            (> notoi 0)
+        )
         (set! notoi 0)
     )
-
-    (when
-        (and
-            *target*
-            (not *scene-player*)
-            (= (paused?) #f)
-            (= (pause-allowed?) #t)
-            (cpad-pressed? 0 l3)
-            (= r3-noto #t)
-            (> notoi 22)
-        )
-        (set! notoi 22)
-        (set! anim-noto 1)
-    )
-
+    ;; animate xp bars on l3 press
     (when
         (and
             *target*
@@ -2691,29 +2726,30 @@
             (= (paused?) #f)
             (= r3-noto #t)
         )
+        (when (and (< anim-noto 0) (< notoi 300))
+            (+! anim-noto 1)
+        )
+        (when (and (>= anim-noto 0) (<= notoi 300))
             (+! notoi 1)
-            (when (and (>= notoi 1)(<= notoi 21))
-                (+! anim-noto 1)
-            )
-            (when (and (> notoi 21) (< notoi 353))
-                (draw-XP-bar)
-                (set! noto-draw-x 190)
-                (set! noto-draw-y 11)
-                (set! guns-draw-x 30)
-                (set! guns-draw-y 11)
-                (set! car-draw-x 350)
-                (set! car-draw-y 11)
-            )
-            (when (>= notoi 370)
-                (-! anim-noto 1)
-            )
-            (when (or (= notoi 390)(= in-menu? #t))
-                (set! notoi 0)
-                (set! anim-noto -30)
-                (set! r3-noto #f)
-                (set! xp-bar-spawned? #f)
-            )
         )
+        (when (and (> anim-noto -30) (>= notoi 300))
+            (-! anim-noto 1)
+        )
+        (when (or (<= anim-noto -30)(= in-menu? #t))
+            (set! notoi 0)
+            (set! anim-noto -30)
+            (set! r3-noto #f)
+            (set! xp-bar-spawned? #f)
+        )
+        (set! noto-draw-x (- noto-bar-x-pos (/ xp-bar-width 2)))
+        (set! noto-draw-y (+ anim-noto 11))
+        (set! guns-draw-x (- gun-bar-x-pos (/ xp-bar-width 2)))
+        (set! guns-draw-y (+ anim-noto 11))
+        (set! car-draw-x (- car-bar-x-pos (/ xp-bar-width 2)))
+        (set! car-draw-y (+ anim-noto 11))
+        (when (>= noto-draw-y 1)
+            (draw-XP-bar))
+    )
 
     (when ;draw the notoriety level onscreen
     (and
@@ -2723,19 +2759,14 @@
         (= r3-noto #t)
         (= in-menu? #f)
     )
-        (clear matt-str)
-        (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_ORANGE>Hero Level: ~d~%~%<COLOR_YELLOW>~d/~d"
+        (clear *temp-string*)
+        (format *temp-string* "<COLOR_ORANGE>Hero Level ~d~%~%~d / ~d"
         notoriety-level
         (the int (-> *game-info* karma))
         (the int (* (+ (* notoriety-level 60) (* notoriety-level 100)) notoriety-level))
         )
-        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 anim-noto 0.0 (font-color default) (font-flags middle shadow kerning large))))
-        (set! (-> font-ctx scale) 0.325)
-        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        (draw-mod-menu-text-custom *temp-string*
+        noto-bar-x-pos anim-noto 0.325 #f #t #f)
     )
     (when ;draw the guns level onscreen
     (and
@@ -2749,19 +2780,14 @@
             (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
         )
     )
-        (clear matt-str)
-        (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_RED>Guns: ~d~%~%<COLOR_RED>~d/~d"
+        (clear *temp-string*)
+        (format *temp-string* "<COLOR_RED>Gun Level ~d~%~%~d / ~d"
         guns-level
         (the int (-> *game-info* buzzer-total))
         (the int (* (+ (* guns-level 120) (* guns-level 200)) guns-level))
         )
-        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 90 anim-noto 0.0 (font-color default) (font-flags middle shadow kerning large))))
-        (set! (-> font-ctx scale) 0.325)
-        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        (draw-mod-menu-text-custom *temp-string*
+        gun-bar-x-pos anim-noto 0.325 #f #t #f)
     )
     (when ;draw the cars level onscreen
     (and
@@ -2772,19 +2798,14 @@
         (= in-menu? #f)
         (!= (-> *game-info* total-deaths) 0)
     )
-        (clear matt-str)
-        (clear *pc-encoded-matt-str*)
-        (format matt-str "<COLOR_PINK>Vehicles: ~d~%~%<COLOR_PINK>~d/~d"
+        (clear *temp-string*)
+        (format *temp-string* "<COLOR_PINK>Vehicle Level ~d~%~%~d / ~d"
         cars-level
         (the int (-> *game-info* fuel))
         (the int (* (+ (* cars-level 30) (* cars-level 175)) cars-level))
         )
-        (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-        (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-        (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-        (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 410 anim-noto 0.0 (font-color default) (font-flags middle shadow kerning large))))
-        (set! (-> font-ctx scale) 0.325)
-        (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
+        (draw-mod-menu-text-custom *temp-string*
+        car-bar-x-pos anim-noto 0.325 #f #t #f)
     )
 
     (when (and 
