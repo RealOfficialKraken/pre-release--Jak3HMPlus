@@ -1555,6 +1555,7 @@ Have fun!~%
         *debug-segment*
     )
     (when (= in-picture-mode? #f)
+        ; old
         #|(clear matt-str)
         (clear *pc-encoded-matt-str*)
         (format matt-str "<COLOR_RED>Press <COLOR_BLUE>X<COLOR_WHITE>+<COLOR_PINK>Square<COLOR_RED> to go into Picture mode~%<COLOR_GREEN>Triangle<COLOR_RED> to exit"
@@ -1565,6 +1566,10 @@ Have fun!~%
         (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 255 0.0 (font-color white) (font-flags middle shadow kerning large))))
         (set! (-> font-ctx scale) 0.325)
         (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))|#
+        
+        ; new
+        ;; (draw-mod-menu-text-custom "<PAD_TRIANGLE> Exit   <PAD_X>+<PAD_SQUARE> Picture mode"
+        ;; 255 255 0.325 #f #t #f)
     )
     (when
         (and

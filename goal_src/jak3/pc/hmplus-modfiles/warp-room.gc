@@ -502,32 +502,18 @@
     :virtual #t
     :code (behavior ()
         (loop
+            (draw-mod-menu-text-custom "Which model would you like to play as?~%~%This can be changed at any time in the mod menu."
+            255 90 0.325 #f #t #f)
+            
+            (clear *temp-string*)
             (case (-> self hm-select)
                 ((0)
-                    (clear matt-str)
-                    (clear *pc-encoded-matt-str*)
-                    (format matt-str "<COLOR_CYAN>Which model would you like to play as?~%<COLOR_PINK>This can be changed at any time in the mod menu~%~%<COLOR_GREEN>Jak II <COLOR_RED>Jak 3"
-                    )
-                    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-                    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-                    (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-                    (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 60 0.0 (font-color default) (font-flags middle shadow kerning large))))
-                    (set! (-> font-ctx scale) 0.325)
-                    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
-                )
+                    (format *temp-string* "<COLOR_YELLOW>Jak II <COLOR_MENU-PARENT>Jak 3"))
                 ((1)
-                    (clear matt-str)
-                    (clear *pc-encoded-matt-str*)
-                    (format matt-str "<COLOR_CYAN>Which model would you like to play as?~%<COLOR_PINK>This can be changed at any time in the mod menu~%~%<COLOR_RED>Jak II <COLOR_GREEN>Jak 3"
-                    )
-                    (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-                    (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-                    (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-                    (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 60 0.0 (font-color default) (font-flags middle shadow kerning large))))
-                    (set! (-> font-ctx scale) 0.325)
-                    (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
-                )
+                    (format *temp-string* "<COLOR_MENU-PARENT>Jak II <COLOR_YELLOW>Jak 3"))
             )
+            (draw-mod-menu-text-custom *temp-string*
+            255 140 0.425 #f #t #f)
             (suspend)
         )
     )
