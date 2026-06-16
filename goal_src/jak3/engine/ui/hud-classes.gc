@@ -451,7 +451,7 @@
 
 (defmethod init-callback ((this hud-crystal))
   (set! (-> this gui-id)
-        (add-process *gui-control* this (gui-channel hud-lower-left) (gui-action hidden) (-> this name) 81920.0 0) ;; jak health hud is replaced, so this can take hud-lower-left channel
+        (add-process *gui-control* this (gui-channel subtitle-pc) (gui-action hidden) (-> this name) 81920.0 0)
         )
   (hud-create-icon this 0 (the-as int (art-group-get-by-name *level* "skel-eco-crystal-dark-c" (the-as (pointer level) #f))))
   (set! (-> this icons 0 scale-x) 0.036)
