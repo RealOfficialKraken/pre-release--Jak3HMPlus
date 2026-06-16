@@ -1466,51 +1466,6 @@ Have fun!~%
         ((9)  (blank-hint! "You received the~%<COLOR_PINK>Peace Maker" 0 0))
         ((10) (blank-hint! "You received the~%<COLOR_PINK>Mass Inverter" 0 0))
         ((11) (blank-hint! "You received the~%<COLOR_PINK>Super Nova" 0 0))
-        
-        ;; below are vanilla-like upgrade popups, but they seem less flexible so i went with above
-
-        ;; ((0) ;; gun-red-1
-
-        ;; )
-        ;; ((1) ;; gun-red-2
-        ;;     (talker-spawn-func (-> *talker-speech* 370) *entity-pool* (target-pos 0) (the-as region #f))
-        ;; )
-        ;; ((2) ;; gun-red-3
-        ;;     (talker-spawn-func (-> *talker-speech* 371) *entity-pool* (target-pos 0) (the-as region #f))
-        ;; )
-
-
-        ;; ((3) ;; gun-yellow-1
-
-        ;; )
-        ;; ((4) ;; gun-yellow-2
-        ;;     (talker-spawn-func (-> *talker-speech* 368) *entity-pool* (target-pos 0) (the-as region #f))
-        ;; )
-        ;; ((5) ;; gun-yellow-3
-        ;;     (talker-spawn-func (-> *talker-speech* 369) *entity-pool* (target-pos 0) (the-as region #f))
-        ;; )
-
-
-        ;; ((6) ;; gun-blue-1
-        ;;     (talker-spawn-func (-> *talker-speech* 372) *entity-pool* (target-pos 0) (the-as region #f))
-        ;; )
-        ;; ((7) ;; gun-blue-2
-        ;;     (talker-spawn-func (-> *talker-speech* 373) *entity-pool* (target-pos 0) (the-as region #f))
-        ;; )
-        ;; ((8) ;; gun-blue-3
-        ;;     (talker-spawn-func (-> *talker-speech* 374) *entity-pool* (target-pos 0) (the-as region #f))
-        ;; )
-
-
-        ;; ((9) ;; gun-dark-1
-        ;;     (talker-spawn-func (-> *talker-speech* 365) *entity-pool* (target-pos 0) (the-as region #f))
-        ;; )
-        ;; ((10) ;; gun-dark-2
-        ;;     (talker-spawn-func (-> *talker-speech* 366) *entity-pool* (target-pos 0) (the-as region #f))
-        ;; )
-        ;; ((11) ;; gun-dark-3
-        ;;     (talker-spawn-func (-> *talker-speech* 367) *entity-pool* (target-pos 0) (the-as region #f))
-        ;; )
     )
 )
 
