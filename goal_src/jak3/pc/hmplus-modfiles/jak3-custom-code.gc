@@ -14,6 +14,10 @@
 (defun-extern spawn-brute-artifact none)
 (defun-extern pick-random-anchor none)
 (defun-extern spawn-rage-ghost none)
+(declare-type maker enemy)
+(declare-type planetboss maker)
+(declare-type planetboss-spawn-manager process)
+(defun-extern spawn-planetboss-spawn-manager int none)
 (defun-extern boss-leaper! vector none)
 (define hmplus-intro-fade-start (seconds 0.0))
 (define hmplus-intro-fading? #f)
@@ -24,6 +28,14 @@
 (define gm-desc2 "")
 (define gm-desc3 "")
 (define gm-desc4 "")
+
+
+#|
+CRASHES TO FIX:
+- After Jinx mission
+- Rage ghost still crashes every now and again
+- Freaking dark ship gets in the way of everything
+|#
 
 (defun toggle-picture-mode ()
     (cond
@@ -5019,6 +5031,8 @@
                 (not in-satbattle?)
                 (not (search-process-tree *active-pool* (lambda ((p process)) (type? p entity-boss))))
                 (not (search-process-tree *active-pool* (lambda ((p process)) (type? p entity-boss-dying))))
+                (not (search-process-tree *active-pool* (lambda ((p process)) (type? p planetboss-spawn-manager))))
+                (not (search-process-tree *active-pool* (lambda ((p process)) (type? p planetboss))))
                 (not in-menu?)
             )
                 (spawn-rage-ghost)
@@ -9231,6 +9245,8 @@
     (kill-by-name "floor-spikelight" *active-pool*)
     (set! *floor-spikelight* #f)
     (kill-by-name "entity-boss-dying" *active-pool*)
+    (kill-by-name "planetboss" *entity-pool*)
+    (kill-by-name "planetboss-spawn-manager" *default-pool*)
     (set! level-override #f)
     (when (ppointer->process *weather-flux*)
         (send-event (ppointer->process *weather-flux*) 'die #t)

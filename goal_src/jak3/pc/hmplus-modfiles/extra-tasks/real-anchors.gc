@@ -1,0 +1,87 @@
+(in-package goal)
+
+;;name : real-anchors.gc
+
+(define-extern spawn-dark-ship (function vector (none)))
+
+(deftype real-anchor (process)
+    ((current-wave          int)
+     (ds-pos                vector :inline)
+    )
+    (:state-methods
+        pre-idle
+        idle
+        battle
+        win
+        dead
+    )
+)
+
+(defbehavior real-anchor-init-by-other real-anchor ((vec vector))
+    (vector-copy! (-> self ds-pos) vec)
+    (set! (-> self current-wave) 0)
+    (let ((vec2 (new-stack-vector0)))
+        (vector-copy! vec2 (-> self ds-pos))
+        (+! (-> vec2 y) (meters 400.0))
+        (spawn-dark-ship vec2)
+    )
+    (go-virtual pre-idle)
+    (none)
+)
+
+(defstate pre-idle (real-anchor)
+    :virtual #t
+    :code (behavior ()
+        (loop
+            (when *debug-segment*
+                (format *stdcon* "real-anchor is in pre-idle")
+            )
+            (suspend)
+        )
+    )
+)
+
+(defstate dead (real-anchor)
+    :virtual #t
+    :code (behavior ()
+        (kill-by-name (-> self name) *default-pool*)
+        (deactivate self)
+    )
+)
+
+(defun spawn-real-anchor ((vec vector))
+    (process-spawn real-anchor vec :name "real-anchor")
+    (none)
+)
+
+(defun spawn-dark-ship ((vec vector))
+    (let ((veccy (new 'stack-no-clear 'vector))
+          (ship 
+            (the manipy 
+            (ppointer->process 
+                (process-spawn manipy
+                :init
+                manipy-init
+                vec
+                #f
+                (art-group-get-by-name *level* "skel-dm-skyship" (the (pointer level) #f))
+                #f
+                0
+                #f
+                :name "dm-ship"
+                :from *default-dead-pool*
+                :stack-size #x18000
+                )
+            )
+          )
+      )
+    )
+    (send-event ship 'shadow #t)
+    (set! (-> veccy x) 55.0)
+    (set! (-> veccy y) 55.0)
+    (set! (-> veccy z) 55.0)
+    (send-event ship 'scale veccy)
+    (send-event ship 'max-vis-dist 9999999.0)
+    )
+    (none)
+)

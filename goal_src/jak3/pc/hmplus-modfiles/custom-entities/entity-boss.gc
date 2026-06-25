@@ -1201,7 +1201,7 @@
           
           ;; phase 2: credits for 85s
           ((2)
-            (kill-by-name "darkworld-tower" *default-pool**)
+            (kill-by-name "darkworld-tower" *default-pool*)
 
             (let ((scroll-delay (seconds 7.0))
                   (scroll-duration (seconds 80.0))
