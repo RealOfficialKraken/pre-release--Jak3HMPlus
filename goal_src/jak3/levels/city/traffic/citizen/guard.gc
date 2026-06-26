@@ -1739,7 +1739,7 @@
   (set! (-> this pursuit-start-time) 0)
   (set! (-> this last-choose-new-enemy-time) 0)
   (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-      (set! (-> this hit-points) (+ (* 14.0 (-> this enemy-info default-hit-points)) (* (the float enemy-noto) 3)))
+      (set! (-> this hit-points) (+ (* 34.0 (-> this enemy-info default-hit-points)) (* (the float enemy-noto) 3)))
       (set! (-> this hit-points) (+ (-> this enemy-info default-hit-points) (* (the float enemy-noto) 3)))
     )
   (set! (-> this hit-face) (the-as uint -1))

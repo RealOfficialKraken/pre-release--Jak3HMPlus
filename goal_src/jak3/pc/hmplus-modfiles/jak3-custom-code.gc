@@ -2258,6 +2258,7 @@ As you complete through main missions, you'll unlock more <COLOR_YELLOW>points o
 (set! menu-type 0)
 (sound-play "menu-back")
 (cpad-clear! 0 r3)
+(freeze-enemies-in-menu!)
 )
 
 (when 
@@ -2314,7 +2315,7 @@ As you complete through main missions, you'll unlock more <COLOR_YELLOW>points o
         (the int (-> *game-info* crates-opened))
         )
         (draw-mod-menu-text-custom *temp-string*
-        255 22 0.325 #f #t #f)
+        255 72 0.325 #f #t #f)
     )
 
     (when (and 

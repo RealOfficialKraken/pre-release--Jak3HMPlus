@@ -168,6 +168,7 @@
     (defun-extern draw-targbar-hp (none))
     (defun-extern draw-targbar-dark (none))
     (defun-extern draw-targbar-light (none))
+    (define targbar-hp-blink-timer 0)
 
     (define levelup-color #f)
     (define lui 0)
@@ -343,7 +344,7 @@
             (< (-> self y-ofs) 33.0)
             (<= notoriety-level (- enemy-noto 7))
         )
-        (set! (-> self rep-string) "(+ Hi~+7Vg~-7Vh Level Bonus)~%~S: +~D XP")
+        (set! (-> self rep-string) "(+ Hi~+7Vg~-7Vh Level Bonus)~%~S: +~D Re~+7Vp~-7Vutation")
         (set! (-> self xp-gain) (+ (-> self xp-gain) (* (-> self xp-gain) 0.43)))
       )
       (+! (-> self y-ofs) (* 0.6 (-> self clock time-adjust-ratio)))
@@ -394,7 +395,7 @@
       (set! (-> self font) (new 'process 'font-context *font-default-matrix* 0 0 0.0 (font-color white) (font-flags shadow kerning))))
   (set! (-> self xp-string) xp-string)
   (set! (-> self xp-gain) *xp-gain*)
-  (set! (-> self rep-string) "~S: +~D XP")
+  (set! (-> self rep-string) "~S: +~D Re~+7Vp~-7Vutation")
   (set-scale! (-> self font) 0.2)
   (set-flags! (-> self font) (font-flags shadow kerning large middle))
   (set-width! (-> self font) 350)
@@ -588,20 +589,25 @@
     (let ((xp-gain2 (/ (* xp-gain enemy-noto) 1.5))
           (xp-gain3 (/ (* xp-gain enemy-noto) 4))
           (high-xp-gain 0.0))
-
-        ;; color-based xp scaling
         (set! xp-gain2 (* xp-gain2 (hmplus-enemy-xp-scale)))
+        (when
+          (and
+            (< notoriety-level 100)
+            (> xp-gain2 2500.0)
+          )
+          (set! xp-gain2 2500.0)
+        )
 
-        (when (> xp-gain2 2500.0)
-            (set! xp-gain2 2500.0)
-        )
         (when (<= notoriety-level (- enemy-noto 7))
-            (set! xp-gain2 (+ xp-gain2 (* xp-gain2 1.23))) ;; or whatever multiplier
+            (set! xp-gain2 (+ xp-gain2 (* xp-gain2 1.23)))
         )
+
         (set! high-xp-gain xp-gain2)
+
         (when (<= notoriety-level (- enemy-noto 7))
-            (set! high-xp-gain (+ high-xp-gain (* xp-gain2 0.43))) ;; or whatever multiplier
+            (set! high-xp-gain (+ high-xp-gain (* xp-gain2 0.43)))
         )
+
         (format #t "+ ~f karma" high-xp-gain)
         (set! *xp-gain* xp-gain2)
         (+! (-> *game-info* karma) high-xp-gain)
@@ -1193,25 +1199,25 @@
         ;NEW HP BAR:
         (when (= enemy-hp #t)
   (+! hpi 1)
-  (let ((color-string "<COLOR_WHITE>Level "))
+  (let ((color-string "<COLOR_WHITE>Lv. "))
     (when (and
             (<= enemy-noto (+ notoriety-level 3))
             (> enemy-noto (- notoriety-level 3))
-            (not (string= color-string "<COLOR_YELLOW>Level ")))
-      (set! color-string "<COLOR_YELLOW>Level "))
+            (not (string= color-string "<COLOR_YELLOW>Lv. ")))
+      (set! color-string "<COLOR_YELLOW>Lv. "))
     (when (and
             (>= enemy-noto (+ notoriety-level 3))
-            (not (string= color-string "<COLOR_RED>Level ")))
-      (set! color-string "<COLOR_RED>Level "))
+            (not (string= color-string "<COLOR_RED>Lv. ")))
+      (set! color-string "<COLOR_RED>Lv. "))
     (when (and
             (<= enemy-noto (- notoriety-level 3))
             (> enemy-noto (- notoriety-level 7))
-            (not (string= color-string "<COLOR_GREEN>Level ")))
-      (set! color-string "<COLOR_GREEN>Level "))
+            (not (string= color-string "<COLOR_GREEN>Lv. ")))
+      (set! color-string "<COLOR_GREEN>Lv. "))
     (when (and
             (< enemy-noto (- notoriety-level 7))
-            (not (string= color-string "<COLOR_TRANSPARENT>Level ")))
-      (set! color-string "<COLOR_TRANSPARENT>Level "))
+            (not (string= color-string "<COLOR_TRANSPARENT>Lv. ")))
+      (set! color-string "<COLOR_TRANSPARENT>Lv. "))
     (when
       (and
         *target*
@@ -1421,29 +1427,82 @@
       (set! chip-alpha (the int (* 112.0 (- 1.0 chip-u))))
       (set! chip-arg (new 'static 'rgba :r 255 :g 0 :b 0 :a chip-alpha))))
   (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                               (bucket-id particles))
-    (draw-sprite2d-xy s2-0 x y 310 8 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-    (when (and (= enemy-hp-chip-active #t)
-               (> chip-progress progress)
-               (> chip-height 0)
-               (> chip-alpha 0))
-      (let ((red-w (the int (* 310.0 progress)))
-            (chip-w (the int (* 310.0 chip-progress))))
-        (when (> chip-w red-w)
-          (draw-sprite2d-xy s2-0
-                            (+ (+ x 1) red-w)
-                            chip-y
-                            (- chip-w red-w)
-                            chip-height
-                            chip-arg
-                            #x3fffff))))
+                             (bucket-id particles))
+
+  ;; outer shadow / plate
+  (draw-sprite2d-xy s2-0
+                    (- x 4)
+                    (- y 1)
+                    318
+                    10
+                    (new 'static 'rgba :r 0 :g 0 :b 0 :a #x50)
+                    #x3fffff)
+
+  ;; inner dark backing
+  (draw-sprite2d-xy s2-0
+                    x
+                    y
+                    310
+                    8
+                    (new 'static 'rgba :r 0 :g 0 :b 0 :a #x70)
+                    #x3fffff)
+
+  ;; faint full-bar color glow
+  (draw-sprite2d-xy s2-0
+                    x
+                    y
+                    310
+                    8
+                    (new 'static 'rgba
+                         :r (-> arg3 r)
+                         :g (-> arg3 g)
+                         :b (-> arg3 b)
+                         :a #x18)
+                    #x3fffff)
+
+  ;; delayed damage chip
+  (when (and (= enemy-hp-chip-active #t)
+             (> chip-progress progress)
+             (> chip-height 0)
+             (> chip-alpha 0))
+    (let ((red-w (the int (* 310.0 progress)))
+          (chip-w (the int (* 310.0 chip-progress))))
+      (when (> chip-w red-w)
+        (draw-sprite2d-xy s2-0
+                          (+ (+ x 1) red-w)
+                          chip-y
+                          (- chip-w red-w)
+                          chip-height
+                          chip-arg
+                          #x3fffff))))
+
+  ;; main fill
+  (draw-sprite2d-xy s2-0
+                    (+ x 1)
+                    (+ y 1)
+                    (the int (* 308.0 progress))
+                    6
+                    arg3
+                    #x3fffff)
+
+  ;; top highlight line
+  (draw-sprite2d-xy s2-0
+                    (+ x 2)
+                    (+ y 1)
+                    (the int (* 306.0 progress))
+                    1
+                    (new 'static 'rgba :r 255 :g 255 :b 255 :a #x38)
+                    #x3fffff)
+
+  ;; right edge cap / hot tip
+  (when (> progress 0.03)
     (draw-sprite2d-xy s2-0
-                      (+ x 1)
-                      (+ y 1)
-                      (the int (* 310.0 progress))
-                      6
-                      arg3
-                      #x3fffff)))))
+                      (+ (+ x 1) (the int (* 308.0 progress)))
+                      y
+                      2
+                      8
+                      (new 'static 'rgba :r 255 :g 255 :b 255 :a #x30)
+                      #x3fffff))))))
   (when (= hpi 400)
     (set! hpi 0)
     (set! enemy-hp #f)
@@ -2612,7 +2671,7 @@
                         (not in-arena-menu-info?)
                     )
                     (clear *temp-string*)
-                    (format *temp-string* "<COLOR_ORANGE>~s~%<COLOR_WHITE>+~d XP"
+                    (format *temp-string* "<COLOR_ORANGE>~s~%<COLOR_WHITE>+~d Reputation"
                     xp-string
                     (the int *xp-gain*)
                     )
@@ -2843,8 +2902,8 @@
 )
 
 (defun draw-targbar-hp ()
-  (let ((x 7)
-        (y 358)
+  (let ((x 10)
+        (y 347)
         (progress 0.0)
         (arg3 (new 'static 'rgba
                    :r 0
@@ -2905,16 +2964,86 @@
       (set! targbar-hp-display-percent 1.0))
 
     (set! progress targbar-hp-display-percent)
+    ;; low HP warning
+    (when (<= progress 0.20)
+    (+! targbar-hp-blink-timer 1)
+
+    ;; red color
+    (set! (-> arg3 r) 255)
+    (set! (-> arg3 g) 0)
+    (set! (-> arg3 b) 0)
+
+    ;; blink alpha: 10 frames bright, 10 frames dim
+    (if (< (mod targbar-hp-blink-timer 20) 10)
+        (set! (-> arg3 a) #x70)
+        (set! (-> arg3 a) #x20)))
+
+(when (> progress 0.20)
+  (set! targbar-hp-blink-timer 0))
 
     (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                 (bucket-id particles))
-      (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-      (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)))
+                             (bucket-id particles))
+
+  ;; outer HP plate
+(draw-sprite2d-xy s2-0
+                  (- x 2)
+                  (- y 1)
+                  67
+                  18
+                  (new 'static 'rgba :r 0 :g 0 :b 0 :a #x60)
+                  #x3fffff)
+
+;; dark inner track
+(draw-sprite2d-xy s2-0
+                  x
+                  y
+                  63
+                  16
+                  (new 'static 'rgba :r 0 :g 0 :b 0 :a #x70)
+                  #x3fffff)
+
+;; HP fill
+(draw-sprite2d-xy s2-0
+                  (+ x 1)
+                  (+ y 1)
+                  (the int (* 61.0 progress))
+                  14
+                  arg3
+                  #x3fffff)
+
+;; top shine
+(draw-sprite2d-xy s2-0
+                  (+ x 2)
+                  (+ y 1)
+                  (the int (* 59.0 progress))
+                  1
+                  (new 'static 'rgba :r 255 :g 255 :b 255 :a #x30)
+                  #x3fffff)
+
+;; small hot edge - 2x taller
+(when (> progress 0.04)
+  (draw-sprite2d-xy s2-0
+                    (+ (+ x 1) (the int (* 61.0 progress)))
+                    y
+                    2
+                    16
+                    (new 'static 'rgba :r 255 :g 255 :b 255 :a #x24)
+                    #x3fffff))
+
+  ;; small hot edge
+  (when (> progress 0.04)
+    (draw-sprite2d-xy s2-0
+                      (+ (+ x 1) (the int (* 61.0 progress)))
+                      y
+                      2
+                      8
+                      (new 'static 'rgba :r 255 :g 255 :b 255 :a #x24)
+                      #x3fffff))))
   (none))
 
   (defun draw-targbar-dark ()
-  (let ((x 7)
-        (y 342)
+  (let ((x 10)
+        (y 338)
         (progress 0.0)
         (arg3 (new 'static 'rgba
                    :r 155
@@ -2977,14 +3106,52 @@
     (set! progress targbar-dark-display-percent)
 
     (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                 (bucket-id particles))
-      (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-      (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)))
+                             (bucket-id particles))
+
+  ;; capsule shadow
+  (draw-sprite2d-xy s2-0
+                    (- x 2)
+                    (- y 1)
+                    67
+                    9
+                    (new 'static 'rgba :r 0 :g 0 :b 0 :a #x50)
+                    #x3fffff)
+
+  ;; dim full eco track using the eco color
+  (draw-sprite2d-xy s2-0
+                    x
+                    y
+                    63
+                    7
+                    (new 'static 'rgba
+                         :r (-> arg3 r)
+                         :g (-> arg3 g)
+                         :b (-> arg3 b)
+                         :a #x14)
+                    #x3fffff)
+
+  ;; main eco fill
+  (draw-sprite2d-xy s2-0
+                    (+ x 1)
+                    (+ y 1)
+                    (the int (* 61.0 progress))
+                    5
+                    arg3
+                    #x3fffff)
+
+  ;; bright core line
+  (draw-sprite2d-xy s2-0
+                    (+ x 2)
+                    (+ y 3)
+                    (the int (* 59.0 progress))
+                    1
+                    (new 'static 'rgba :r 155 :g 0 :b 255 :a #x40)
+                    #x3fffff)))
   (none))
 
   (defun draw-targbar-light ()
-  (let ((x 7)
-        (y 326)
+  (let ((x 10)
+        (y 328)
         (progress 0.0)
         (arg3 (new 'static 'rgba
                    :r 200
@@ -3047,7 +3214,45 @@
     (set! progress targbar-light-display-percent)
 
     (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                 (bucket-id particles))
-      (draw-sprite2d-xy s2-0 x y 63 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-      (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 61.0 progress)) 12 arg3 #x3fffff)))
+                             (bucket-id particles))
+
+  ;; capsule shadow
+  (draw-sprite2d-xy s2-0
+                  (- x 2)
+                  (- y 1)
+                  67
+                  10
+                  (new 'static 'rgba :r 0 :g 0 :b 0 :a #x50)
+                  #x3fffff)
+
+  ;; dim full eco track using the eco color
+  (draw-sprite2d-xy s2-0
+                    x
+                    y
+                    63
+                    7
+                    (new 'static 'rgba
+                         :r (-> arg3 r)
+                         :g (-> arg3 g)
+                         :b (-> arg3 b)
+                         :a #x14)
+                    #x3fffff)
+
+  ;; main eco fill
+  (draw-sprite2d-xy s2-0
+                    (+ x 1)
+                    (+ y 1)
+                    (the int (* 61.0 progress))
+                    5
+                    arg3
+                    #x3fffff)
+
+  ;; bright core line
+  (draw-sprite2d-xy s2-0
+                    (+ x 2)
+                    (+ y 3)
+                    (the int (* 59.0 progress))
+                    1
+                    (new 'static 'rgba :r 255 :g 240 :b 120 :a #x40)
+                    #x3fffff)))
   (none))

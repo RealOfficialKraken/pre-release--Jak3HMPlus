@@ -28,6 +28,30 @@
 
 (defun-extern spawn-eb-floater vector symbol float none)
 
+(defun replay-current-vin-log! ()
+  (let ((vin-progress (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000)))
+    (set! dialogue-choice #f)
+    (set! dialogue-select 0)
+    (set! choice-given? #f)
+    (cond
+      ((= vin-progress 0)
+        (set! log-id 1337)
+        (set! log-sec 1))
+      ((= vin-progress 1)
+        (set! log-id 1337)
+        (set! log-sec 1))
+      ((= vin-progress 2)
+        (set! log-id 1345)
+        (set! log-sec 1))
+      ((>= vin-progress 3)
+        (set! log-id 1410)
+        (set! log-sec 0)))
+    (set! in-dialogue? #t)
+    (disable-hudmap)
+  )
+  (none)
+)
+
 
 ;; these are broken and weird, probably not useful anymore
 #|
@@ -343,7 +367,12 @@
 
 (defun vin-hint-pull ((idx int))
     (case idx
-        ((0) (set! vin-shop-hint "You should start by gathering <COLOR_PINK>10 Dark Crystals<COLOR_WHITE>.~%~%That should help us learn more about them."))
+        ((0) 
+            (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                (set! vin-shop-hint "You should start by gathering <COLOR_PINK>10 Dark Crystals<COLOR_WHITE>.~%~%That should help us learn more about them.")
+                (set! vin-shop-hint "You should start by gathering <COLOR_PINK>50 Dark Crystals<COLOR_WHITE>.~%~%That should help us learn more about them.")
+            )
+        )
         ((1) (set! vin-shop-hint "Certain new missions from The Entity~%~%will reward you a Super Gun Mod."))
         ((2) (set! vin-shop-hint "You can find <COLOR_PINK>Dark Eco Crystals<COLOR_WHITE> in~%~%Tier 3 <COLOR_PINK>Black Crates<COLOR_WHITE> dropped by enemies."))
         ((3) (set! vin-shop-hint "You can backtrack to levels you usually can't~%~%through the warp room for bonus rewards."))
@@ -402,7 +431,10 @@
     )
     (draw-mod-menu-background)
     (draw-mod-menu-text-preset 0 "<COLOR_PINK>Vin's Black Market")
-    (draw-mod-menu-text-preset 1 "<PAD_X> Purchase   <PAD_TRIANGLE> Exit")
+    (if (>= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 1)
+        (draw-mod-menu-text-preset 1 "<PAD_X> Purchase   <PAD_CIRCLE> Talk to Vin  <PAD_TRIANGLE> Exit")
+        (draw-mod-menu-text-preset 1 "<PAD_X> Purchase   <PAD_TRIANGLE> Exit")
+    )
     (draw-mod-menu-text-custom "~%~%~%Trade your Dark Eco Crystals for goods" 255 50 0.325 #f #t #f)
     (draw-vin-shop-items)
 
@@ -432,6 +464,15 @@
 
     ;; (vin-hint-pull (rand-vu-int-range 1 9))
     (vin-hint-pull vin-hinti)
+    (when 
+        (and 
+            (or
+                (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                (>= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 1)
+            )
+        )
+    (vin-hint-pull (rand-vu-int-range 1 9))
+    )
     (+! vin-hinti 1)
     (when (> vin-hinti 10)
         (set! vin-hinti 1)
@@ -492,6 +533,13 @@
                 (turn-to-scene-camera cam-pos tpos #t)
             )
             (draw-vin-shop)
+            (when 
+                (and 
+                    (cpad-pressed? 0 circle)
+                    (>= (/ (mod (-> *game-info* continue-deaths) 10000000) 1000000) 1)
+                )
+                (replay-current-vin-log!)
+                (cpad-clear! 0 circle))
             (mod-menu-controls)
         )
     )
@@ -611,7 +659,7 @@
             ((= log-id 1339) ; How exactly do these crystals help?
                 (when (= log-sec 1)
                     (set! di-s1 "If you remember, <COLOR_RED>The Entity<COLOR_WHITE> got access to")
-                    (set! di-s2 "a tremenous amount of <COLOR_PINK>Dark Eco<COLOR_WHITE>.")
+                    (set! di-s2 "a tremendous amount of <COLOR_PINK>Dark Eco<COLOR_WHITE>.")
                     (set! di-s3 "")
                     (set! di-s4 "")
                 )
@@ -1779,7 +1827,9 @@
                     (set! di-s3 "")
                     (set! di-s4 "")
                     (let ((vec (new 'static 'vector :x (meters 2265.2287) :y (meters 34.2360) :z (meters 147.3039) :w 1.0)))
-                        (spawn-eb-floater vec #t 5.0)
+                        (when (not *eb-floater*)
+                            (spawn-eb-floater vec #t 5.0)
+                        )
                     )
                 )
                 (when (= log-sec 5)

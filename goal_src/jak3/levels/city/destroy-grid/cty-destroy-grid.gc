@@ -345,7 +345,7 @@
   (set! (-> *game-info* bot-health 0)
       (/ (-> this hit-points)
          (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-             (+ (* 14.0 (-> this enemy-info default-hit-points))
+             (+ (* 34.0 (-> this enemy-info default-hit-points))
                 (* (the float enemy-noto) 3))
              (+ (-> this enemy-info default-hit-points)
                 (* (the float enemy-noto) 3)))))

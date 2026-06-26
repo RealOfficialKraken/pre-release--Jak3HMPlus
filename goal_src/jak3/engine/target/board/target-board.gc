@@ -696,14 +696,14 @@
            )
          )
         (('attack 'attack-or-shove 'attack-invinc)
-         (target-attacked
-           arg2
-           (the-as attack-info (-> arg3 param 1))
-           arg0
-           (the-as touching-shapes-entry (-> arg3 param 0))
-           target-board-hit
-           )
-         )
+          (target-attacked
+            arg2
+            (the-as attack-info (-> arg3 param 1))
+            arg0
+            (the-as touching-shapes-entry (-> arg3 param 0))
+            target-hit
+            )
+          )
         (('shove)
          (when (not (focus-test? self hit))
            (mem-copy! (the-as pointer (-> self attack-info-rec)) (the-as pointer (-> arg3 param 1)) 168)

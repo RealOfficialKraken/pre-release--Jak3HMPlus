@@ -457,6 +457,7 @@
     (set! (-> self gui-id)
           (add-process *gui-control* self (gui-channel message) (gui-action play) (-> self name) 81920.0 0)
           )
+    (task-node-close! (game-task-node temple-oracle-resolution) #t)
     )
   :exit (behavior ()
     (send-event *target* 'get-pickup (pickup-type health) 100.0)

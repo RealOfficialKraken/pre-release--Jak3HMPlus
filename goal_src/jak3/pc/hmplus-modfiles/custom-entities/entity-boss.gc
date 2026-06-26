@@ -379,10 +379,16 @@
           (kill-by-name "eb-floater" *active-pool*)
           (set! *eb-floater* #f)
         )
-        (quickspawn-eb (new 'static 'vector :x (meters 3496.7414) :y (meters 406.6769) :z (meters 880.2725) :w 1.0))
+        (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+          (quickspawn-eb-hm (new 'static 'vector :x (meters 3496.7414) :y (meters 406.6769) :z (meters 880.2725) :w 1.0))
+          (quickspawn-eb (new 'static 'vector :x (meters 3496.7414) :y (meters 406.6769) :z (meters 880.2725) :w 1.0))
+        )
         (camera-unlocked)
         (lightjak-get-off-part (target-pos 0))
-        (play-main-music "snd/music/final-boss.mp3" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+        (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+          (play-main-music "snd/music/heromode-final-boss.mp3" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+          (play-main-music "snd/music/final-boss.mp3" (the int (* (-> *setting-control* user-current sfx-volume) 100)))
+        )
         (go-virtual idle)
       )
 
@@ -393,7 +399,7 @@
           (= log-id 599)
           (cpad-pressed? 0 x)
         )
-        (+! log-sec 1)
+        ;; (+! log-sec 1)
         (when (= log-sec 1)
           (set! di-s1 "<COLOR_RED>The inhabitants attempted to use me...")
           (set! di-s2 "")
@@ -669,7 +675,7 @@
           (= log-id 6999)
           (cpad-pressed? 0 x)
         )
-        (+! log-sec 1)
+        ;; (+! log-sec 1)
         (when (= log-sec 1)
           (set! di-s1 "<COLOR_WHITE>Now we can finally return everything to normal!")
           (set! di-s2 "")
@@ -761,7 +767,7 @@
           (= log-id 3400)
           (cpad-pressed? 0 x)
         )
-        (+! log-sec 1)
+        ;; (+! log-sec 1)
         (when (= log-sec 1)
           (set! di-s1 "<COLOR_CYAN>I... was created to serve you, for my purpose")
           (set! di-s2 "<COLOR_CYAN>was never to be a god of my own creations,")
@@ -1088,7 +1094,7 @@
   ;; main credits block
   (clear matt-str)
   (clear *pc-encoded-matt-str*)
-  (format matt-str "<COLOR_ORANGE>HeroMode+~%~%~%<COLOR_CYAN>By Kraken~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_WHITE>This mod would not be possible without the help of~%everyone in the <COLOR_YELLOW>OpenGOAL<COLOR_WHITE> discord!~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%All modded changes and music made by <COLOR_CYAN>Kraken~%~%~%")
+  (format matt-str "<COLOR_ORANGE>HeroMode+~%~%~%<COLOR_CYAN>By Kraken~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_WHITE>This mod would not be possible without the help of~%everyone in the <COLOR_YELLOW>OpenGOAL<COLOR_WHITE> discord!~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%All modded changes and music made by <COLOR_CYAN>Kraken~%~%~%<COLOR_WHITE>UI Work:~%<COLOR_ORANGE>Alokas")
   (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
   (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
     (dma-buffer-add-gs-set-flusha buf
@@ -1107,7 +1113,7 @@
   ;; special thanks block, drawn lower than the first one
   (clear matt-str)
   (clear *pc-encoded-matt-str*)
-  (format matt-str "<COLOR_ORANGE>Special Thanks:~%~%<COLOR_CYAN>Hat Kid~%~%<COLOR_PINK>Barg~%~%<COLOR_RED>Zed~%~%<COLOR_ORANGE>Mortis~%~%<COLOR_YELLOW>Majora~%~%<COLOR_ORANGE>Kuitar~%~%<COLOR_YELLOW>EvelynTSMG~%~%<COLOR_ORANGE>Markus~%~%<COLOR_RED>...and all the OpenGOAL Devs for making this possible!")
+  (format matt-str "~%~%~%~%~%~%<COLOR_WHITE>Special Thanks:~%~%<COLOR_CYAN>Hat Kid~%~%<COLOR_PINK>Barg~%~%<COLOR_RED>Zed~%~%<COLOR_ORANGE>Mortis~%~%<COLOR_YELLOW>Majora~%~%<COLOR_ORANGE>Kuitar~%~%<COLOR_YELLOW>EvelynTSMG~%~%<COLOR_ORANGE>Markus~%~%<COLOR_RED>...and all the OpenGOAL Devs for making this possible!")
   (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
   (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
     (dma-buffer-add-gs-set-flusha buf
@@ -1937,6 +1943,7 @@
 (defmethod entity-boss-spawn-visible-model ((this entity-boss))
   (let ((man (-> this child))
         (veccy (new 'stack-no-clear 'vector))
+        (veccy2 (new 'stack-no-clear 'vector))
         (q (new 'stack-no-clear 'quaternion)))
     (set! man
       (process-spawn manipy
@@ -1957,8 +1964,15 @@
       (set! (-> veccy x) 2.0)
       (set! (-> veccy y) 2.0)
       (set! (-> veccy z) 2.0)
+      (set! (-> veccy2 x) 1.0)
+      (set! (-> veccy2 y) 0.0)
+      (set! (-> veccy2 z) 0.0)
       (send-event (ppointer->process man) 'scale veccy)
-      (send-event (ppointer->process man) 'max-vis-dist 9999999.0)))
+      (send-event (ppointer->process man) 'max-vis-dist 9999999.0)
+      (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+        (send-event (ppointer->process man) 'color-mult veccy2)
+      )
+      ))
   0
   (none))
 
@@ -2373,6 +2387,75 @@
 (defun quickspawn-eb ((vec vector))
   (set! *entity-boss*
     (process-spawn entity-boss
+    :init entity-boss-init-by-other
+    vec
+    :name "Entity-Boss")
+  )
+  (none)
+)
+
+(deftype entity-boss-hm (entity-boss)
+  ()
+)
+
+(defbehavior entity-boss-hm-init-by-other entity-boss-hm ((vec vector))
+  (init-enemy-collision! self)
+  (vector-copy! (-> self root trans) vec)
+  (quaternion-identity! (-> self root quat))
+  (vector-identity! (-> self root scale))
+  (vector-zero! (-> self root transv))
+  (initialize-skeleton
+    self
+    (the-as skeleton-group
+      (art-group-get-by-name *level* "skel-precursor-boss-1" (the-as (pointer level) #f)))
+    (the-as pair 0))
+  (set-enemy-info! self *entity-boss-enemy-info*)
+  (logior! (-> self enemy-flags) (enemy-flag vulnerable attackable trackable))
+  (vector-copy! (-> self move-start) (-> self root trans))
+  (vector-copy! (-> self move-end) (-> self root trans))
+  (logior! (-> self skel status) (joint-control-status sync-math))
+  (reset-to-collide-spec (-> self focus) (collide-spec player-list))
+  (clear-focused (-> self focus))
+  (set! (-> self turn-speed) 1200.0)
+  (set! (-> self face-yaw) 0.0)
+  (set! (-> self idle-phase) 0)
+  (set! (-> self floor-spike-start-time) 0)
+  (set! (-> self last-floor-spike-time) 0)
+  (set! (-> self phase-start) (current-time))
+  (set! (-> self arc-height) (meters 2.0))
+  (set! (-> self arc-sign) 1.0)
+  (set! (-> self phase-time) (seconds 1.9))
+  (set! (-> self fight-start-time) (current-time))
+  (set! (-> self transition-phase) 0)
+  (set! (-> self should-die?) #f)
+  (send-event *target* 'get-pickup (pickup-type ammo-yellow) 9999.0)
+  (send-event *target* 'get-pickup (pickup-type ammo-red) 9999.0)
+  (if (or
+          (logtest? (-> *game-info* features) (game-feature gun-blue-1))
+          (logtest? (-> *game-info* features) (game-feature gun-blue-2))
+          (logtest? (-> *game-info* features) (game-feature gun-blue-3))
+      )
+      (send-event *target* 'get-pickup (pickup-type ammo-blue) 9999.0)
+  )
+  (if (or
+          (logtest? (-> *game-info* features) (game-feature gun-dark-1))
+          (logtest? (-> *game-info* features) (game-feature gun-dark-2))
+          (logtest? (-> *game-info* features) (game-feature gun-dark-3))
+      )
+      (send-event *target* 'get-pickup (pickup-type ammo-dark) 9999.0)
+  )
+  (send-event *target* 'get-pickup (pickup-type eco-pill-dark) 100.0)
+  (send-event *target* 'get-pickup (pickup-type eco-pill-light) 100.0)
+  (entity-boss-spawn-visible-model self)
+  (set! (-> self hit-points) 30000000.0)
+  (set! (-> self enemy-info default-hit-points) 30000000.0)
+  (go-virtual idle)
+  (none)
+)
+
+(defun quickspawn-eb-hm ((vec vector))
+  (set! *entity-boss*
+    (process-spawn entity-boss-hm
     :init entity-boss-init-by-other
     vec
     :name "Entity-Boss")

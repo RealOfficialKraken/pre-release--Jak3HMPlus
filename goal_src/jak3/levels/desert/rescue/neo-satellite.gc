@@ -1731,12 +1731,16 @@
   )
   (set! draw-enemy-noto enemy-noto)
   (set! hpbar-hit-points (-> this hit-points))
-  (set! hpbar-max-hit-points 
-    (if (!= (-> this diff-counter) 0)
-      (+ (-> this enemy-info default-hit-points) (* 600.0 (the float (-> this diff-counter))))
-      (-> this enemy-info default-hit-points)
-    )
-  )
+
+(set! hpbar-max-hit-points 
+  (if (!= (-> this diff-counter) 0)
+    (+ (-> this enemy-info default-hit-points)
+       (* 600.0 (the float (-> this diff-counter))))
+    (-> this enemy-info default-hit-points)))
+
+;; safety clamp for high-level Neo-Sat
+(when (< hpbar-max-hit-points hpbar-hit-points)
+  (set! hpbar-max-hit-points hpbar-hit-points))
   (init-enemy-hpbar 'normal)
   (go (method-of-object this sat-idle))
   (none)
@@ -2105,12 +2109,16 @@
         )
       (set! draw-enemy-noto enemy-noto)
       (set! hpbar-hit-points (-> this hit-points))
-      (set! hpbar-max-hit-points 
-        (if (!= (-> this diff-counter) 0)
-          (+ (-> this enemy-info default-hit-points) (* 600.0 (the float (-> this diff-counter))))
-          (-> this enemy-info default-hit-points)
-        )
-      )
+
+(set! hpbar-max-hit-points 
+  (if (!= (-> this diff-counter) 0)
+    (+ (-> this enemy-info default-hit-points)
+       (* 600.0 (the float (-> this diff-counter))))
+    (-> this enemy-info default-hit-points)))
+
+;; safety clamp for high-level Neo-Sat
+(when (< hpbar-max-hit-points hpbar-hit-points)
+  (set! hpbar-max-hit-points hpbar-hit-points))
       (init-enemy-hpbar 'normal)
      )
     (('notify)
