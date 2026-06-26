@@ -6,6 +6,7 @@
 ;;name: entity-boss.gc
 
 (defun-extern quickspawn-eb vector (none))
+(defun-extern quickspawn-eb-hm vector (none))
 (defun-extern spawn-floor-spikelight vector time-frame float int none)
 (defun-extern spawn-vin-head-process vector none)
 
@@ -1059,9 +1060,6 @@
     (send-event (ppointer->process *time-of-day*) 'change 'ratio 0.0)
     (set! (-> *time-of-day-context* overide-enable) #t)
     (set! (-> *mood-control* overide-weather-flag) #t)
-
-    ;; optional: reuse your existing purple/dark override helper if desired
-    ;; (dark-weather-override)
     )
   (none)
 )
@@ -1085,6 +1083,7 @@
     (when (and (not (-> this did-dark-toggle?))
                (>= elapsed-sec 5.0))
                (toggle-dark-mode)
+               (send-event (ppointer->process *time-of-day*) 'change 'hour 18)
                (kill-by-name "darkworld-orb" *default-pool*)
       (set! (-> this did-dark-toggle?) #t)))
   (none)
@@ -1094,7 +1093,7 @@
   ;; main credits block
   (clear matt-str)
   (clear *pc-encoded-matt-str*)
-  (format matt-str "<COLOR_ORANGE>HeroMode+~%~%~%<COLOR_CYAN>By Kraken~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_WHITE>This mod would not be possible without the help of~%everyone in the <COLOR_YELLOW>OpenGOAL<COLOR_WHITE> discord!~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%All modded changes and music made by <COLOR_CYAN>Kraken~%~%~%<COLOR_WHITE>UI Work:~%<COLOR_ORANGE>Alokas")
+  (format matt-str "<COLOR_ORANGE>HeroMode+~%~%~%<COLOR_CYAN>By Kraken~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%<COLOR_WHITE>This mod would not be possible without the help of~%everyone in the <COLOR_YELLOW>OpenGOAL<COLOR_WHITE> discord!~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%~%All modded changes and music made by <COLOR_CYAN>Kraken~%~%~%<COLOR_WHITE>Amazing UI Rework:~%<COLOR_CYAN>Alokas")
   (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
   (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
     (dma-buffer-add-gs-set-flusha buf
