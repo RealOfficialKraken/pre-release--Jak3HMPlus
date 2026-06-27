@@ -178,7 +178,6 @@
           (set! (-> s5-1 quad) (-> wgv-vec quad))
           (+! (-> s5-1 y) 9011.2)
           (set-continue! *game-info* "volcanos-warp" #t)
-          (blank-hint! "Area level range <COLOR_ORANGE>Lv. 10-16" 290 400)
           (when (and (= in-volcano-level? #f) (task-node-closed? (game-task-node volcano-darkeco-resolution)))
             (volcano-level)
           )

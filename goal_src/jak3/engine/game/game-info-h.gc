@@ -420,6 +420,8 @@
 
   (defun-extern toggle-freeze none)
 
+  (defun-extern spawn-planetboss-spawn-manager int none)
+
   ;black market stuff with Vin
   (define in-vin-shop? #f)
   (define vin-select 0)

@@ -309,7 +309,7 @@
 (defbehavior heromode-process-init-by-other heromode-process ()
     (set! (-> self gen-i) 0)
     (set! (-> self hm-select) 0)
-    (set! (-> self hm-activated?) #f)
+    (set! (-> self hm-activated?) #t)
     (if (-> self hm-activated?)
         (go-virtual preidle)
         (go-virtual preidle-dormant)

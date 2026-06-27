@@ -595,4 +595,6 @@
   "grunt.o"
   "missle-seeker.o"
   "pet-process.o"
+  "wasdef-manager.o"
+  "planetboss.o"
  ))

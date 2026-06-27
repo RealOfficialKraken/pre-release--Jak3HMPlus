@@ -18,6 +18,16 @@
 (define hmplus-ending-fade-active? #f)
 (define hmplus-ending-fade-done? #f)
 
+(defun entity-boss-hm-level ()
+  (hmplus-hero-map-level 50)
+  )
+
+(defun entity-boss-hm-hp ()
+  (let ((lvl (entity-boss-hm-level)))
+    (* 100000.0 (/ (the float lvl) 50.0))
+    )
+  )
+
 (defpartgroup group-nestc-rift-ring
   :id 1560
   :duration (seconds 0.017)
@@ -578,10 +588,11 @@
         (go-virtual win)
       )
       (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-        (when (!= enemy-noto (hmplus-hero-map-level 1))
-          (set! enemy-noto (hmplus-hero-map-level 1))
+        (when (!= enemy-noto (entity-boss-hm-level))
+          (set! enemy-noto (entity-boss-hm-level))
         )
-        (when (!= enemy-noto 1) (set! enemy-noto 1))
+        (when (!= enemy-noto 1)
+          (set! enemy-noto 1))
       )
       (when (or (= (-> self go-talking) #t) entity-boss-go-dormant?)
         (set! (-> self go-talking) #f)
@@ -1698,7 +1709,13 @@
     (entity-boss-update-arc! (_type_) symbol)
     (entity-boss-pick-ring-target-from-camera! (_type_) none)
     (get-trans (_type_ int) vector)
+    (entity-boss-apply-damage! (_type_ float) none)
   )
+)
+
+(defbehavior entity-boss-event-handler entity-boss ((arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
+  (event-handler self arg0 arg1 arg2 arg3)
+  (none)
 )
 
 (define *entity-boss-platform-center*
@@ -1775,7 +1792,7 @@
       (set! (-> root total-prims) (the-as uint 4))
       (set! (-> group prim-core collide-as) (collide-spec enemy))
       (set! (-> group prim-core collide-with)
-            (collide-spec jak bot player-list hit-by-player-list enemy))
+            (collide-spec jak bot player-list hit-by-player-list enemy projectile hit-by-others-list))
       (set! (-> group prim-core action) (collide-action solid no-standon))
       (set-vector! (-> group local-sphere) 0.0 (meters 4.0) 0.0 (meters 5.0))
       (set! (-> root root-prim) group))
@@ -1783,21 +1800,21 @@
     (let ((p0 (new 'process 'collide-shape-prim-sphere root (the-as uint 0))))
       (set! (-> p0 prim-core collide-as) (collide-spec enemy))
       (set! (-> p0 prim-core collide-with)
-            (collide-spec jak bot player-list hit-by-player-list enemy))
+          (collide-spec jak bot player-list hit-by-player-list enemy projectile hit-by-others-list))
       (set! (-> p0 prim-core action) (collide-action solid no-standon))
       (set-vector! (-> p0 local-sphere) 0.0 (meters 2.0) 0.0 (meters 2.0)))
 
     (let ((p1 (new 'process 'collide-shape-prim-sphere root (the-as uint 0))))
       (set! (-> p1 prim-core collide-as) (collide-spec enemy))
       (set! (-> p1 prim-core collide-with)
-            (collide-spec jak bot player-list hit-by-player-list enemy))
+            (collide-spec jak bot player-list hit-by-player-list enemy projectile hit-by-others-list))
       (set! (-> p1 prim-core action) (collide-action solid no-standon))
       (set-vector! (-> p1 local-sphere) 0.0 (meters 4.5) 0.0 (meters 2.3)))
 
     (let ((p2 (new 'process 'collide-shape-prim-sphere root (the-as uint 0))))
       (set! (-> p2 prim-core collide-as) (collide-spec enemy))
       (set! (-> p2 prim-core collide-with)
-            (collide-spec jak bot player-list hit-by-player-list enemy))
+            (collide-spec jak bot player-list hit-by-player-list enemy projectile hit-by-others-list))
       (set! (-> p2 prim-core action) (collide-action solid no-standon))
       (set-vector! (-> p2 local-sphere) 0.0 (meters 7.0) 0.0 (meters 1.6)))
 
@@ -1810,33 +1827,38 @@
   0
   (none))
 
+(defmethod entity-boss-apply-damage! ((this entity-boss) (damage float))
+  (when (<= damage 0.0)
+    (set! damage 1.0))
+  (set! enemy-string "The Entity")
+  (set! draw-enemy-noto 9000)
+  (set! enemy-hp #t)
+  (set! hpbar-pre-hit-points (-> this hit-points))
+  (set! (-> this hit-points) (fmax 0.0 (- (-> this hit-points) damage)))
+  (set! hpbar-hit-points (-> this hit-points))
+  (set! hpbar-max-hit-points (-> this enemy-info default-hit-points))
+  (init-enemy-hpbar 'use-pre-hit)
+  (when (<= (-> this hit-points) 0.0)
+    (send-event this 'death-start #f))
+  (none)
+)
+
 (defmethod event-handler ((this entity-boss) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
   (case arg2
     (('attack)
-      (let ((atk (the-as attack-info (-> arg3 param 1)))
-            (damage 0.0))
+      (let ((atk (the-as attack-info (-> arg3 param 1))))
         (when atk
           (when (!= (-> atk id) (-> this incoming attack-id))
             (set! (-> this incoming attack-id) (-> atk id))
-            (set! damage (the float (-> atk damage)))
-            (when (<= damage 0.0)
-              (set! damage 1.0))
-            (set! enemy-string "The Entity")
-            (set! draw-enemy-noto 9000)
-            (set! enemy-hp #t)
-            (set! hpbar-pre-hit-points (-> this hit-points))
-            (set! (-> this hit-points) (fmax 0.0 (- (-> this hit-points) damage)))
-            (set! hpbar-hit-points (-> this hit-points))
-            (set! hpbar-max-hit-points (-> this enemy-info default-hit-points))
-            (init-enemy-hpbar 'use-pre-hit)
-            (when (<= (-> this hit-points) 0.0)
-              (send-event this 'death-start #f))
-          ))))
+            (entity-boss-apply-damage! this (the float (-> atk damage)))))))
+    (('touched)
+      (let ((shot (as-type arg0 gun-dark-shot)))
+        (when shot
+          (entity-boss-apply-damage! this 32.0)
+          (send-event shot 'impact))))
     (('death-start 'death-end)
       (call-parent-method this arg0 arg1 arg2 arg3)
-      (set! (-> this should-die?) #t)
-    )
-  )
+      (set! (-> this should-die?) #t)))
   (none))
 
 (defmethod get-trans ((this entity-boss) (arg0 int))
@@ -1942,7 +1964,6 @@
 (defmethod entity-boss-spawn-visible-model ((this entity-boss))
   (let ((man (-> this child))
         (veccy (new 'stack-no-clear 'vector))
-        (veccy2 (new 'stack-no-clear 'vector))
         (q (new 'stack-no-clear 'quaternion)))
     (set! man
       (process-spawn manipy
@@ -1963,14 +1984,8 @@
       (set! (-> veccy x) 2.0)
       (set! (-> veccy y) 2.0)
       (set! (-> veccy z) 2.0)
-      (set! (-> veccy2 x) 1.0)
-      (set! (-> veccy2 y) 0.0)
-      (set! (-> veccy2 z) 0.0)
       (send-event (ppointer->process man) 'scale veccy)
       (send-event (ppointer->process man) 'max-vis-dist 9999999.0)
-      (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-        (send-event (ppointer->process man) 'color-mult veccy2)
-      )
       ))
   0
   (none))
@@ -2013,7 +2028,7 @@
 
 (defstate idle (entity-boss)
   :virtual #t
-  :event enemy-event-handler
+  :event entity-boss-event-handler
   :enter (behavior ()
     (set! (-> self idle-phase) 0)
     (set! (-> self phase-start) (current-time))
@@ -2090,7 +2105,7 @@
 
 (defstate transition-to-floor-dodge (entity-boss)
   :virtual #t
-  :event enemy-event-handler
+  :event entity-boss-event-handler
   :enter (behavior ()
     (set! (-> self transition-phase) 0)
     (vector-copy! (-> self move-start) (-> self root trans))
@@ -2186,7 +2201,7 @@
 
 (defstate floor-dodge-minigame (entity-boss)
   :virtual #t
-  :event enemy-event-handler
+  :event entity-boss-event-handler
   :enter (behavior ()
     (set! (-> self root trans x) (meters 3496.7414))
     (set! (-> self root trans y) (meters 403.0))
@@ -2276,7 +2291,7 @@
 
 (defstate return-from-floor-dodge (entity-boss)
   :virtual #t
-  :event enemy-event-handler
+  :event entity-boss-event-handler
   :enter (behavior ()
     (vector-copy! (-> self move-start) (-> self root trans))
     (vector-copy! (-> self move-end) (-> self root trans))
@@ -2379,6 +2394,7 @@
   (send-event *target* 'get-pickup (pickup-type eco-pill-dark) 100.0)
   (send-event *target* 'get-pickup (pickup-type eco-pill-light) 100.0)
   (entity-boss-spawn-visible-model self)
+  (update-transforms (-> self root))
   (go-virtual idle)
   (none)
 )
@@ -2395,6 +2411,47 @@
 
 (deftype entity-boss-hm (entity-boss)
   ()
+  (:methods
+    (entity-boss-hm-spawn-visible-model (_type_) none)
+  )
+)
+
+(defmethod entity-boss-hm-spawn-visible-model ((this entity-boss-hm))
+  (let ((man (-> this child))
+        (veccy (new 'stack-no-clear 'vector))
+        (red-mult (new 'stack-no-clear 'vector)))
+    (set! man
+      (process-spawn manipy
+        :init
+        manipy-init
+        (-> this root trans)
+        #f
+        (art-group-get-by-name *level* "skel-precursor-boss-1" (the (pointer level) #f))
+        #f
+        0
+        #f
+        :name "man-eb"
+        :to this
+        :from *default-dead-pool*))
+
+    (when man
+      (set! (-> this child) man)
+      (send-event (ppointer->process man) 'shadow #t)
+
+      (set! (-> veccy x) 2.0)
+      (set! (-> veccy y) 2.0)
+      (set! (-> veccy z) 2.0)
+      (set! (-> veccy w) 1.0)
+      (send-event (ppointer->process man) 'scale veccy)
+
+      (send-event (ppointer->process man) 'max-vis-dist 9999999.0)
+
+      (set! (-> red-mult x) 7.0)
+      (set! (-> red-mult y) 0.0)
+      (set! (-> red-mult z) 0.0)
+      (set! (-> red-mult w) 3.0)
+      (send-event (ppointer->process man) 'color-mult-vector red-mult)))
+  (none)
 )
 
 (defbehavior entity-boss-hm-init-by-other entity-boss-hm ((vec vector))
@@ -2445,9 +2502,13 @@
   )
   (send-event *target* 'get-pickup (pickup-type eco-pill-dark) 100.0)
   (send-event *target* 'get-pickup (pickup-type eco-pill-light) 100.0)
-  (entity-boss-spawn-visible-model self)
-  (set! (-> self hit-points) 30000000.0)
-  (set! (-> self enemy-info default-hit-points) 30000000.0)
+  (entity-boss-hm-spawn-visible-model self)
+  (let ((hp (entity-boss-hm-hp)))
+    (set! enemy-noto (entity-boss-hm-level))
+    (set! (-> self hit-points) hp)
+    (set! (-> self enemy-info default-hit-points) hp)
+    )
+  (update-transforms (-> self root))
   (go-virtual idle)
   (none)
 )
@@ -2455,9 +2516,8 @@
 (defun quickspawn-eb-hm ((vec vector))
   (set! *entity-boss*
     (process-spawn entity-boss-hm
-    :init entity-boss-init-by-other
-    vec
-    :name "Entity-Boss")
-  )
+      :init entity-boss-hm-init-by-other
+      vec
+      :name "Entity-Boss"))
   (none)
-)
+  )
