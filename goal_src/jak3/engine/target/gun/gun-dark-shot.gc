@@ -1401,7 +1401,7 @@
      (time-elapsed? (get-last-fire-time 36) (seconds 2))
      )
     (((pickup-type gun-dark-3))
-     (time-elapsed? (get-last-fire-time 37) (seconds 9))
+     (time-elapsed? (get-last-fire-time 37) (seconds 80))
      )
     (else
       #t

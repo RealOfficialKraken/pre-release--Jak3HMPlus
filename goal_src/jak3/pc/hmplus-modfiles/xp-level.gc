@@ -9,6 +9,14 @@
 (define gun-bar-x-pos 96)
 (define car-bar-x-pos 416)
 
+(define boost-liquid-i 0)
+(define boost-liquid-delay 0)
+(define boost-bubble-0 -100)
+(define boost-bubble-1 -100)
+(define boost-bubble-2 -100)
+(define boost-bubble-3 -100)
+(define boost-bubble-4 -100)
+
 (defun-extern draw-mod-menu-text-custom string int int float symbol symbol symbol none)
 (defun-extern draw-active-quest none)
 
@@ -2867,36 +2875,195 @@
         car-bar-x-pos anim-noto 0.325 #f #t #f)
     )
 
-    (when (and 
-            *target*
-            (not *scene-player*)
-            (= (paused?) #f)
-            (focus-test? *target* pilot)
-            (not (task-node-open? (game-task-node desert-glide-templetop)))
-            (not (task-node-open? (game-task-node desert-glide-resolution)))
-            ) ;for the turbo meter, also referenced in wvehicle.gc and wvehicle-util.gc
-            (let 
-            (
-                (x 7)
-                (y 348)
-                (progress turbo-amount-hud) ;turbo-amount-hud
-                (arg3 (new 'static 'rgba 
-                    :r 0
-                    :g 255
-                    :b 255
-                    :a #x40
-                    )
-                    )
-            )
-                (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                                    (bucket-id particles)
-                                    )
-            (draw-sprite2d-xy s2-0 x y 60 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
-            (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) (the int (* 58.5 progress)) 12 arg3 #x3fffff)
-            )
-        )
-        
+    (when
+  (and 
+    *target*
+    (not *scene-player*)
+    (= (paused?) #f)
+    (focus-test? *target* pilot)
+    (not (task-node-open? (game-task-node desert-glide-templetop)))
+    (not (task-node-open? (game-task-node desert-glide-resolution)))
     )
+  (+! boost-liquid-i 1)
+  (+! boost-liquid-delay 1)
+
+  (when (>= boost-liquid-delay 8)
+    (set! boost-liquid-delay 0)
+    (cond
+      ((< boost-bubble-0 0)
+       (set! boost-bubble-0 0))
+      ((< boost-bubble-1 0)
+       (set! boost-bubble-1 0))
+      ((< boost-bubble-2 0)
+       (set! boost-bubble-2 0))
+      ((< boost-bubble-3 0)
+       (set! boost-bubble-3 0))
+      ((< boost-bubble-4 0)
+       (set! boost-bubble-4 0))
+      )
+    )
+
+  (when (>= boost-bubble-0 0)
+    (+! boost-bubble-0 2)
+    )
+  (when (>= boost-bubble-1 0)
+    (+! boost-bubble-1 2)
+    )
+  (when (>= boost-bubble-2 0)
+    (+! boost-bubble-2 2)
+    )
+  (when (>= boost-bubble-3 0)
+    (+! boost-bubble-3 2)
+    )
+  (when (>= boost-bubble-4 0)
+    (+! boost-bubble-4 2)
+    )
+
+  (let* ((x 7)
+         (y 348)
+         (progress turbo-amount-hud)
+         (fill-w (the int (* 58.5 progress)))
+         (arg3 (new 'static 'rgba 
+                 :r 0
+                 :g 255
+                 :b 255
+                 :a #x40
+                 ))
+         (bubble-color (new 'static 'rgba
+                         :r 170
+                         :g 255
+                         :b 255
+                         :a #x78
+                         ))
+         (bubble-fade (new 'static 'rgba
+                        :r 90
+                        :g 255
+                        :b 255
+                        :a #x35
+                        ))
+         (wave-color (new 'static 'rgba
+                       :r 90
+                       :g 255
+                       :b 255
+                       :a #x20
+                       ))
+         (wave-hot (new 'static 'rgba
+                     :r 210
+                     :g 255
+                     :b 255
+                     :a #x28
+                     ))
+         )
+    (when (< progress 0.0)
+      (set! progress 0.0)
+      )
+    (when (> progress 1.0)
+      (set! progress 1.0)
+      )
+    (set! fill-w (the int (* 58.5 progress)))
+
+    (when (> boost-bubble-0 fill-w)
+      (set! boost-bubble-0 -100)
+      )
+    (when (> boost-bubble-1 fill-w)
+      (set! boost-bubble-1 -100)
+      )
+    (when (> boost-bubble-2 fill-w)
+      (set! boost-bubble-2 -100)
+      )
+    (when (> boost-bubble-3 fill-w)
+      (set! boost-bubble-3 -100)
+      )
+    (when (> boost-bubble-4 fill-w)
+      (set! boost-bubble-4 -100)
+      )
+
+    (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
+                                 (bucket-id particles)
+                                 )
+      (draw-sprite2d-xy s2-0 x y 60 14 (new 'static 'rgba :a (-> arg3 a)) #x3fffff)
+      (draw-sprite2d-xy s2-0 (+ x 1) (+ y 1) fill-w 12 arg3 #x3fffff)
+
+      (when (> fill-w 12)
+        (let* ((w0 (mod boost-liquid-i 36))
+               (wx0 (mod boost-liquid-i fill-w))
+               (wx1 (mod (+ boost-liquid-i 18) fill-w))
+               (wy0 (+ (+ y 3) (the int (/ (if (< w0 18) w0 (- 36 w0)) 6))))
+               (wy1 (+ (+ y 8) (the int (/ (if (< w0 18) (- 18 w0) (- w0 18)) 6))))
+               )
+          (when (<= (+ wx0 10) fill-w)
+            (draw-sprite2d-xy s2-0 (+ (+ x 1) wx0) wy0 10 1 wave-color #x3fffff)
+            )
+          (when (<= (+ wx1 12) fill-w)
+            (draw-sprite2d-xy s2-0 (+ (+ x 1) wx1) wy1 12 1 wave-color #x3fffff)
+            )
+          )
+        )
+
+      (when (> fill-w 8)
+        (draw-sprite2d-xy s2-0 (+ x 2) (+ y 2) (- fill-w 2) 1 wave-hot #x3fffff)
+        )
+
+      (when (and (> fill-w 6) (>= boost-bubble-0 0) (<= (+ boost-bubble-0 2) fill-w))
+        (let* ((w0 (mod (+ (* boost-liquid-i 2) boost-bubble-0) 32))
+               (yy0 (+ (+ y 3) (the int (/ (if (< w0 16) w0 (- 32 w0)) 4))))
+               )
+          (when (>= boost-bubble-0 3)
+            (draw-sprite2d-xy s2-0 (+ (+ x 1) (- boost-bubble-0 3)) yy0 2 1 bubble-fade #x3fffff)
+            )
+          (draw-sprite2d-xy s2-0 (+ (+ x 1) boost-bubble-0) yy0 2 2 bubble-color #x3fffff)
+          (draw-sprite2d-xy s2-0 (+ (+ x 1) boost-bubble-0) yy0 1 1 wave-hot #x3fffff)
+          )
+        )
+
+      (when (and (> fill-w 10) (>= boost-bubble-1 0) (<= (+ boost-bubble-1 1) fill-w))
+        (let* ((w1 (mod (+ (* boost-liquid-i 2) boost-bubble-1 8) 32))
+               (yy1 (+ (+ y 5) (the int (/ (if (< w1 16) w1 (- 32 w1)) 3))))
+               )
+          (when (>= boost-bubble-1 2)
+            (draw-sprite2d-xy s2-0 (+ (+ x 1) (- boost-bubble-1 2)) yy1 1 1 bubble-fade #x3fffff)
+            )
+          (draw-sprite2d-xy s2-0 (+ (+ x 1) boost-bubble-1) yy1 1 1 bubble-color #x3fffff)
+          )
+        )
+
+      (when (and (> fill-w 18) (>= boost-bubble-2 0) (<= (+ boost-bubble-2 3) fill-w))
+        (let* ((w2 (mod (+ (* boost-liquid-i 2) boost-bubble-2 16) 32))
+               (yy2 (+ (+ y 7) (the int (/ (if (< w2 16) w2 (- 32 w2)) 4))))
+               )
+          (when (>= boost-bubble-2 4)
+            (draw-sprite2d-xy s2-0 (+ (+ x 1) (- boost-bubble-2 4)) yy2 3 1 bubble-fade #x3fffff)
+            )
+          (draw-sprite2d-xy s2-0 (+ (+ x 1) boost-bubble-2) yy2 3 2 bubble-color #x3fffff)
+          (draw-sprite2d-xy s2-0 (+ (+ x 2) boost-bubble-2) yy2 1 1 wave-hot #x3fffff)
+          )
+        )
+
+      (when (and (> fill-w 28) (>= boost-bubble-3 0) (<= (+ boost-bubble-3 1) fill-w))
+        (let* ((w3 (mod (+ (* boost-liquid-i 2) boost-bubble-3 4) 32))
+               (yy3 (+ (+ y 4) (the int (/ (if (< w3 16) w3 (- 32 w3)) 3))))
+               )
+          (when (>= boost-bubble-3 3)
+            (draw-sprite2d-xy s2-0 (+ (+ x 1) (- boost-bubble-3 3)) yy3 2 1 bubble-fade #x3fffff)
+            )
+          (draw-sprite2d-xy s2-0 (+ (+ x 1) boost-bubble-3) yy3 1 2 bubble-color #x3fffff)
+          )
+        )
+
+      (when (and (> fill-w 38) (>= boost-bubble-4 0) (<= (+ boost-bubble-4 2) fill-w))
+        (let* ((w4 (mod (+ (* boost-liquid-i 2) boost-bubble-4 12) 32))
+               (yy4 (+ (+ y 6) (the int (/ (if (< w4 16) w4 (- 32 w4)) 4))))
+               )
+          (when (>= boost-bubble-4 4)
+            (draw-sprite2d-xy s2-0 (+ (+ x 1) (- boost-bubble-4 4)) yy4 3 1 bubble-fade #x3fffff)
+            )
+          (draw-sprite2d-xy s2-0 (+ (+ x 1) boost-bubble-4) yy4 2 2 bubble-color #x3fffff)
+          (draw-sprite2d-xy s2-0 (+ (+ x 1) boost-bubble-4) yy4 1 1 wave-hot #x3fffff)
+          )
+        )
+      )
+    )
+  )
 
     (none)
 )

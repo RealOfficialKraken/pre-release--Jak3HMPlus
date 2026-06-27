@@ -7,6 +7,16 @@
 
 ;; DECOMP BEGINS
 
+(defun neo-juicer-hero-attack-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      3.0
+      1.0))
+
+(defun neo-juicer-hero-move-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      2.0
+      1.0))
+
 (defpartgroup group-neo-juicer-shot-hit
   :id 1524
   :duration (seconds 0.017)
@@ -1092,9 +1102,12 @@
   (let* ((t9-0 (method-of-type nav-enemy get-focus!))
          (v1-1 (t9-0 this))
          )
-    (if (and v1-1 (time-elapsed? (-> this last-fire-time) (seconds 7)))
-        v1-1
-        )
+    (if (and v1-1
+         (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+             (time-elapsed? (-> this last-fire-time) (seconds 2.333))
+             (time-elapsed? (-> this last-fire-time) (seconds 7))))
+    v1-1
+    )
     )
   )
 
@@ -1119,7 +1132,9 @@
              (-> self root)
              (get-trans (the-as process-focusable gp-0) 0)
              (-> self nav max-rotation-rate)
-             (seconds 0.2)
+             (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                (seconds 0.067)
+                (seconds 0.2))
              )
            )
           (else
@@ -1207,14 +1222,18 @@
     '()
     )
   :code (behavior ()
-    (ja-channel-push! 1 (seconds 0.1))
-    (ja-no-eval :group! neo-juicer-attack0-start-ja :num! (seek!) :frame-num 0.0)
+    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+        (ja-channel-push! 1 (seconds 0.033))
+        (ja-channel-push! 1 (seconds 0.1)))
+    (ja-no-eval :group! neo-juicer-attack0-start-ja
+                :num! (seek! max (neo-juicer-hero-attack-speed))
+                :frame-num 0.0)
     (until (ja-done? 0)
       (if (< 11.0 (ja-aframe-num 0))
           (toggle-deadly-flag self #t)
           )
       (suspend)
-      (ja :num! (seek!))
+      (ja :num! (seek! max (neo-juicer-hero-attack-speed)))
       )
     0
     (let* ((gp-0 #f)
@@ -1248,7 +1267,9 @@
             cfg-31
             :delay (empty-form)
             )
-          (ja-channel-push! 1 (seconds 0.05))
+          (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+            (ja-channel-push! 1 (seconds 0.017))
+            (ja-channel-push! 1 (seconds 0.05)))
           (ja :group! neo-juicer-attack-turn-ja)
           (b! #t cfg-42 :delay (nop!))
           (label cfg-31)
@@ -1261,7 +1282,7 @@
             )
           (label cfg-42)
           (suspend)
-          (ja :num! (seek!))
+          (ja :num! (seek! max (neo-juicer-hero-attack-speed)))
           )
         (empty-form)
         (send-event (handle->process (-> self current-projectile)) 'die)
@@ -1689,8 +1710,8 @@
     (set! (-> v1-5 ignore-angle) 30947.555)
     )
   (let ((v1-7 (-> this nav)))
-    (set! (-> v1-7 speed-scale) 1.0)
-    )
+    (set! (-> v1-7 speed-scale) (neo-juicer-hero-move-speed))
+  )
   0
   (set-gravity-length (-> this root dynam) 573440.0)
   (set! (-> this last-fire-time) 0)

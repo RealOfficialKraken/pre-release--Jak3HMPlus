@@ -5,6 +5,11 @@
 ;; name in dgo: metalhead-grunt
 ;; dgos: CTYPESB
 
+(defun metalhead-grunt-hero-move-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      2.0
+      1.0))
+
 ;; +++mh-grunt-flag
 (defenum mh-grunt-flag
   :type uint8
@@ -908,7 +913,7 @@
       (until #f
         (set! (-> self patrol-anim) (-> *mh-grunt-global-info* patrol-anim (rnd-int self 2)))
         (let ((v1-28 (-> self nav)))
-          (set! (-> v1-28 target-speed) (-> self patrol-anim travel-speed))
+          (set! (-> v1-28 target-speed) (* (-> self patrol-anim travel-speed) (metalhead-grunt-hero-move-speed)))
           )
         0
         (let ((gp-0 (-> self draw art-group data (-> self patrol-anim anim-index)))
@@ -932,7 +937,7 @@
           (ja-channel-push! 1 (seconds 0.2))
           (set! (-> self patrol-anim) (the-as mh-grunt-anim-info (-> *mh-grunt-global-info* patrol-anim)))
           (let ((v1-67 (-> self nav)))
-            (set! (-> v1-67 target-speed) (-> self patrol-anim travel-speed))
+            (set! (-> v1-67 target-speed) (* (-> self patrol-anim travel-speed) (metalhead-grunt-hero-move-speed)))
             )
           0
           (let ((gp-1 (-> self draw art-group data (-> self patrol-anim anim-index)))
@@ -1063,7 +1068,7 @@
             (when (not (and v1-9 (= v1-9 gp-0)))
               (ja-channel-push! 1 (seconds 0.1))
               (let ((v1-13 (-> self nav)))
-                (set! (-> v1-13 target-speed) (-> self charge-anim travel-speed))
+                (set! (-> v1-13 target-speed) (* (-> self charge-anim travel-speed) (metalhead-grunt-hero-move-speed)))
                 )
               0
               )
@@ -1086,7 +1091,7 @@
   :event enemy-event-handler
   :enter (behavior ()
     (let ((v1-1 (-> self nav state)))
-      (set! (-> v1-1 speed) (-> self enemy-info run-travel-speed))
+      (set! (-> v1-1 speed) (* (-> self enemy-info run-travel-speed) (metalhead-grunt-hero-move-speed)))
       )
     0
     (logior! (-> self enemy-flags) (enemy-flag lock-focus))
@@ -1116,7 +1121,7 @@
   :code (behavior ()
     (set! (-> self attack-anim) (-> *mh-grunt-global-info* attack-anim (rnd-int self 1)))
     (let ((v1-5 (-> self nav)))
-      (set! (-> v1-5 target-speed) (-> self attack-anim travel-speed))
+      (set! (-> v1-5 target-speed) (* (-> self attack-anim travel-speed) (metalhead-grunt-hero-move-speed)))
       )
     0
     (let ((v1-7 (-> self nav)))
@@ -1138,7 +1143,7 @@
         )
       )
     (let ((v1-36 (-> self nav)))
-      (set! (-> v1-36 target-speed) (-> self charge-anim travel-speed))
+      (set! (-> v1-36 target-speed) (* (-> self charge-anim travel-speed) (metalhead-grunt-hero-move-speed)))
       )
     0
     (let ((v1-38 (-> self nav)))
@@ -1258,7 +1263,7 @@
       )
     (set! (-> self patrol-anim) (-> *mh-grunt-global-info* patrol-anim (rnd-int self 2)))
     (let ((v1-14 (-> self nav)))
-      (set! (-> v1-14 target-speed) (-> self patrol-anim travel-speed))
+      (set! (-> v1-14 target-speed) (* (-> self patrol-anim travel-speed) (metalhead-grunt-hero-move-speed)))
       )
     0
     (let ((f30-0 (rnd-float-range self 0.9 1.1))
@@ -1470,6 +1475,9 @@
     (the-as pair 0)
     )
   (setup-enemy! this (get-nav-info this))
+  (let ((v1-0 (-> this nav)))
+    (set! (-> v1-0 speed-scale) (metalhead-grunt-hero-move-speed))
+  )
   (let ((v1-6 (-> this neck)))
     (set! (-> v1-6 up) (the-as uint 1))
     (set! (-> v1-6 nose) (the-as uint 2))

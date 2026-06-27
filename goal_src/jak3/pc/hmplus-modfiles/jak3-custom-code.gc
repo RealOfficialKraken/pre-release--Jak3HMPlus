@@ -4,7 +4,7 @@
 ;; name: jak3-custom-code.gc
 
 ;;MOD VERSION
-(define mod-version "0.9.5")
+(define mod-version "1.0")
 
 (defun-extern freeze-enemies-in-menu! (none))
 (defun-extern level-up! int none)
@@ -27,6 +27,109 @@
 
 (defun-extern pet-menu-toggle-pet! none)
 (defun-extern vin-shop-confirm! none)
+
+(defun draw-prestige-skull-icon ((x int) (y int) (s int))
+
+    (with-dma-buffer-add-bucket ((buf (-> *display* frames (-> *display* on-screen) global-buf)) (bucket-id particles))
+
+      (cond
+        ((< (-> *game-info* crates-opened) 5.0)
+
+          (draw-sprite2d-xy buf (+ x (* s 5)) y (* s 4) s (static-rgba 95 0 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 3)) (+ y s) (* s 8) s (static-rgba 95 0 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 2)) (+ y (* s 2)) (* s 10) s (static-rgba 95 0 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x s) (+ y (* s 3)) (* s 12) (* s 2) (static-rgba 95 0 0 235) #x3fffff)
+          (draw-sprite2d-xy buf x (+ y (* s 5)) (* s 14) (* s 2) (static-rgba 95 0 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x s) (+ y (* s 7)) (* s 12) s (static-rgba 95 0 0 235) #x3fffff)
+
+          (draw-sprite2d-xy buf (+ x s) (+ y (* s 5)) (* s 2) s (static-rgba 255 120 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 3)) (+ y (* s 4)) (* s 8) s (static-rgba 255 120 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 11)) (+ y (* s 5)) (* s 2) s (static-rgba 255 120 0 235) #x3fffff)
+
+          (draw-sprite2d-xy buf (+ x (* s 4)) (+ y (* s 8)) (* s 6) s (static-rgba 95 0 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 5)) (+ y (* s 9)) (* s 4) s (static-rgba 95 0 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 5)) (+ y (* s 10)) (* s 4) s (static-rgba 95 0 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 4)) (+ y (* s 11)) (* s 6) s (static-rgba 95 0 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 3)) (+ y (* s 12)) (* s 8) s (static-rgba 95 0 0 235) #x3fffff)
+
+          (draw-sprite2d-xy buf (+ x (* s 5)) (+ y (* s 9)) s s (static-rgba 130 15 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 8)) (+ y (* s 10)) s s (static-rgba 130 15 0 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 5)) (+ y (* s 11)) s s (static-rgba 130 15 0 235) #x3fffff)
+
+          (when (>= (-> *game-info* crates-opened) 2.0)
+            (draw-sprite2d-xy buf (+ x (* s 4)) (+ y (* s 2)) s s (static-rgba 150 20 0 235) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 9)) (+ y (* s 2)) s s (static-rgba 150 20 0 235) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 6)) (+ y (* s 8)) (* s 2) s (static-rgba 150 20 0 235) #x3fffff))
+
+          (when (>= (-> *game-info* crates-opened) 3.0)
+            (draw-sprite2d-xy buf (+ x (* s 2)) (+ y (* s 6)) (* s 2) s (static-rgba 255 165 0 245) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 10)) (+ y (* s 6)) (* s 2) s (static-rgba 255 165 0 245) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 5)) (+ y (* s 3)) (* s 4) s (static-rgba 150 20 0 235) #x3fffff))
+
+          (when (>= (-> *game-info* crates-opened) 4.0)
+            (draw-sprite2d-xy buf (+ x (* s 6)) (+ y s) (* s 2) s (static-rgba 255 180 0 245) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 6)) (+ y (* s 2)) (* s 2) s (static-rgba 180 30 0 235) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 4)) (+ y (* s 12)) s s (static-rgba 160 25 0 235) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 9)) (+ y (* s 12)) s s (static-rgba 160 25 0 235) #x3fffff))
+        )
+
+        (else
+
+          (draw-sprite2d-xy buf (+ x (* s 5)) y (* s 4) s (static-rgba 0 25 120 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 3)) (+ y s) (* s 8) s (static-rgba 0 25 120 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 2)) (+ y (* s 2)) (* s 10) s (static-rgba 0 25 120 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x s) (+ y (* s 3)) (* s 12) (* s 2) (static-rgba 0 25 120 235) #x3fffff)
+          (draw-sprite2d-xy buf x (+ y (* s 5)) (* s 14) (* s 2) (static-rgba 0 25 120 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x s) (+ y (* s 7)) (* s 12) s (static-rgba 0 25 120 235) #x3fffff)
+
+          (draw-sprite2d-xy buf (+ x s) (+ y (* s 5)) (* s 2) s (static-rgba 0 210 255 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 3)) (+ y (* s 4)) (* s 8) s (static-rgba 0 210 255 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 11)) (+ y (* s 5)) (* s 2) s (static-rgba 0 210 255 235) #x3fffff)
+
+          (draw-sprite2d-xy buf (+ x (* s 4)) (+ y (* s 8)) (* s 6) s (static-rgba 0 25 120 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 5)) (+ y (* s 9)) (* s 4) s (static-rgba 0 25 120 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 5)) (+ y (* s 10)) (* s 4) s (static-rgba 0 25 120 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 4)) (+ y (* s 11)) (* s 6) s (static-rgba 0 25 120 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 3)) (+ y (* s 12)) (* s 8) s (static-rgba 0 25 120 235) #x3fffff)
+
+          (draw-sprite2d-xy buf (+ x (* s 5)) (+ y (* s 9)) s s (static-rgba 0 55 170 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 8)) (+ y (* s 10)) s s (static-rgba 0 55 170 235) #x3fffff)
+          (draw-sprite2d-xy buf (+ x (* s 5)) (+ y (* s 11)) s s (static-rgba 0 55 170 235) #x3fffff)
+
+          (when (>= (-> *game-info* crates-opened) 6.0)
+            (draw-sprite2d-xy buf (+ x (* s 4)) (+ y (* s 2)) s s (static-rgba 0 70 190 235) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 9)) (+ y (* s 2)) s s (static-rgba 0 70 190 235) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 6)) (+ y (* s 8)) (* s 2) s (static-rgba 0 70 190 235) #x3fffff))
+
+          (when (>= (-> *game-info* crates-opened) 7.0)
+            (draw-sprite2d-xy buf (+ x (* s 2)) (+ y (* s 6)) (* s 2) s (static-rgba 80 235 255 245) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 10)) (+ y (* s 6)) (* s 2) s (static-rgba 80 235 255 245) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 5)) (+ y (* s 3)) (* s 4) s (static-rgba 0 70 190 235) #x3fffff))
+
+          (when (>= (-> *game-info* crates-opened) 8.0)
+            (draw-sprite2d-xy buf (+ x (* s 6)) (+ y s) (* s 2) s (static-rgba 120 245 255 245) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 6)) (+ y (* s 2)) (* s 2) s (static-rgba 0 95 220 235) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 4)) (+ y (* s 12)) s s (static-rgba 0 85 205 235) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 9)) (+ y (* s 12)) s s (static-rgba 0 85 205 235) #x3fffff))
+
+          (when (>= (-> *game-info* crates-opened) 9.0)
+            (draw-sprite2d-xy buf (+ x (* s 3)) (+ y (* s 5)) s s (static-rgba 150 250 255 245) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 10)) (+ y (* s 5)) s s (static-rgba 150 250 255 245) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 6)) (+ y (* s 9)) (* s 2) s (static-rgba 0 210 255 240) #x3fffff)
+            (draw-sprite2d-xy buf (- x s) (+ y (* s 5)) s s (static-rgba 0 210 255 235) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 14)) (+ y (* s 5)) s s (static-rgba 0 210 255 235) #x3fffff))
+
+          (when (>= (-> *game-info* crates-opened) 10.0)
+            (draw-sprite2d-xy buf (+ x (* s 2)) (+ y (* s 3)) s s (static-rgba 200 255 255 250) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 11)) (+ y (* s 3)) s s (static-rgba 200 255 255 250) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 4)) (+ y (* s 6)) s s (static-rgba 200 255 255 250) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 9)) (+ y (* s 6)) s s (static-rgba 200 255 255 250) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 6)) (+ y (* s 4)) (* s 2) s (static-rgba 200 255 255 250) #x3fffff)
+            (draw-sprite2d-xy buf (+ x (* s 6)) (+ y (* s 12)) (* s 2) s (static-rgba 200 255 255 250) #x3fffff))
+        )
+      )
+    )
+  (none))
 
 (defun draw-mod-menu-text-preset ((text-type int) (text string)) ;; (text-x-pos int) (text-y-pos int) (text-scale float))
     (clear matt-str)
@@ -1093,7 +1196,7 @@ Have fun!~%
         ((5) ;; gunmod yellow 3
             (when (task-node-closed? (game-task-node mody-freeze))
                 (set! gunmod-description-title  "<COLOR_YELLOW>Silver Freeze")
-                (set! gunmod-description        "Enemies freeze for 3 seconds~%when they get hit.")))
+                (set! gunmod-description        "Enemies freeze for 2 seconds~%when they get hit.~%~%~%<COLOR_RED>Lasts 0.5 seconds in Prestige Mode!")))
 
         ((6) ;; gunmod blue 1
             (when (task-node-closed? (game-task-node modb-ammo))
@@ -1108,7 +1211,7 @@ Have fun!~%
         ((8) ;; gunmod blue 3
             (when (task-node-closed? (game-task-node modb-airstrike))
                 (set! gunmod-description-title  "<COLOR_CYAN>Rocket Targeter")
-                (set! gunmod-description        "Charges lock-on missiles while~%firing.")))
+                (set! gunmod-description        "Charges lock-on missiles while~%firing.~%~%~%<COLOR_RED>Costs extra ammo in Prestige Mode!")))
 
         ((9) ;; gunmod dark 1
             (when (task-node-closed? (game-task-node modd-morpher))
@@ -2310,6 +2413,7 @@ As you complete through main missions, you'll unlock more <COLOR_YELLOW>points o
     (draw-mod-menu-background)
 
     (when (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+        (draw-prestige-skull-icon 145 45 3)
         (clear *temp-string*)
         (format *temp-string* "<COLOR_RED>Prestige Level ~D"
         (the int (-> *game-info* crates-opened))

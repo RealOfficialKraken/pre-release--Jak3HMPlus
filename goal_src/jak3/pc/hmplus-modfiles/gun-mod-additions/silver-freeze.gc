@@ -26,7 +26,9 @@
 
 (defbehavior silver-freeze-proc-init-by-other silver-freeze-proc ((victim process))
   (set! (-> self victim) (process->handle victim))
-  (set! (-> self end-time) (+ (current-time) (seconds 2)))
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      (set! (-> self end-time) (+ (current-time) (seconds 0.5)))
+      (set! (-> self end-time) (+ (current-time) (seconds 2))))
   (set! (-> self old-gravity-y) 0.0)
   (set! (-> self old-gravity-max) 0.0)
   (set! (-> self old-gravity-length) 0.0)

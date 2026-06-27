@@ -5,6 +5,11 @@
 ;; name in dgo: neo-grenadier
 ;; dgos: SEA
 
+(defun neo-grenadier-hero-attack-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      3.0
+      1.0))
+
 ;; +++grenadier-status-flag
 (defenum grenadier-status-flag
   :type uint64
@@ -594,9 +599,11 @@
           )
         )
       )
-    (when (or (time-elapsed? (-> self state-time) (rand-vu-int-range (seconds 3) (seconds 9)))
-              (>= 8192.0 (vector-vector-xz-distance (-> self root trans) (-> self bank final-pos)))
-              )
+    (when (or (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+              (time-elapsed? (-> self state-time) (rand-vu-int-range (seconds 1) (seconds 3)))
+              (time-elapsed? (-> self state-time) (rand-vu-int-range (seconds 3) (seconds 9))))
+          (>= 8192.0 (vector-vector-xz-distance (-> self root trans) (-> self bank final-pos)))
+          )
       (if (and (handle->process (-> self focus handle))
                (not (logtest? (-> (the-as process-focusable (handle->process (-> self focus handle))) focus-status)
                               (focus-status disable dead ignore grabbed)
@@ -713,11 +720,15 @@
         )
     )
   :code (behavior ()
-    (ja-channel-push! 1 (seconds 0.135))
-    (ja-no-eval :group! neo-grenadier-spin-kick-ja :num! (seek!) :frame-num 0.0)
+    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+        (ja-channel-push! 1 (seconds 0.045))
+        (ja-channel-push! 1 (seconds 0.135)))
+    (ja-no-eval :group! neo-grenadier-spin-kick-ja
+                :num! (seek! max (neo-grenadier-hero-attack-speed))
+                :frame-num 0.0)
     (until (ja-done? 0)
       (suspend)
-      (ja :num! (seek!))
+      (ja :num! (seek! max (neo-grenadier-hero-attack-speed)))
       )
     (go-hostile self)
     )
@@ -965,7 +976,7 @@
         )
     )
   :code (behavior ()
-    (let ((f30-0 (rnd-float-range self 0.9 1.1)))
+    (let ((f30-0 (* (rnd-float-range self 0.9 1.1) (neo-grenadier-hero-attack-speed))))
       (let ((f28-0 (vector-length (-> self root transv))))
         (ja-channel-push! 1 (seconds 0.2))
         (when (< 4096.0 f28-0)
@@ -1018,7 +1029,7 @@
             (until (pointing-toward-focus? self 910.2222 #t)
               (ja-blend-eval)
               (suspend)
-              (ja :num! (loop! 0.75))
+              (ja :num! (loop! (* 0.75 (neo-grenadier-hero-attack-speed))))
               )
             (nav-enemy-method-184 self)
             )

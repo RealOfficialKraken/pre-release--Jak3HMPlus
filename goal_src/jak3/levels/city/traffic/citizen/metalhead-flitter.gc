@@ -7,6 +7,11 @@
 
 ;; DECOMP BEGINS
 
+(defun metalhead-flitter-hero-move-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      2.0
+      1.0))
+
 (defskelgroup skel-mh-flitter city-flitter city-flitter-lod0-jg -1
               ((city-flitter-lod0-mg (meters 20)) (city-flitter-lod1-mg (meters 999999)))
               :bounds (static-spherem 0 0 0 5.5)
@@ -964,6 +969,9 @@
     (the-as pair 0)
     )
   (setup-enemy! this *metalhead-flitter-nav-enemy-info*)
+  (let ((v1-0 (-> this nav)))
+  (set! (-> v1-0 speed-scale) (metalhead-flitter-hero-move-speed))
+  )
   (set! (-> this move-angle) 10922.667)
   (set! (-> this heading) (if (= (rand-vu-int-range 0 1) 1)
                               #t
@@ -999,9 +1007,9 @@
     468
     (new 'static 'vector :x -942.08 :y -860.16 :z 1269.76 :w 163840.0)
     )
-  (set! (-> this speed-walk) (-> this enemy-info walk-travel-speed))
-  (set! (-> this dist-walk-anim) (-> this enemy-info walk-travel-speed))
-  (set! (-> this dist-run-anim) (-> this enemy-info run-travel-speed))
+  (set! (-> this speed-walk) (* (-> this enemy-info walk-travel-speed) (metalhead-flitter-hero-move-speed)))
+  (set! (-> this dist-walk-anim) (* (-> this enemy-info walk-travel-speed) (metalhead-flitter-hero-move-speed)))
+  (set! (-> this dist-run-anim) (* (-> this enemy-info run-travel-speed) (metalhead-flitter-hero-move-speed)))
   0
   (none)
   )

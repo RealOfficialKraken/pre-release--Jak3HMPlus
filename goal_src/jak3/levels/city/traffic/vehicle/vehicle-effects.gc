@@ -76,7 +76,7 @@
                                            :position (new 'static 'vector :w 4096.0)
                                            :size-probe 102.4
                                            :size-y 4096.0
-                                           :color (new 'static 'rgbaf :x 255.0 :y 64.0 :w 16.0)
+                                           :color (new 'static 'rgbaf :x 0.0 :y 60.0 :z 255.0 :w 16.0)
                                            :fade-a -0.0000122044
                                            :fade-b 8.997864
                                            :tex-id (new 'static 'texture-id :index #xf :page #x4)
@@ -347,7 +347,9 @@
       (set! (-> v1-5 position w) f0-5)
       )
     0
-    (set! (-> s5-0 glow color y) (rand-vu-float-range 0.0 64.0))
+    (set! (-> s5-0 glow color x) 0.0)
+    (set! (-> s5-0 glow color y) (rand-vu-float-range 30.0 80.0))
+    (set! (-> s5-0 glow color z) 255.0)
     (set! (-> s5-0 glow color w) (* (-> arg1 fog-fade) (+ (* 16.0 (-> arg1 thrust)) (* 4.0 (rand-vu)))))
     (let ((f0-13 (* 4.0 (-> s5-0 float1))))
       (set! (-> s5-0 glow position w) f0-13)

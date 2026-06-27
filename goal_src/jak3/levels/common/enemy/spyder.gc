@@ -5,6 +5,11 @@
 ;; name in dgo: spyder
 ;; dgos: STAA
 
+(defun spyder-hero-attack-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      3.0
+      1.0))
+
 ;; +++spyder-flag
 (defenum spyder-flag
   :type uint64
@@ -1024,11 +1029,17 @@
                     (set! (-> self fire-info 0 quad) (-> s3-0 quad))
                     (vector-copy! (-> self fire-info 1) s2-1)
                     )
-                  (suspend-for (seconds 0.2)
-                    (set! f30-0 (seek f30-0 (lerp-scale 0.0 1.0 (the float s4-0) 0.0 8.0) (seconds-per-frame)))
-                    (ja :num! (loop!))
-                    (ja :chan 1 :num! (chan 0) :frame-interp0 f30-0 :frame-interp1 f30-0)
-                    )
+                  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                    (suspend-for (seconds 0.067)
+                      (set! f30-0 (seek f30-0 (lerp-scale 0.0 1.0 (the float s4-0) 0.0 8.0) (* 3.0 (seconds-per-frame))))
+                      (ja :num! (loop! 3.0))
+                      (ja :chan 1 :num! (chan 0) :frame-interp0 f30-0 :frame-interp1 f30-0)
+                      )
+                    (suspend-for (seconds 0.2)
+                      (set! f30-0 (seek f30-0 (lerp-scale 0.0 1.0 (the float s4-0) 0.0 8.0) (seconds-per-frame)))
+                      (ja :num! (loop!))
+                      (ja :chan 1 :num! (chan 0) :frame-interp0 f30-0 :frame-interp1 f30-0)
+                      ))
                   (let ((f28-1 (+ 12288.0 f28-0)))
                     (vector-copy! gp-0 s5-0)
                     (let ((a0-31 (handle->process (-> self focus handle))))
@@ -1046,7 +1057,7 @@
         )
       )
     (until (ja-done? 0)
-      (ja :num! (seek! 2.0))
+      (ja :num! (seek! (* 2.0 (spyder-hero-attack-speed))))
       (let ((a0-36 (-> self skel root-channel 1)))
         (let ((f0-23 1.0))
           (set! (-> a0-36 frame-interp 1) f0-23)
