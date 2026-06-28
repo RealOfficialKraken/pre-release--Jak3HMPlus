@@ -10,6 +10,11 @@
 (define-extern *mh-flyer-curve-missile-linear-trail* curve2d-fast)
 (define-extern *mh-flyer-missile-trail* light-trail-composition)
 
+(defun mh-flyer-hero-attack-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      3.0
+      1.0))
+
 ;; DECOMP BEGINS
 
 (defpart 1715
@@ -1102,7 +1107,9 @@
     (ja :num! (loop!))
     (seek! (-> self jitter) 0.0 (* 4.0 (seconds-per-frame)))
     (when (>= (-> self missiles-fired) 3)
-      (set! (-> self last-fire-time) (+ (current-time) (seconds 5)))
+      (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+          (set! (-> self last-fire-time) (+ (current-time) (seconds 1.667)))
+          (set! (-> self last-fire-time) (+ (current-time) (seconds 5))))
       (set! (-> self missiles-fired) 0)
       0
       )
@@ -1110,9 +1117,12 @@
       (let ((f0-5 (vector-vector-xz-distance (-> self root trans) (target-pos 0))))
         (when (and (< f0-5 1228800.0)
                    (< 286720.0 f0-5)
-                   (and (time-elapsed? (-> self last-fire-time) (seconds 0.6))
-                        (< 0.0 (vector-dot (-> self rotation-matrix fvec) (-> self focus-xz-dir)))
-                        )
+                   (and
+                    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+                        (time-elapsed? (-> self last-fire-time) (seconds 0.2))
+                        (time-elapsed? (-> self last-fire-time) (seconds 0.6)))
+                    (< 0.0 (vector-dot (-> self rotation-matrix fvec) (-> self focus-xz-dir)))
+                    )
                    )
           (let ((gp-1 (new 'stack-no-clear 'projectile-init-by-other-params)))
             (set! (-> gp-1 ent) (-> self entity))

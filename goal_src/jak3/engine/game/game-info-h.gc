@@ -294,19 +294,26 @@
   (define in-gunmods? #f)
   (define in-superpowers? #f)
   (define in-skill? #f)
+  (define in-pets? #f)
+  (define in-jak-model? #f)
   (define on-vehicle? #f)
 
   (define in-tutorial? #f)
   (define tutorial-msg 0)
   (define tutorial-freeze 0)
 
-  (define menu-slot 0)
+  (define menu-index 0)
+  (define menu-index-max 0)
   (define menu-type 0)
   (define menu-select 1)
 
+  (define in-arena-menu-info? #f)
+  (define in-hero-menu? #f)
+
+
   (define in-menu? #f)
   (define in-dialogue? #f)
-  (define di-s "")
+  (define di-s1 "")
   (define di-s2 "")
   (define di-s3 "")
   (define di-s4 "")
@@ -413,6 +420,8 @@
 
   (defun-extern toggle-freeze none)
 
+  (defun-extern spawn-planetboss-spawn-manager int none)
+
   ;black market stuff with Vin
   (define in-vin-shop? #f)
   (define vin-select 0)
@@ -508,18 +517,33 @@
   (define gunmod-ratshooter #f)
   (define gunmod-saucers #f)
 
-  (define red-1s "???")
-  (define red-2s "???")
-  (define red-3s "???")
-  (define yellow-1s "???")
-  (define yellow-2s "???")
-  (define yellow-3s "???")
-  (define blue-1s "???")
-  (define blue-2s "???")
-  (define blue-3s "???")
-  (define dark-1s "???")
-  (define dark-2s "???")
-  (define dark-3s "???")
+  (define gunmod-red-1s "   ?????????")
+  (define gunmod-red-2s "   ?????????")
+  (define gunmod-red-3s "   ?????????")
+  (define gunmod-yellow-1s "   ?????????")
+  (define gunmod-yellow-2s "   ?????????")
+  (define gunmod-yellow-3s "   ?????????")
+  (define gunmod-blue-1s "   ?????????")
+  (define gunmod-blue-2s "   ?????????")
+  (define gunmod-blue-3s "   ?????????")
+  (define gunmod-dark-1s "   ?????????")
+  (define gunmod-dark-2s "   ?????????")
+  (define gunmod-dark-3s "   ?????????")
+  
+  (define gunmod-description "")
+  (define gunmod-description-title "")
+  (define gunmod-menu-text-color "<COLOR_MENU-PARENT>")
+
+  (define warp-s1 "?????????")
+  (define warp-s2 "?????????")
+  (define warp-s3 "?????????")
+  (define warp-s4 "?????????")
+  (define warp-s5 "?????????")
+  
+  (define mod-menu-option-list-s (new 'global 'string 2048 (the-as string #f)))
+  (define mod-menu-x 70)
+  (define mod-menu-y 40)
+
 
   (defun-extern spawn-palace-blockers (none))
   (defun-extern spawn-volcano-blocker (none))
@@ -614,7 +638,9 @@
 
   (defun-extern spawn-jak2-stayas none)
   (defun-extern spawn-pet-menu none)
+  (defun-extern spawn-gunmod-menu none)
   (define asked-jak-if-jak2? #f)
+  (define in-welcome-screen? #f)
 
   (define-extern *xp-gain* float)
   (define-extern xp-draw symbol)
@@ -656,7 +682,7 @@
   (define bhint-string2 "")
   (define bhint-max 0)
   (define bhint-y 255)
-  (defun-extern blank-hint! string string int int none)
+  (defun-extern blank-hint! string int int none)
 
   (define arena-token-count 0)
   (defun-extern spawn-gun-upgrade vector float none)
@@ -715,7 +741,7 @@
 
   (defun-extern launch-disclaimer none)
   (define in-disclaimer? #f)
-  (define launch-disclaimer? #t)
+  (define launch-disclaimer? #f)
   (define-extern mod-version string)
   (define launch-mmenu-delay #f)
   (define lmmi 0)

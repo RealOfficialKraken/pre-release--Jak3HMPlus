@@ -2890,9 +2890,6 @@
       (set! shot
             (the-as guard-shot
               (someone-fire-projectile planetboss-guard-shot gp-0 owner)))
-      (when shot
-        (set! (-> shot timeout) (seconds 4))
-        )
       shot))
   (none))
 
@@ -2925,7 +2922,7 @@
 
 (defun planetboss-standing-fire-cycle! ((self planetboss))
   (cond
-    ((time-elapsed? (-> self planetboss-fire-cycle-time) (seconds 10.0))
+    ((time-elapsed? (-> self planetboss-fire-cycle-time) (seconds 4.0))
      (set-time! (-> self planetboss-fire-cycle-time))
      )
     ((not (time-elapsed? (-> self planetboss-fire-cycle-time) (seconds 3.0)))
@@ -3119,7 +3116,7 @@
          (planetboss-snap-to-ground! self)
          (planetboss-get-chase-pos! (-> self seek-pos) self)
          (when (<= (vector-vector-xz-distance (target-pos 0) (-> self root trans))
-                   (meters 2000.0))
+                   (meters 200.0))
            (set! (-> self planetboss-chasing?) #f)
            (vector-reset! (-> self pvel))
            )
@@ -3183,20 +3180,15 @@
         (dist 0.0)
         (hit 0.0)
         (ok #f))
-
     (vector-copy! base (target-pos 0))
-    (quaternion->matrix m (-> *target* control quat))
-
+    (quaternion->matrix m (-> *target* root quat))
     (vector-copy! forward (-> m fvec))
     (set! (-> forward y) 0.0)
     (vector-normalize! forward 1.0)
-
     (vector-copy! right (-> m rvec))
     (set! (-> right y) 0.0)
     (vector-normalize! right 1.0)
-
     (set! dist (rand-vu-float-range (meters 400.0) (meters 500.0)))
-
     (while (and (< try 5) (not ok))
       (cond
         ((= try 0)
@@ -3215,18 +3207,14 @@
          (set! side (meters -100.0))
          )
         )
-
       (vector-copy! out base)
       (vector+*! out out forward dist)
       (vector+*! out out right side)
       (set! (-> out w) 1.0)
-
       (vector-copy! (-> q start-pos) out)
       (+! (-> q start-pos y) (meters 160.0))
-
       (vector-reset! (-> q move-dist))
       (set! (-> q move-dist y) (meters -400.0))
-
       (set! (-> q radius) (meters 1.5))
       (set! (-> q collide-with) (collide-spec backgnd))
       (set! (-> q ignore-process0) #f)
@@ -3239,23 +3227,19 @@
               :noendlessfall #x1
               :board #x1))
       (set! (-> q action-mask) (collide-action solid))
-
       (set! hit (fill-and-probe-using-line-sphere *collide-cache* q))
-
       (when (>= hit 0.0)
         (set! (-> out y) (-> q best-other-tri intersect y))
         (set! (-> out w) 1.0)
         (set! ok #t)
         )
-
       (+! try 1)
       )
-
     ok
     )
   )
 
-  (defbehavior planetboss-spawn-manager-init-by-other planetboss-spawn-manager ((amt int))
+(defbehavior planetboss-spawn-manager-init-by-other planetboss-spawn-manager ((amt int))
     (set! (-> self remaining) amt)
     (set! (-> self spawned-count) 0)
     (set! (-> self last-spawn-time) 0)
@@ -3273,7 +3257,6 @@
           )
         (when (and (= in-desert-game-task? #f)
                    (time-elapsed? (-> self last-spawn-time) (seconds 0.25)))
-
           (set-time! (-> self last-spawn-time))
           (cond
             ((planetboss-front-spawn-pos! spawn-pos)
@@ -3294,11 +3277,10 @@
     )
   )
 
-  (defstate dead (planetboss-spawn-manager)
-    :virtual #t
-    :code (behavior ()
-      (kill-by-name (-> self name) *default-pool*)
-      (deactivate self)
+(defstate dead (planetboss-spawn-manager)
+  :virtual #t
+  :code (behavior ()
+    (deactivate self)
     )
   )
 

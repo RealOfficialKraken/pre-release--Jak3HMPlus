@@ -941,15 +941,15 @@
                   (penetrate-using (-> self control penetrate-using)))))
             (target-generic-event-handler proc argc message block)))
       )
-      (('attack-invinc)
-       (target-attacked
-         message
-         (the-as attack-info (-> block param 1))
-         proc
-         (the-as touching-shapes-entry (-> block param 0))
-         target-hit
-         )
-       )
+      (('attack 'attack-or-shove 'attack-invinc)
+        (target-attacked
+          message
+          (the-as attack-info (-> block param 1))
+          proc
+          (the-as touching-shapes-entry (-> block param 0))
+          target-hit
+          )
+        )
       (else
         (target-generic-event-handler proc argc message block)
         )
@@ -1078,15 +1078,15 @@
           )
          )
        )
-      (('attack-invinc)
-       (target-attacked
-         message
-         (the-as attack-info (-> block param 1))
-         proc
-         (the-as touching-shapes-entry (-> block param 0))
-         target-hit
-         )
-       )
+      (('attack 'attack-or-shove 'attack-invinc)
+        (target-attacked
+          message
+          (the-as attack-info (-> block param 1))
+          proc
+          (the-as touching-shapes-entry (-> block param 0))
+          target-hit
+          )
+        )
       (else
         (target-generic-event-handler proc argc message block)
         )

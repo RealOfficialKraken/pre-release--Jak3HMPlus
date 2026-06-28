@@ -7,6 +7,11 @@
 
 ;; DECOMP BEGINS
 
+(defun robo-hover-hero-attack-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      3.0
+      1.0))
+
 (defpartgroup group-robo-gun-smoke
   :id 558
   :duration (seconds 0.017)
@@ -775,14 +780,16 @@
     )
   :code (behavior ()
     (sound-play "hover-warn")
-    (ja-channel-push! 1 (seconds 0.2))
+    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+        (ja-channel-push! 1 (seconds 0.067))
+        (ja-channel-push! 1 (seconds 0.2)))
     (ja-no-eval :group! (-> self draw art-group data (-> self hover-info shoot-anim))
-                :num! (seek!)
+                :num! (seek! max (robo-hover-hero-attack-speed))
                 :frame-num 0.0
                 )
     (until (ja-done? 0)
       (suspend)
-      (ja :num! (seek!))
+      (ja :num! (seek! max (robo-hover-hero-attack-speed)))
       )
     (go-virtual ambush-fly)
     )
@@ -943,10 +950,11 @@
     )
   :exit (behavior ()
     (set! (-> self next-fire-time)
-          (+ (current-time)
-             (the int (* 300.0 (rnd-float-range self (-> self attack-wait-min) (-> self attack-wait-max))))
-             )
-          )
+      (+ (current-time)
+         (the int (* (/ 300.0 (robo-hover-hero-attack-speed))
+                     (rnd-float-range self (-> self attack-wait-min) (-> self attack-wait-max))))
+         )
+      )
     (set! (-> self restart-fly-anims) #t)
     )
   :trans (behavior ()
@@ -958,21 +966,28 @@
     )
   :code (behavior ()
     (sound-play "hover-warn")
-    (ja-channel-push! 1 (seconds 0.2))
+    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+        (ja-channel-push! 1 (seconds 0.067))
+        (ja-channel-push! 1 (seconds 0.2)))
     (ja-no-eval :group! (-> self draw art-group data (-> self hover-info shoot-anim))
-                :num! (seek!)
+                :num! (seek! max (robo-hover-hero-attack-speed))
                 :frame-num 0.0
                 )
     (until (ja-done? 0)
       (suspend)
-      (ja :num! (seek!))
+      (ja :num! (seek! max (robo-hover-hero-attack-speed)))
       )
     (go-hostile self)
     )
   :post (behavior ()
     (set! (-> self gun-blend)
-          (seek-ease (-> self gun-blend) 1.0 (* 3.0 (seconds-per-frame)) 0.9 (* 0.4 (seconds-per-frame)))
-          )
+      (seek-ease
+        (-> self gun-blend)
+        1.0
+        (* 3.0 (robo-hover-hero-attack-speed) (seconds-per-frame))
+        0.9
+        (* 0.4 (robo-hover-hero-attack-speed) (seconds-per-frame)))
+      )
     (vector-copy! (-> self aim-position) (-> self focus-pos))
     (set! (-> self aim-position y) (+ 6144.0 (-> self attack-miss-dist-curr) (-> self aim-position y)))
     (hover-enemy-hostile-post)

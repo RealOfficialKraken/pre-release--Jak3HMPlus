@@ -5,6 +5,21 @@
 ;; name in dgo: roboguard-city
 ;; dgos: CTYPESC
 
+(defun roboguard-city-hero-move-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      2.0
+      1.0))
+
+(defun roboguard-city-hero-roll-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      2.0
+      1.0))
+
+(defun roboguard-city-hero-attack-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      3.0
+      1.0))
+
 ;; +++robo-flag
 (defenum robo-flag
   :type uint16
@@ -885,7 +900,7 @@
         )
     (set! (-> self attack-dist-scalar) 0.5)
     (let ((v1-9 (-> self nav)))
-      (set! (-> v1-9 acceleration) 16384.0)
+      (set! (-> v1-9 acceleration) (* 16384.0 (roboguard-city-hero-roll-speed)))
       )
     0
     (nav-enemy-method-181 self)
@@ -915,11 +930,11 @@
         (go-virtual roll-exit)
         )
     (let ((v1-9 (-> self nav)))
-      (set! (-> v1-9 target-speed) 81920.0)
+      (set! (-> v1-9 target-speed) (* 81920.0 (roboguard-city-hero-roll-speed)))
       )
     0
     (let ((v1-11 (-> self nav)))
-      (set! (-> v1-11 turning-acceleration) 20480.0)
+      (set! (-> v1-11 turning-acceleration) (* 20480.0 (roboguard-city-hero-roll-speed)))
       )
     0
     (when (time-elapsed? (-> self last-update-chase-pos-time) (seconds 1))
@@ -1358,20 +1373,29 @@
             (lerp-scale 0.0 1.0 (vector-vector-xz-distance (-> self root trans) (-> self focus-pos)) 12288.0 20480.0)
             )
           )
-      (ja-channel-push! 2 (seconds 0.3))
-      (ja-no-eval :group! roboguard-city-punch-close-rotate-ja :num! (seek!) :frame-num 0.0)
-      (ja-no-eval :chan 1 :group! roboguard-city-punch-far-rotate-ja :num! (seek!) :frame-num 0.0)
+      (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+          (ja-channel-push! 2 (seconds 0.1))
+          (ja-channel-push! 2 (seconds 0.3)))
+      (ja-no-eval :group! roboguard-city-punch-close-rotate-ja
+                  :num! (seek! max (roboguard-city-hero-attack-speed))
+                  :frame-num 0.0)
+      (ja-no-eval :chan 1
+                  :group! roboguard-city-punch-far-rotate-ja
+                  :num! (seek! max (roboguard-city-hero-attack-speed))
+                  :frame-num 0.0)
       (until (ja-done? 0)
         (ja :chan 1 :num! (chan 0) :frame-interp0 f30-0 :frame-interp1 f30-0)
         (seek-to-point-toward-point!
           (-> self root)
           (-> self focus-pos)
           (* 1.2 (-> self nav max-rotation-rate))
-          (seconds 0.02)
+          (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+              (seconds 0.007)
+              (seconds 0.02))
           )
-        (seek! (-> self torso-aim-blend) 0.0 (* 3.0 (seconds-per-frame)))
+        (seek! (-> self torso-aim-blend) 0.0 (* 3.0 (roboguard-city-hero-attack-speed) (seconds-per-frame)))
         (suspend)
-        (ja :num! (seek! max 0.5))
+        (ja :num! (seek! max (* 0.5 (roboguard-city-hero-attack-speed))))
         )
       (let ((f28-0 8192.0))
         (let* ((a0-10 (-> self root root-prim))
@@ -1385,23 +1409,33 @@
                 )
           )
         (logior! (-> self focus-status) (focus-status dangerous))
-        (ja-no-eval :group! roboguard-city-punch-close-go-ja :num! (seek!) :frame-num 0.0)
-        (ja-no-eval :chan 1 :group! roboguard-city-punch-far-go-ja :num! (seek!) :frame-num 0.0)
+        (ja-no-eval :group! roboguard-city-punch-close-go-ja
+                    :num! (seek! max (roboguard-city-hero-attack-speed))
+                    :frame-num 0.0)
+        (ja-no-eval :chan 1
+                    :group! roboguard-city-punch-far-go-ja
+                    :num! (seek! max (roboguard-city-hero-attack-speed))
+                    :frame-num 0.0)
         (until (ja-done? 0)
           (ja :chan 1 :num! (chan 0) :frame-interp0 f30-0 :frame-interp1 f30-0)
           (suspend)
-          (ja :num! (seek!))
+          (ja :num! (seek! max (roboguard-city-hero-attack-speed)))
           )
         (set! (-> (the-as collide-shape-prim-group (-> self root root-prim)) child 2 prim-core action)
               (collide-action)
               )
         (logclear! (-> self focus-status) (focus-status dangerous))
-        (ja-no-eval :group! roboguard-city-punch-close-hold-ja :num! (seek!) :frame-num 0.0)
-        (ja-no-eval :chan 1 :group! roboguard-city-punch-far-hold-ja :num! (seek!) :frame-num 0.0)
+        (ja-no-eval :group! roboguard-city-punch-close-hold-ja
+                    :num! (seek! max (roboguard-city-hero-attack-speed))
+                    :frame-num 0.0)
+        (ja-no-eval :chan 1
+                    :group! roboguard-city-punch-far-hold-ja
+                    :num! (seek! max (roboguard-city-hero-attack-speed))
+                    :frame-num 0.0)
         (until (ja-done? 0)
           (ja :chan 1 :num! (chan 0) :frame-interp0 f30-0 :frame-interp1 f30-0)
           (suspend)
-          (ja :num! (seek! max 0.75))
+          (ja :num! (seek! max (* 0.75 (roboguard-city-hero-attack-speed))))
           )
         (let* ((v1-147 (the-as collide-shape-prim-group (-> self root root-prim)))
                (a0-26 (-> v1-147 child 2))
@@ -1441,7 +1475,9 @@
     (nav-enemy-method-179 self)
     )
   :trans (behavior ()
-    (when (and (time-elapsed? (-> self fire-time) (seconds 0.6)) (zero? (-> self skel float-channels)))
+    (when (and (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+    (time-elapsed? (-> self fire-time) (seconds 0.2))
+    (time-elapsed? (-> self fire-time) (seconds 0.6))) (zero? (-> self skel float-channels)))
       (when (and (time-elapsed? (-> self state-time) (-> self reaction-time)) (-> self fired-this-time?))
         (let ((v1-12 (roboguard-city-method-236 self)))
           (cond
@@ -1465,8 +1501,8 @@
           (set! (-> self skel interp-select 0) #x13bb8)
           (set! (-> self skel interp-select 1) 0)
           (set! (-> v1-28 param 0) 1.0)
-          (set! (-> v1-28 param 1) 1.0)
-          (set! (-> v1-28 param 2) 2.0)
+          (set! (-> v1-28 param 1) (roboguard-city-hero-attack-speed))
+          (set! (-> v1-28 param 2) (* 2.0 (roboguard-city-hero-attack-speed)))
           (set! (-> v1-28 num-func) num-func-interp1-play!)
           )
         )
@@ -2128,6 +2164,7 @@
   (let ((t9-4 (method-of-type kg-squad-member init-enemy!)))
     (t9-4 this)
     )
+  (set! (-> this speed-scale) (roboguard-city-hero-move-speed))
   (set! (-> this last-update-chase-pos-time) 0)
   (init-los!
     (-> this los)
@@ -2176,11 +2213,11 @@
     )
   (set! (-> this anim-shuffle) 10)
   (set! (-> this anim-walk) 10)
-  (set! (-> this speed-walk) 12288.0)
-  (set! (-> this dist-walk-anim) 16384.0)
-  (set! (-> this dist-run-anim) 26624.0)
+  (set! (-> this speed-walk) (* 12288.0 (roboguard-city-hero-move-speed)))
+  (set! (-> this dist-walk-anim) (* 16384.0 (roboguard-city-hero-move-speed)))
+  (set! (-> this dist-run-anim) (* 26624.0 (roboguard-city-hero-move-speed)))
   (set! (-> this anim-run) 11)
-  (set! (-> this speed-run) 49152.0)
+  (set! (-> this speed-run) (* 49152.0 (roboguard-city-hero-move-speed)))
   (set! (-> this draw lod-set lod 0 dist) 491520.0)
   0
   (none)

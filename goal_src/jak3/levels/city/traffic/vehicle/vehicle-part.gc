@@ -127,13 +127,13 @@
   )
 
 (defpart 922
-  :init-specs ((:texture (gun-yellow-muzzleflash level-default-sprite))
+  :init-specs ((:texture (gun-enemy-muzzleflash level-default-sprite))
     (:num 1.0)
     (:scale-x (meters 0.4))
     (:scale-y (meters 3))
-    (:r 128.0 128.0)
-    (:g 32.0 96.0)
-    (:b :copy g)
+    (:r 0.0)
+    (:g 180.0 255.0)
+    (:b 255.0)
     (:a 128.0 64.0)
     (:timer (seconds 0.017))
     (:flags (sp-cpuinfo-flag-2 sp-cpuinfo-flag-3 left-multiply-quat))

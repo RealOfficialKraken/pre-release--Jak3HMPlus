@@ -4323,6 +4323,7 @@
           (t9-0)
           )
       )
+    (jak-refill!)
     (let ((gp-0 (new 'stack 'bombbot-spawn-params)))
       (quaternion-copy! (-> gp-0 quat) (new 'static 'quaternion :y 0.841 :w 0.5409))
       (set! (-> gp-0 path) *bombbot-path-1*)

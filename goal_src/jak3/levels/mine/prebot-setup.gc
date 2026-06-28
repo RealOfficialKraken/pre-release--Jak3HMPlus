@@ -22,6 +22,23 @@
   )
 ;; ---prebot-flag
 
+(defun prebot-hp-scale ()
+  (cond
+    ((task-node-open? (game-task-node mine-boss-resolution))
+     (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+       (+ 1000.0 (* enemy-noto 10) (* (the float (-> *game-info* crates-opened)) 10000.0))
+       (+ 600.0 (* enemy-noto 10))
+     )
+    )
+    (else
+      (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+        (* (+ 1000.0 (* enemy-noto 3)) (/ (the float enemy-noto) 3))
+        (* (+ 200.0 (* enemy-noto 3)) (/ (the float enemy-noto) 3))
+      )
+    )
+  )
+)
+
 
 (declare-type prebot process-focusable)
 (define-extern *prebot-sword-color-curve* curve-color-piecewise)
@@ -1107,16 +1124,7 @@
     (set! (-> this ammo v1-104 handle) (the-as handle #f))
     (set! (-> this ammo v1-104 birth-next-time) #f)
     )
-  (if (task-node-open? (game-task-node mine-boss-resolution))
-    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-      (set! (-> this hit-points) (+ 1000.0 (* enemy-noto 10)))
-      (set! (-> this hit-points) (+ 600.0 (* enemy-noto 10)))
-    )
-    (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
-      (set! (-> this hit-points) (* (+ 1000.0 (* enemy-noto 3)) (/ (the float enemy-noto) 3)))
-      (set! (-> this hit-points) (* (+ 200.0 (* enemy-noto 3)) (/ (the float enemy-noto) 3)))
-    )
-  )
+  (set! (-> this hit-points) (prebot-hp-scale))
   (if (= in-mine-level? #f)
     (set! enemy-noto 20)
     (set! enemy-noto (rand-vu-int-range 25 35))

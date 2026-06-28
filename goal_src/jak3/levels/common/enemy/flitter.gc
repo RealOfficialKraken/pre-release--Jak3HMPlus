@@ -7,6 +7,11 @@
 
 ;; DECOMP BEGINS
 
+(defun flitter-hero-move-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      2.0
+      1.0))
+
 (defpartgroup group-flitter-dust-puff
   :id 257
   :duration (seconds 0.017)
@@ -1284,6 +1289,9 @@
     (the-as pair 0)
     )
   (setup-enemy! this *flitter-nav-enemy-info*)
+  (let ((v1-0 (-> this nav)))
+  (set! (-> v1-0 speed-scale) (flitter-hero-move-speed))
+  )
   (set! (-> this move-angle) 10922.667)
   (set! (-> this heading) (if (= (rand-vu-int-range 0 1) 1)
                               #t

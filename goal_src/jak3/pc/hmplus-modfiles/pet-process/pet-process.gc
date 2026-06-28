@@ -768,19 +768,19 @@
 (define enabled-pet-scouter? #f)
 (define enabled-pet-dogat? #f)
 
-(define pet-flitter-s "???")
-(define pet-spiky-frog-s "???")
-(define pet-rat-s "???")
-(define pet-manta-s "???")
-(define pet-neo-wasp-s "???")
-(define pet-kangarat-s "???")
-(define pet-mantis-s "???")
-(define pet-terra-s "???")
-(define pet-scouter-s "???")
-(define pet-dogat-s "???")
+(define pet-flitter-s "   ?????????")
+(define pet-spiky-frog-s "   ?????????")
+(define pet-rat-s "   ?????????")
+(define pet-manta-s "   ?????????")
+(define pet-neo-wasp-s "   ?????????")
+(define pet-kangarat-s "   ?????????")
+(define pet-mantis-s "   ?????????")
+(define pet-terra-s "   ?????????")
+(define pet-scouter-s "   ?????????")
+(define pet-dogat-s "   ?????????")
 
-(defun pet-menu-toggle-pet! ((idx int))
-  (case idx
+(defun pet-menu-toggle-pet! ()
+  (case menu-index
     ((0)
       (when (task-node-closed? (game-task-node pet-flitter))
         (if enabled-pet-flitter?
@@ -891,9 +891,9 @@
 
 (defbehavior pet-menu-init-by-other pet-menu ()
   (stack-size-set! (-> self main-thread) 2048)
-  (set! (-> self men-select) 0)
-  (set! (-> self men-section) 0)
-  (set! (-> self men-max) 9)
+  ;; (set! (-> self men-select) 0)
+  ;; (set! (-> self men-section) 0)
+  ;; (set! (-> self men-max) 9)
   (go-virtual idle)
   (none))
 
@@ -901,130 +901,173 @@
   (process-spawn pet-menu :name "pet-menu")
   (none))
 
-(defmethod pet-menu-controls! ((this pet-menu))
-  (when (cpad-pressed? 0 up)
-    (-! (-> this men-select) 1)
-    (when (< (-> this men-select) 0)
-      (set! (-> this men-select) (-> this men-max))))
+;; (defmethod pet-menu-controls! ((this pet-menu))
+;;   (when (cpad-pressed? 0 up)
+;;     (-! (-> this men-select) 1)
+;;     (when (< (-> this men-select) 0)
+;;       (set! (-> this men-select) (-> this men-max)))
+;;   )
+;;   (when (cpad-pressed? 0 down)
+;;     (+! (-> this men-select) 1)
+;;     (when (> (-> this men-select) (-> this men-max))
+;;       (set! (-> this men-select) 0))
+;;   )
+;;   (when (or (cpad-pressed? 0 square)
+;;           (cpad-pressed? 0 circle))
+;;     (pet-menu-toggle-pet! (-> this men-select))
+;;   )
+;;   (none)
+;; )
 
-  (when (cpad-pressed? 0 down)
-    (+! (-> this men-select) 1)
-    (when (> (-> this men-select) (-> this men-max))
-      (set! (-> this men-select) 0)))
-
-  (when (or (cpad-pressed? 0 square)
-          (cpad-pressed? 0 circle))
-  (pet-menu-toggle-pet! (-> this men-select)))
-
-  (none))
+(defun pet-menu-color-check ((idx int))
+  (case idx
+    ((0)
+      (if enabled-pet-flitter?
+        (set! gunmod-menu-text-color "<COLOR_WHITE>")
+        (set! gunmod-menu-text-color "<COLOR_MENU-PARENT>")))
+    ((1)
+      (if enabled-pet-spiky-frog?
+        (set! gunmod-menu-text-color "<COLOR_WHITE>")
+        (set! gunmod-menu-text-color "<COLOR_MENU-PARENT>")))
+    ((2)
+      (if enabled-pet-rat?
+        (set! gunmod-menu-text-color "<COLOR_WHITE>")
+        (set! gunmod-menu-text-color "<COLOR_MENU-PARENT>")))
+    ((3)
+      (if enabled-pet-manta?
+        (set! gunmod-menu-text-color "<COLOR_WHITE>")
+        (set! gunmod-menu-text-color "<COLOR_MENU-PARENT>")))
+    ((4)
+      (if enabled-pet-neo-wasp?
+        (set! gunmod-menu-text-color "<COLOR_WHITE>")
+        (set! gunmod-menu-text-color "<COLOR_MENU-PARENT>")))
+    ((5)
+      (if enabled-pet-kangarat?
+        (set! gunmod-menu-text-color "<COLOR_WHITE>")
+        (set! gunmod-menu-text-color "<COLOR_MENU-PARENT>")))
+    ((6)
+      (if enabled-pet-mantis?
+        (set! gunmod-menu-text-color "<COLOR_WHITE>")
+        (set! gunmod-menu-text-color "<COLOR_MENU-PARENT>")))
+    ((7)
+      (if enabled-pet-terra?
+        (set! gunmod-menu-text-color "<COLOR_WHITE>")
+        (set! gunmod-menu-text-color "<COLOR_MENU-PARENT>")))
+    ((8)
+      (if enabled-pet-scouter?
+        (set! gunmod-menu-text-color "<COLOR_WHITE>")
+        (set! gunmod-menu-text-color "<COLOR_MENU-PARENT>")))
+    ((9)
+      (if enabled-pet-dogat?
+        (set! gunmod-menu-text-color "<COLOR_WHITE>")
+        (set! gunmod-menu-text-color "<COLOR_MENU-PARENT>")))))
 
 (defun pet-menu-newline! ((dst string))
   (cat-string<-string dst "
 ")
   (none))
 
-(defun pet-menu-append-item! ((dst string) (text string) (selected symbol))
-  (cat-string<-string dst text)
+(defun pet-menu-append-item! ((dst string) (text string) (selected symbol) (idx int))
+  (pet-menu-color-check idx)
   (if selected
-    (cat-string<-string dst "<COLOR_GREEN>(<)")
-    (cat-string<-string dst "<COLOR_WHITE>(<)"))
+    (set! gunmod-menu-text-color "<COLOR_YELLOW>") ;; option selected
+      (cat-string<-string dst gunmod-menu-text-color)) 
+    (cat-string<-string dst gunmod-menu-text-color) ;; option not selected
+  (cat-string<-string dst text)
   (pet-menu-newline! dst)
   (none))
 
-(defmethod pet-menu-draw! ((this pet-menu))
+
+(defmethod pet-menu-draw! ((this pet-menu)) ;displays pet menu options
+  (when 
+  (and 
+  (= in-menu? #t)
+  (= in-modifiers? #f)
+  (= in-gunmods? #f)
+  (= in-superpowers? #f)
+  (= in-skill? #f)
+  (= in-pets? #t)
+  )
   (if (task-node-closed? (game-task-node pet-flitter))
     (if enabled-pet-flitter?
-      (set! pet-flitter-s "<COLOR_GREEN>Flitter")
-      (set! pet-flitter-s "<COLOR_RED>Flitter"))
-    (set! pet-flitter-s "<COLOR_ORANGE>???"))
+      (set! pet-flitter-s "< Stinger")
+      (set! pet-flitter-s "O Stinger"))
+    (set! pet-flitter-s "   ?????????"))
 
   (if (task-node-closed? (game-task-node pet-spiky-frog))
     (if enabled-pet-spiky-frog?
-      (set! pet-spiky-frog-s "<COLOR_GREEN>Spiky Frog")
-      (set! pet-spiky-frog-s "<COLOR_RED>Spiky Frog"))
-    (set! pet-spiky-frog-s "<COLOR_ORANGE>???"))
+      (set! pet-spiky-frog-s "< Lava Toad")
+      (set! pet-spiky-frog-s "O Lava Toad"))
+    (set! pet-spiky-frog-s "   ?????????"))
 
   (if (task-node-closed? (game-task-node pet-rat))
     (if enabled-pet-rat?
-      (set! pet-rat-s "<COLOR_GREEN>Rat")
-      (set! pet-rat-s "<COLOR_RED>Rat"))
-    (set! pet-rat-s "<COLOR_ORANGE>???"))
+      (set! pet-rat-s "< Rat")
+      (set! pet-rat-s "O Rat"))
+    (set! pet-rat-s "   ?????????"))
 
   (if (task-node-closed? (game-task-node pet-manta))
     (if enabled-pet-manta?
-      (set! pet-manta-s "<COLOR_GREEN>Manta")
-      (set! pet-manta-s "<COLOR_RED>Manta"))
-    (set! pet-manta-s "<COLOR_ORANGE>???"))
+      (set! pet-manta-s "< Manta")
+      (set! pet-manta-s "O Manta"))
+    (set! pet-manta-s "   ?????????"))
 
   (if (task-node-closed? (game-task-node pet-neo-wasp))
     (if enabled-pet-neo-wasp?
-      (set! pet-neo-wasp-s "<COLOR_GREEN>Neo Wasp")
-      (set! pet-neo-wasp-s "<COLOR_RED>Neo Wasp"))
-    (set! pet-neo-wasp-s "<COLOR_ORANGE>???"))
+      (set! pet-neo-wasp-s "< Dark Maker Hornet")
+      (set! pet-neo-wasp-s "O Dark Maker Hornet"))
+    (set! pet-neo-wasp-s "   ?????????"))
 
   (if (task-node-closed? (game-task-node pet-kangarat))
     (if enabled-pet-kangarat?
-      (set! pet-kangarat-s "<COLOR_GREEN>Kangarat")
-      (set! pet-kangarat-s "<COLOR_RED>Kangarat"))
-    (set! pet-kangarat-s "<COLOR_ORANGE>???"))
+      (set! pet-kangarat-s "< Kanga-rat")
+      (set! pet-kangarat-s "O Kanga-rat"))
+    (set! pet-kangarat-s "   ?????????"))
 
   (if (task-node-closed? (game-task-node pet-mantis))
     (if enabled-pet-mantis?
-      (set! pet-mantis-s "<COLOR_GREEN>Mantis")
-      (set! pet-mantis-s "<COLOR_RED>Mantis"))
-    (set! pet-mantis-s "<COLOR_ORANGE>???"))
+      (set! pet-mantis-s "< Mantis")
+      (set! pet-mantis-s "O Mantis"))
+    (set! pet-mantis-s "   ?????????"))
 
   (if (task-node-closed? (game-task-node pet-terra))
     (if enabled-pet-terra?
-      (set! pet-terra-s "<COLOR_GREEN>Metalhead Bat")
-      (set! pet-terra-s "<COLOR_RED>Metalhead Bat"))
-    (set! pet-terra-s "<COLOR_ORANGE>???"))
+      (set! pet-terra-s "< Metal Head Bat")
+      (set! pet-terra-s "O Metal Head Bat"))
+    (set! pet-terra-s "   ?????????"))
 
   (if (task-node-closed? (game-task-node pet-scouter))
     (if enabled-pet-scouter?
-      (set! pet-scouter-s "<COLOR_GREEN>Scouter")
-      (set! pet-scouter-s "<COLOR_RED>Scouter"))
-    (set! pet-scouter-s "<COLOR_ORANGE>???"))
+      (set! pet-scouter-s "< Spydroid")
+      (set! pet-scouter-s "O Spydroid"))
+    (set! pet-scouter-s "   ?????????"))
 
   (if (task-node-closed? (game-task-node pet-dogat))
     (if enabled-pet-dogat?
-      (set! pet-dogat-s "<COLOR_GREEN>Desert Scurrier")
-      (set! pet-dogat-s "<COLOR_RED>Desert Scurrier"))
-    (set! pet-dogat-s "<COLOR_ORANGE>???"))
+      (set! pet-dogat-s "< Dogat")
+      (set! pet-dogat-s "O Dogat"))
+    (set! pet-dogat-s "   ?????????"))
     
-  (with-dma-buffer-add-bucket ((s2-0 (-> *display* frames (-> *display* on-screen) global-buf))
-                               (bucket-id particles))
-    (draw-sprite2d-xy s2-0 0 5 768 20 (new 'static 'rgba :a #x40) #x3fffff)
-    (draw-sprite2d-xy s2-0 140 25 225 293 (new 'static 'rgba :a #x40) #x3fffff)
-    (draw-sprite2d-xy s2-0 0 315 730 27 (new 'static 'rgba :a #x40) #x3fffff))
+  ;; draw text
+  (clear *temp-string*)
+  (pet-menu-newline! *temp-string*)
+  (pet-menu-newline! *temp-string*)
+  (pet-menu-newline! *temp-string*)
+  (pet-menu-newline! *temp-string*)
+  (pet-menu-append-item! *temp-string* pet-flitter-s (= menu-index 0) 0)
+  (pet-menu-append-item! *temp-string* pet-spiky-frog-s (= menu-index 1) 1)
+  (pet-menu-append-item! *temp-string* pet-rat-s (= menu-index 2) 2)
+  (pet-menu-append-item! *temp-string* pet-manta-s (= menu-index 3) 3)
+  (pet-menu-append-item! *temp-string* pet-neo-wasp-s (= menu-index 4) 4)
+  (pet-menu-append-item! *temp-string* pet-kangarat-s (= menu-index 5) 5)
+  (pet-menu-append-item! *temp-string* pet-mantis-s (= menu-index 6) 6)
+  (pet-menu-append-item! *temp-string* pet-terra-s (= menu-index 7) 7)
+  (pet-menu-append-item! *temp-string* pet-scouter-s (= menu-index 8) 8)
+  (pet-menu-append-item! *temp-string* pet-dogat-s (= menu-index 9) 9)
 
-    (clear matt-str)
-  (clear *pc-encoded-matt-str*)
-
-  (cat-string<-string matt-str "<COLOR_CYAN>Can you collect them all?~%")
-  (pet-menu-newline! matt-str)
-  (pet-menu-newline! matt-str)
-
-  (pet-menu-append-item! matt-str pet-flitter-s (= (-> this men-select) 0))
-  (pet-menu-append-item! matt-str pet-spiky-frog-s (= (-> this men-select) 1))
-  (pet-menu-append-item! matt-str pet-rat-s (= (-> this men-select) 2))
-  (pet-menu-append-item! matt-str pet-manta-s (= (-> this men-select) 3))
-  (pet-menu-append-item! matt-str pet-neo-wasp-s (= (-> this men-select) 4))
-
-  (pet-menu-append-item! matt-str pet-kangarat-s (= (-> this men-select) 5))
-  (pet-menu-append-item! matt-str pet-mantis-s (= (-> this men-select) 6))
-  (pet-menu-append-item! matt-str pet-terra-s (= (-> this men-select) 7))
-  (pet-menu-append-item! matt-str pet-scouter-s (= (-> this men-select) 8))
-  (pet-menu-append-item! matt-str pet-dogat-s (= (-> this men-select) 9))
-
-  (pc-encode-utf8-string matt-str *pc-encoded-matt-str*)
-  (with-dma-buffer-add-bucket ((buf (-> (current-frame) global-buf)) (bucket-id debug-no-zbuf1))
-    (dma-buffer-add-gs-set-flusha buf (alpha-1 (new 'static 'gs-alpha :b #x1 :d #x1)) (tex1-1 (new 'static 'gs-tex1 :mmag #x1 :mmin #x1)))
-    (let ((font-ctx (new 'stack 'font-context *font-default-matrix* 255 60 0.0 (font-color default) (font-flags middle shadow kerning large))))
-      (set! (-> font-ctx scale) 0.325)
-      (draw-string-adv *pc-encoded-matt-str* buf font-ctx)))
-      
-
+  (draw-mod-menu-text-custom *temp-string*
+  90 90 0.425 #t #f #f)
+  )
   (none))
 
 (defstate idle (pet-menu)
@@ -1034,17 +1077,18 @@
     (disable-hudmap))
   :code (behavior ()
     (loop
-      (pet-menu-controls! self)
+      ;; (pet-menu-controls! self)
       (pet-menu-draw! self)
-      (when (cpad-pressed? 0 triangle)
+      (when (cpad-pressed? 0 triangle r3)
         (go-virtual dead))
-      (suspend))))
+      (suspend)
+      )))
 
 (defstate dead (pet-menu)
   :virtual #t
   :code (behavior ()
-    (camera-unlocked)
-    (enable-hudmap)
-    (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
-    (kill-by-name (-> self name) *default-pool*)
+    ;; (camera-unlocked)
+    ;; (enable-hudmap)
+    ;; (kill-by-name "proc-mask-enemyfreeze" *active-pool*)
+    ;; (kill-by-name (-> self name) *default-pool*)
     (deactivate self)))

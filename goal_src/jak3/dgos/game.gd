@@ -596,5 +596,5 @@
   "missle-seeker.o"
   "pet-process.o"
   "wasdef-manager.o"
-  "real-anchors.o"
+  "planetboss.o"
  ))

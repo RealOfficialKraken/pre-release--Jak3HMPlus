@@ -7,6 +7,11 @@
 
 ;; DECOMP BEGINS
 
+(defun kg-grunt-hero-move-speed ()
+  (if (logtest? (-> *game-info* secrets) (game-secrets hero-mode))
+      2.0
+      1.0))
+
 (defskelgroup skel-kg-grunt kg-grunt kg-grunt-lod0-jg -1
               ((kg-grunt-lod1-mg (meters 20)) (kg-grunt-lod2-mg (meters 999999)))
               :bounds (static-spherem 0 0 0 5)
@@ -963,7 +968,7 @@
       (until #f
         (set! (-> self patrol-anim) (-> *kg-grunt-global-info* patrol-anim (rnd-int self 4)))
         (let ((v1-28 (-> self nav)))
-          (set! (-> v1-28 target-speed) (-> self patrol-anim travel-speed))
+          (set! (-> v1-28 target-speed) (* (-> self patrol-anim travel-speed) (kg-grunt-hero-move-speed)))
           )
         0
         (let ((gp-0 (-> self draw art-group data (-> self patrol-anim anim-index)))
@@ -987,7 +992,7 @@
           (ja-channel-push! 1 (seconds 0.2))
           (set! (-> self patrol-anim) (the-as kg-grunt-anim-info (-> *kg-grunt-global-info* patrol-anim)))
           (let ((v1-67 (-> self nav)))
-            (set! (-> v1-67 target-speed) (-> self patrol-anim travel-speed))
+            (set! (-> v1-67 target-speed) (* (-> self patrol-anim travel-speed) (kg-grunt-hero-move-speed)))
             )
           0
           (let ((gp-1 (-> self draw art-group data (-> self patrol-anim anim-index)))
@@ -1113,7 +1118,7 @@
     (let ((v1-2 (ja-group)))
       (when (and v1-2 (or (= v1-2 kg-grunt-charge0-ja) (= v1-2 kg-grunt-charge1-ja) (= v1-2 kg-grunt-charge2-ja)))
         (let ((v1-6 (-> self nav)))
-          (set! (-> v1-6 target-speed) (-> self charge-anim travel-speed))
+          (set! (-> v1-6 target-speed) (* (-> self charge-anim travel-speed) (kg-grunt-hero-move-speed)))
           )
         0
         (ja-no-eval :num! (seek!))
@@ -1142,7 +1147,7 @@
             (when (not (and v1-37 (= v1-37 gp-0)))
               (ja-channel-push! 1 (seconds 0.1))
               (let ((v1-41 (-> self nav)))
-                (set! (-> v1-41 target-speed) (-> self charge-anim travel-speed))
+                (set! (-> v1-41 target-speed) (* (-> self charge-anim travel-speed) (kg-grunt-hero-move-speed)))
                 )
               0
               )
@@ -1165,7 +1170,7 @@
   :event enemy-event-handler
   :enter (behavior ()
     (let ((v1-1 (-> self nav state)))
-      (set! (-> v1-1 speed) (-> self enemy-info run-travel-speed))
+      (set! (-> v1-1 speed) (* (-> self enemy-info run-travel-speed) (kg-grunt-hero-move-speed)))
       )
     0
     (logior! (-> self enemy-flags) (enemy-flag lock-focus))
@@ -1196,7 +1201,7 @@
   :code (behavior ()
     (set! (-> self attack-anim) (-> *kg-grunt-global-info* attack-anim (rnd-int self 2)))
     (let ((v1-5 (-> self nav)))
-      (set! (-> v1-5 target-speed) (-> self attack-anim travel-speed))
+      (set! (-> v1-5 target-speed) (* (-> self attack-anim travel-speed) (kg-grunt-hero-move-speed)))
       )
     0
     (let ((v1-7 (-> self nav)))
@@ -1218,7 +1223,7 @@
         )
       )
     (let ((v1-36 (-> self nav)))
-      (set! (-> v1-36 target-speed) (-> self charge-anim travel-speed))
+      (set! (-> v1-36 target-speed) (* (-> self charge-anim travel-speed) (kg-grunt-hero-move-speed)))
       )
     0
     (let ((v1-38 (-> self nav)))
@@ -1335,7 +1340,7 @@
     (let ((v1-2 (ja-group)))
       (when (and v1-2 (or (= v1-2 kg-grunt-charge0-ja) (= v1-2 kg-grunt-charge1-ja) (= v1-2 kg-grunt-charge2-ja)))
         (let ((v1-6 (-> self nav)))
-          (set! (-> v1-6 target-speed) (-> self charge-anim travel-speed))
+          (set! (-> v1-6 target-speed) (* (-> self charge-anim travel-speed) (kg-grunt-hero-move-speed)))
           )
         0
         (ja-no-eval :num! (seek!))
@@ -1360,7 +1365,7 @@
         )
       0
       (let ((v1-27 (-> self nav)))
-        (set! (-> v1-27 target-speed) (-> self charge-anim travel-speed))
+        (set! (-> v1-27 target-speed) (* (-> self charge-anim travel-speed) (kg-grunt-hero-move-speed)))
         )
       0
       (let ((v1-29 (-> self nav)))
@@ -1458,7 +1463,7 @@
         )
       0
       (let ((v1-33 (-> self nav)))
-        (set! (-> v1-33 target-speed) (-> self patrol-anim travel-speed))
+        (set! (-> v1-33 target-speed) (* (-> self patrol-anim travel-speed) (kg-grunt-hero-move-speed)))
         )
       0
       (let ((v1-35 (-> self nav)))
@@ -1884,8 +1889,8 @@
     (set! (-> v1-17 ignore-angle) 30947.555)
     )
   (let ((v1-19 (-> this nav)))
-    (set! (-> v1-19 speed-scale) 1.0)
-    )
+  (set! (-> v1-19 speed-scale) (kg-grunt-hero-move-speed))
+  )
   0
   (set-gravity-length (-> this root dynam) 573440.0)
   (let ((s5-3 *kg-grunt-global-info*))

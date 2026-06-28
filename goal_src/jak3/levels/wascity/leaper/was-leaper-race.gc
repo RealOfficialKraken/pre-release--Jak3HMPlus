@@ -1022,7 +1022,7 @@
     (set-time! (-> self hint-timer))
     (set-time! (-> self state-time))
     (set! *enemies-explode* #t)
-    (blank-hint! "<COLOR_RED>OH NO" "<COLOR_YELLOW>All enemies <COLOR_ORANGE>explode<COLOR_YELLOW> on death!" 140 300)
+    (blank-hint! "<COLOR_RED>OH NO~%All enemies explode on death!" 140 300)
     (when (!= enemy-noto 1)
       (set! enemy-noto 1)
     )

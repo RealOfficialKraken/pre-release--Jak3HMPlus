@@ -1152,6 +1152,7 @@
    (antenna-explode-part        sparticle-launch-control)
    (next-lightning-time         time-frame)
    (diff-counter                int)
+   (hmplus-max-hit-points       float)
    )
   (:state-methods
     sat-idle
@@ -1729,14 +1730,19 @@
   (when (!= (-> this diff-counter) 0)
     (+! (-> this hit-points) (* 600.0 (the float (-> this diff-counter))))
   )
+  (set! (-> this hmplus-max-hit-points) (-> this hit-points))
   (set! draw-enemy-noto enemy-noto)
   (set! hpbar-hit-points (-> this hit-points))
-  (set! hpbar-max-hit-points 
-    (if (!= (-> this diff-counter) 0)
-      (+ (-> this enemy-info default-hit-points) (* 600.0 (the float (-> this diff-counter))))
-      (-> this enemy-info default-hit-points)
-    )
-  )
+
+(set! hpbar-max-hit-points 
+  (if (!= (-> this diff-counter) 0)
+    (+ (-> this enemy-info default-hit-points)
+       (* 600.0 (the float (-> this diff-counter))))
+    (-> this enemy-info default-hit-points)))
+
+;; safety clamp for high-level Neo-Sat
+(when (< hpbar-max-hit-points hpbar-hit-points)
+  (set! hpbar-max-hit-points hpbar-hit-points))
   (init-enemy-hpbar 'normal)
   (go (method-of-object this sat-idle))
   (none)
@@ -2070,63 +2076,48 @@
   )
 
 (defmethod event-handler ((this neo-sat) (arg0 process) (arg1 int) (arg2 symbol) (arg3 event-message-block))
-  "Commmon handler for events."
+  "Common handler for events."
   (case arg2
     (('attack)
-     (let ((a0-3 (-> arg3 param 1))
-           (s1-0 (new 'stack-no-clear 'attack-info))
-           )
-       ((method-of-type attack-info attack-info-method-9)
-        (the-as attack-info a0-3)
-        s1-0
-        (the-as process-drawable arg0)
-        this
-        )
-       (if (and (not (logtest? (-> this enemy-flags) (enemy-flag vulnerable)))
-                (< (+ -8192.0 (-> this root trans y)) (-> s1-0 intersection y))
-                )
-           (send-event (handle->process (-> this warp-handle)) 'hit)
-           )
-       )
-       (when (or (= (-> this diff-counter) 0) (= (-> this diff-counter) 1))
-          (set! enemy-string "Satellite Probe")
-        )
-        (when (= (-> this diff-counter) 2)
-          (set! enemy-string "Dark Satellite")
-        )
-        (when (or (= (-> this diff-counter) 3) (= (-> this diff-counter) 4))
-          (set! enemy-string "Ancient Satellite")
-        )
-        (when (or (= (-> this diff-counter) 5) (= (-> this diff-counter) 6))
-          (set! enemy-string "Unstable Satellite")
-        )
-        (when (= (-> this diff-counter) 7)
-          (set! enemy-string "Cataclysm")
-        )
-      (set! draw-enemy-noto enemy-noto)
-      (set! hpbar-hit-points (-> this hit-points))
-      (set! hpbar-max-hit-points 
-        (if (!= (-> this diff-counter) 0)
-          (+ (-> this enemy-info default-hit-points) (* 600.0 (the float (-> this diff-counter))))
-          (-> this enemy-info default-hit-points)
-        )
-      )
-      (init-enemy-hpbar 'normal)
-     )
+      (set! hpbar-pre-hit-points (-> this hit-points))
+
+      ;; name setup
+      (when (or (= (-> this diff-counter) 0) (= (-> this diff-counter) 1))
+        (set! enemy-string "Satellite Probe"))
+      (when (= (-> this diff-counter) 2)
+        (set! enemy-string "Dark Satellite"))
+      (when (or (= (-> this diff-counter) 3) (= (-> this diff-counter) 4))
+        (set! enemy-string "Ancient Satellite"))
+      (when (or (= (-> this diff-counter) 5) (= (-> this diff-counter) 6))
+        (set! enemy-string "Unstable Satellite"))
+      (when (= (-> this diff-counter) 7)
+        (set! enemy-string "Cataclysm"))
+
+      (set! draw-enemy-noto enemy-noto))
+
     (('notify)
-     (case (-> arg3 param 0)
-       (('attack)
-        (let ((v1-18 (the-as process (-> arg3 param 1))))
-          (if (and v1-18 (= (-> v1-18 type) target) (> (-> this current-stage) 0))
-              (set! (-> this hit-player?) #t)
-              )
-          )
-        )
-       )
-     )
-    )
+      (case (-> arg3 param 0)
+        (('attack)
+          (let ((v1-18 (the-as process (-> arg3 param 1))))
+            (if (and v1-18 (= (-> v1-18 type) target) (> (-> this current-stage) 0))
+              (set! (-> this hit-player?) #t)))))))
+
+  ;; let normal enemy logic actually damage Neo-Sat
   (call-parent-method this arg0 arg1 arg2 arg3)
-  )
+
+  ;; now update bar from the real HP after damage
+  (when (= arg2 'attack)
+    (set! hpbar-hit-points (-> this hit-points))
+    (set! hpbar-max-hit-points (-> this hmplus-max-hit-points))
+
+    ;; safety only, should rarely matter now
+    (when (< hpbar-max-hit-points hpbar-hit-points)
+      (set! hpbar-max-hit-points hpbar-hit-points)
+      (set! (-> this hmplus-max-hit-points) hpbar-hit-points))
+
+    (init-enemy-hpbar 'use-pre-hit))
+
+  (none))
 
 (defmethod coin-flip? ((this neo-sat))
   "Return #t half the time, #f the other."
@@ -2627,21 +2618,30 @@
   "Given an attack message, apply damage."
   (let ((f30-0 (call-parent-method this arg0 arg1)))
     (let ((f28-0 (-> this hit-points))
-          (f26-0 (* 285.0 (- 3.0 (the float (+ (-> this current-stage) 1)))))
-          )
+          (phase-floor 0.0)
+          (max-hp (-> this hmplus-max-hit-points)))
+      (when (<= max-hp 0.0)
+        (set! max-hp (-> this enemy-info default-hit-points)))
+      (case (-> this current-stage)
+        ((0)
+          (set! phase-floor (* max-hp 0.6666667)))
+        ((1)
+          (set! phase-floor (* max-hp 0.33333334)))
+        ((2)
+          (set! phase-floor 0.0))
+        (else
+          (set! phase-floor 0.0)))
+
       (sound-play "sat-hit")
-      (when (>= f26-0 f28-0)
-        (if (= f28-0 0.0)
-            (setup-masks (-> this draw) 0 4)
-            )
-        (set! f30-0 (- f30-0 (- f26-0 f28-0)))
-        (set! (-> this hit-points) f26-0)
-        (set! (-> this should-rise?) #t)
-        )
-      )
-    f30-0
-    )
-  )
+      (when (>= phase-floor f28-0)
+        (when (= phase-floor 0.0)
+          (setup-masks (-> this draw) 0 4))
+        (set! f30-0 (- f30-0 (- phase-floor f28-0)))
+
+        (set! (-> this hit-points) phase-floor)
+        (set! (-> this should-rise?) #t)))
+
+    f30-0))
 
 (defstate neo-sat-sit-and-spin (neo-sat)
   :virtual #t
@@ -3379,7 +3379,7 @@
                 (task-node-open? (game-task-node desert-rescue-resolution))
                 (task-node-open? (game-task-node desert-rescue-hold-doors))
               )
-              (blank-hint! "Collect your Reward from" "the Fallen Satellite!" 250 600)
+              (blank-hint! "Collect your Reward from~%the Fallen Satellite!" 250 600)
             )
             (when (or (= (-> self diff-counter) 6) (= (-> self diff-counter) 5))
               (let ((fact (new 'static 'fact-info)))

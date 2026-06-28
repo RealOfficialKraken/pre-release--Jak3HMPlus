@@ -269,6 +269,7 @@
       (set-setting! 'music 'oasisfi 0.0 0)
       (set-setting! 'fog-special-interp-rate #f 0.025 0)
       (set-setting! 'fog-special-interp-targ #f 0.9 0)
+      (jak-refill!)
       (set! enemy-noto 18)
       (dotimes (gp-1 (length *oasis-vehicle-start*))
         (spawn-v-marauder self -1 gp-1)
