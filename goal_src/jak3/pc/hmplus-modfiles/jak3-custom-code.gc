@@ -1053,7 +1053,7 @@ Have fun!~%
         (set! in-arena-fight? #t)
         (set! pause-menu-blocked? #f)
         (set! in-arena-menu? #f)
-        (set! enemy-noto 1)
+        (set! enemy-noto (hmplus-hero-map-level 1))
         (case menu-index
             ((0)
                 (task-node-close! (game-task-node arena-replay-1-introduction) #t)
