@@ -5,6 +5,9 @@ Similar to the Jak II HeroMode+ mod, this mod adds a whole new set of mechanics 
 
 After a year of development, I can surely say that this mod is one of the biggest and craziest that I've ever made, hands down. There is so much to cover, so not all changes are listed here. But I will do my best to list all of them here :)
 
+## Full OST and Trailer
+https://youtube.com/@kraken-mods?si=Obh0Wezpr6528h7b
+
 ## Leveling System
 
 The mod is designed with a skill-based leveling system for Jak's Guns, Vehicles, and his overall Hero Level.
