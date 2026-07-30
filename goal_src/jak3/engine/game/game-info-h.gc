@@ -405,6 +405,10 @@
   (define anchor-cooldown #f)
   (define anchor-cdr 0)
 
+  (declare-type darkworld-spawner process)
+  (define *darkworld-spawner* (the (pointer darkworld-spawner) #f))
+  (defun-extern spawn-darkworld-spawner none)
+
   (define skill-noto-string1 "")
   (define skill-noto-string2 "")
   (define skill-noto-string3 "")

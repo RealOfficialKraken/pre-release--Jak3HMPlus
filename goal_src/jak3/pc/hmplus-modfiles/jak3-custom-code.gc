@@ -3572,7 +3572,7 @@ weapon damage by leveling up.
 (when
     (and
         (= weather-dark-mode #t)
-        (rand-vu-percent? 0.000221)
+        (not *darkworld-spawner*)
         (= (paused?) #f)
         (= (pause-allowed?) #t)
         (task-node-closed? (game-task-node desert-vin-quest-resolution))
@@ -3584,10 +3584,7 @@ weapon damage by leveling up.
         (not (search-process-tree *active-pool* (lambda ((p process)) (type? p entity-boss-dying))))
         (not in-menu?)
     )
-    (if (logtest? (-> *game-info* features) (game-feature gun-dark-3))
-        (spawn-planetboss-spawn-manager 1)
-        (spawn-rage-ghost)
-    )
+    (spawn-darkworld-spawner)
 )
 
 (when
@@ -7570,6 +7567,8 @@ You should NOT change your framerate for the time being.~%
     (kill-by-name "jak3logo" *active-pool*)
     (kill-by-name "jak3logo-flicker" *active-pool*)
     (kill-by-name "Entity-Boss" *active-pool*)
+    (set! *darkworld-spawner* #f)
+    (kill-by-name "darkworld-spawner" *active-pool*)
     (set! *entity-boss* #f)
     (kill-by-name "tm-forest-survive" *active-pool*)
     (kill-by-name "nebula-splitter" *active-pool*)

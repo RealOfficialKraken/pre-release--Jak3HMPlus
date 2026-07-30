@@ -526,3 +526,42 @@
         (deactivate self)
     )
 )
+
+(deftype darkworld-spawner (process)
+    ()
+    (:state-methods
+        idle
+        dead
+    )
+)
+
+(defbehavior darkworld-spawner-init-by-other darkworld-spawner ()
+    (go-virtual idle)
+    (none)
+)
+
+(defun spawn-darkworld-spawner ()
+    (set! *darkworld-spawner*
+        (process-spawn darkworld-spawner :name "darkworld-spawner" *active-pool*)
+    )
+    (none)
+)
+
+(defstate idle (darkworld-spawner)
+    :virtual #t
+    :code (behavior ()
+        (loop
+            (cond
+                ((= weather-dark-mode #t)
+                    (when (rand-vu-percent? 0.0)
+                        (if (logtest? (-> *game-info* features) (game-feature gun-dark-3))
+                            (spawn-planetboss-spawn-manager 1)
+                            (spawn-rage-ghost)
+                        )
+                    )
+                )
+            )
+            (suspend)
+        )
+    )
+)
